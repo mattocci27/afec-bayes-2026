@@ -1,0 +1,1141 @@
+---
+pagetitle: "Bayesian statistics for ecology: Day 1"
+author: "Masatoshi Katabuchi"
+institute: "XTBG, CAS"
+strip-comments: true
+format:
+  revealjs:
+    html-math-method: mathjax
+    logo: ../images/xtbg_logo.png
+    chalkboard: true
+    slide-number: true
+    theme: ../assets/rladies.scss
+    show-slide-number: all
+    controls: true
+    width: 1440
+    height: 810
+    max-scale: 1.0
+    code-block-height: 660px
+    css: [../assets/custom.css]
+    include-after: |
+      <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
+      <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
+callout-icon: false
+execute:
+  echo: false
+---
+
+<!--
+DAY 1 SESSION PLAN (90 min) -- Bayesian foundations
+
+Learning outcomes: by the end of the session participants can
+  1. explain in words what likelihood, prior and posterior are, and write
+     posterior ∝ likelihood × prior;
+  2. predict how the posterior changes when the prior or the amount of data changes;
+  3. summarise a posterior from its draws (mean, interval, P(p > x));
+  4. run a small Stan model from R and connect data -> parameters -> posterior draws.
+
+Assumptions (TODO: confirm with the organisers)
+  - participants use R (tidyverse basics) and have fitted lm()/glm() before;
+  - teaching language is English;
+  - participants read and modify Stan models but do not write them from scratch;
+  - no homework; optional extensions are in each exercise sheet.
+
+Timing
+   0- 8  Welcome, course map, where we are going (NDD across species: 2 slides,
+         about 3 min, question only), today's question
+   8-20  Likelihood (review)
+  20-35  Bayes' theorem: forward / inverse problems
+  35-47  Prior, posterior, prior predictive thinking
+  47-60  Exercise 1A (R only, no Stan)
+  60-70  From formulas to samples: MCMC intuition, Stan
+  70-85  Exercise 1B (first Stan model, live)
+  85-90  Wrap-up and bridge to Day 2
+
+If time runs short: skip "Likelihood of several observations", show only
+fip_6.png of the forward/inverse sequence, and skip the MH animation slide.
+Optional material is in the appendix at the end.
+-->
+
+```{r setup, include=FALSE}
+source(here::here("R/slides_setup.R"))
+```
+
+##  {#title-slide background="../images/priors.png" background-size="50%" background-position="50% 20%"}
+
+::: title-box
+<h2>Bayesian statistics for ecology</h2>
+
+<h3>Day 1: From likelihood to posterior</h3>
+
+<h3>🧑🏻‍💻 [Masatoshi Katabuchi \@ XTBG, CAS]{.author}</h3>
+:::
+
+<!-- TODO: add the course dates and the official AFEC 2026 course name to the title slide. -->
+
+## Course map
+
+::: columns
+::: {.column width="33%"}
+### Day 1
+
+**Bayesian foundations**
+
+- Likelihood
+- Bayes' theorem
+- Prior and posterior
+- First Stan model
+:::
+
+::: {.column width="33%"}
+### Day 2
+
+**Regression and model checking**
+
+- Linear and logistic regression
+- Posterior prediction
+- Did the model and the computation work?
+:::
+
+::: {.column width="33%"}
+### Day 3
+
+**Hierarchical models**
+
+- Partial pooling
+- Varying intercepts and slopes
+- Workflow for real ecological data
+:::
+:::
+
+::: fragment
+::: small
+- Each day: short lectures + two exercises in the browser-based R environment.
+- The goal is to **think with and interpret** Bayesian models, not to memorise Stan syntax.
+- Small models are run live. For heavier models we provide fitted results.
+:::
+:::
+
+::: notes
+- 3 x 90 minutes
+- nobody needs to install anything
+:::
+
+## {#where-we-are-going}
+
+::: columns
+::: {.column width="40%"}
+![](../images/comita_cover.jpg){height=480}
+:::
+
+::: {.column width="60%"}
+### Negative density dependence (NDD)
+
+"...rare species suffered more from the presence of conspecific neighbors than common species did, suggesting that conspecific density dependence shapes species abundances in diverse communities."
+
+\-                    Comita et al. 2010 \-
+
+:::
+:::
+
+::: fragment
+NDD can maintain diversity in communities by preventing common species from dominating the community.
+:::
+
+::: fragment
+**Where we are going**: by Day 3, we can ask this kind of question of our own data.
+:::
+
+::: footer
+[Comita *et al.* 2010 *Science*](https://doi.org/10.1126/science.1190772)
+:::
+
+::: notes
+- motivation only: no model details today
+- most questions in community ecology have this shape: individuals within species (or sites, or years)
+:::
+
+## Multilevel model (verbal model: NDD example)
+
+::: footer
+Example inspired by
+[Comita *et al.* 2010 *Science*](https://doi.org/10.1126/science.1190772)
+and
+[Song & Katabuchi *et al.* 2024 *Ecology*](https://doi.org/10.1002/ecy.4382). Density and abundance are scaled (mean = 0, sd = 1).
+:::
+
+::: small
+
+*H: Rare species tend to be rare because they suffer stronger conspecific NDD than common species.*
+
+::: fragment
+- Survival rates *p* ~ conspecific density *x* (individual-level, logistic regression).
+:::
+
+::: fragment
+- Slopes *a* ~ species abundance (species-level).
+:::
+
+:::
+
+```{r, echo=FALSE, fig.width=15, fig.height=4.3, fig.retina=3}
+set.seed(123)
+n_sp <- 10
+n_rep <- 80
+trait <- rnorm(n_sp, 0, 1)
+gamma0 <- -0.8
+gamma1 <- 0.3
+b1_hat <- gamma1 * trait + gamma0
+b1 <- rnorm(n_sp, b1_hat, 0.1)
+
+b0 <- rnorm(n_sp, 0, 0.5)
+y_fun <- function(beta0, beta1) beta0 + beta1 * xx
+xx <- seq(-3, 3, length = n_rep)
+z <- map2(as.list(b0), as.list(b1), y_fun) |> unlist()
+
+tmp <- tibble(z,
+              x = rep(xx, n_sp),
+              sp = rep(paste0("sp", 1:n_sp), each = n_rep))
+
+tmp2 <- tibble(x = trait, y = b1, sp = rep(paste0("sp", 1:n_sp)))
+
+p1 <- tmp |>
+  ggplot(aes(x = x, y = logistic(z), col = sp)) +
+  geom_line() +
+  xlab("Conspecific density") +
+  ylab("Survival rates") +
+  ggtitle("p = logistic(ax + b)") +
+  theme(legend.position = "none")
+
+p2 <- tmp |>
+  ggplot(aes(x = x, y = z, col = sp)) +
+  geom_line() +
+  xlab("Conspecific density") +
+  ylab("logit(Survival rates)") +
+  ggtitle("logit(p) = ax + b") +
+  theme(legend.position = "none")
+
+p3 <- tmp2 |>
+  ggplot(aes(x = x, y = y, col = sp)) +
+  geom_smooth(method = "lm", se = TRUE, lty = 2,
+    alpha = 0.2,
+    linewidth = 0.5, col = "black") +
+  geom_point(size = 3) +
+  xlab("Abundance") +
+  ylab("Strength of NDD") +
+  theme(legend.position = "none")
+
+p1 + p2 + p3
+```
+
+::: small
+::: fragment
+Rare species have few seedlings. We want the slope of **every** species and the pattern **among** species in one model: a **hierarchical (multilevel) model**. This is where the course ends.
+:::
+:::
+
+::: notes
+- do not explain the model: the point is the shape of the question
+- three things we need to get there: a distribution for each parameter (today), regression with a link function (Day 2), a way to share information among species (Day 3)
+- that "way to share information" will turn out to be a prior: keep this in mind when priors appear later today
+:::
+
+## Today's question: the smallest version
+
+::: columns
+::: {.column width="40%"}
+![](../images/seedling.png)
+:::
+
+::: {.column width="60%"}
+We planted 5 seedlings. One year later, 2 are alive.
+
+::: incremental
+- What is the survival probability $p$ of this species?
+- How sure are we?
+- Would we be equally sure with 40 survivors out of 100?
+:::
+
+::: fragment
+One species, no predictor, one parameter. We keep this example all day, then climb back up:
+**Day 2**: $p$ depends on conspecific density. **Day 3**: it differs among mother trees and species.
+:::
+:::
+:::
+
+## Today's objectives
+
+By the end of today, you can
+
+::: incremental
+- explain what **likelihood**, **prior**, and **posterior** mean;
+- predict how the posterior changes with **more data** or a **different prior**;
+- summarise a posterior distribution: mean, interval, and statements such as $P(p > 0.5 \mid \text{data})$;
+- run a small Stan model and read its output.
+:::
+
+# Likelihood
+
+## Likelihood and probability density distribution
+
+::: columns
+
+::: {.column width=40%}
+
+```{r, fig.height=7}
+x <- seq(-5, 5, length.out = 100)
+y <- dnorm(x, mean = 0, sd = 1)
+tibble(x, y) |>
+  ggplot() +
+  xlab("x") +
+  ylab("Density") +
+  ggtitle("N(0, 1)") +
+  geom_line(aes(x, y)) +
+  theme(
+    axis.title   = element_text(size = 32),
+    axis.text    = element_text(size = 28))
+```
+
+::: small
+$f(x \mid \mu, \sigma) = \frac{1}{\sqrt{2\pi\sigma^2}}\mathrm{exp} \bigl[{-\frac{1}{2}\bigl\{\frac{x-\mu}{\sigma}}\bigr\}^2\bigr]$
+:::
+
+:::
+::: {.column width=60%}
+::: incremental
+- **P(data | parameters)**: Probability of observing the data given the parameters.
+
+- e.g., when your model is $x_i \sim \mathcal{N}(\mu = 0, \sigma = 1)$ (normal distribution with mean 0 and standard deviation 1), what is the probability density at x = 1.96?
+:::
+
+::: fragment
+```{r, echo=TRUE}
+dnorm(1.96, mean = 0, sd = 1)
+```
+:::
+
+::: fragment
+- A statistical model always has this form: a distribution for the data (normal, binomial, Poisson, ...) with unknown parameters.
+:::
+
+:::
+
+:::
+
+::: notes
+- likelihood is all about probability density (mass) function (normal, log-normal, poisson, beta, gamma, binomial, negative-binomial...)
+- NOTE: throughout the course N(mu, sigma) is written with the standard deviation, as in Stan and in dnorm()
+:::
+
+## Likelihood of several observations
+
+When your data is x = {-1.5, 0, 1.5} and your model is $x \sim \mathcal{N}(\mu, 1)$, how probable is the data for a given $\mu$?
+
+::: small
+::: incremental
+- $L(\mu) = P(-1.5 \mid \mu, 1) \times P(0 \mid \mu, 1) \times P(1.5 \mid \mu, 1)$
+- $\mathrm{ln}\;L(\mu) = \mathrm{ln}\;P(-1.5 \mid \mu, 1) + \mathrm{ln}\;P(0 \mid \mu, 1) +  \mathrm{ln}\;P(1.5 \mid \mu, 1)$
+:::
+:::
+
+::: fragment
+
+```{r, fig.height=3.5}
+like_fun <- function(mu) {
+  dnorm(-1.5, mean = mu, sd = 1, log = TRUE) +
+    dnorm(0, mean = mu, sd = 1, log = TRUE) +
+    dnorm(1.5, mean = mu, sd = 1, log = TRUE)
+}
+
+x <- seq(-5, 5, length.out = 100)
+y <- like_fun(x)
+tibble(x, y) |>
+  ggplot() +
+  xlab("mu") +
+  ylab("ln L") +
+  geom_line(aes(x, y)) +
+  theme(
+    axis.title   = element_text(size = 32),
+    axis.text    = element_text(size = 28))
+```
+:::
+
+::: fragment
+The data are fixed. The likelihood is a function of the **parameter**.
+:::
+
+## Maximum Likelihood Estimation (MLE)
+
+- 2 survivors out of 5 seedlings: What is the survival probability of seedlings?
+
+::: columns
+
+::: {.column width=40%}
+![](../images/seedling.png)
+:::
+
+::: {.column width=60%}
+::: incremental
+- $p$: survival rates, $1-p$: mortality rate
+
+- $L = {}_5C_2 p^2(1-p)^3$ (Binomial distribution)
+
+- $\mathrm{ln}\;L = \mathrm{ln}\;{}_5C_2 + 2\mathrm{ln}\;p + 3\mathrm{ln}(1-p)$
+
+- $\frac{d}{dp}\mathrm{ln}\;L = \frac{2}{p} - \frac{3}{1-p} = 0$
+
+- Solve: $p = \frac{2}{5}$
+
+:::
+:::
+:::
+
+## What the MLE does not tell us
+
+::: columns
+::: {.column width="55%"}
+```{r, fig.height=6, fig.width=8}
+tibble(p = seq(0, 1, length.out = 501)) |>
+  mutate(
+    `2 of 5` = dbinom(2, 5, p) / max(dbinom(2, 5, p)),
+    `40 of 100` = dbinom(40, 100, p) / max(dbinom(40, 100, p))
+  ) |>
+  pivot_longer(-p, names_to = "Data", values_to = "lik") |>
+  ggplot(aes(p, lik, linetype = Data)) +
+  geom_line(linewidth = 1.5, colour = col_like) +
+  geom_vline(xintercept = 0.4, linetype = 3) +
+  labs(x = "Survival probability p", y = "Likelihood (rescaled)") +
+  theme(legend.position = "top")
+```
+:::
+
+::: {.column width="45%"}
+::: incremental
+- Both data sets give the same MLE: $\hat{p} = 0.4$.
+- With 2 of 5, values such as $p = 0.2$ or $p = 0.7$ are still very compatible with the data.
+- A single number hides this uncertainty.
+- What we really want: **how plausible is each value of $p$, given the data?**
+  $$P(p \mid \text{data})$$
+:::
+:::
+:::
+
+::: notes
+- the likelihood is P(data | p), not P(p | data)
+- to turn it around we need Bayes' theorem
+:::
+
+# Conditional Probability and Bayes' Theorem
+
+## Conditional Probability
+
+::: columns
+
+::: {.column width="40%"}
+
+```{r}
+circle <- function(x0, y0, r, n = 200) {
+  t <- seq(0, 2 * pi, length.out = n)
+  tibble(x = x0 + r * cos(t), y = y0 + r * sin(t))
+}
+a <- 1
+radius <- 1.5
+lens <- bind_rows(
+  circle(-a, 0, radius) |> filter(x >= 0) |> arrange(y),
+  circle(a, 0, radius) |> filter(x <= 0) |> arrange(desc(y))
+)
+
+ggplot() +
+  geom_polygon(data = circle(a, 0, radius), aes(x, y), fill = "blue", alpha = 0.3) +
+  geom_polygon(data = lens, aes(x, y), fill = "blue", alpha = 0.6) +
+  geom_path(data = circle(-a, 0, radius), aes(x, y), linewidth = 1.5) +
+  geom_path(data = circle(a, 0, radius), aes(x, y), linewidth = 1.5) +
+  ggtitle("U") +
+  coord_fixed() +
+  theme_void() +
+  annotate("text", x = 0, y = 0, label = "A ∩ B", size = 14) +
+  annotate("text", x = -1.5, y = 0, label = "A", size = 16) +
+  annotate("text", x = 1.5, y = 0, label = "B", size = 16) +
+  theme(
+    title = element_text(size = 40),
+    panel.border = element_rect(colour = "black", linewidth = 2, fill = NA),
+    legend.position = "none"
+  )
+```
+
+:::
+
+::: {.column width="60%"}
+
+Probability of A occurring given B has already occurred:
+
+$$
+P(A \mid B) = \frac{P(A \cap B)}{P(B)}
+$$
+
+::: incremental
+e.g.,
+
+- P(hangover) = 4%
+- P(baijiu) = 1.5%
+- P(hangover | baijiu) = 85%.
+:::
+
+:::
+:::
+
+::: notes
+- probability A occurs given B
+- vertical bar = given
+- at least 1 day for each month
+- the next day after I had beer
+- the next day after I had baijiu
+:::
+
+##  Bayes' Theorem
+
+$$
+P(B \mid A) = \frac{P(A \cap B)}{P(A)}
+$$
+
+$$
+P(A \mid B) = \frac{P(A \cap B)}{P(B)}
+$$
+
+
+::: fragment
+$$
+P(A \mid B) \times P(B) =  P(B \mid A) \times P(A)
+$$
+:::
+
+
+::: fragment
+::: box
+$$
+P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
+$$
+:::
+:::
+
+::: fragment
+### Why is this useful?
+:::
+
+---
+
+<img src="../images/fip_1.png" width="100%" style="display: block; margin: auto;"/>
+
+---
+
+<img src="../images/fip_2.png" width="100%" style="display: block; margin: auto;"/>
+
+---
+
+<img src="../images/fip_3.png" width="100%" style="display: block; margin: auto;"/>
+
+---
+
+<img src="../images/fip_4.png" width="100%" style="display: block; margin: auto;"/>
+
+---
+
+<img src="../images/fip_5.png" width="100%" style="display: block; margin: auto;"/>
+
+---
+
+<img src="../images/fip_6.png" width="100%" style="display: block; margin: auto;"/>
+
+## Forward and Inverse Problems: PCR and disease example
+
+::: footer
+- $P(\text{Positive})$: 2%, $P(\text{Infected})$: 0.05%
+:::
+
+**➡️Forward problem:**
+If you are infected, what is the probability that PCR test is positive?
+
+<br>
+
+::: fragment
+$P(\text{Positive} \mid \text{Infected})$: 95%
+:::
+
+<br>
+
+::: fragment
+This is what the lab test is designed to estimate — how likely we are to observe a positive signal given the known infection status (e.g., 95 out of 100 infected samples test positive).
+:::
+
+## Forward and Inverse Problems: PCR and disease example
+
+::: footer
+- $P(\text{Positive})$: 2%, $P(\text{Infected})$: 0.05%
+:::
+
+**🔁Inverse problem (Bayesian):**
+If the PCR test is positive, what is the probability that you are infected?
+
+<br>
+
+::: fragment
+- $P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected}) \cdot  P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%$
+:::
+
+<br>
+
+::: fragment
+This isn’t intuitive, but it’s the probability we actually care about — how likely someone is to be infected, given a positive test result.
+
+:::
+
+::: notes
+- ask the room to guess before revealing 2.4%
+- 0.95 * 0.0005 / 0.02 = 0.02375
+:::
+
+---
+
+<img src="../images/bayes_re.png" width="100%" style="display: block; margin: auto;"/>
+
+---
+
+## Bayes' theorem
+
+$$
+\textcolor{#d95f02}{
+  P(\mathrm{Parameter} \mid \mathrm{Data})
+}
+=
+\frac{
+\textcolor{#1b9e77} {
+  P(\mathrm{Data} \mid \mathrm{Parameter})
+} \times
+\textcolor{#7570b3} {
+  P(\mathrm{Parameter})}
+}
+{P(\mathrm{Data})}
+$$
+
+::: small
+::: incremental
+- $\textcolor{#d95f02}{P(\mathrm{Parameter} \mid \mathrm{Data})}$
+
+  - **What we want to estimate ([posterior]{.orange})**: When we got our data, what were the parameters behind the data (e.g., survival probability, coefficients of regressions)?
+
+- $\textcolor{#1b9e77}{P(\mathrm{Data} \mid \mathrm{Parameter})}$
+
+  - When we know our parameters, what is the probability of getting our data? (i.e., **[likelihood]{.teal}**)
+
+- $\textcolor{#7570b3}{P(\mathrm{Parameter})}$
+
+  - What we assume about the parameter before we see the data (i.e., **[prior]{.purple}**).
+
+- $P(\mathrm{Data})$
+
+  - Does not depend on the parameters (i.e., a constant)
+:::
+:::
+
+---
+
+<img src="../images/bayes_re_2.png" width="100%" style="display: block; margin: auto;"/>
+
+# Prior and posterior
+
+## Seedlings again: prior × likelihood = posterior
+
+::: columns
+::: {.column width="55%"}
+```{r, fig.height=6, fig.width=8}
+plot_update(2, 5, 1, 1, linewidth = 1.8) +
+  ggtitle(NULL) +
+  theme(legend.position = "top")
+```
+:::
+
+::: {.column width="45%"}
+::: small
+- [Likelihood]{.teal}: 2 survivors out of 5, $y \sim \mathcal{B}(5, p)$
+- [Prior]{.purple}: before the data, every $p$ between 0 and 1 is equally plausible, $p \sim \text{Beta}(1, 1)$
+- [Posterior]{.orange}: $\propto p^2(1-p)^3 \times 1$
+
+::: incremental
+- The answer is a **distribution**, not a number.
+- We summarise it:
+  - mean: `r round(3/7, 2)`
+  - 90% interval: `r round(qbeta(0.05, 3, 4), 2)` to `r round(qbeta(0.95, 3, 4), 2)`
+  - $P(p > 0.5 \mid \text{data})$ = `r round(1 - pbeta(0.5, 3, 4), 2)`
+- "Given the model and the data, there is a 90% probability that $p$ is between `r round(qbeta(0.05, 3, 4), 2)` and `r round(qbeta(0.95, 3, 4), 2)`."
+:::
+:::
+:::
+:::
+
+::: notes
+- Beta(1,1) prior + 2 of 5 -> Beta(3, 4) posterior
+- contrast the interval statement with a confidence interval
+- this small table (mean / interval / probability statement) is the reporting pattern for the whole course
+:::
+
+##  Prior vs. Data: MLE and Bayesian comparison (Coin Toss)
+
+We compare two coins, A and B, with the same prior but different likelihood (due to data sizes) to illustrate how prior beliefs influence posterior estimates.
+
+::: incremental
+
+### MLE
+
+- A: 2 head out of 3 tosses -> P(H) = 2/3 = 0.666
+- B: 60 heads out of 100 tosses -> P(H) = 60/100 = 0.6
+
+::: columns
+::: {.column width="50%"}
+### Bayesian
+
+- $\textcolor{#1b9e77}{L_A = {}_3C_2 p^2 (1-p)^1}$
+
+- $\textcolor{#1b9e77}{L_B = {}_{100}C_{60} p^{60} (1-p)^{40}}$
+
+- $\textcolor{#7570b3}{\mathrm{Prior} \propto  p^{50} (1-p)^{50}}$
+  - Beta(51, 51): we believe coins are fair
+
+:::
+
+::: {.column width="50%"}
+```{r, fig.height=4}
+tibble(x = seq(0, 1, length = 200)) |>
+  mutate(prior = dbeta(x, 51, 51)) |>
+  ggplot(aes(x, prior)) +
+  geom_line(linewidth = 1.5, colour = col_prior) +
+  labs(x = "p", y = "Prior density") +
+  theme(
+    legend.position = "none",
+    axis.text = element_text(size = 28),
+    axis.title = element_text(size = 32))
+```
+:::
+
+:::
+:::
+
+---
+
+##  Bayesian Update with Prior (Coin Toss)
+
+[Posterior]{.orange} $\propto$ [Likelihood]{.teal} $\times$ [Prior]{.purple}
+
+::: columns
+::: {.column width="50%"}
+
+::: fragment
+Coin A:
+$\textcolor{#d95f02}{Post_A}\propto\textcolor{#1b9e77}{p^2 (1-p)^1} \times\textcolor{#7570b3}{p^{50} (1-p)^{50}}$
+
+Peak of the posterior: $p = 52/103 \approx 0.505$
+:::
+::: fragment
+- $Post_A$: With only 3 coin tosses, the likelihood is weak, so the posterior stays close to the prior.
+:::
+:::
+
+::: {.column width="50%"}
+::: fragment
+Coin B:
+$\textcolor{#d95f02}{Post_B} \propto \textcolor{#1b9e77}{p^{60} (1-p)^{40}} \times\textcolor{#7570b3}{p^{50} (1-p)^{50}}$
+
+Peak of the posterior: $p = 110/200 = 0.55$
+:::
+
+::: fragment
+- $Post_B$:
+With 100 coin tosses, the likelihood dominates, so the posterior shifts more towards the data.
+:::
+
+:::
+:::
+
+::: small
+::: incremental
+- The same prior can have a strong or weak influence depending on how much data we have.
+- We usually have some sense of scale for our parameters, and we are allowed to use that information.
+:::
+:::
+
+## Four things that are easy to mix up
+
+::: small
+| | What it is | Coin A (2 of 3, prior Beta(51, 51)) |
+|---|---|---|
+| **MLE** | the $p$ that maximises the [likelihood]{.teal} | `r round(2/3, 3)` |
+| **MAP** | the $p$ that maximises the [posterior]{.orange} (its peak) | `r round(52/103, 3)` |
+| **Posterior mean** | the average of the [posterior]{.orange} | `r round(53/105, 3)` |
+| **Posterior distribution** | every value of $p$ with its plausibility | Beta(53, 52) |
+:::
+
+::: incremental
+- MLE and MAP are single numbers. They say nothing about uncertainty.
+- With a flat prior, MAP = MLE. The posterior is still a distribution.
+- In this course we work with the **whole posterior** and summarise it with a mean (or median) and an interval.
+:::
+
+## Which prior? Simulate from it
+
+```{r, fig.height=5.5, fig.width=15}
+set.seed(1)
+priors <- tribble(
+  ~name, ~a, ~b,
+  "Flat: Beta(1, 1)", 1, 1,
+  "Weakly informative: Beta(2, 2)", 2, 2,
+  "Informative: Beta(3, 7)", 3, 7
+) |>
+  mutate(name = fct_inorder(name))
+
+dens <- priors |>
+  mutate(d = map2(a, b, \(a, b) tibble(p = seq(0, 1, length.out = 201), density = dbeta(p, a, b)))) |>
+  unnest(d)
+
+sims <- priors |>
+  mutate(s = map2(a, b, \(a, b) tibble(y = rbinom(1e4, 5, rbeta(1e4, a, b))))) |>
+  unnest(s) |>
+  count(name, y) |>
+  group_by(name) |>
+  mutate(prop = n / sum(n))
+
+p1 <- ggplot(dens, aes(p, density)) +
+  geom_line(linewidth = 1.5, colour = col_prior) +
+  facet_wrap(~name) +
+  scale_x_continuous(breaks = c(0, 0.5, 1)) +
+  labs(x = "Survival probability p", y = "Prior density")
+
+p2 <- ggplot(sims, aes(y, prop)) +
+  geom_col(fill = col_prior, alpha = 0.7) +
+  facet_wrap(~name) +
+  labs(x = "Survivors out of 5 seedlings, simulated from the prior", y = "Proportion") +
+  theme(strip.text = element_blank())
+
+p1 / p2
+```
+
+::: small
+::: incremental
+- **Prior predictive check**: draw $p$ from the prior, simulate data, and ask "could data like these happen?"
+- A prior is a statement about plausible *data*, so judge it on the scale of the data.
+- In ecology we mostly use **weakly informative** priors: they rule out the impossible, and let the data speak.
+:::
+:::
+
+::: notes
+- informative prior here: earlier censuses suggest about 30% of seedlings survive
+- more on priors for regression coefficients on Day 2
+:::
+
+## Exercise 1A: prior × likelihood by hand {background-color="#f3e8f5"}
+
+::: large
+`day1/exercise.html`, Exercise 1A (12 minutes, R only)
+:::
+
+- **Predict first**, then run.
+- Change the amount of data. Keep the prior fixed.
+- Change the prior. Keep the data fixed.
+- Write one sentence that interprets the posterior.
+
+::: notes
+- walk around; ask pairs to explain the Beta(8, 2) result to each other
+- debrief 2 min: posterior mean is a compromise; the weight of the data grows with N
+:::
+
+# From formulas to samples
+
+## Why do we need samples?
+
+**Goal**: describe the posterior distribution of the parameters given the data.
+
+::: incremental
+- For the seedling model we have a formula for the posterior, Beta(3, 4).
+- For almost every model we actually care about (regressions, hierarchical models), **no formula exists**.
+- Solution: draw many random samples from the posterior and summarise the samples.
+- **MCMC** (Markov Chain Monte Carlo) is a family of algorithms that produce such samples using only [likelihood]{.teal} × [prior]{.purple}.
+:::
+
+## MCMC: a simplified Metropolis-Hastings (MH) algorithm
+
+::: columns
+::: {.column width="40%"}
+
+![](../images/mh_trace.gif){height=290}
+
+![](../images/mh_post.gif){height=290}
+
+:::
+
+::: {.column width="60%"}
+
+::: incremental
+- Start with some values of *p* (e.g., 0.2 and 0.8).
+- Calculate the posterior of those values.
+- Repeat the following steps N times:
+  - Propose a new value of $p_{\text{new}}$ (e.g., $p \pm 0.01$)
+  - Calculate the posterior at $p_{\text{new}}$.
+  - If $\text{Post}(p_{\text{new}}) \geq \text{Post}(p_t), \text{ then } p_{t+1} = p_{\text{new}}$.
+  - Else, accept $p_{\text{new}}$ with probability $\frac{\text{Post}(p_{\text{new}})}{\text{Post}(p_t)}$.
+- After the first steps (grey: **warmup**), the chain visits each value of $p$ in proportion to its posterior probability.
+:::
+:::
+:::
+
+::: notes
+- example: coin B, posterior proportional to p^110 (1-p)^90
+- two chains from different starting points end up in the same place: this idea returns on Day 2 as R-hat
+:::
+
+## Stan: A modern language/software for Bayesian modeling
+
+::: columns
+
+::: {.column width=35%}
+
+<img src="https://raw.githubusercontent.com/stan-dev/logos/master/logo.png" width=140 alt="Stan Logo"/>
+
+![](../images/hmc.gif){height=380}
+
+:::
+
+::: {.column width=65%}
+
+::: small
+::: incremental
+
+- 🧑🏻‍💻 **Bayesian Modeling**
+
+  - Stan uses the No-U-Turn sampler (NUTS), a variant of Hamiltonian Monte Carlo (HMC). It uses the slope of the posterior to make long, efficient moves, so it works for models with many parameters.
+
+- ⚙️ **Flexible and Scalable**
+
+  - You can use Stan for many types of models, from simple regressions to multi-level models including time-series, spatial, SEM, and more.
+
+- 💻 **Multiplatform**
+
+  - Stan works with R, Python, Julia, and more. In this course we call Stan from R with `cmdstanr`.
+
+:::
+:::
+:::
+:::
+
+::: notes
+- we do not need the mechanics of HMC to use Stan well; optional slides are in the appendix
+- what we do need: check that the sampler worked (Day 2)
+:::
+
+## A Stan model = data + parameters + model
+
+::: columns
+::: {.column width="50%"}
+```{r, results="asis"}
+show_stan("stan/binomial.stan")
+```
+:::
+
+::: {.column width="50%"}
+::: small
+- `data`: what we observed, and the settings of the prior
+  - $N = 5$, $y = 2$, $a = 1$, $b = 1$
+- `parameters`: what we want to learn
+  - $p$
+- `model`: [prior]{.purple} and [likelihood]{.teal}
+  - $p \sim \text{Beta}(a, b)$
+  - $y \sim \mathcal{B}(N, p)$
+
+::: fragment
+Stan returns **draws** from the [posterior]{.orange} of every parameter.
+:::
+
+::: fragment
+We pass the prior settings as data, so you can change the prior from R without touching the Stan file.
+:::
+:::
+:::
+:::
+
+## The output is a table of draws
+
+::: columns
+::: {.column width="45%"}
+```{r}
+seedling_fit <- read_fit("day1_seedling")
+```
+
+```{r, echo=TRUE, eval=FALSE}
+fit <- fit_or_load(
+  "day1_seedling",
+  "stan/binomial.stan",
+  data = list(N = 5, y = 2, a = 1, b = 1)
+)
+fit$draws
+```
+
+```{r}
+seedling_fit$draws |>
+  as_tibble() |>
+  select(.chain, .iteration, p) |>
+  mutate(p = round(p, 3)) |>
+  head(4) |>
+  kable(format = "html") |>
+  kable_material(c("striped"), full_width = FALSE, font_size = 24)
+```
+
+::: small
+... `r ndraws(seedling_fit$draws)` rows
+:::
+:::
+
+::: {.column width="55%"}
+```{r, fig.height=4, fig.width=8}
+ggplot(as_tibble(seedling_fit$draws), aes(p)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 40, fill = col_post, alpha = 0.5) +
+  stat_function(fun = dbeta, args = list(3, 4), linewidth = 1.2) +
+  labs(x = "Survival probability p", y = "Density",
+    subtitle = "Histogram: Stan draws. Line: exact posterior Beta(3, 4)")
+```
+
+::: small
+::: incremental
+- Posterior mean: `mean(draws$p)` = `r round(mean(seedling_fit$draws$p), 2)`
+- 90% interval: `quantile(draws$p, c(0.05, 0.95))` = `r paste(round(quantile(seedling_fit$draws$p, c(0.05, 0.95)), 2), collapse = ", ")`
+- $P(p > 0.5)$: `mean(draws$p > 0.5)` = `r round(mean(seedling_fit$draws$p > 0.5), 2)`
+- Anything you can compute from $p$, you compute for every draw.
+:::
+:::
+:::
+:::
+
+::: notes
+- fit_or_load() = cmdstan_model() + $sample(), with a fallback to stored results if sampling fails
+- the summary numbers differ slightly from the exact ones: Monte Carlo error
+:::
+
+## Exercise 1B: your first Stan model {background-color="#f3e8f5"}
+
+::: large
+`day1/exercise.html`, Exercise 1B (15 minutes, live sampling)
+:::
+
+- Run the seedling model and summarise the draws.
+- Compare with the exact posterior from Exercise 1A.
+- Change the data and the prior (no recompiling needed).
+- Predict the number of survivors among 50 new seedlings.
+
+::: notes
+- if sampling fails for someone: fit_or_load() loads the stored result automatically
+- debrief 3 min: draws -> any derived quantity
+:::
+
+## Summary of Day 1
+
+::: incremental
+- **Likelihood**: how probable are the data for given parameter values.
+- **Bayes' theorem** turns this around: [posterior]{.orange} $\propto$ [likelihood]{.teal} $\times$ [prior]{.purple}.
+- The posterior is a **distribution**. We report means, intervals, and probabilities, not just the peak.
+- The prior matters when data are few, and fades as data accumulate.
+- When there is no formula, **MCMC** gives draws from the posterior. Everything we want is computed from the draws.
+:::
+
+::: fragment
+**Tomorrow**: survival and tree height depend on *predictors*. Regression models, predictions, and how to check that a fitted model can be trusted.
+:::
+
+# Appendix: optional material {visibility="uncounted"}
+
+## MCMC: Hamiltonian Monte Carlo (HMC) {visibility="uncounted"}
+
+::: columns
+
+::: {.column width=40%}
+![](../images/pot_eng.gif)
+
+![](../images/traj.gif)
+:::
+
+::: {.column width=60%}
+
+:::incremental
+
+- $H(\theta, r) = U(\theta) + r^2/2$ (Hamiltonian: potential energy + kinetic energy = constant)
+
+  - $U(\theta) = -\text{log}\; p(\theta \mid \text{data})$
+
+- Instead of sampling from $p(\theta \mid \text{data})$, HMC samples from a joint distribution over both $\theta$ and $r$.
+
+  - $p(\theta \mid \text{data}) \propto \int \text{exp}(-H(\theta, r))dr$
+
+- It's equivalent to sampling from $p(\theta \mid \text{data}) \propto \text{exp}(-U(\theta))$.
+
+- HMC explores very different $\theta$ along the same trajectory (i.e. leapfrog path), which is much more efficient than random sampling.
+
+:::
+:::
+:::
+
+## MCMC: Hamiltonian Monte Carlo (HMC) {visibility="uncounted"}
+
+::: columns
+
+::: {.column width=30%}
+![](../images/leapfrog.gif)
+
+![](../images/hmc.gif)
+
+:::
+
+::: {.column width=70%}
+
+:::incremental
+
+- Within each iteration, HMC simulates a trajectory using leapfrog steps.
+
+    -  No-U-Turn Sampler (NUTS) dynamically determines the number of leapfrog steps; we only need to set the maximum (e.g., `max_treedepth` in **Stan**).
+
+- The Hamiltonian stays the same, but momentum $r$ is resampled each iteration.
+
+- Only the final parameter $\theta$ of each trajectory is kept as a posterior sample.
+
+:::
+:::
+:::
+
+::: footer
+The code behind these animations: `docs/hmc.qmd`, `R/hmc.R`
+:::
+
+## MCMC Methods: Comparison {visibility="uncounted"}
+
+| Feature                    | **Metropolis(-Hastings)**          | **Gibbs Sampling**                        | **Hamiltonian Monte Carlo (HMC)**        |
+|----------------------------|------------------------------------|-------------------------------------------|------------------------------------------|
+| How it works               | Try random moves, accept/reject    | Update one parameter at a time            | Simulate smooth movement using gradients |
+| Efficient in high dimensions? | ❌ Often slow                   | ✅ If math is simple                       | ✅ Very efficient                         |
+| Flexible?                  | ✅ Yes                             | ❌ No (conjugate priors)                   | ✅ Yes                                    |
+| Typical software           | JAGS, custom R                     | JAGS, BUGS                                | Stan               |
+
+## Interfaces to Stan (for R users) {visibility="uncounted"}
+
+- Stan: The actual modeling and inference engine, written in C++.
+
+- CmdStan: Command line interface (you write Stan code and run it via terminal).
+
+- `rstan`, `cmdstanr`: R interface to Stan/Cmdstan (you write Stan code and run it within R).
+
+- `brms`, `rstanarm`: Higher-level R packages that generate and run Stan models for you (you write an R formula, without writing Stan code).
+
+- In this course, we use `cmdstanr` with models that are already written. `brms` versions of the same models are shown as optional material on Day 2 and Day 3.
+
+## References {visibility="uncounted"}
+
+- [Gelman, A. et al. Bayesian Data Analysis, Third Edition. (Chapman & Hall/CRC, 2013)](http://www.stat.columbia.edu/~gelman/book/)
+
+- [Stan User's Guide](https://mc-stan.org/docs/stan-users-guide/index.html)
+
+- [Stan Functions Reference](https://mc-stan.org/docs/functions-reference/index.html)
+
+- [AIcia Solid Project](https://youtu.be/mX_NpDD7wwg) (in Japanese and Math)

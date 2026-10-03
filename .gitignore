@@ -4,5 +4,6 @@
 !*.*
 
 *.key
+*.rds
 *_files
 *_cache

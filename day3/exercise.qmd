@@ -1,0 +1,562 @@
+---
+title: "Day 3 exercises: hierarchical models"
+author: "Masatoshi Katabuchi"
+date: today
+solutions: true
+format:
+  html:
+    theme: coderpro
+    toc: true
+    toc-depth: 2
+    number-sections: false
+    smooth-scroll: true
+    standalone: true
+    embed-resources: true
+execute:
+  cache: false
+---
+
+<!--
+Instructor version (default): solutions are shown in collapsed boxes.
+Participant version (no solutions):
+  quarto render day3/exercise.qmd -M solutions:false
+  mv day3/exercise.html day3/exercise-student.html
+(`-o` cannot be used here: it breaks `embed-resources` in Quarto 1.9.)
+-->
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 4
+)
+```
+
+## Setup
+
+```{r setup}
+library(tidyverse)
+library(posterior)
+library(bayesplot)
+library(patchwork)
+library(here)
+
+source(here("R/functions.R"))
+source(here("R/course_data.R"))
+source(here("R/course_utils.R"))
+theme_set(theme_bw())
+
+# mean and 90% interval of a vector of draws
+mean_qi <- function(x) {
+  tibble(mean = mean(x), lo = quantile(x, 0.05), hi = quantile(x, 0.95))
+}
+```
+
+Remember the two rules: **predict before you run**, and **interpret in words**.
+
+# Exercise 3A: eight mother trees, three models
+
+|  |  |
+|---|---|
+| **Purpose** | See what partial pooling does, for which groups, and why. Predict for a new group. |
+| **Time** | 20 minutes. Tasks 1 to 4 are the core. |
+| **Computation** | Complete pooling and no pooling: the Day 1 formula, no Stan. Partial pooling: live sampling, small model (about 1 second), with a stored result as fallback. |
+| **Data** | Seedlings (`n`) and survivors (`suv`) under eight mother trees of one species. Simulated: the true survival rates exist, but we hide them until Task 3. |
+
+```{r trees-data}
+trees_all <- make_tree_data()            # includes the truth
+trees <- select(trees_all, tree, n, suv) # what a field ecologist would have
+trees |> mutate(p_like = round(suv / n, 2))
+```
+
+## Task 1: predict
+
+Under partial pooling every estimate moves towards the overall survival rate (`r round(sum(trees$suv) / sum(trees$n), 2)`).
+
+**Predict first:** which tree's estimate will move the most? Which the least? Write down the two letters and your reason.
+
+## Task 2: fit the three models
+
+**Complete pooling**: all trees share one $p$. With a flat prior, the posterior is a Beta distribution (Day 1), so we can draw from it directly.
+
+```{r pool}
+set.seed(1)
+n_draws <- 4000
+
+p_pool <- rbeta(n_draws, 1 + sum(trees$suv), 1 + sum(trees$n - trees$suv))
+mean_qi(p_pool)
+```
+
+**No pooling**: each tree has its own, unrelated $p_i$. Again a Beta posterior, one per tree.
+
+```{r nopool}
+no_pool <- trees |>
+  mutate(draws = map2(suv, n, \(s, n) rbeta(n_draws, 1 + s, 1 + n - s))) |>
+  mutate(map(draws, mean_qi) |> list_rbind()) |>
+  select(-draws) |>
+  mutate(model = "no pooling")
+no_pool
+```
+
+**Partial pooling**: $\mathrm{logit}(p_i) \sim \mathcal{N}(\mu, \sigma)$, with $\mu$ and $\sigma$ estimated from all trees.
+
+```{r show-logistic, echo=FALSE, results="asis"}
+cat("```stan\n", paste(readLines(here("stan/logistic.stan")), collapse = "\n"), "\n```\n", sep = "")
+```
+
+```{r partial}
+trees_data <- list(
+  I = nrow(trees),          # number of mother trees
+  ii = seq_len(nrow(trees)),
+  suv = trees$suv,
+  N = trees$n
+)
+
+trees_fit <- fit_or_load("day3_trees", "stan/logistic.stan", data = trees_data)
+td <- trees_fit$draws
+
+diagnostic_table(trees_fit)
+td |>
+  subset_draws(variable = c("mu", "sigma", "p")) |>
+  summarise_draws(mean, ~quantile(.x, c(0.05, 0.95)), rhat, ess_bulk)
+```
+
+```{r partial-table}
+partial <- trees |>
+  mutate(map(1:8, \(i) mean_qi(td[[paste0("p[", i, "]")]])) |> list_rbind()) |>
+  mutate(model = "partial pooling")
+```
+
+Check the computation (`rhat`, ESS, divergences) before you go on.
+
+## Task 3: compare
+
+```{r compare, fig.height=4.5}
+both <- bind_rows(no_pool, partial) |>
+  mutate(label = fct_reorder(sprintf("%s (n = %d)", tree, n), n))
+
+ggplot(both, aes(mean, label, colour = model)) +
+  geom_vline(xintercept = mean(p_pool), linetype = 2) +
+  geom_pointrange(aes(xmin = lo, xmax = hi), position = position_dodge(width = 0.5)) +
+  labs(x = "Survival rate (posterior mean and 90% interval)", y = NULL,
+    subtitle = "Dashed line: complete pooling")
+```
+
+1. Which tree moved the most? Was your prediction right? Which two properties of a tree decide how far it moves?
+2. Compare the widths of the intervals under no pooling and partial pooling. Why are the partial pooling intervals narrower?
+3. The data are simulated. Reveal the truth with `trees_all$p_true` and compute the average error of each approach (starter code below). Which approach is worst? Is the best one clearly better than the others?
+
+```{r compare-task, eval=FALSE}
+rmse <- function(estimate) sqrt(mean((estimate - trees_all$p_true)^2))
+
+rmse(no_pool$mean)
+rmse(partial$mean)
+rmse(mean(p_pool))
+```
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r compare-sol}
+rmse <- function(estimate) sqrt(mean((estimate - trees_all$p_true)^2))
+
+tibble(
+  approach = c("no pooling", "partial pooling", "complete pooling"),
+  rmse = c(rmse(no_pool$mean), rmse(partial$mean), rmse(mean(p_pool)))
+)
+
+left_join(
+  select(no_pool, tree, n, no_pooling = mean),
+  select(partial, tree, partial_pooling = mean),
+  by = "tree"
+) |>
+  mutate(moved = partial_pooling - no_pooling, truth = trees_all$p_true)
+```
+
+1. Tree H moves the most (from 0.50 to about 0.34): it has the fewest seedlings (n = 16) **and** the most extreme estimate. Trees with many seedlings and estimates near the mean (E, G) hardly move. Distance from the mean and sample size both matter.
+2. Under partial pooling each tree borrows information from the other seven, so its interval is narrower than with its own seedlings alone.
+3. No pooling is clearly the worst (average error about 0.10). Partial pooling roughly halves the error (about 0.06).
+   Complete pooling is about as good here (about 0.05).
+
+**Why complete pooling does well here, and why that is not a reason to use it**: the true survival rates of these eight trees differ little (0.23 to 0.36).
+Complete pooling *assumes* that trees do not differ. Partial pooling *estimates* how much they differ, found that the differences are small, and shrank accordingly.
+If the trees had differed a lot, complete pooling would have been badly wrong and partial pooling would have shrunk less.
+You cannot know which situation you are in without fitting $\sigma$.
+
+**Common misunderstandings**
+
+- "Partial pooling always pulls estimates halfway." The amount depends on $n_i$ and on the estimated $\sigma$.
+- "Shrinkage biases my estimates, so it is bad." Each estimate is pulled a little towards the mean, but the set of estimates is closer to the truth on average.
+
+**Note on priors**: complete and no pooling used a flat Beta(1, 1) prior on $p$, while the slides wrote these models with a normal prior on $\mathrm{logit}(p)$. With 16 to 46 seedlings per tree the difference is negligible compared with the effect of pooling.
+:::
+:::
+
+## Task 4: what does $\sigma$ tell us?
+
+```{r sigma-plot, fig.height=3}
+mcmc_hist(td, pars = c("mu", "sigma"))
+```
+
+1. $\sigma$ is the standard deviation among mother trees on the logit scale. Report its posterior mean and 90% interval. Is $\sigma = 0$ (no differences among trees) ruled out?
+2. Translate to the probability scale: for a typical draw, what are the survival rates of a tree one $\sigma$ below and one $\sigma$ above the mean? Use `plogis(mu - sigma)` and `plogis(mu + sigma)` with the posterior means.
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r sigma-sol}
+mean_qi(td$sigma)
+plogis(mean(td$mu) + c(-1, 0, 1) * mean(td$sigma))
+```
+
+1. $\sigma$ is about 0.3, with a wide interval from near 0 to about 0.7. Values close to 0 are quite plausible: eight trees carry little information about a standard deviation.
+2. With $\sigma = 0.3$, typical trees range from about 0.22 to 0.35 around a mean of 0.28.
+
+**Points to make**
+
+- Group-level SDs are the hardest parameters to estimate, and the prior matters more for them than for anything else in the model. The data were simulated with $\sigma = 0.2$.
+- "We found no significant variation among trees" is not the conclusion. The conclusion is the interval.
+:::
+:::
+
+## Optional: predict a new mother tree
+
+We find a ninth mother tree of the same species. What survival rate do we expect under it, before counting any seedlings?
+
+For every draw, draw a new tree from the group-level distribution:
+
+```{r newtree, eval=FALSE}
+set.seed(1)
+z_new <- rnorm(nrow(td), mean = td$___, sd = td$___)
+p_new <- plogis(z_new)
+
+mean_qi(p_new)
+mean_qi(p_pool) # compare: complete pooling
+```
+
+Why is the interval for the new tree wider than the complete pooling interval?
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r newtree-sol}
+set.seed(1)
+z_new <- rnorm(nrow(td), mean = td$mu, sd = td$sigma)
+p_new <- plogis(z_new)
+
+mean_qi(p_new)
+mean_qi(p_pool)
+```
+
+The new tree is expected to have a survival rate of about 0.29, with a 90% interval of about 0.17 to 0.44.
+The complete pooling interval (about 0.24 to 0.33) describes the *average* tree. The new-tree interval adds the variation among trees ($\sigma$), which complete pooling assumes away and no pooling cannot estimate.
+Predicting for a new group is something only the hierarchical model can do.
+:::
+:::
+
+## Optional: ten times more seedlings
+
+**What stays fixed:** the model and the observed proportions. **What changes:** every tree has 10 times more seedlings and survivors.
+
+**Predict first:** will the partial pooling estimates be closer to the no pooling estimates or further away? What happens to $\sigma$?
+
+```{r tenx, eval=FALSE}
+trees_10x <- modifyList(trees_data, list(suv = trees$suv * 10L, N = trees$n * 10L))
+fit_10x <- fit_or_load("day3_trees", "stan/logistic.stan", data = trees_10x)
+
+fit_10x$draws |>
+  subset_draws(variable = c("sigma", "p")) |>
+  summarise_draws(mean, ~quantile(.x, c(0.05, 0.95)))
+```
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r tenx-sol}
+trees_10x <- modifyList(trees_data, list(suv = trees$suv * 10L, N = trees$n * 10L))
+fit_10x <- fit_or_load("day3_trees", "stan/logistic.stan", data = trees_10x)
+
+fit_10x$draws |>
+  subset_draws(variable = c("sigma", "p")) |>
+  summarise_draws(mean, ~quantile(.x, c(0.05, 0.95)))
+```
+
+**Expected observations**: with 160 to 460 seedlings per tree the estimates stay close to the raw proportions (tree H: about 0.48 instead of 0.34), and $\sigma$ is now clearly away from 0 (about 0.55).
+The same proportions, backed by more data, are taken as evidence for real differences among trees. Shrinkage is not a fixed amount. It adapts to how much each group knows about itself.
+
+If you see a warning that the precomputed result was fitted to the default data, live sampling did not work on your machine: read the numbers above instead.
+:::
+:::
+
+# Exercise 3B: species differences in tree allometry
+
+|  |  |
+|---|---|
+| **Purpose** | Interpret a multilevel regression: variation among species, a species-level predictor, and what partial pooling does for rare species. |
+| **Time** | 20 minutes. Part 1 about 8 minutes, Part 2 about 12 minutes. |
+| **Computation** | Part 1: live sampling (about 1 second), stored result as fallback. Part 2: **stored result by default** (heavier model; set `use_precomputed = FALSE` to run it yourself, about 10 seconds). |
+| **Data** | The 188 trees of Day 2, now with species (`sp`) and wood density of the species (`wd`, scaled). |
+
+```{r allo-data}
+allo <- make_allometry_data()
+
+allo |>
+  group_by(sp) |>
+  summarise(trees = n(), wd = first(wd))
+```
+
+## Part 1: varying intercepts
+
+$$
+\log h_{ij} \sim \mathcal{N}(\log \beta_{0j} + \beta_1 \log(\mathrm{DBH}_{ij}/40),\; \sigma), \qquad
+\log \beta_{0j} \sim \mathcal{N}(\mu_0, \tau)
+$$
+
+```{r vint-fit}
+vint_data <- list(
+  N = nrow(allo),
+  J = nlevels(allo$sp),            # number of species
+  sp = as.integer(allo$sp),        # species index of each tree
+  log_dbh = log(allo$dbh / 40),    # centred at DBH = 40 cm, as on Day 2
+  log_h = log(allo$h)
+)
+
+vint_fit <- fit_or_load("day3_vint", "stan/vint.stan", data = vint_data)
+vd <- vint_fit$draws
+
+diagnostic_table(vint_fit)
+vd |>
+  subset_draws(variable = c("mu0", "tau", "beta1", "sigma")) |>
+  summarise_draws(mean, ~quantile(.x, c(0.05, 0.95)), rhat, ess_bulk)
+```
+
+1. Is the computation fine?
+2. Complete the sentences.
+   - "A 40-cm tree of a typical species is about ___ m tall."
+   - "Species differ in height at the same DBH by about ___ % (SD among species)."
+   - "Within a species, trees differ by about ___ %."
+3. On Day 2 the model without species gave $\sigma \approx 0.135$. Now $\sigma$ is smaller. Where did the difference go?
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r vint-sol}
+mean_qi(exp(vd$mu0))
+mean_qi(vd$tau)
+mean_qi(vd$sigma)
+```
+
+1. Yes: `rhat` 1.00, large ESS, no divergences.
+2. About 14.9 m (90% interval about 14.0 to 15.9); species differ by about 11% (interval about 7% to 18%); trees within a species differ by about 11%.
+3. Day 2's residual SD mixed two things: variation among trees within a species and variation among species. The multilevel model separates them: $0.135^2 \approx \sigma^2 + \text{(part of) } \tau^2$.
+
+**Optional comparison**: species intercepts barely shrink here.
+
+```{r vint-sol2}
+no_pool_int <- coef(lm(log(h) ~ 0 + sp + log(dbh / 40), data = allo))[1:10]
+
+tibble(
+  sp = levels(allo$sp),
+  trees = as.integer(table(allo$sp)),
+  no_pooling = round(no_pool_int, 2),
+  partial_pooling = round(map_dbl(1:10, \(j) mean(vd[[paste0("log_beta0[", j, "]")]])), 2)
+)
+```
+
+The intercepts are almost identical under no pooling and partial pooling, even for the species with 3 trees.
+Unlike the mother trees, species really differ ($\tau \approx 0.11$) and even a few trees pin down the height of a species well ($\sigma \approx 0.11$).
+**How much partial pooling changes depends on the data**: compare $\tau$ with $\sigma / \sqrt{n_j}$.
+:::
+:::
+
+## Part 2: varying slopes and wood density
+
+*Hypothesis: species with dense wood have a larger scaling exponent.*
+
+Both the intercept and the exponent now vary among species, and their typical values depend on wood density:
+
+$$
+\log \beta_{0j} \approx \gamma_{11} + \gamma_{12}\,\mathrm{wd}_j, \qquad
+\beta_{1j} \approx \gamma_{21} + \gamma_{22}\,\mathrm{wd}_j
+$$
+
+In the Stan output: `gamma[1,1]`, `gamma[1,2]`, `gamma[2,1]`, `gamma[2,2]`; `tau[1]` and `tau[2]` are the remaining SDs among species; `beta[1,j]` and `beta[2,j]` are the intercept and exponent of species `j`.
+
+```{r vslope-fit}
+vslope_data <- vslope_stan_data(allo) # see R/course_data.R
+str(vslope_data, give.attr = FALSE)
+
+vslope_fit <- fit_or_load("day3_vslope", "stan/vslope.stan", data = vslope_data,
+  adapt_delta = 0.95, use_precomputed = TRUE)
+sd3 <- vslope_fit$draws
+
+diagnostic_table(vslope_fit)
+sd3 |>
+  subset_draws(variable = c("gamma", "tau", "sigma")) |>
+  summarise_draws(mean, ~quantile(.x, c(0.05, 0.95)), rhat, ess_bulk, ess_tail)
+```
+
+1. **Diagnostics first**: `rhat`, ESS, divergences. May we interpret this fit?
+2. **The ecological question**: what is the posterior probability that the exponent increases with wood density, $P(\gamma_{22} > 0 \mid \text{data})$? How large is the effect: compute the exponent of a typical species at `wd = -1` and at `wd = +1`.
+3. Does wood density also affect the height at 40 cm DBH ($\gamma_{12}$)? Write one honest sentence.
+
+```{r vslope-task, eval=FALSE}
+g22 <- sd3$`gamma[2,2]`
+mean(g22 > ___)
+
+exp_low  <- sd3$`gamma[2,1]` + sd3$`gamma[2,2]` * ___
+exp_high <- sd3$`gamma[2,1]` + sd3$`gamma[2,2]` * ___
+mean_qi(exp_low)
+mean_qi(exp_high)
+```
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r vslope-sol}
+mean(sd3$`gamma[2,2]` > 0)
+mean_qi(sd3$`gamma[2,2]`)
+
+exp_low  <- sd3$`gamma[2,1]` + sd3$`gamma[2,2]` * -1
+exp_high <- sd3$`gamma[2,1]` + sd3$`gamma[2,2]` * 1
+mean_qi(exp_low)
+mean_qi(exp_high)
+
+mean(sd3$`gamma[1,2]` > 0)
+mean_qi(sd3$`gamma[1,2]`)
+```
+
+1. `rhat` is 1.00, ESS is around 1000 or more, and there are no divergent transitions. We may interpret it.
+2. $P(\gamma_{22} > 0)$ is about 0.99. The exponent of a typical species is about 0.58 at low wood density (−1 SD) and about 0.74 at high wood density (+1 SD).
+3. "The data are compatible with a small positive effect of wood density on height at 40 cm DBH, but also with no effect ($\gamma_{12}$ = 0.03, 90% interval −0.03 to 0.10; probability of a positive effect about 0.8)."
+
+**Points to make**
+
+- An uncertain result is reported as uncertain. It is neither "no effect" nor "a trend".
+- The data were simulated with $\gamma_{22} = 0.10$ and $\gamma_{12} = 0.05$. Both are inside the intervals. With only 10 species, species-level effects are estimated from 10 data points, no matter how many trees we measure.
+:::
+:::
+
+## Part 2, continued: what happens to rare species?
+
+Compare the exponent of each species from separate regressions (no pooling) with the multilevel model.
+
+```{r slopes, fig.height=4.5}
+no_pool_slope <- allo |>
+  group_by(sp) |>
+  group_modify(~ tibble(
+    trees = nrow(.x),
+    wd = .x$wd[1],
+    no_pooling = coef(lm(log(h) ~ log(dbh / 40), data = .x))[2]
+  )) |>
+  ungroup()
+
+slopes <- no_pool_slope |>
+  mutate(map(1:10, \(j) mean_qi(sd3[[paste0("beta[2,", j, "]")]])) |> list_rbind())
+slopes
+
+ggplot(slopes, aes(wd)) +
+  geom_segment(aes(xend = wd, y = no_pooling, yend = mean), colour = "grey50",
+    arrow = arrow(length = unit(0.2, "cm"))) +
+  geom_point(aes(y = no_pooling, size = trees), shape = 21, fill = "white") +
+  geom_pointrange(aes(y = mean, ymin = lo, ymax = hi), colour = "#d95f02") +
+  labs(x = "Wood density (scaled)", y = "Exponent", size = "Trees",
+    subtitle = "Open: separate regressions. Orange: multilevel model (mean, 90% interval)")
+```
+
+1. Which species change the most? What do they have in common?
+2. The rare species are not pulled towards the overall mean exponent. Towards what are they pulled?
+3. A colleague suggests dropping species with fewer than 10 trees "because their estimates are unreliable". What would you answer?
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+1. The species with 3, 4, and 6 trees (sp10, sp9, sp8). The separate regression for sp9 gives an exponent of about 0.30 from 4 trees; the multilevel model gives about 0.62.
+2. Towards the species-level regression line: the exponent expected for a species with that wood density. A species-level predictor makes partial pooling smarter.
+3. Dropping rare species discards most species of a diverse community and biases the sample towards common species. The multilevel model keeps them, uses what little they say, and reports wide intervals where the data are thin (look at the orange intervals of the rare species).
+
+**Contrast with Part 1**: the same species, the same data, and almost no shrinkage of intercepts but strong shrinkage of exponents for rare species.
+A slope needs far more data than a mean. Whether partial pooling matters is a property of the parameter and the data, not of the method.
+:::
+:::
+
+## Optional: predict a tree of a new species
+
+A species that is not in our data has high wood density (`wd = 1`). How tall is a typical tree of that species at DBH = 80 cm?
+
+For every draw: (1) the expected intercept and exponent for `wd = 1`; (2) add the species-level variation `tau[1]`, `tau[2]`; (3) compute the height at 80 cm.
+For simplicity, ignore the correlation between intercept and slope.
+
+```{r newsp, eval=FALSE}
+set.seed(1)
+S <- nrow(sd3)
+a_new <- rnorm(S, sd3$`gamma[1,1]` + sd3$`gamma[1,2]` * 1, sd3$`tau[1]`)
+b_new <- rnorm(S, sd3$`gamma[2,1]` + sd3$`gamma[2,2]` * 1, sd3$`tau[2]`)
+
+h_new <- exp(a_new + b_new * log(___ / 40))
+mean_qi(h_new)
+```
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r newsp-sol}
+set.seed(1)
+S <- nrow(sd3)
+a_new <- rnorm(S, sd3$`gamma[1,1]` + sd3$`gamma[1,2]` * 1, sd3$`tau[1]`)
+b_new <- rnorm(S, sd3$`gamma[2,1]` + sd3$`gamma[2,2]` * 1, sd3$`tau[2]`)
+
+h_new <- exp(a_new + b_new * log(80 / 40))
+mean_qi(h_new)
+```
+
+About 26 m, with a 90% interval of about 20 to 33 m. The interval is wide, because we know nothing about this species except its wood density: it contains the uncertainty of the species-level regression and the variation among species.
+For one individual tree of the new species we would add $\sigma$ as well (as on Day 2).
+
+<!-- TODO: the solution ignores the intercept-slope correlation (L_Omega). Add the exact version with the Cholesky factor if this task is promoted to the core. -->
+:::
+:::
+
+## Optional: the same models with `brms` and `lme4`
+
+```{r tools, eval=FALSE}
+# varying intercepts
+lme4::lmer(log(h) ~ log(dbh / 40) + (1 | sp), data = allo)
+brms::brm(log(h) ~ log(dbh / 40) + (1 | sp), data = allo)
+
+# varying intercepts and slopes, wood density at the species level
+lme4::lmer(log(h) ~ log(dbh / 40) * wd + (1 + log(dbh / 40) | sp), data = allo)
+brms::brm(log(h) ~ log(dbh / 40) * wd + (1 + log(dbh / 40) | sp), data = allo)
+```
+
+`lmer()` reports a singular fit for the second model with these data. What does the Bayesian model give you instead of a boundary estimate?
+
+<!-- TODO: brms is not part of the validated environment yet; it compiles a model on every call, so keep it optional with 30 participants. -->
+
+# Wrap-up questions
+
+1. Explain partial pooling to a colleague in two sentences, without equations.
+2. For which of your own data sets would a hierarchical model be natural? What are the groups? Which predictors act on individuals and which on groups?
+3. Name the checks you would run before interpreting such a model.
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Notes for the discussion
+
+1. For example: "Each group gets its own estimate, but the groups are assumed to be similar, and the model learns from the data how similar. Groups with little data lean on the others; groups with much data speak for themselves."
+2. Collect two or three examples from the room and sketch the levels on the board (individual, species, plot, year).
+3. `rhat`, ESS, divergences, trace plots; a prior predictive check for the priors; posterior predictive checks by group.
+:::
+:::

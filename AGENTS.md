@@ -49,6 +49,7 @@ Build on the existing ecological examples. Help participants understand model as
 - For design consultations, provide proposals and reasons. When editing is requested, complete the requested changes and relevant validation.
 - Respect existing themes, layouts, code chunks, and references. Keep changes focused on the task.
 - Follow the repository's configuration and README. Verify the execution environment and dependencies instead of assuming they exist.
+- `_targets.R` is the legacy pipeline that generates the MH/HMC GIFs in `images/` (used by `main.qmd` and `day1/slides.qmd`); run `targets::tar_make()` only to regenerate those GIFs. It does not fit the course models or render the day1–3 materials. Build those with `Rscript R/precompute_fits.R` (refits every course model into `fits/`), then `quarto render dayN/slides.qmd` and `quarto render dayN/exercise.qmd`. Do not use `targets` in the exercises.
 - Avoid introducing machine-specific absolute paths. Consider configuration or environment variables for existing fixed paths.
 - Set random seeds for simulations. When reusing fitted results, verify that they match the corresponding code and data.
 - When comparing Stan and brms, check differences in model formulations, priors, and variable transformations.
