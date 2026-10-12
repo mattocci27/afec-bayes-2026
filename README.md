@@ -85,6 +85,9 @@ record the environment originally used to produce the stored fits.
 The root `Dockerfile` now targets `rocker/tidyverse:4.6.1` on Linux amd64,
 with CmdStan 2.38.0 and an offline, isolated workspace per participant.
 See [docker/README.md](docker/README.md) for the design, build/start commands,
-validation checklist and outstanding risks. This is separate from the legacy
-VS Code / Apptainer workflow; no Compose configuration is provided yet.
+validation checklist and outstanding risks. `docker-compose.yml` defines
+`student01`–`student30` with separate passwords, workspaces and host ports.
+Use `bash docker/create-student-env.sh` to prepare private runtime credentials;
+see the Docker README before starting services. This is separate from the legacy
+VS Code / Apptainer workflow.
 The image has **not been built or run** during this change, as requested.

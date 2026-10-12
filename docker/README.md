@@ -1,8 +1,8 @@
 # AFEC 2026 classroom Docker image
 
 One image supplies 30 independent RStudio Server containers on the Ubuntu Intel
-server. Container creation, passwords, ports and resource limits belong to a
-future Compose configuration; no Compose file is included here.
+server. The root `docker-compose.yml` defines 30 student services with individual
+credentials, volumes, ports and resource limits.
 
 ## Repository audit and scope
 
@@ -152,6 +152,88 @@ Do not mount the Docker socket, host secrets or other students' volumes.
 Do not bypass root initialization with a final `USER rstudio`, `--user rstudio`,
 Compose `user: rstudio`, or an overridden entrypoint.
 
+## Compose deployment — prepared, not started
+
+All services use the same prebuilt image, defaulting to `afec-bayes:2026-r4.6.1`.
+There is no `build` section and `pull_policy: never` prevents an unexpected image
+download during class. Build/load and validate the image separately before use.
+Rocker's root startup and `/init` are inherited.
+
+| Setting | Default |
+|---|---|
+| Services | `student01`–`student30` |
+| Host ports | `8801`–`8830`, in student order; container port `8787` |
+| Host bind address | `127.0.0.1` |
+| Username | `rstudio` inside each independent container |
+| Password file | `.afec-credentials/studentNN.env` |
+| Persistent storage | One named `studentNN-workspace` volume per student |
+| Mount target | `/home/rstudio/workspace` only |
+| CPU / memory / swap | 1 CPU / 3 GiB / no additional swap per container |
+| Process limit | 256 per container |
+| Network | One classroom bridge; direct inter-container connectivity disabled |
+| Restart / health | `unless-stopped`; local HTTP check every 30 seconds |
+
+The CPU/memory settings are provisional upper limits, not reserved capacity or
+a guarantee of 30 simultaneous fits. One bridge avoids allocating 30 subnets.
+Docker's [bridge driver option](https://docs.docker.com/engine/network/drivers/bridge/#options)
+`enable_icc=false` disables direct inter-container connectivity. It does not
+disable internet access or guarantee isolation against hostile code or access
+through published host endpoints. Validate the host's firewall/routing before
+class. The core course needs no outbound downloads.
+
+Run the following **later**, once the image is ready:
+
+```bash
+# Generate 30 unique passwords without displaying them; reruns keep existing files.
+bash docker/create-student-env.sh
+# Validate including credential files without printing their contents.
+docker compose config --quiet
+
+# First validate one new student, then start all 30 after acceptance.
+docker compose up -d --no-build student01
+docker compose ps student01
+docker compose logs --tail=50 student01
+docker compose exec --user rstudio student01 Rscript /opt/afec/bin/verify.R
+docker compose up -d --no-build
+
+# Target one student without interrupting the others.
+docker compose restart student01
+docker compose stop student01
+```
+
+The credential helper requires host `openssl`. It creates a private directory
+(0700) and individual env files (0600). Distribute each student's password and
+endpoint individually. Existing files are preserved, including intentionally
+edited passwords; change a password by editing its file and recreating that
+service with `docker compose up -d --no-build --force-recreate student01`.
+The workspace volume persists. A plain restart does not reload an edited env file.
+Do not print or publish plain `docker compose config`: it resolves passwords.
+Use `--quiet`, or `--no-env-resolution` for a credential-free structural check.
+
+For optional host-specific settings, copy `.env.example` to `.env` only if `.env`
+does not already exist. Configure `AFEC_IMAGE`, `AFEC_CREDENTIALS_DIR`,
+`AFEC_BIND_IP`, `AFEC_CPUS` and `AFEC_MEMORY_LIMIT` there. The credential helper
+uses its explicit argument, not Compose's `.env`; for a custom directory, run
+`bash docker/create-student-env.sh /dedicated/credentials-directory` and set
+`AFEC_CREDENTIALS_DIR` to that absolute directory. Credentials and `.env` are
+Git-ignored, and credential files are excluded from the image build context.
+
+Default endpoints are `http://127.0.0.1:8801` through `:8830` **on the server**.
+Remote students cannot reach that loopback address directly. Use a host HTTPS
+reverse proxy to route individual student hostnames to these ports. No proxy or
+TLS configuration is included yet. For a trusted classroom LAN test, set
+`AFEC_BIND_IP` to the server's LAN IPv4 address and allow ports 8801–8830 on that
+LAN; endpoints then become `http://<server-LAN-IP>:8801`, etc. This direct route
+is unencrypted; prefer HTTPS or an encrypted VPN for actual credential use.
+
+Compose names volumes using the fixed project name `afec-bayes-2026`. Keep that
+name stable: changing `-p`/`COMPOSE_PROJECT_NAME` selects different volumes.
+`docker compose down` keeps named volumes; `down --volumes` deletes student work.
+Back up the volumes before image/host maintenance. A container's IDE settings
+outside the workspace are still lost on recreation. Health checks only test the
+HTTP server; they do not validate a student's R session, and unhealthy status
+alone does not trigger automatic recreation.
+
 ## Validation and outstanding risks
 
 **The image was not built or started, as requested.** Local static/unit checks:
@@ -188,8 +270,17 @@ Also test container **recreation** with the same volume, a fresh student volume,
 real exercise chunks, student writes, model shared libraries and an outbound-blocked
 network. Retain the classroom LAN for UI tests; `--network none` also prevents
 browser access. Measure RSS/CPU/runtime before wider live sampling. Next prepare
-30-container Compose, HTTPS, credential distribution, monitoring, backups and a
+HTTPS, credential distribution, monitoring, backups and a
 classroom rehearsal. A 30-user load test was not performed or required here.
+
+Compose was parsed with Docker Compose v5.1.2 using
+`docker compose config --no-env-resolution --quiet`, without contacting the
+Docker daemon or creating images, containers, networks or volumes. Static checks
+cover 30 distinct ports, credential paths and workspace volumes, the bridge
+configuration, resource limits, auth/thread defaults and preserved `/init` startup. The credential
+helper was checked in a temporary directory for 30 unique private files and
+non-overwrite behavior. Server-side limits, HTTP health checks, network routing
+and persistence still require runtime acceptance on Ubuntu.
 
 Fits match the current seeded data, model names, CmdStan 2.38.0 and draw structure.
 They were generated under R 4.5.3, whereas the current lock is R 4.6.1, and they

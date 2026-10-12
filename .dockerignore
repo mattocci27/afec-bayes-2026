@@ -47,6 +47,8 @@
 **/.git
 **/.DS_Store
 **/.env*
+**/*.env
+**/.afec-credentials
 **/.Renviron*
 **/*.key
 **/*.pem

@@ -8,3 +8,10 @@
 *.rds
 *_files
 *_cache
+
+# Classroom runtime credentials and local deployment configuration
+.afec-credentials/
+**/*.env
+.env
+.env.*
+!.env.example

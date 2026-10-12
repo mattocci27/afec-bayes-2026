@@ -1,0 +1,412 @@
+# One shared, prebuilt image; one stable service/workspace/password per student.
+# See docker/README.md. No build or image pull occurs through this configuration.
+name: afec-bayes-2026
+
+x-student: &student
+  image: "${AFEC_IMAGE:-afec-bayes:2026-r4.6.1}"
+  platform: linux/amd64
+  pull_policy: never
+  restart: unless-stopped
+  cpus: "${AFEC_CPUS:-1.0}"
+  mem_limit: "${AFEC_MEMORY_LIMIT:-3g}"
+  memswap_limit: "${AFEC_MEMORY_LIMIT:-3g}"
+  pids_limit: 256
+  stop_grace_period: 60s
+  environment:
+    ROOT: "FALSE"
+    DISABLE_AUTH: "FALSE"
+    DEFAULT_USER: rstudio
+    AFEC_CLASSROOM: "TRUE"
+    AFEC_USE_PRECOMPUTED: "TRUE"
+    OMP_NUM_THREADS: "1"
+    OPENBLAS_NUM_THREADS: "1"
+    MKL_NUM_THREADS: "1"
+    BLIS_NUM_THREADS: "1"
+    VECLIB_MAXIMUM_THREADS: "1"
+    NUMEXPR_NUM_THREADS: "1"
+    RCPP_PARALLEL_NUM_THREADS: "1"
+    MAKEFLAGS: "-j1"
+  healthcheck:
+    test: ["CMD", "curl", "--fail", "--silent", "--max-time", "5", "--output", "/dev/null", "http://127.0.0.1:8787/"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    start_period: 60s
+  logging:
+    driver: local
+    options:
+      max-size: "10m"
+      max-file: "3"
+  # Inherit root startup and /init. Do not set user, command or entrypoint.
+
+services:
+  student01:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student01.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8801:8787"
+    volumes:
+      - student01-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student02:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student02.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8802:8787"
+    volumes:
+      - student02-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student03:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student03.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8803:8787"
+    volumes:
+      - student03-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student04:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student04.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8804:8787"
+    volumes:
+      - student04-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student05:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student05.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8805:8787"
+    volumes:
+      - student05-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student06:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student06.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8806:8787"
+    volumes:
+      - student06-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student07:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student07.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8807:8787"
+    volumes:
+      - student07-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student08:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student08.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8808:8787"
+    volumes:
+      - student08-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student09:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student09.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8809:8787"
+    volumes:
+      - student09-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student10:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student10.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8810:8787"
+    volumes:
+      - student10-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student11:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student11.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8811:8787"
+    volumes:
+      - student11-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student12:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student12.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8812:8787"
+    volumes:
+      - student12-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student13:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student13.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8813:8787"
+    volumes:
+      - student13-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student14:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student14.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8814:8787"
+    volumes:
+      - student14-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student15:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student15.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8815:8787"
+    volumes:
+      - student15-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student16:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student16.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8816:8787"
+    volumes:
+      - student16-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student17:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student17.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8817:8787"
+    volumes:
+      - student17-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student18:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student18.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8818:8787"
+    volumes:
+      - student18-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student19:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student19.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8819:8787"
+    volumes:
+      - student19-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student20:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student20.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8820:8787"
+    volumes:
+      - student20-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student21:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student21.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8821:8787"
+    volumes:
+      - student21-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student22:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student22.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8822:8787"
+    volumes:
+      - student22-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student23:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student23.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8823:8787"
+    volumes:
+      - student23-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student24:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student24.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8824:8787"
+    volumes:
+      - student24-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student25:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student25.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8825:8787"
+    volumes:
+      - student25-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student26:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student26.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8826:8787"
+    volumes:
+      - student26-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student27:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student27.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8827:8787"
+    volumes:
+      - student27-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student28:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student28.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8828:8787"
+    volumes:
+      - student28-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student29:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student29.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8829:8787"
+    volumes:
+      - student29-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+  student30:
+    <<: *student
+    env_file:
+      - "${AFEC_CREDENTIALS_DIR:-./.afec-credentials}/student30.env"
+    ports:
+      - "${AFEC_BIND_IP:-127.0.0.1}:8830:8787"
+    volumes:
+      - student30-workspace:/home/rstudio/workspace
+    networks:
+      - classroom
+
+# Keep the project name stable so recreation reuses these named volumes.
+volumes:
+  student01-workspace: {}
+  student02-workspace: {}
+  student03-workspace: {}
+  student04-workspace: {}
+  student05-workspace: {}
+  student06-workspace: {}
+  student07-workspace: {}
+  student08-workspace: {}
+  student09-workspace: {}
+  student10-workspace: {}
+  student11-workspace: {}
+  student12-workspace: {}
+  student13-workspace: {}
+  student14-workspace: {}
+  student15-workspace: {}
+  student16-workspace: {}
+  student17-workspace: {}
+  student18-workspace: {}
+  student19-workspace: {}
+  student20-workspace: {}
+  student21-workspace: {}
+  student22-workspace: {}
+  student23-workspace: {}
+  student24-workspace: {}
+  student25-workspace: {}
+  student26-workspace: {}
+  student27-workspace: {}
+  student28-workspace: {}
+  student29-workspace: {}
+  student30-workspace: {}
+
+# One bridge avoids allocating 30 subnets; disable direct inter-container traffic.
+networks:
+  classroom:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "false"
+
