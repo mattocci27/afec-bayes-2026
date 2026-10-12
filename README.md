@@ -90,4 +90,8 @@ validation checklist and outstanding risks. `docker-compose.yml` defines
 Use `bash docker/create-student-env.sh` to prepare private runtime credentials;
 see the Docker README before starting services. This is separate from the legacy
 VS Code / Apptainer workflow.
-The image has **not been built or run** during this change, as requested.
+The image was built and validated on Linux amd64 on 2026-10-12 after the seven
+required fits were supplied. Non-root package/model checks, short sampling,
+plotting, the RStudio sign-in endpoint, and workspace persistence across restart
+and recreation passed. Browser login and visual inspection remain unverified.
+See [docker/README.md](docker/README.md) for image details and execution logs.

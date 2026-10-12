@@ -105,7 +105,7 @@ themes/QMDs are unchanged. The unused legacy `my_ggsave()` helper downloads a
 Google font; do not call it in class. External reference links remain optional
 reading, not bundled papers.
 
-Slide HTML is rendered from existing fits during a future build. Exercises are
+Slide HTML is rendered from existing fits during the image build. Exercises are
 QMDs to open in RStudio and run chunk-by-chunk: worked solutions change data/prior
 and cannot honestly be rendered from only default stored fits. If exercise HTML
 is needed, the instructor must compute the changed conditions beforehand.
@@ -121,7 +121,7 @@ Build and validate where the required services are reachable, then transfer the
 completed image to the classroom server (for example, `docker save` / `docker load`).
 Do not depend on downloading or rebuilding it during the workshop in China.
 
-## Future build and single-container example — not executed here
+## Build and single-container example
 
 `fits/*.rds` is gitignored: cloning alone is insufficient. Supply all seven
 validated fits under `fits/`, or the build deliberately fails. If necessary,
@@ -236,7 +236,56 @@ alone does not trigger automatic recreation.
 
 ## Validation and outstanding risks
 
-**The image was not built or started, as requested.** Local static/unit checks:
+### Build and runtime acceptance: 2026-10-12
+
+The image built successfully using the command above on Linux amd64. The final
+successful build took 1,371.14 seconds (22 minutes 51 seconds), including a
+temporary stall downloading the Stan logo. The initial preflight was blocked by
+seven missing RDS files; these were subsequently supplied without model refitting.
+
+Preflight commands: `docker version`, `docker buildx version`,
+`docker compose version`, `uname -m`, `df -h . /tmp`, `free -h`, and `ls -lh fits`.
+Docker client/server were both 29.9.0, Buildx was 0.38.0, and Compose was 5.6.0.
+The host was x86_64, with 476 GB of available disk space and 121 GiB of available
+memory (125 GiB total).
+
+Two fixes were required: set `R_LIBS=/opt/afec/library` to override Rocker's
+default library precedence (which selected readxl 1.5.0 instead of the locked
+1.5.0.1), and compare DESCRIPTION versions directly because `packageVersion()`
+normalizes versions such as abind's `1.4-8` to `1.4.8`. Verification now checks
+library precedence and reports the package, expected/actual versions and path
+on a mismatch. The locked package versions were preserved. Buildx also needed
+a private temporary `DOCKER_CONFIG` because the session's `~/.docker` was
+read-only; the temporary configuration was removed after each attempt.
+
+Image tag: `afec-bayes:2026-r4.6.1`.
+Image ID: `sha256:49b6d761a33e95240f54e55ad7341da564a4f32b0c1eee0650ed5920f2cb30a9`.
+Image size: 6,658,389,171 bytes (6.66 GB). No repository digest is available for
+this locally built image; it was not pushed. The base image repository digest
+was `sha256:94a4cdb7be4d1214f9039bca4937e8919253d2ad90d8bed084e9a8af685a50c7`.
+Runtime versions: R 4.6.1, CmdStan 2.38.0 and Quarto 1.10.18.
+
+All three slide decks rendered. The build-time and runtime `verify.R` checks
+passed as `rstudio`, including all 156 locked package versions, seven stored
+fits, 13 model executables, two short sequential binomial chains (100 retained
+draws total), and PNG plotting. The short sample validates execution only.
+
+A unique temporary container used a fresh named workspace volume, a private
+runtime password file, localhost-only port binding, a 1 CPU limit and 3 GiB
+memory limit. RStudio served the sign-in page with a browser user agent.
+Non-root file writes succeeded, and a marker survived both restart and container
+recreation with the same volume. The temporary container, volume and password
+file were removed. Existing student services and credentials were not changed.
+
+Build logs, exit codes, durations, image inspection and runtime commands/results
+are in [`../logs/docker-build-2026-10-12/`](../logs/docker-build-2026-10-12/).
+Browser login, visual/offline browser inspection, a fresh interactive RStudio
+session and 30-user load testing remain unverified. No registry push or external
+deployment was performed.
+
+### Earlier static validation
+
+**The image was not built or started during the earlier implementation.** Local static/unit checks:
 
 ```bash
 RENV_CONFIG_SANDBOX_ENABLED=FALSE Rscript docker/test-static.R
@@ -250,9 +299,9 @@ changed-data/stale-source rejection, auth guards, and a first-copy/non-overwrite
 file-operation simulation. The simulation stubs chown and macOS/GNU mv differences;
 it is **not** proof of real Docker volume permissions or restart behavior.
 
-A future build runs `verify.R` as `rstudio` to check locked package loading,
+A build runs `verify.R` as `rstudio` to check locked package loading,
 CmdStan, executable accessibility, stored fits, a short binomial sample and PNG
-plotting. That hook has **not** been executed in an image. Its short sample tests
+plotting. That hook passed in the image described above. Its short sample tests
 execution, not convergence or scientific adequacy. After building, run:
 
 ```bash
@@ -280,7 +329,8 @@ cover 30 distinct ports, credential paths and workspace volumes, the bridge
 configuration, resource limits, auth/thread defaults and preserved `/init` startup. The credential
 helper was checked in a temporary directory for 30 unique private files and
 non-overwrite behavior. Server-side limits, HTTP health checks, network routing
-and persistence still require runtime acceptance on Ubuntu.
+and routing still require classroom acceptance. Single-container HTTP startup
+and workspace persistence passed in the runtime check described above.
 
 Fits match the current seeded data, model names, CmdStan 2.38.0 and draw structure.
 They were generated under R 4.5.3, whereas the current lock is R 4.6.1, and they

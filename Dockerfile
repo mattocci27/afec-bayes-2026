@@ -27,7 +27,7 @@ RUN BUILD_JOBS=${BUILD_JOBS} Rscript --vanilla /opt/afec/build/install-packages.
 
 ENV ROOT=FALSE DISABLE_AUTH=FALSE \
     S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
-    R_LIBS_SITE=/opt/afec/library R_LIBS_USER= \
+    R_LIBS=/opt/afec/library R_LIBS_SITE=/opt/afec/library R_LIBS_USER= \
     R_PROFILE_SITE=/opt/afec/Rprofile.site \
     RENV_CONFIG_AUTOLOADER_ENABLED=FALSE \
     CMDSTAN=/opt/cmdstan/cmdstan-2.38.0 \

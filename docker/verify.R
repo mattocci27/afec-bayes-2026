@@ -2,10 +2,19 @@
 args <- commandArgs(trailingOnly = TRUE)
 root <- if (length(args)) args[1] else "/home/rstudio/workspace/afec-bayes-2026"
 stopifnot(Sys.info()[["effective_user"]] != "root", as.character(getRversion()) == "4.6.1")
+stopifnot(normalizePath(.libPaths()[1]) == normalizePath("/opt/afec/library"))
 setwd(root)
 versions <- read.delim("/opt/afec/packages.tsv", stringsAsFactors = FALSE)
 for (i in seq_len(nrow(versions))) {
-  stopifnot(as.character(packageVersion(versions$package[i])) == versions$version[i])
+  name <- versions$package[i]
+  # packageVersion() normalizes e.g. abind 1.4-8 to 1.4.8. The manifest
+  # records the original DESCRIPTION version, so compare the same field.
+  actual <- packageDescription(name)$Version
+  expected <- versions$version[i]
+  if (!identical(actual, expected)) {
+    stop("Package version mismatch for ", name, ": expected ", expected,
+         ", found ", actual, " in ", find.package(name))
+  }
 }
 for (name in readLines("/opt/afec/course-packages.txt")) {
   stopifnot(requireNamespace(name, quietly = TRUE))
