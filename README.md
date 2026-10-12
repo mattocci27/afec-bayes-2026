@@ -79,3 +79,12 @@ now uses the [officially recommended R-universe URL](https://mc-stan.org/cmdstan
 This local check does not refit course models or revalidate the earlier Docker
 environment after dependency updates. The container results described above
 record the environment originally used to produce the stored fits.
+
+## AFEC 2026 classroom Docker image
+
+The root `Dockerfile` now targets `rocker/tidyverse:4.6.1` on Linux amd64,
+with CmdStan 2.38.0 and an offline, isolated workspace per participant.
+See [docker/README.md](docker/README.md) for the design, build/start commands,
+validation checklist and outstanding risks. This is separate from the legacy
+VS Code / Apptainer workflow; no Compose configuration is provided yet.
+The image has **not been built or run** during this change, as requested.

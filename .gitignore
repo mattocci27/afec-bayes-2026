@@ -2,6 +2,7 @@
 *
 !*/
 !*.*
+!Dockerfile
 
 *.key
 *.rds
