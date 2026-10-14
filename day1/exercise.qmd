@@ -1,7 +1,7 @@
 ---
 title: "Day 1 exercises: from likelihood to posterior"
 author: "Masatoshi Katabuchi"
-date: today
+date: "2026-10-21"
 solutions: true
 format:
   html:
@@ -12,16 +12,14 @@ format:
     smooth-scroll: true
     standalone: true
     embed-resources: true
+    html-math-method: katex
 execute:
   cache: false
 ---
 
 <!--
-Instructor version (default): solutions are shown in collapsed boxes.
-Participant version (no solutions):
-  quarto render day1/exercise.qmd -M solutions:false
-  mv day1/exercise.html day1/exercise-student.html
-(`-o` cannot be used here: it breaks `embed-resources` in Quarto 1.9.)
+Instructor source. Generate the solution-free participant QMD and both HTMLs
+with Rscript R/build_classroom_materials.R. Optional live chunks are eval=FALSE.
 -->
 
 ```{r global_options, include=FALSE}
@@ -39,6 +37,14 @@ knitr::opts_chunk$set(
 ## Setup
 
 Run this chunk first. Everything is already installed in the course environment.
+
+Open `exercise-student.qmd` and run selected chunks. Work in pairs: one person
+runs the code, the other checks the prediction and writes the interpretation;
+swap roles for Exercise 1B. Fill `___` before running a task chunk.
+
+**Core route:** analyse supplied posterior draws. If RStudio is unavailable,
+open `exercise-student.html` and `results.html` locally and answer the same questions
+using the printed tables and figures. No installation or homework is required.
 
 ```{r setup}
 library(tidyverse)
@@ -63,7 +69,7 @@ Tasks marked **Optional** are for those who finish early.
 |  |  |
 |---|---|
 | **Purpose** | See how the prior and the amount of data shape the posterior. |
-| **Time** | 12 minutes |
+| **Time** | 15 minutes: 12 minutes pair work + 3 minutes explanation/questions. Tasks 1–3 are core. |
 | **Computation** | R only. No Stan, nothing to wait for. |
 | **Data** | $y$ survivors out of $N$ seedlings. |
 | **Model** | $y \sim \text{Binomial}(N, p)$, prior $p \sim \text{Beta}(a, b)$ |
@@ -74,7 +80,7 @@ Two helper functions use this formula:
 - `plot_update(y, N, a, b)` draws the prior, the likelihood, and the posterior.
 - `summarise_update(y, N, a, b)` returns the MLE, the posterior mean, and the 90% posterior interval.
 
-How to read a Beta prior: $\text{Beta}(a, b)$ behaves like having already seen $a$ survivors and $b$ deaths.
+How to read a Beta prior: its mean is $a/(a+b)$; in the posterior mean it contributes a weight of $a+b$ pseudo-observations. This is a weighting analogy, not a claim about actual prior seedlings.
 $\text{Beta}(1, 1)$ is flat.
 
 ```{r ex1a-start}
@@ -139,7 +145,9 @@ plot_update(y = 2, N = 5, a = ___, b = ___)
 summarise_update(y = 2, N = 5, a = ___, b = ___)
 ```
 
-Then repeat with 40 of 100 and the same three priors. What changed?
+Core: compare Beta(1,1) and Beta(8,2) for 2/5, then for 40/100. What changed?
+Try Beta(2,2) if you finish early. After 6 minutes, check that your pair has
+compared 2/5 with 40/100 under the flat prior.
 
 ::: {.content-visible when-meta="solutions"}
 ::: {.callout-tip collapse="true"}
@@ -223,8 +231,8 @@ Judging a prior on the scale of the data is usually easier than judging it on th
 |  |  |
 |---|---|
 | **Purpose** | Connect data → parameters → posterior draws, and compute summaries from draws. |
-| **Time** | 15 minutes |
-| **Computation** | Live sampling. Very small model (about 1 second). If sampling fails, a stored result is loaded automatically. |
+| **Time** | 15 minutes: 12 minutes pair work + 3 minutes explanation/questions. Tasks 1–3 are core. |
+| **Computation** | Stored Stan result for core tasks. Optional instructor-coordinated live sampling uses a precompiled model; no shared-server runtime is assumed. |
 | **Data** | 2 survivors out of 5 seedlings. |
 | **Model** | The same model as Exercise 1A, written in Stan. |
 
@@ -234,12 +242,13 @@ The Stan model. Find the data, the parameter, the prior, and the likelihood:
 cat("```stan\n", paste(readLines(here("stan/binomial.stan")), collapse = "\n"), "\n```\n", sep = "")
 ```
 
-## Task 1: run the model and look at the draws
+## Task 1: load the fitted model and look at the draws (5 minutes)
 
 ```{r ex1b-fit}
 seedling_data <- list(N = 5, y = 2, a = 1, b = 1)
 
-fit <- fit_or_load("day1_seedling", "stan/binomial.stan", data = seedling_data)
+fit <- fit_or_load("day1_seedling", "stan/binomial.stan", data = seedling_data,
+  use_precomputed = TRUE)
 
 fit$source   # "live" or "precomputed"
 draws <- fit$draws
@@ -249,16 +258,18 @@ draws
 ::: {.callout-note collapse="true"}
 ## What does `fit_or_load()` do?
 
-It is a thin wrapper around `cmdstanr`. Without the safety net it is:
+With `use_precomputed = TRUE`, it loads a fitted result and checks its data.
+Live inference calls a matching precompiled model in the classroom:
 
 ```{r, eval=FALSE}
-mod <- cmdstanr::cmdstan_model(here("stan/binomial.stan"))
+mod <- course_model("stan/binomial.stan")
 fit <- mod$sample(data = seedling_data, seed = 123, chains = 4,
-                  iter_warmup = 1000, iter_sampling = 1000)
+                  parallel_chains = 1, iter_warmup = 1000, iter_sampling = 1000)
 draws <- posterior::as_draws_df(fit$draws())
 ```
 
-If this fails on your machine, `fit_or_load()` loads a stored result from `fits/` so you can continue.
+Wait for the instructor before live inference. The core uses the stored default
+fit throughout. A changed data/prior fit cannot be replaced by this default fit.
 :::
 
 Each row is one draw from the posterior. `lp__` is the log posterior density (ignore it for now).
@@ -299,7 +310,7 @@ The small differences are Monte Carlo error: we have a finite number of draws.
 :::
 :::
 
-## Task 2: a probability statement from draws
+## Task 2: a probability statement from draws (2 minutes)
 
 Compute $P(p > 0.5 \mid \text{data})$ from the draws. Compare with your answer in Exercise 1A, Task 3.
 
@@ -321,49 +332,7 @@ This works for any statement and any model, including models with no formula for
 :::
 :::
 
-## Task 3: change the data, then the prior
-
-The prior settings `a` and `b` are part of the data list, so nothing needs to be recompiled.
-
-**Predict first:** for each case below, will the 90% interval be wider or narrower than in Task 1, and where will the posterior mean be?
-
-- (a) 40 survivors out of 100, flat prior.
-- (b) 2 survivors out of 5, prior $\text{Beta}(8, 2)$.
-
-```{r ex1b-task3, eval=FALSE}
-fit_a <- fit_or_load("day1_seedling", "stan/binomial.stan",
-  data = list(N = ___, y = ___, a = 1, b = 1))
-
-summarise_draws(fit_a$draws, mean, ~quantile(.x, c(0.05, 0.95)))
-```
-
-::: {.content-visible when-meta="solutions"}
-::: {.callout-tip collapse="true"}
-## Solution and notes
-
-```{r ex1b-sol3}
-fit_a <- fit_or_load("day1_seedling", "stan/binomial.stan",
-  data = list(N = 100, y = 40, a = 1, b = 1))
-fit_b <- fit_or_load("day1_seedling", "stan/binomial.stan",
-  data = list(N = 5, y = 2, a = 8, b = 2))
-
-bind_rows(
-  `2/5, Beta(1,1)` = summarise_draws(draws, mean, ~quantile(.x, c(0.05, 0.95))),
-  `40/100, Beta(1,1)` = summarise_draws(fit_a$draws, mean, ~quantile(.x, c(0.05, 0.95))),
-  `2/5, Beta(8,2)` = summarise_draws(fit_b$draws, mean, ~quantile(.x, c(0.05, 0.95))),
-  .id = "case"
-) |>
-  filter(variable == "p")
-```
-
-**Expected observations**: the same pattern as in Exercise 1A. More data gives a narrower posterior; a strong prior moves the posterior when data are few.
-The point of this task is that Stan reproduces what you computed by hand, so you can trust it when no formula exists.
-
-If you see a warning that the precomputed result was fitted to the default data, live sampling did not work on your machine: read the numbers above instead.
-:::
-:::
-
-## Task 4: predict new data
+## Task 3: predict new data (5 minutes)
 
 We plan to plant 50 new seedlings. How many will survive?
 
@@ -372,10 +341,13 @@ Each posterior draw of `p` is one plausible value of the survival probability. F
 ```{r ex1b-task4}
 set.seed(1)
 y_new <- rbinom(n = nrow(draws), size = 50, prob = draws$p)
+y_plugin <- rbinom(n = nrow(draws), size = 50, prob = 0.4)
+quantile(y_new, c(0.05, 0.95))
+quantile(y_plugin, c(0.05, 0.95))
 ```
 
 1. Plot `y_new` and compute its 90% interval.
-2. Compare with `rbinom(2000, 50, 0.4)`, which pretends that $p$ is exactly 0.4. Which is wider? Why?
+2. Compare with `y_plugin`, which pretends that $p$ is exactly 0.4. Which is wider? Why? If time is short, use the supplied intervals and explain in words.
 
 ::: {.content-visible when-meta="solutions"}
 ::: {.callout-tip collapse="true"}
@@ -400,6 +372,63 @@ tibble(
 It carries two sources of uncertainty: we do not know $p$ well (only 5 seedlings), and survival is random even if we knew $p$.
 
 **Common misunderstanding**: the interval for $p$ and the interval for new data are different things. We return to this on Day 2 with regression lines.
+:::
+:::
+
+## Optional live extension: change the data, then the prior (8 extra minutes)
+
+Run only when the instructor schedules your pair. **What stays fixed:** the
+Stan model and sampling settings. Change only the data in (a), and only the prior
+in (b). If live inference is unavailable, compare the exact Beta results below.
+
+The prior settings `a` and `b` are part of the data list, so nothing needs to be recompiled.
+
+**Predict first:** for each case below, will the 90% interval be wider or narrower than in Task 1, and where will the posterior mean be?
+
+- (a) 40 survivors out of 100, flat prior.
+- (b) 2 survivors out of 5, prior $\text{Beta}(8, 2)$.
+
+```{r ex1b-task3, eval=FALSE}
+fit_a <- fit_or_load("day1_seedling", "stan/binomial.stan",
+  data = list(N = ___, y = ___, a = 1, b = 1),
+  use_precomputed = FALSE, fallback = FALSE)
+
+summarise_draws(fit_a$draws, mean, ~quantile(.x, c(0.05, 0.95)))
+```
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r ex1b-sol3, eval=FALSE}
+fit_a <- fit_or_load("day1_seedling", "stan/binomial.stan",
+  data = list(N = 100, y = 40, a = 1, b = 1),
+  use_precomputed = FALSE, fallback = FALSE)
+fit_b <- fit_or_load("day1_seedling", "stan/binomial.stan",
+  data = list(N = 5, y = 2, a = 8, b = 2),
+  use_precomputed = FALSE, fallback = FALSE)
+
+bind_rows(
+  `2/5, Beta(1,1)` = summarise_draws(draws, mean, ~quantile(.x, c(0.05, 0.95))),
+  `40/100, Beta(1,1)` = summarise_draws(fit_a$draws, mean, ~quantile(.x, c(0.05, 0.95))),
+  `2/5, Beta(8,2)` = summarise_draws(fit_b$draws, mean, ~quantile(.x, c(0.05, 0.95))),
+  .id = "case"
+) |>
+  filter(variable == "p")
+```
+
+**Expected observations**: the same pattern as in Exercise 1A. More data gives a narrower posterior; a strong prior moves the posterior when data are few.
+Agreement with the exact answer checks this simple model. Other models still
+need convergence diagnostics and predictive checks.
+
+**Exact comparison without Stan (also in the offline result sheet):**
+
+```{r ex1b-exact-comparison}
+bind_rows(summarise_update(2, 5), summarise_update(40, 100),
+          summarise_update(2, 5, 8, 2))
+```
+
+These are exact Beta summaries for the changed conditions, not reused default Stan draws.
 :::
 :::
 

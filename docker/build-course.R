@@ -68,7 +68,7 @@ for (file in c("assets/custom.css", "assets/rladies.scss")) {
 cat('\n@font-face { font-family: Lato; src: url("fonts/Lato-Regular.ttf"); }\n',
     file = "assets/custom.css", append = TRUE)
 for (day in paste0("day", 1:3)) {
-  for (name in c("slides", "exercise")) {
+  for (name in "slides") {
     file <- file.path(day, paste0(name, ".qmd"))
     lines <- readLines(file)
     lines <- gsub("https://raw.githubusercontent.com/stan-dev/logos/master/logo.png",
@@ -86,12 +86,10 @@ for (day in paste0("day", 1:3)) {
   }
 }
 Sys.setenv(AFEC_USE_PRECOMPUTED = "TRUE")
-# Render only slides: exercises contain worked answers that intentionally change
-# data/prior, and must not render those from the default-data stored posterior.
-for (day in paste0("day", 1:3)) {
-  status <- system2("quarto", c("render", file.path(day, "slides.qmd")))
-  if (status != 0L) stop("Slide render failed: ", day)
-}
+# Changed-input inference chunks are eval=FALSE; core handouts load matching fits.
+# Remove solution code from participant sources before rendering.
+source("R/classroom_materials.R")
+build_classroom_materials(root, package = FALSE)
 files <- list.files(root, recursive = TRUE, full.names = TRUE, all.files = TRUE)
 files <- files[!dir.exists(files)]
 write.table(data.frame(file = substring(files, nchar(root) + 2L),

@@ -33,28 +33,33 @@ Learning outcomes: by the end of the session participants can
      posterior ∝ likelihood × prior;
   2. predict how the posterior changes when the prior or the amount of data changes;
   3. summarise a posterior from its draws (mean, interval, P(p > x));
-  4. run a small Stan model from R and connect data -> parameters -> posterior draws.
+  4. identify data, parameters and model in a supplied Stan file, and analyse
+     its stored posterior draws (a live demonstration is optional).
 
 Assumptions (TODO: confirm with the organisers)
   - participants use R (tidyverse basics) and have fitted lm()/glm() before;
   - teaching language is English;
-  - participants read and modify Stan models but do not write them from scratch;
+  - participants read supplied Stan models; editing or writing Stan is optional;
   - no homework; optional extensions are in each exercise sheet.
+  - 30 participants work in 15 pairs; one instructor, no TA assumed;
+  - stored fits are the core route; nobody installs software during class.
 
 Timing
-   0- 8  Welcome, course map, where we are going (NDD across species: 2 slides,
-         about 3 min, question only), today's question
-   8-20  Likelihood (review)
-  20-35  Bayes' theorem: forward / inverse problems
-  35-47  Prior, posterior, prior predictive thinking
-  47-60  Exercise 1A (R only, no Stan)
-  60-70  From formulas to samples: MCMC intuition, Stan
-  70-85  Exercise 1B (first Stan model, live)
-  85-90  Wrap-up and bridge to Day 2
+   0- 8  Login/setup checkpoint, course map, ecological question
+   8-18  Likelihood, using the seedling question
+  18-30  Bayes' theorem; one forward/inverse figure
+  30-42  Prior, posterior, prior predictive thinking
+  42-57  Exercise 1A: 12 min pair work + 3 min explanation/questions
+  57-67  Stan's three blocks and posterior draws
+  67-82  Exercise 1B core: 12 min pair work + 3 min explanation/questions
+  82-86  Wrap-up and bridge to Day 2
+  86-90  Questions and delay buffer
 
-If time runs short: skip "Likelihood of several observations", show only
-fip_6.png of the forward/inverse sequence, and skip the MH animation slide.
-Optional material is in the appendix at the end.
+Core: Exercise 1A tasks 1-3; Exercise 1B tasks 1-3 (draws, probability, prediction).
+The PCR sequence, coin comparisons, MH/HMC mechanics and changed-input Stan
+refits are extensions. If behind: keep one prior comparison in 1A, give the
+prediction plotting code in 1B, and omit live sampling. Preserve the debrief.
+Login must be tried before class; use the static result sheet if access fails.
 -->
 
 ```{r setup, include=FALSE}
@@ -68,10 +73,11 @@ source(here::here("R/slides_setup.R"))
 
 <h3>Day 1: From likelihood to posterior</h3>
 
+<p>AFEC-X 2026 · 21 October · 19:00–20:30 China time (UTC+8)</p>
+
 <h3>🧑🏻‍💻 [Masatoshi Katabuchi \@ XTBG, CAS]{.author}</h3>
 :::
 
-<!-- TODO: add the course dates and the official AFEC 2026 course name to the title slide. -->
 
 ## Course map
 
@@ -112,13 +118,13 @@ source(here::here("R/slides_setup.R"))
 ::: small
 - Each day: short lectures + two exercises in the browser-based R environment.
 - The goal is to **think with and interpret** Bayesian models, not to memorise Stan syntax.
-- Small models are run live. For heavier models we provide fitted results.
+- Core tasks use supplied posterior draws. The instructor may demonstrate live sampling.
 :::
 :::
 
 ::: notes
 - 3 x 90 minutes
-- nobody needs to install anything
+- nobody needs to install anything; work in pairs and swap driver/reader roles
 :::
 
 ## {#where-we-are-going}
@@ -271,97 +277,36 @@ By the end of today, you can
 - explain what **likelihood**, **prior**, and **posterior** mean;
 - predict how the posterior changes with **more data** or a **different prior**;
 - summarise a posterior distribution: mean, interval, and statements such as $P(p > 0.5 \mid \text{data})$;
-- run a small Stan model and read its output.
+- identify Stan's three blocks and summarise its supplied posterior draws.
 :::
 
 # Likelihood
 
-## Likelihood and probability density distribution
+## Likelihood: start with five seedlings
+
+$$
+Y\mid p\sim\mathrm{Binomial}(5,p),\qquad P(Y=y\mid p)=\binom{5}{y}p^y(1-p)^{5-y}
+$$
 
 ::: columns
-
-::: {.column width=40%}
-
-```{r, fig.height=7}
-x <- seq(-5, 5, length.out = 100)
-y <- dnorm(x, mean = 0, sd = 1)
-tibble(x, y) |>
-  ggplot() +
-  xlab("x") +
-  ylab("Density") +
-  ggtitle("N(0, 1)") +
-  geom_line(aes(x, y)) +
-  theme(
-    axis.title   = element_text(size = 32),
-    axis.text    = element_text(size = 28))
+::: {.column width="50%"}
+```{r, fig.height=4.5, fig.width=7}
+tibble(y=0:5, probability=dbinom(0:5,5,.4)) |>
+  ggplot(aes(y,probability))+geom_col(fill=col_like)+
+  labs(x="Survivors out of 5",y="Probability",title="p = 0.4")
 ```
-
-::: small
-$f(x \mid \mu, \sigma) = \frac{1}{\sqrt{2\pi\sigma^2}}\mathrm{exp} \bigl[{-\frac{1}{2}\bigl\{\frac{x-\mu}{\sigma}}\bigr\}^2\bigr]$
 :::
-
-:::
-::: {.column width=60%}
+::: {.column width="50%"}
 ::: incremental
-- **P(data | parameters)**: Probability of observing the data given the parameters.
+- Forward: hold $p$ fixed and compare possible data $y$.
+- We observed $y=2$. The **likelihood** holds these data fixed and compares values of $p$:
 
-- e.g., when your model is $x_i \sim \mathcal{N}(\mu = 0, \sigma = 1)$ (normal distribution with mean 0 and standard deviation 1), what is the probability density at x = 1.96?
-:::
+$$L(p)=\binom{5}{2}p^2(1-p)^3$$
 
-::: fragment
-```{r, echo=TRUE}
-dnorm(1.96, mean = 0, sd = 1)
-```
-:::
-
-::: fragment
-- A statistical model always has this form: a distribution for the data (normal, binomial, Poisson, ...) with unknown parameters.
-:::
-
-:::
-
-:::
-
-::: notes
-- likelihood is all about probability density (mass) function (normal, log-normal, poisson, beta, gamma, binomial, negative-binomial...)
-- NOTE: throughout the course N(mu, sigma) is written with the standard deviation, as in Stan and in dnorm()
-:::
-
-## Likelihood of several observations
-
-When your data is x = {-1.5, 0, 1.5} and your model is $x \sim \mathcal{N}(\mu, 1)$, how probable is the data for a given $\mu$?
-
-::: small
-::: incremental
-- $L(\mu) = P(-1.5 \mid \mu, 1) \times P(0 \mid \mu, 1) \times P(1.5 \mid \mu, 1)$
-- $\mathrm{ln}\;L(\mu) = \mathrm{ln}\;P(-1.5 \mid \mu, 1) + \mathrm{ln}\;P(0 \mid \mu, 1) +  \mathrm{ln}\;P(1.5 \mid \mu, 1)$
+- In R: `dbinom(2, size=5, prob=p)`.
+- This is not yet a probability distribution for $p$.
 :::
 :::
-
-::: fragment
-
-```{r, fig.height=3.5}
-like_fun <- function(mu) {
-  dnorm(-1.5, mean = mu, sd = 1, log = TRUE) +
-    dnorm(0, mean = mu, sd = 1, log = TRUE) +
-    dnorm(1.5, mean = mu, sd = 1, log = TRUE)
-}
-
-x <- seq(-5, 5, length.out = 100)
-y <- like_fun(x)
-tibble(x, y) |>
-  ggplot() +
-  xlab("mu") +
-  ylab("ln L") +
-  geom_line(aes(x, y)) +
-  theme(
-    axis.title   = element_text(size = 32),
-    axis.text    = element_text(size = 28))
-```
-:::
-
-::: fragment
-The data are fixed. The likelihood is a function of the **parameter**.
 :::
 
 ## Maximum Likelihood Estimation (MLE)
@@ -524,81 +469,7 @@ $$
 
 ---
 
-<img src="../images/fip_1.png" width="100%" style="display: block; margin: auto;"/>
-
----
-
-<img src="../images/fip_2.png" width="100%" style="display: block; margin: auto;"/>
-
----
-
-<img src="../images/fip_3.png" width="100%" style="display: block; margin: auto;"/>
-
----
-
-<img src="../images/fip_4.png" width="100%" style="display: block; margin: auto;"/>
-
----
-
-<img src="../images/fip_5.png" width="100%" style="display: block; margin: auto;"/>
-
----
-
 <img src="../images/fip_6.png" width="100%" style="display: block; margin: auto;"/>
-
-## Forward and Inverse Problems: PCR and disease example
-
-::: footer
-- $P(\text{Positive})$: 2%, $P(\text{Infected})$: 0.05%
-:::
-
-**➡️Forward problem:**
-If you are infected, what is the probability that PCR test is positive?
-
-<br>
-
-::: fragment
-$P(\text{Positive} \mid \text{Infected})$: 95%
-:::
-
-<br>
-
-::: fragment
-This is what the lab test is designed to estimate — how likely we are to observe a positive signal given the known infection status (e.g., 95 out of 100 infected samples test positive).
-:::
-
-## Forward and Inverse Problems: PCR and disease example
-
-::: footer
-- $P(\text{Positive})$: 2%, $P(\text{Infected})$: 0.05%
-:::
-
-**🔁Inverse problem (Bayesian):**
-If the PCR test is positive, what is the probability that you are infected?
-
-<br>
-
-::: fragment
-- $P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected}) \cdot  P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%$
-:::
-
-<br>
-
-::: fragment
-This isn’t intuitive, but it’s the probability we actually care about — how likely someone is to be infected, given a positive test result.
-
-:::
-
-::: notes
-- ask the room to guess before revealing 2.4%
-- 0.95 * 0.0005 / 0.02 = 0.02375
-:::
-
----
-
-<img src="../images/bayes_re.png" width="100%" style="display: block; margin: auto;"/>
-
----
 
 ## Bayes' theorem
 
@@ -678,99 +549,15 @@ plot_update(2, 5, 1, 1, linewidth = 1.8) +
 - this small table (mean / interval / probability statement) is the reporting pattern for the whole course
 :::
 
-##  Prior vs. Data: MLE and Bayesian comparison (Coin Toss)
-
-We compare two coins, A and B, with the same prior but different likelihood (due to data sizes) to illustrate how prior beliefs influence posterior estimates.
-
-::: incremental
-
-### MLE
-
-- A: 2 head out of 3 tosses -> P(H) = 2/3 = 0.666
-- B: 60 heads out of 100 tosses -> P(H) = 60/100 = 0.6
-
-::: columns
-::: {.column width="50%"}
-### Bayesian
-
-- $\textcolor{#1b9e77}{L_A = {}_3C_2 p^2 (1-p)^1}$
-
-- $\textcolor{#1b9e77}{L_B = {}_{100}C_{60} p^{60} (1-p)^{40}}$
-
-- $\textcolor{#7570b3}{\mathrm{Prior} \propto  p^{50} (1-p)^{50}}$
-  - Beta(51, 51): we believe coins are fair
-
-:::
-
-::: {.column width="50%"}
-```{r, fig.height=4}
-tibble(x = seq(0, 1, length = 200)) |>
-  mutate(prior = dbeta(x, 51, 51)) |>
-  ggplot(aes(x, prior)) +
-  geom_line(linewidth = 1.5, colour = col_prior) +
-  labs(x = "p", y = "Prior density") +
-  theme(
-    legend.position = "none",
-    axis.text = element_text(size = 28),
-    axis.title = element_text(size = 32))
-```
-:::
-
-:::
-:::
-
----
-
-##  Bayesian Update with Prior (Coin Toss)
-
-[Posterior]{.orange} $\propto$ [Likelihood]{.teal} $\times$ [Prior]{.purple}
-
-::: columns
-::: {.column width="50%"}
-
-::: fragment
-Coin A:
-$\textcolor{#d95f02}{Post_A}\propto\textcolor{#1b9e77}{p^2 (1-p)^1} \times\textcolor{#7570b3}{p^{50} (1-p)^{50}}$
-
-Peak of the posterior: $p = 52/103 \approx 0.505$
-:::
-::: fragment
-- $Post_A$: With only 3 coin tosses, the likelihood is weak, so the posterior stays close to the prior.
-:::
-:::
-
-::: {.column width="50%"}
-::: fragment
-Coin B:
-$\textcolor{#d95f02}{Post_B} \propto \textcolor{#1b9e77}{p^{60} (1-p)^{40}} \times\textcolor{#7570b3}{p^{50} (1-p)^{50}}$
-
-Peak of the posterior: $p = 110/200 = 0.55$
-:::
-
-::: fragment
-- $Post_B$:
-With 100 coin tosses, the likelihood dominates, so the posterior shifts more towards the data.
-:::
-
-:::
-:::
-
-::: small
-::: incremental
-- The same prior can have a strong or weak influence depending on how much data we have.
-- We usually have some sense of scale for our parameters, and we are allowed to use that information.
-:::
-:::
-
 ## Four things that are easy to mix up
 
 ::: small
-| | What it is | Coin A (2 of 3, prior Beta(51, 51)) |
+| | What it is | Seedlings (2 of 5, prior Beta(8, 2)) |
 |---|---|---|
-| **MLE** | the $p$ that maximises the [likelihood]{.teal} | `r round(2/3, 3)` |
-| **MAP** | the $p$ that maximises the [posterior]{.orange} (its peak) | `r round(52/103, 3)` |
-| **Posterior mean** | the average of the [posterior]{.orange} | `r round(53/105, 3)` |
-| **Posterior distribution** | every value of $p$ with its plausibility | Beta(53, 52) |
+| **MLE** | the $p$ that maximises the [likelihood]{.teal} | `r round(2/5, 3)` |
+| **MAP** | the $p$ that maximises the [posterior]{.orange} (its peak) | `r round(9/13, 3)` |
+| **Posterior mean** | the average of the [posterior]{.orange} | `r round(10/15, 3)` |
+| **Posterior distribution** | every value of $p$ with its plausibility | Beta(10, 5) |
 :::
 
 ::: incremental
@@ -833,7 +620,7 @@ p1 / p2
 ## Exercise 1A: prior × likelihood by hand {background-color="#f3e8f5"}
 
 ::: large
-`day1/exercise.html`, Exercise 1A (12 minutes, R only)
+`day1/exercise-student.qmd`, Exercise 1A (15 minutes including discussion)
 :::
 
 - **Predict first**, then run.
@@ -843,7 +630,8 @@ p1 / p2
 
 ::: notes
 - walk around; ask pairs to explain the Beta(8, 2) result to each other
-- debrief 2 min: posterior mean is a compromise; the weight of the data grows with N
+- checkpoint after 6 min: everyone has compared 2/5 and 40/100
+- debrief 3 min: posterior mean is a compromise; the weight of the data grows with N
 :::
 
 # From formulas to samples
@@ -857,37 +645,6 @@ p1 / p2
 - For almost every model we actually care about (regressions, hierarchical models), **no formula exists**.
 - Solution: draw many random samples from the posterior and summarise the samples.
 - **MCMC** (Markov Chain Monte Carlo) is a family of algorithms that produce such samples using only [likelihood]{.teal} × [prior]{.purple}.
-:::
-
-## MCMC: a simplified Metropolis-Hastings (MH) algorithm
-
-::: columns
-::: {.column width="40%"}
-
-![](../images/mh_trace.gif){height=290}
-
-![](../images/mh_post.gif){height=290}
-
-:::
-
-::: {.column width="60%"}
-
-::: incremental
-- Start with some values of *p* (e.g., 0.2 and 0.8).
-- Calculate the posterior of those values.
-- Repeat the following steps N times:
-  - Propose a new value of $p_{\text{new}}$ (e.g., $p \pm 0.01$)
-  - Calculate the posterior at $p_{\text{new}}$.
-  - If $\text{Post}(p_{\text{new}}) \geq \text{Post}(p_t), \text{ then } p_{t+1} = p_{\text{new}}$.
-  - Else, accept $p_{\text{new}}$ with probability $\frac{\text{Post}(p_{\text{new}})}{\text{Post}(p_t)}$.
-- After the first steps (grey: **warmup**), the chain visits each value of $p$ in proportion to its posterior probability.
-:::
-:::
-:::
-
-::: notes
-- example: coin B, posterior proportional to p^110 (1-p)^90
-- two chains from different starting points end up in the same place: this idea returns on Day 2 as R-hat
 :::
 
 ## Stan: A modern language/software for Bayesian modeling
@@ -971,7 +728,7 @@ seedling_fit <- read_fit("day1_seedling")
 fit <- fit_or_load(
   "day1_seedling",
   "stan/binomial.stan",
-  data = list(N = 5, y = 2, a = 1, b = 1)
+  data = list(N = 5, y = 2, a = 1, b = 1), use_precomputed = TRUE
 )
 fit$draws
 ```
@@ -1012,23 +769,24 @@ ggplot(as_tibble(seedling_fit$draws), aes(p)) +
 :::
 
 ::: notes
-- fit_or_load() = cmdstan_model() + $sample(), with a fallback to stored results if sampling fails
+- core: fit_or_load(..., use_precomputed = TRUE) reads the supplied Stan result
+- optional live example uses the matching precompiled executable; no classroom compilation
 - the summary numbers differ slightly from the exact ones: Monte Carlo error
 :::
 
 ## Exercise 1B: your first Stan model {background-color="#f3e8f5"}
 
 ::: large
-`day1/exercise.html`, Exercise 1B (15 minutes, live sampling)
+`day1/exercise-student.qmd`, Exercise 1B (15 minutes including discussion)
 :::
 
-- Run the seedling model and summarise the draws.
+- Load the supplied seedling fit and summarise the draws.
 - Compare with the exact posterior from Exercise 1A.
-- Change the data and the prior (no recompiling needed).
 - Predict the number of survivors among 50 new seedlings.
 
 ::: notes
-- if sampling fails for someone: fit_or_load() loads the stored result automatically
+- core tasks 1-3; changed-input refits are optional and need instructor coordination
+- checkpoint after 5 min: everyone has the mean and interval
 - debrief 3 min: draws -> any derived quantity
 :::
 
@@ -1047,6 +805,268 @@ ggplot(as_tibble(seedling_fit$draws), aes(p)) +
 :::
 
 # Appendix: optional material {visibility="uncounted"}
+
+## Extension: probability density for continuous data {visibility="uncounted"}
+
+::: columns
+
+::: {.column width=40%}
+
+```{r, fig.height=7}
+x <- seq(-5, 5, length.out = 100)
+y <- dnorm(x, mean = 0, sd = 1)
+tibble(x, y) |>
+  ggplot() +
+  xlab("x") +
+  ylab("Density") +
+  ggtitle("N(0, 1)") +
+  geom_line(aes(x, y)) +
+  theme(
+    axis.title   = element_text(size = 32),
+    axis.text    = element_text(size = 28))
+```
+
+::: small
+$f(x \mid \mu, \sigma) = \frac{1}{\sqrt{2\pi\sigma^2}}\mathrm{exp} \bigl[{-\frac{1}{2}\bigl\{\frac{x-\mu}{\sigma}}\bigr\}^2\bigr]$
+:::
+
+:::
+::: {.column width=60%}
+::: incremental
+- **P(data | parameters)**: Probability of observing the data given the parameters.
+
+- e.g., when your model is $x_i \sim \mathcal{N}(\mu = 0, \sigma = 1)$ (normal distribution with mean 0 and standard deviation 1), what is the probability density at x = 1.96?
+:::
+
+::: fragment
+```{r, echo=TRUE}
+dnorm(1.96, mean = 0, sd = 1)
+```
+:::
+
+::: fragment
+- A statistical model always has this form: a distribution for the data (normal, binomial, Poisson, ...) with unknown parameters.
+:::
+
+:::
+
+:::
+
+::: notes
+- likelihood is all about probability density (mass) function (normal, log-normal, poisson, beta, gamma, binomial, negative-binomial...)
+- NOTE: throughout the course N(mu, sigma) is written with the standard deviation, as in Stan and in dnorm()
+:::
+
+
+## Likelihood of several observations {visibility="uncounted"}
+
+When your data is x = {-1.5, 0, 1.5} and your model is $x \sim \mathcal{N}(\mu, 1)$, how probable is the data for a given $\mu$?
+
+::: small
+::: incremental
+- $L(\mu) = P(-1.5 \mid \mu, 1) \times P(0 \mid \mu, 1) \times P(1.5 \mid \mu, 1)$
+- $\mathrm{ln}\;L(\mu) = \mathrm{ln}\;P(-1.5 \mid \mu, 1) + \mathrm{ln}\;P(0 \mid \mu, 1) +  \mathrm{ln}\;P(1.5 \mid \mu, 1)$
+:::
+:::
+
+::: fragment
+
+```{r, fig.height=3.5}
+like_fun <- function(mu) {
+  dnorm(-1.5, mean = mu, sd = 1, log = TRUE) +
+    dnorm(0, mean = mu, sd = 1, log = TRUE) +
+    dnorm(1.5, mean = mu, sd = 1, log = TRUE)
+}
+
+x <- seq(-5, 5, length.out = 100)
+y <- like_fun(x)
+tibble(x, y) |>
+  ggplot() +
+  xlab("mu") +
+  ylab("ln L") +
+  geom_line(aes(x, y)) +
+  theme(
+    axis.title   = element_text(size = 32),
+    axis.text    = element_text(size = 28))
+```
+:::
+
+::: fragment
+The data are fixed. The likelihood is a function of the **parameter**.
+:::
+
+
+## Forward and Inverse Problems: PCR and disease example {visibility="uncounted"}
+
+::: footer
+- $P(\text{Positive})$: 2%, $P(\text{Infected})$: 0.05%
+:::
+
+**➡️Forward problem:**
+If you are infected, what is the probability that PCR test is positive?
+
+<br>
+
+::: fragment
+$P(\text{Positive} \mid \text{Infected})$: 95%
+:::
+
+<br>
+
+::: fragment
+This is what the lab test is designed to estimate — how likely we are to observe a positive signal given the known infection status (e.g., 95 out of 100 infected samples test positive).
+:::
+
+## Forward and Inverse Problems: PCR and disease example {visibility="uncounted"}
+
+::: footer
+- $P(\text{Positive})$: 2%, $P(\text{Infected})$: 0.05%
+:::
+
+**🔁Inverse problem (Bayesian):**
+If the PCR test is positive, what is the probability that you are infected?
+
+<br>
+
+::: fragment
+- $P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected}) \cdot  P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%$
+:::
+
+<br>
+
+::: fragment
+This isn’t intuitive, but it’s the probability we actually care about — how likely someone is to be infected, given a positive test result.
+
+:::
+
+::: notes
+- ask the room to guess before revealing 2.4%
+- 0.95 * 0.0005 / 0.02 = 0.02375
+:::
+
+---
+
+<img src="../images/bayes_re.png" width="100%" style="display: block; margin: auto;"/>
+
+---
+
+
+##  Prior vs. Data: MLE and Bayesian comparison (Coin Toss) {visibility="uncounted"}
+
+We compare two coins, A and B, with the same prior but different likelihood (due to data sizes) to illustrate how prior beliefs influence posterior estimates.
+
+::: incremental
+
+### MLE
+
+- A: 2 head out of 3 tosses -> P(H) = 2/3 = 0.666
+- B: 60 heads out of 100 tosses -> P(H) = 60/100 = 0.6
+
+::: columns
+::: {.column width="50%"}
+### Bayesian
+
+- $\textcolor{#1b9e77}{L_A = {}_3C_2 p^2 (1-p)^1}$
+
+- $\textcolor{#1b9e77}{L_B = {}_{100}C_{60} p^{60} (1-p)^{40}}$
+
+- $\textcolor{#7570b3}{\mathrm{Prior} \propto  p^{50} (1-p)^{50}}$
+  - Beta(51, 51): we believe coins are fair
+
+:::
+
+::: {.column width="50%"}
+```{r, fig.height=4}
+tibble(x = seq(0, 1, length = 200)) |>
+  mutate(prior = dbeta(x, 51, 51)) |>
+  ggplot(aes(x, prior)) +
+  geom_line(linewidth = 1.5, colour = col_prior) +
+  labs(x = "p", y = "Prior density") +
+  theme(
+    legend.position = "none",
+    axis.text = element_text(size = 28),
+    axis.title = element_text(size = 32))
+```
+:::
+
+:::
+:::
+
+---
+
+##  Bayesian Update with Prior (Coin Toss) {visibility="uncounted"}
+
+[Posterior]{.orange} $\propto$ [Likelihood]{.teal} $\times$ [Prior]{.purple}
+
+::: columns
+::: {.column width="50%"}
+
+::: fragment
+Coin A:
+$\textcolor{#d95f02}{Post_A}\propto\textcolor{#1b9e77}{p^2 (1-p)^1} \times\textcolor{#7570b3}{p^{50} (1-p)^{50}}$
+
+Peak of the posterior: $p = 52/103 \approx 0.505$
+:::
+::: fragment
+- $Post_A$: With only 3 coin tosses, the likelihood is weak, so the posterior stays close to the prior.
+:::
+:::
+
+::: {.column width="50%"}
+::: fragment
+Coin B:
+$\textcolor{#d95f02}{Post_B} \propto \textcolor{#1b9e77}{p^{60} (1-p)^{40}} \times\textcolor{#7570b3}{p^{50} (1-p)^{50}}$
+
+Peak of the posterior: $p = 110/200 = 0.55$
+:::
+
+::: fragment
+- $Post_B$:
+With 100 coin tosses, the likelihood dominates, so the posterior shifts more towards the data.
+:::
+
+:::
+:::
+
+::: small
+::: incremental
+- The same prior can have a strong or weak influence depending on how much data we have.
+- We usually have some sense of scale for our parameters, and we are allowed to use that information.
+:::
+:::
+
+
+## MCMC: a simplified Metropolis-Hastings (MH) algorithm {visibility="uncounted"}
+
+::: columns
+::: {.column width="40%"}
+
+![](../images/mh_trace.gif){height=290}
+
+![](../images/mh_post.gif){height=290}
+
+:::
+
+::: {.column width="60%"}
+
+::: incremental
+- Start with some values of *p* (e.g., 0.2 and 0.8).
+- Calculate the posterior of those values.
+- Repeat the following steps N times:
+  - Propose a new value of $p_{\text{new}}$ (e.g., $p \pm 0.01$)
+  - Calculate the posterior at $p_{\text{new}}$.
+  - If $\text{Post}(p_{\text{new}}) \geq \text{Post}(p_t), \text{ then } p_{t+1} = p_{\text{new}}$.
+  - Else, accept $p_{\text{new}}$ with probability $\frac{\text{Post}(p_{\text{new}})}{\text{Post}(p_t)}$.
+- After the first steps (grey: **warmup**), the chain visits each value of $p$ in proportion to its posterior probability.
+:::
+:::
+:::
+
+::: notes
+- example: coin B, posterior proportional to p^110 (1-p)^90
+- two chains from different starting points end up in the same place: this idea returns on Day 2 as R-hat
+:::
+
 
 ## MCMC: Hamiltonian Monte Carlo (HMC) {visibility="uncounted"}
 

@@ -1,0 +1,54 @@
+---
+title: "AFEC-X 2026: classroom readiness check"
+format:
+  html:
+    theme: coderpro
+    embed-resources: true
+    html-math-method: katex
+execute:
+  eval: false
+---
+
+Complete this **10-minute check before Day 1**, using your assigned browser
+RStudio account. Nobody needs to install R, CmdStan, Docker or a C++ toolchain.
+Teaching assumes basic tidyverse use and previous experience with `lm()`/`glm()`;
+tell the instructor if these are unfamiliar. The teaching materials are in English.
+
+1. Open your individual course URL, log in, and open `afec-bayes-2026.Rproj`.
+2. Open `day1/exercise-student.qmd` in the editor and run its setup chunk.
+3. Run the following code. It reads a supplied result and plots; it does not fit a model.
+
+```{r}
+library(tidyverse)
+library(posterior)
+library(here)
+source(here("R/course_utils.R"))
+fit <- fit_or_load("day1_seedling", "stan/binomial.stan",
+                  list(N = 5, y = 2, a = 1, b = 1), use_precomputed = TRUE)
+fit$source
+nrow(fit$draws)
+mean(fit$draws$p)
+quantile(fit$draws$p, c(0.05, 0.95))
+plot_update(2, 5)
+```
+
+Expected: `precomputed`, 4000 draws, mean near 0.43, an interval near 0.15–0.73,
+and a prior/likelihood/posterior plot. Report which step failed and the exact
+error message; keep your password private. Save a short note in your workspace,
+log out and back in, and check that your note remains.
+
+4. Download and unzip the participant archive **before class**. Open
+   `day1/exercise-student.html` and `day1/results.html` locally; check equations,
+   figures and tables with the network disconnected. Repeat for Days 2 and 3.
+5. Tell the instructor whether login, code, plotting, saved note and local HTML
+   all worked. Do this at least several days before 21 October; course times are
+   19:00–20:30 China time (UTC+8), 21–23 October 2026.
+
+During class, work in pairs and swap the person running code and the person
+interpreting it. Fill `___` before running task chunks. Run only the indicated
+chunks. If access fails, use the local handouts and results with your partner.
+
+Optional local R use is allowed after this same stored-result check passes on an
+already-prepared machine. Installation is outside classroom time; keep your
+Server credentials even if using local R. Live inference requires an
+instructor-scheduled slot and is not required for completing the course.

@@ -1,7 +1,7 @@
 ---
 title: "Day 3 exercises: hierarchical models"
 author: "Masatoshi Katabuchi"
-date: today
+date: "2026-10-23"
 solutions: true
 format:
   html:
@@ -12,16 +12,14 @@ format:
     smooth-scroll: true
     standalone: true
     embed-resources: true
+    html-math-method: katex
 execute:
   cache: false
 ---
 
 <!--
-Instructor version (default): solutions are shown in collapsed boxes.
-Participant version (no solutions):
-  quarto render day3/exercise.qmd -M solutions:false
-  mv day3/exercise.html day3/exercise-student.html
-(`-o` cannot be used here: it breaks `embed-resources` in Quarto 1.9.)
+Instructor source. Generate the solution-free participant QMD and both HTMLs
+with Rscript R/build_classroom_materials.R. Optional live chunks are eval=FALSE.
 -->
 
 ```{r global_options, include=FALSE}
@@ -37,6 +35,11 @@ knitr::opts_chunk$set(
 ```
 
 ## Setup
+
+Open `exercise-student.qmd` and run selected chunks; fill `___` first.
+Work in pairs and swap driver/reader roles for 3B. All core tasks use supplied
+posterior draws or direct Beta simulation. If RStudio is unavailable, answer
+from `exercise-student.html` and `results.html`. No installation or homework is required.
 
 ```{r setup}
 library(tidyverse)
@@ -63,8 +66,8 @@ Remember the two rules: **predict before you run**, and **interpret in words**.
 |  |  |
 |---|---|
 | **Purpose** | See what partial pooling does, for which groups, and why. Predict for a new group. |
-| **Time** | 20 minutes. Tasks 1 to 4 are the core. |
-| **Computation** | Complete pooling and no pooling: the Day 1 formula, no Stan. Partial pooling: live sampling, small model (about 1 second), with a stored result as fallback. |
+| **Time** | Tasks 1–4: 25 minutes (22 minutes pair work + 3 minutes explanation/questions). Task 5: a separate 6-minute core block after 3B. |
+| **Computation** | Complete/no pooling: direct Beta simulation in R. Partial pooling: supplied Stan result. All five core tasks work without live inference. |
 | **Data** | Seedlings (`n`) and survivors (`suv`) under eight mother trees of one species. Simulated: the true survival rates exist, but we hide them until Task 3. |
 
 ```{r trees-data}
@@ -116,7 +119,9 @@ trees_data <- list(
   N = trees$n
 )
 
-trees_fit <- fit_or_load("day3_trees", "stan/logistic.stan", data = trees_data)
+trees_fit <- fit_or_load("day3_trees", "stan/logistic.stan", data = trees_data,
+  use_precomputed = TRUE)
+trees_fit$source
 td <- trees_fit$draws
 
 diagnostic_table(trees_fit)
@@ -203,7 +208,7 @@ You cannot know which situation you are in without fitting $\sigma$.
 mcmc_hist(td, pars = c("mu", "sigma"))
 ```
 
-1. $\sigma$ is the standard deviation among mother trees on the logit scale. Report its posterior mean and 90% interval. Is $\sigma = 0$ (no differences among trees) ruled out?
+1. $\sigma$ is the standard deviation among mother trees on the logit scale. Report its posterior mean and 90% interval. Are values close to 0 plausible? A continuous prior gives probability zero to the exact point 0, so this is not a test of exact equality.
 2. Translate to the probability scale: for a typical draw, what are the survival rates of a tree one $\sigma$ below and one $\sigma$ above the mean? Use `plogis(mu - sigma)` and `plogis(mu + sigma)` with the posterior means.
 
 ::: {.content-visible when-meta="solutions"}
@@ -225,11 +230,13 @@ plogis(mean(td$mu) + c(-1, 0, 1) * mean(td$sigma))
 :::
 :::
 
-## Optional: predict a new mother tree
+## Task 5: predict a new mother tree (core, 6 minutes after 3B)
 
 We find a ninth mother tree of the same species. What survival rate do we expect under it, before counting any seedlings?
 
-For every draw, draw a new tree from the group-level distribution:
+Return to this task at the instructor's signal. **Predict first:** will the
+new-tree interval be wider than the complete-pooling interval? For every draw,
+draw a new tree from the group-level distribution:
 
 ```{r newtree, eval=FALSE}
 set.seed(1)
@@ -261,7 +268,11 @@ Predicting for a new group is something only the hierarchical model can do.
 :::
 :::
 
-## Optional: ten times more seedlings
+## Optional live extension: ten times more seedlings (8 extra minutes)
+
+Wait for the instructor to schedule live inference. If it is unavailable,
+discuss the approximate 2026-10-02 validation result below; changed-input draws
+are not supplied. These results must not be replaced by the default fit.
 
 **What stays fixed:** the model and the observed proportions. **What changes:** every tree has 10 times more seedlings and survivors.
 
@@ -269,7 +280,8 @@ Predicting for a new group is something only the hierarchical model can do.
 
 ```{r tenx, eval=FALSE}
 trees_10x <- modifyList(trees_data, list(suv = trees$suv * 10L, N = trees$n * 10L))
-fit_10x <- fit_or_load("day3_trees", "stan/logistic.stan", data = trees_10x)
+fit_10x <- fit_or_load("day3_trees", "stan/logistic.stan", data = trees_10x,
+  use_precomputed = FALSE, fallback = FALSE)
 
 fit_10x$draws |>
   subset_draws(variable = c("sigma", "p")) |>
@@ -280,9 +292,10 @@ fit_10x$draws |>
 ::: {.callout-tip collapse="true"}
 ## Solution and notes
 
-```{r tenx-sol}
+```{r tenx-sol, eval=FALSE}
 trees_10x <- modifyList(trees_data, list(suv = trees$suv * 10L, N = trees$n * 10L))
-fit_10x <- fit_or_load("day3_trees", "stan/logistic.stan", data = trees_10x)
+fit_10x <- fit_or_load("day3_trees", "stan/logistic.stan", data = trees_10x,
+  use_precomputed = FALSE, fallback = FALSE)
 
 fit_10x$draws |>
   subset_draws(variable = c("sigma", "p")) |>
@@ -292,7 +305,8 @@ fit_10x$draws |>
 **Expected observations**: with 160 to 460 seedlings per tree the estimates stay close to the raw proportions (tree H: about 0.48 instead of 0.34), and $\sigma$ is now clearly away from 0 (about 0.55).
 The same proportions, backed by more data, are taken as evidence for real differences among trees. Shrinkage is not a fixed amount. It adapts to how much each group knows about itself.
 
-If you see a warning that the precomputed result was fitted to the default data, live sampling did not work on your machine: read the numbers above instead.
+If live inference fails, stop and use this historical comparison for discussion.
+It is not a new fit from the present session.
 :::
 :::
 
@@ -301,8 +315,8 @@ If you see a warning that the precomputed result was fitted to the default data,
 |  |  |
 |---|---|
 | **Purpose** | Interpret a multilevel regression: variation among species, a species-level predictor, and what partial pooling does for rare species. |
-| **Time** | 20 minutes. Part 1 about 8 minutes, Part 2 about 12 minutes. |
-| **Computation** | Part 1: live sampling (about 1 second), stored result as fallback. Part 2: **stored result by default** (heavier model; set `use_precomputed = FALSE` to run it yourself, about 10 seconds). |
+| **Time** | 21 minutes: 18 minutes pair work + 3 minutes explanation/questions. Part 1: 6 minutes; Part 2: 6 minutes; rare-species plot: 6 minutes. |
+| **Computation** | Supplied Stan results for both parts. The covariance parameterisation is an extension; interpreting the group-level coefficients is core. |
 | **Data** | The 188 trees of Day 2, now with species (`sp`) and wood density of the species (`wd`, scaled). |
 
 ```{r allo-data}
@@ -329,7 +343,9 @@ vint_data <- list(
   log_h = log(allo$h)
 )
 
-vint_fit <- fit_or_load("day3_vint", "stan/vint.stan", data = vint_data)
+vint_fit <- fit_or_load("day3_vint", "stan/vint.stan", data = vint_data,
+  use_precomputed = TRUE)
+vint_fit$source
 vd <- vint_fit$draws
 
 diagnostic_table(vint_fit)
@@ -407,7 +423,7 @@ sd3 |>
 
 1. **Diagnostics first**: `rhat`, ESS, divergences. May we interpret this fit?
 2. **The ecological question**: what is the posterior probability that the exponent increases with wood density, $P(\gamma_{22} > 0 \mid \text{data})$? How large is the effect: compute the exponent of a typical species at `wd = -1` and at `wd = +1`.
-3. Does wood density also affect the height at 40 cm DBH ($\gamma_{12}$)? Write one honest sentence.
+3. **Optional:** does wood density also affect height at 40 cm DBH ($\gamma_{12}$)?
 
 ```{r vslope-task, eval=FALSE}
 g22 <- sd3$`gamma[2,2]`
@@ -478,6 +494,10 @@ ggplot(slopes, aes(wd)) +
 2. The rare species are not pulled towards the overall mean exponent. Towards what are they pulled?
 3. A colleague suggests dropping species with fewer than 10 trees "because their estimates are unreliable". What would you answer?
 
+**Checkpoints:** after 6 minutes distinguish `tau` from `sigma`; after 12 minutes
+report the wood-density comparison. The instructor supplies the rare-species
+plot code; you interpret it. If behind, use the static plot in `results.html`.
+
 ::: {.content-visible when-meta="solutions"}
 ::: {.callout-tip collapse="true"}
 ## Solution and notes
@@ -543,7 +563,8 @@ brms::brm(log(h) ~ log(dbh / 40) * wd + (1 + log(dbh / 40) | sp), data = allo)
 
 `lmer()` reports a singular fit for the second model with these data. What does the Bayesian model give you instead of a boundary estimate?
 
-<!-- TODO: brms is not part of the validated environment yet; it compiles a model on every call, so keep it optional with 30 participants. -->
+<!-- brms is installed in the classroom image; the calls and prior differences
+still need comparison. Compilation is outside the core classroom route. -->
 
 # Wrap-up questions
 

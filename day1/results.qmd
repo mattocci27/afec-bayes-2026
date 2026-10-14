@@ -1,0 +1,70 @@
+---
+title: "Day 1: results for offline discussion"
+date: "2026-10-21"
+format:
+  html:
+    theme: coderpro
+    embed-resources: true
+    html-math-method: katex
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+Use this sheet with `exercise-student.html` if RStudio is unavailable. Predict
+before reading a table, then interpret in words. Results are exact Beta
+calculations or the supplied default Stan fit; no new inference was run.
+
+```{r setup}
+library(tidyverse)
+library(posterior)
+library(here)
+source(here("R/course_utils.R"))
+theme_set(theme_bw())
+fit <- fit_or_load("day1_seedling", "stan/binomial.stan",
+                  list(N=5,y=2,a=1,b=1), use_precomputed=TRUE)
+draws <- fit$draws
+```
+
+## 1A: prior and data comparisons
+
+```{r comparisons}
+cases <- tribble(~y,~N,~a,~b, 2,5,1,1, 8,20,1,1, 40,100,1,1,
+                 2,5,2,2, 2,5,8,2, 40,100,8,2)
+knitr::kable(pmap_dfr(cases, summarise_update),digits=3)
+plot_update(2,5,8,2)
+```
+
+The first three rows keep the observed proportion and prior fixed. A strong
+prior changes the small-data posterior more than the large-data posterior.
+For 2/5 and the flat prior, $P(p>0.5\mid y)=`r round(1-pbeta(.5,3,4),3)`$.
+
+## 1B: draws, probability statements and prediction
+
+```{r draws-summary}
+knitr::kable(summarise_draws(subset_draws(draws,variable="p"),mean,
+                           ~quantile(.x,c(.05,.95)),rhat,ess_bulk,ess_tail),digits=3)
+knitr::kable(diagnostic_table(fit))
+```
+
+There are `r nrow(draws)` retained draws (4 chains × 1000).
+$P(p>0.5\mid y)$ from these draws is `r round(mean(draws$p>.5),3)`.
+Small differences from the exact Beta answer are Monte Carlo error.
+
+```{r predictions}
+set.seed(1)
+y_new <- rbinom(nrow(draws),50,draws$p)
+y_plugin <- rbinom(nrow(draws),50,.4)
+knitr::kable(tibble(method=c("posterior predictive","plug-in p = 0.4"),
+                    q5=c(quantile(y_new,.05),quantile(y_plugin,.05)),
+                    q95=c(quantile(y_new,.95),quantile(y_plugin,.95))))
+tibble(survivors=c(y_new,y_plugin),
+       method=rep(c("posterior predictive","plug-in"),each=nrow(draws))) |>
+  ggplot(aes(survivors,fill=method)) +
+  geom_histogram(binwidth=1,position="identity",alpha=.5)
+```
+
+The predictive interval includes uncertainty about $p$ and random survival
+given $p$. The optional changed-input comparisons in the first table use
+exact Beta calculations; they are not default Stan draws relabelled as new fits.

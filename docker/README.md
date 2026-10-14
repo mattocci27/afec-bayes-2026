@@ -105,10 +105,16 @@ themes/QMDs are unchanged. The unused legacy `my_ggsave()` helper downloads a
 Google font; do not call it in class. External reference links remain optional
 reading, not bundled papers.
 
-Slide HTML is rendered from existing fits during the image build. Exercises are
-QMDs to open in RStudio and run chunk-by-chunk: worked solutions change data/prior
-and cannot honestly be rendered from only default stored fits. If exercise HTML
-is needed, the instructor must compute the changed conditions beforehand.
+Slides and static handouts are rendered from existing fits during future builds.
+`R/classroom_materials.R` removes solution Divs from participant QMDs before
+execution. Open `exercise-student.qmd` chunk-by-chunk, or use its HTML together
+with `results.html` during connectivity problems. Changed-input inference chunks
+are disabled during rendering and need explicit live flags. Historical values
+are labelled; default fits are never substituted for changed-input posteriors.
+`classroom/readiness.html` checks login, stored-fit analysis, plotting and local
+handouts before class. Existing built images and student volumes are not updated
+by these source changes; supply the revised ZIP in a new course directory or
+plan an image/workspace migration after backing up participant work.
 Keep HTML, its `*_files`, `assets` and `images` together. Offline browser rendering
 of equations, figures and icons still requires acceptance testing.
 

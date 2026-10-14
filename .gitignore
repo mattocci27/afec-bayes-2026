@@ -15,3 +15,11 @@
 .env
 .env.*
 !.env.example
+
+# Reproducible classroom exports; regenerate from instructor QMDs and stored fits.
+day*/exercise-student.qmd
+day*/exercise-student.html
+day*/results.html
+classroom/readiness.html
+data/
+dist/

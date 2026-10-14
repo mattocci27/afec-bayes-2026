@@ -1,7 +1,7 @@
 ---
 title: "Day 2 exercises: regression and model checking"
 author: "Masatoshi Katabuchi"
-date: today
+date: "2026-10-22"
 solutions: true
 format:
   html:
@@ -12,16 +12,14 @@ format:
     smooth-scroll: true
     standalone: true
     embed-resources: true
+    html-math-method: katex
 execute:
   cache: false
 ---
 
 <!--
-Instructor version (default): solutions are shown in collapsed boxes.
-Participant version (no solutions):
-  quarto render day2/exercise.qmd -M solutions:false
-  mv day2/exercise.html day2/exercise-student.html
-(`-o` cannot be used here: it breaks `embed-resources` in Quarto 1.9.)
+Instructor source. Generate the solution-free participant QMD and both HTMLs
+with Rscript R/build_classroom_materials.R. Optional live chunks are eval=FALSE.
 -->
 
 ```{r global_options, include=FALSE}
@@ -37,6 +35,11 @@ knitr::opts_chunk$set(
 ```
 
 ## Setup
+
+Open `exercise-student.qmd` and run selected chunks; fill `___` first.
+Work in pairs and swap driver/reader roles for 2B. Core tasks use supplied
+posterior draws. If RStudio is unavailable, answer from `exercise-student.html`
+and `results.html`. No installation or homework is required.
 
 ```{r setup}
 library(tidyverse)
@@ -58,8 +61,8 @@ Remember the two rules: **predict before you run**, and **interpret in words**.
 |  |  |
 |---|---|
 | **Purpose** | Fit a Bayesian linear regression, interpret its coefficients as distributions, predict, and check the model. |
-| **Time** | 20 minutes. Tasks 1 to 4 are the core. Task 5 and the optional task are for those who finish early. |
-| **Computation** | Live sampling. Small model (about 1 second). If sampling fails, a stored result is loaded automatically. |
+| **Time** | 24 minutes: 21 minutes pair work + 3 minutes explanation/questions. Tasks 1–4 are core. Changed-input refits need extra time and instructor coordination. |
+| **Computation** | Stored Stan result for all core tasks. No live inference or compilation is needed. |
 | **Data** | Diameter (DBH, cm) and height (m) of 188 trees. Simulated, so the truth is known. |
 | **Model** | $\log h_i \sim \mathcal{N}(\alpha + \beta \log(\mathrm{DBH}_i/40),\; \sigma)$ |
 
@@ -81,7 +84,7 @@ The Stan model:
 cat("```stan\n", paste(readLines(here("stan/linear.stan")), collapse = "\n"), "\n```\n", sep = "")
 ```
 
-## Task 1: fit, check the computation, interpret
+## Task 1: load, check the computation, interpret (7 minutes)
 
 **Predict first:** from the right-hand plot above, guess the slope $\beta$ on the log-log scale. Is it closer to 0.3, 0.6, or 1?
 
@@ -93,7 +96,9 @@ allo_data <- list(
   beta_sd = 2.5             # prior SD for the slope
 )
 
-allo_fit <- fit_or_load("day2_allo", "stan/linear.stan", data = allo_data)
+allo_fit <- fit_or_load("day2_allo", "stan/linear.stan", data = allo_data,
+  use_precomputed = TRUE)
+allo_fit$source
 draws <- allo_fit$draws
 
 summarise_draws(draws, mean, sd, ~quantile(.x, c(0.05, 0.95)), rhat, ess_bulk, ess_tail)
@@ -101,6 +106,8 @@ diagnostic_table(allo_fit)
 ```
 
 1. Check the computation: are all `rhat` values at most 1.01 and all ESS values above 400? Any divergent transitions?
+   These are screening checks, not proof of model adequacy. Look at trace plots,
+   treedepth/E-BFMI warnings and predictive checks as well.
 2. Complete the sentences.
    - "A tree with DBH = 40 cm is typically about ___ m tall."
    - "When DBH increases by 1%, height increases by about ___ % (90% interval ___ to ___)."
@@ -130,7 +137,7 @@ mean(draws$sigma)
 :::
 :::
 
-## Task 2: an ecological question
+## Task 2: an ecological question (2 minutes)
 
 Elastic similarity theory predicts a scaling exponent of 2/3.
 What is the posterior probability that the exponent of these trees is smaller than 2/3? Report it in one sentence.
@@ -154,7 +161,7 @@ The data lean towards a smaller exponent, but 2/3 is well inside the posterior.
 :::
 :::
 
-## Task 3: predict the height of a tree with DBH = 80 cm
+## Task 3: predict the height of a tree with DBH = 80 cm (6 minutes)
 
 Two different questions:
 
@@ -165,6 +172,7 @@ Two different questions:
 **Predict first:** which 90% interval is wider, (a) or (b)?
 
 ```{r allo-task3, eval=FALSE}
+set.seed(1)
 x_new <- log(80 / 40)
 
 mu <- draws$alpha + draws$beta * ___
@@ -199,7 +207,7 @@ More data would shrink (a). It would hardly change (b).
 :::
 :::
 
-## Task 4: posterior predictive check
+## Task 4: posterior predictive check (6 minutes)
 
 Simulate 50 complete data sets from the fitted model and compare them with the observed data.
 
@@ -216,6 +224,20 @@ ppc_dens_overlay(y = allo_data$y, yrep = y_rep) + xlab("log height")
 
 1. Dark line: observed log heights. Light lines: simulated data sets. Does the model generate data that look like ours?
 2. A check looks at one feature of the data. Name a feature of these data that this plot cannot show.
+
+Now run a second check that retains species identity. Does your conclusion change?
+
+```{r allo-species-check, fig.height=3.5}
+allo |>
+  mutate(resid = log(h) - (mean(draws$alpha) + mean(draws$beta) * log(dbh / 40))) |>
+  ggplot(aes(sp, resid)) +
+  geom_hline(yintercept = 0, linetype = 2) +
+  geom_boxplot(outlier.shape = NA) +
+  labs(x = "Species", y = "Residual (log height)")
+```
+
+**Checkpoints:** after 7 minutes, one coefficient sentence; after 15 minutes,
+both prediction intervals. If behind, use `results.html` and finish the interpretations.
 
 ::: {.content-visible when-meta="solutions"}
 ::: {.callout-tip collapse="true"}
@@ -240,7 +262,11 @@ Some species are almost entirely above or below the line. One line for all trees
 :::
 :::
 
-## Task 5: fewer data
+## Optional live extension: fewer data (8 extra minutes)
+
+Wait for the instructor to schedule live inference. If it is unavailable, use
+the approximate historical comparison in the solution/result sheet; it is not
+a newly fitted posterior for this session.
 
 Suppose we had measured only 10 trees. **What stays fixed:** the model and the priors. **What changes:** the data.
 
@@ -257,7 +283,8 @@ allo_10_data <- list(
   beta_sd = 2.5
 )
 
-fit_10 <- fit_or_load("day2_allo", "stan/linear.stan", data = allo_10_data)
+fit_10 <- fit_or_load("day2_allo", "stan/linear.stan", data = allo_10_data,
+  use_precomputed = FALSE, fallback = FALSE)
 summarise_draws(fit_10$draws, mean, sd, ~quantile(.x, c(0.05, 0.95)))
 ```
 
@@ -265,13 +292,14 @@ summarise_draws(fit_10$draws, mean, sd, ~quantile(.x, c(0.05, 0.95)))
 ::: {.callout-tip collapse="true"}
 ## Solution and notes
 
-```{r allo-sol5}
+```{r allo-sol5, eval=FALSE}
 set.seed(10)
 allo_10 <- slice_sample(allo, n = 10)
 allo_10_data <- list(
   N = nrow(allo_10), x = log(allo_10$dbh / 40), y = log(allo_10$h), beta_sd = 2.5
 )
-fit_10 <- fit_or_load("day2_allo", "stan/linear.stan", data = allo_10_data)
+fit_10 <- fit_or_load("day2_allo", "stan/linear.stan", data = allo_10_data,
+  use_precomputed = FALSE, fallback = FALSE)
 
 bind_rows(
   `188 trees` = summarise_draws(draws, mean, sd, ~quantile(.x, c(0.05, 0.95))),
@@ -282,29 +310,38 @@ bind_rows(
 ```
 
 **Expected observations**: with 10 trees the posterior SD of $\beta$ is about 7 times larger (about 0.14 instead of 0.02), and the 90% interval runs from about 0.5 to 1.0.
-We can no longer say whether the exponent is below 2/3: `mean(fit_10$draws$beta < 2/3)` is about `r round(mean(fit_10$draws$beta < 2/3), 2)`.
+We can no longer say confidently whether the exponent is below 2/3. Compute
+`mean(fit_10$draws$beta < 2/3)` only from a successful new fit.
 The posterior mean also moved (about 0.75): a small sample can land far from the truth, and the wide interval says so honestly.
 
-If you see a warning that the precomputed result was fitted to the default data, live sampling did not work on your machine: read the numbers above instead.
+These approximate numbers were checked in the 2026-10-02 instructor validation;
+only the 188-tree posterior is supplied. Stop if live inference fails; do not
+substitute its draws for the 10-tree posterior.
 :::
 :::
 
-## Optional: how much does the prior matter?
+## Optional live extension: how much does the prior matter? (8 extra minutes)
 
 Somebody insists on a tight prior for the slope: $\beta \sim \mathcal{N}(0, 0.1)$ ("height hardly depends on diameter").
 **What stays fixed:** the data. **What changes:** `beta_sd`, from 2.5 to 0.1.
 
-Fit the model with `beta_sd = 0.1`, (a) to all 188 trees and (b) to the 10 trees of Task 5. In which case does the prior change the answer?
+After the instructor enables your pair's live slot, fit with `beta_sd = 0.1`,
+(a) to all 188 trees and (b) to the same 10 trees of the preceding extension.
+Pass `use_precomputed = FALSE, fallback = FALSE`. In which case does the prior
+change the answer? If live inference is unavailable, discuss the historical
+comparison below rather than running new inference.
 
 ::: {.content-visible when-meta="solutions"}
 ::: {.callout-tip collapse="true"}
 ## Solution and notes
 
-```{r allo-sol-opt}
+```{r allo-sol-opt, eval=FALSE}
 fit_all_tight <- fit_or_load("day2_allo", "stan/linear.stan",
-  data = modifyList(allo_data, list(beta_sd = 0.1)))
+  data = modifyList(allo_data, list(beta_sd = 0.1)),
+  use_precomputed = FALSE, fallback = FALSE)
 fit_10_tight <- fit_or_load("day2_allo", "stan/linear.stan",
-  data = modifyList(allo_10_data, list(beta_sd = 0.1)))
+  data = modifyList(allo_10_data, list(beta_sd = 0.1)),
+  use_precomputed = FALSE, fallback = FALSE)
 
 bind_rows(
   `188 trees, sd 2.5` = summarise_draws(draws, mean, ~quantile(.x, c(0.05, 0.95))),
@@ -317,7 +354,9 @@ bind_rows(
 ```
 
 **Expected observations**: with 188 trees the tight prior shifts $\beta$ only slightly (about 0.65 to 0.62). With 10 trees it drags $\beta$ to about 0.1: the prior and the data disagree, and 10 trees cannot overrule the prior.
-This is a **prior sensitivity analysis**: if a defensible change of prior changes your conclusion, say so in the paper.
+These are approximate 2026-10-02 validation results; the changed-prior draws
+are not supplied. This is a **prior sensitivity analysis**: if a defensible
+change of prior changes your conclusion, say so in the paper.
 :::
 :::
 
@@ -326,10 +365,14 @@ This is a **prior sensitivity analysis**: if a defensible change of prior change
 |  |  |
 |---|---|
 | **Purpose** | Recognise a fit that cannot be trusted. Interpret a logistic regression on the probability scale. |
-| **Time** | 15 minutes: Part 1 about 5 minutes, Part 2 about 10 minutes. |
-| **Computation** | Part 1: **stored result only** (the model is deliberately broken and slow). Part 2: live sampling, small model. |
+| **Time** | Part 1: 12-minute whole-class diagnostic demonstration. Part 2: 8 minutes (6 minutes pair work + 2 minutes explanation/questions). |
+| **Computation** | Stored results for both parts. Part 1 is deliberately problematic; never fit it live in class. |
 
 ## Part 1: something is wrong with this fit
+
+Watch the instructor run these chunks. First list the warnings with your
+partner; the sum and Stan-code investigation are demonstrated, not additional
+individual coding tasks.
 
 A colleague fitted an allometry model to the same 188 trees and sends you the result.
 You do not see the Stan code yet.
@@ -411,7 +454,9 @@ ggplot(ndd, aes(cons, suv / n, size = n)) +
 ```{r ndd-fit}
 ndd_data <- list(N = nrow(ndd), n = ndd$n, suv = ndd$suv, cons = ndd$cons)
 
-ndd_fit <- fit_or_load("day2_ndd", "stan/logit_reg.stan", data = ndd_data)
+ndd_fit <- fit_or_load("day2_ndd", "stan/logit_reg.stan", data = ndd_data,
+  use_precomputed = TRUE)
+ndd_fit$source
 nd <- ndd_fit$draws
 
 summarise_draws(nd, mean, sd, ~quantile(.x, c(0.05, 0.95)), rhat, ess_bulk, ess_tail)
@@ -419,9 +464,10 @@ diagnostic_table(ndd_fit)
 ```
 
 1. Is the computation fine?
-2. What is $P(\beta < 0 \mid \text{data})$?
-3. $\beta$ lives on the logit scale. Translate it: compute the survival probability at low density (`cons = -1`) and at high density (`cons = 1`) **for every draw**, then the difference. `plogis()` is the inverse logit.
-4. Write two sentences for the results section of a paper.
+2. $\beta$ lives on the logit scale. Translate it: compute survival at low density
+   (`cons = -1`) and high density (`cons = 1`) **for every draw**. `plogis()` is the inverse logit.
+3. Write one sentence comparing the two probabilities with intervals.
+4. **Optional:** $P(\beta < 0 \mid \text{data})$, the probability difference, and the odds ratio.
 
 ```{r ndd-task, eval=FALSE}
 p_low  <- plogis(nd$alpha + nd$beta * ___)
@@ -429,7 +475,7 @@ p_high <- plogis(nd$alpha + nd$beta * ___)
 
 quantile(p_low, c(0.05, 0.5, 0.95))
 quantile(p_high, c(0.05, 0.5, 0.95))
-quantile(p_high - p_low, c(0.05, 0.5, 0.95))
+quantile(p_high - p_low, c(0.05, 0.5, 0.95)) # optional
 ```
 
 ::: {.content-visible when-meta="solutions"}
@@ -448,10 +494,11 @@ quantile(p_high - p_low, c(0.05, 0.5, 0.95))
 quantile(exp(nd$beta), c(0.05, 0.5, 0.95)) # odds ratio per 1 SD of density
 ```
 
-1. Yes: `rhat` is 1.00, ESS is above 1000, no divergences.
-2. Essentially 1: all draws of $\beta$ are negative.
-3. Survival is about 0.52 at low density and about 0.17 at high density, a difference of about −0.35 (90% interval about −0.41 to −0.29).
-4. For example: "Seedling survival decreased with conspecific density (slope on the logit scale −0.84, 90% interval −1.01 to −0.67). Predicted survival dropped from 0.52 (0.48 to 0.56) at one SD below mean density to 0.17 (0.14 to 0.21) at one SD above."
+1. The numerical diagnostics show `rhat` near 1.00, large ESS and no divergences.
+   Inspect the remaining warnings and trace plots before interpreting; predictive checks assess the model separately.
+2. Survival is about 0.52 at low density and about 0.17 at high density.
+3. For example: "Predicted survival dropped from 0.52 (90% interval 0.48–0.56) at one SD below mean density to 0.17 (0.14–0.21) at one SD above."
+4. Optional: essentially all slope draws are negative; the probability difference is about −0.35 (90% interval −0.41 to −0.29), and the odds ratio is about 0.44.
 
 **Common misunderstandings**
 
@@ -513,7 +560,8 @@ brm(
 )
 ```
 
-<!-- TODO: brms is not part of the validated environment yet. It compiles a model on every call (slow with 30 participants), so keep it optional. -->
+<!-- brms is installed in the classroom image, but these calls have not been
+compared with our Stan fits. Compilation is outside the core classroom route. -->
 
 # Wrap-up questions
 

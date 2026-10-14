@@ -1,0 +1,109 @@
+---
+title: "Day 3: results for offline discussion"
+date: "2026-10-23"
+format:
+  html:
+    theme: coderpro
+    embed-resources: true
+    html-math-method: katex
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+Use with `exercise-student.html`. Core results use supplied fits and current
+seeded data. No new inference was run.
+
+```{r setup}
+library(tidyverse)
+library(posterior)
+library(bayesplot)
+library(here)
+source(here("R/functions.R"))
+source(here("R/course_data.R"))
+source(here("R/course_utils.R"))
+theme_set(theme_bw())
+qi <- function(x) tibble(mean=mean(x),lo=quantile(x,.05),hi=quantile(x,.95))
+trees <- make_tree_data()
+tf <- fit_or_load("day3_trees","stan/logistic.stan",tree_stan_data(trees),use_precomputed=TRUE)
+td <- tf$draws
+set.seed(1)
+p_pool <- rbeta(4000,1+sum(trees$suv),1+sum(trees$n-trees$suv))
+np <- trees |> mutate(draws=map2(suv,n,\(s,n) rbeta(4000,1+s,1+n-s))) |>
+  mutate(map(draws,qi) |> list_rbind()) |> select(tree,n,mean,lo,hi) |> mutate(model="no pooling")
+pp <- trees |> transmute(tree,n) |>
+  mutate(map(1:8,\(i) qi(td[[paste0("p[",i,"]")]])) |> list_rbind()) |>
+  mutate(model="partial pooling")
+cp <- trees |> transmute(tree,n,mean=mean(p_pool),lo=quantile(p_pool,.05),
+                        hi=quantile(p_pool,.95),model="complete pooling")
+```
+
+## 3A Tasks 1–4: estimates and group variation
+
+```{r mother-trees}
+knitr::kable(trees |> select(tree,n,suv,p_true),digits=3)
+est <- bind_rows(np,pp,cp)
+knitr::kable(est,digits=3)
+ggplot(est,aes(mean,tree,colour=model))+
+  geom_pointrange(aes(xmin=lo,xmax=hi),position=position_dodge(width=.5))+
+  labs(x="Survival probability (mean, 90% interval)",y="Mother tree")
+knitr::kable(summarise_draws(subset_draws(td,variable=c("mu","sigma")),
+                           mean,~quantile(.x,c(.05,.95)),rhat,ess_bulk,ess_tail),digits=3)
+knitr::kable(diagnostic_table(tf))
+mcmc_trace(td,pars=c("mu","sigma"))
+```
+
+Shrinkage depends on group information, distance from the group distribution,
+and the inferred group SD. Complete pooling performs well in this simulation
+because true variation is small; it assumes that variation away.
+
+## 3B: species differences in allometry
+
+```{r allometry}
+allo <- make_allometry_data()
+vf <- fit_or_load("day3_vint","stan/vint.stan",vint_stan_data(allo),use_precomputed=TRUE)
+sf <- fit_or_load("day3_vslope","stan/vslope.stan",vslope_stan_data(allo),use_precomputed=TRUE)
+vd <- vf$draws; d <- sf$draws
+knitr::kable(summarise_draws(subset_draws(vd,variable=c("mu0","tau","sigma")),
+                           mean,~quantile(.x,c(.05,.95)),rhat,ess_bulk,ess_tail),digits=3)
+knitr::kable(diagnostic_table(vf))
+knitr::kable(summarise_draws(subset_draws(d,variable=c("gamma","tau","sigma")),
+                           mean,~quantile(.x,c(.05,.95)),rhat,ess_bulk,ess_tail),digits=3)
+knitr::kable(diagnostic_table(sf))
+knitr::kable(bind_rows(`wd = -1`=qi(d$`gamma[2,1]`-d$`gamma[2,2]`),
+                     `wd = +1`=qi(d$`gamma[2,1]`+d$`gamma[2,2]`),.id="wood density"),digits=3)
+slopes <- allo |> group_by(sp) |>
+  group_modify(~tibble(n=nrow(.x),wd=.x$wd[1],
+                      separate=coef(lm(log(h)~log(dbh/40),data=.x))[2])) |>
+  ungroup() |> mutate(map(1:10,\(j) qi(d[[paste0("beta[2,",j,"]")]])) |> list_rbind())
+ggplot(slopes,aes(wd))+
+  geom_segment(aes(xend=wd,y=separate,yend=mean),colour="grey50")+
+  geom_point(aes(y=separate,size=n),shape=21,fill="white")+
+  geom_pointrange(aes(y=mean,ymin=lo,ymax=hi),colour="#d95f02")+
+  labs(x="Wood density (scaled)",y="Exponent",size="Trees")
+```
+
+$P(\gamma_{22}>0\mid y)=`r round(mean(d[["gamma[2,2]"]]>0),3)`$.
+Rare-species slopes move towards the exponent expected for their wood density.
+This relies on hierarchical assumptions; pooling is not a fixed correction.
+
+## 3A Task 5: a new mother tree
+
+```{r newtree}
+set.seed(1)
+p_new <- plogis(rnorm(nrow(td),td$mu,td$sigma))
+knitr::kable(bind_rows(`new tree`=qi(p_new),`complete pooling`=qi(p_pool),.id="target"),digits=3)
+```
+
+For the new tree, include between-tree variation for every posterior draw.
+These intervals describe survival probabilities, not future survivor counts.
+
+## Optional changed-input discussion
+
+Multiplying every tree's survivors and seedlings by 10 keeps observed
+proportions and model fixed. The original 2026-10-02 validation found tree H
+near 0.48 rather than 0.34, and group SD near 0.55 rather than 0.3. These are
+approximate historical results; changed-input draws are not supplied or
+refitted for this sheet. New inference needs an instructor-scheduled slot
+and fresh diagnostics.

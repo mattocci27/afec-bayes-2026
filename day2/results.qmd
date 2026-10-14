@@ -1,0 +1,109 @@
+---
+title: "Day 2: results for offline discussion"
+date: "2026-10-22"
+format:
+  html:
+    theme: coderpro
+    embed-resources: true
+    html-math-method: katex
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+Core results use supplied fits and current seeded data. Use this sheet with
+`exercise-student.html` if RStudio is unavailable. No new inference was run.
+
+```{r setup}
+library(tidyverse)
+library(posterior)
+library(bayesplot)
+library(here)
+source(here("R/functions.R"))
+source(here("R/course_data.R"))
+source(here("R/course_utils.R"))
+theme_set(theme_bw())
+allo <- make_allometry_data()
+data <- allometry_stan_data(allo)
+fit <- fit_or_load("day2_allo","stan/linear.stan",data,use_precomputed=TRUE)
+d <- fit$draws
+```
+
+## 2A: coefficients, predictions and two checks
+
+```{r coefficients}
+knitr::kable(summarise_draws(subset_draws(d,variable=c("alpha","beta","sigma")),
+                           mean,~quantile(.x,c(.05,.95)),rhat,ess_bulk,ess_tail),digits=3)
+knitr::kable(diagnostic_table(fit))
+mcmc_trace(d,pars=c("alpha","beta"))
+```
+
+A typical 40-cm tree is about `r round(mean(exp(d$alpha)),1)` m tall.
+$P(\beta<2/3\mid y)=`r round(mean(d$beta<2/3),3)`$.
+
+```{r predictions}
+set.seed(1)
+mu <- d$alpha+d$beta*log(80/40)
+new <- rnorm(nrow(d),mu,d$sigma)
+knitr::kable(tibble(target=c("typical 80-cm tree","one new 80-cm tree"),
+                   q5=c(quantile(exp(mu),.05),quantile(exp(new),.05)),
+                   median=c(median(exp(mu)),median(exp(new))),
+                   q95=c(quantile(exp(mu),.95),quantile(exp(new),.95))),digits=1)
+set.seed(1)
+idx <- sample(nrow(d),50)
+yrep <- t(sapply(idx,function(i) rnorm(data$N,d$alpha[i]+d$beta[i]*data$x,d$sigma[i])))
+ppc_dens_overlay(data$y,yrep)+xlab("log height")
+allo |> mutate(resid=log(h)-(mean(d$alpha)+mean(d$beta)*log(dbh/40))) |>
+  ggplot(aes(sp,resid))+geom_hline(yintercept=0,lty=2)+geom_boxplot()+
+  labs(x="Species",y="Residual (log height)")
+```
+
+The overall distribution looks plausible, but residuals retain species structure.
+Passing computation checks or one predictive check does not establish adequacy.
+
+## 2B Part 1: intentionally problematic fit
+
+```{r bad-fit}
+bad <- fit_or_load("day2_allo_bad","stan/linear_bad.stan",data[c("N","x","y")],use_precomputed=TRUE)
+knitr::kable(summarise_draws(bad$draws,mean,rhat,ess_bulk,ess_tail),digits=2)
+knitr::kable(diagnostic_table(bad))
+mcmc_trace(bad$draws,pars=c("alpha1","alpha2"))
+```
+
+Zero divergences do not rescue the poorly mixed intercepts. The data identify
+their sum; interpreting their individual means is unsafe.
+
+## 2B Part 2: survival on the probability scale
+
+```{r logistic}
+ndd <- make_ndd_data()
+nf <- fit_or_load("day2_ndd","stan/logit_reg.stan",ndd_stan_data(ndd),use_precomputed=TRUE)
+nd <- nf$draws
+knitr::kable(summarise_draws(subset_draws(nd,variable=c("alpha","beta")),
+                           mean,~quantile(.x,c(.05,.95)),rhat,ess_bulk,ess_tail),digits=3)
+knitr::kable(diagnostic_table(nf))
+lo <- plogis(nd$alpha-nd$beta); hi <- plogis(nd$alpha+nd$beta)
+knitr::kable(tibble(density=c("-1 SD","+1 SD","high minus low"),
+                   q5=c(quantile(lo,.05),quantile(hi,.05),quantile(hi-lo,.05)),
+                   median=c(median(lo),median(hi),median(hi-lo)),
+                   q95=c(quantile(lo,.95),quantile(hi,.95),quantile(hi-lo,.95))),digits=3)
+```
+
+## Optional changed-input discussion
+
+These approximate numbers come from the 2026-10-02 instructor validation and
+original worked solutions. Changed-input draws are not supplied and were not
+refitted for this sheet. The 10-tree subset uses seed 10; the allometry data use
+seed 5. Use the same subset for both priors.
+
+| Data | Slope prior SD | Approximate posterior slope mean | Approximate 90% interval |
+|---|---:|---:|---|
+| 188 trees | 2.5 | 0.65 | 0.62–0.68 |
+| 10 trees | 2.5 | 0.75 | 0.5–1.0 |
+| 188 trees | 0.1 | 0.62 | Not recorded here |
+| Same 10 trees | 0.1 | 0.1 | Not recorded here |
+
+Keep data fixed to compare priors, and priors fixed to compare sample sizes.
+Use the historical values for discussion; new quantitative claims require a
+successful changed-input fit and fresh diagnostics.

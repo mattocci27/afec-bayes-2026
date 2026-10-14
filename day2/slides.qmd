@@ -38,19 +38,25 @@ Learning outcomes: by the end of the session participants can
      posterior predictive check;
   5. recognise a fit that cannot be trusted (R-hat, ESS, trace plots).
 
+Assumptions: same as Day 1 (R/tidyverse and lm/glm experience, English,
+supplied Stan code, no homework, 15 pairs, one instructor). Stored fits are core.
+
 Timing
    0- 5  Recap of Day 1, today's questions
-   5-20  Bayesian linear regression (tree allometry): model, priors, result
-  20-30  Posterior prediction and posterior predictive check
-  30-50  Exercise 2A (live: allometry regression)
-  50-60  Did the computation work? R-hat, ESS, trace plots, a broken model
-  60-70  Logistic regression (seedling survival vs conspecific density)
-  70-85  Exercise 2B (precomputed broken fit + live logistic regression)
-  85-90  Workflow summary and bridge to Day 3
+   5-17  Allometry model, coefficients and priors
+  17-29  Posterior prediction and posterior predictive check
+  29-53  Exercise 2A: 21 min pair work + 3 min explanation/questions
+  53-65  Broken-fit demonstration + whole-class diagnostic questions (2B part 1)
+  65-76  Logistic regression: same linear predictor, different likelihood/link
+  76-84  Exercise 2B part 2: 6 min pair work + 2 min explanation/questions
+  84-87  Workflow summary and bridge to Day 3
+  87-90  Questions and delay buffer
 
-If time runs short: skip "Priors in ecology: why scale matters" (the prior
-predictive slide makes the same point), do the broken-model diagnosis as a
-demonstration instead of Exercise 2B part 1, and skip the Poisson appendix.
+Core: allometry tasks 1-4, diagnose the broken fit as a demonstration, and
+interpret survival at two densities from supplied draws. Changed-data/prior
+refits, odds ratios, logistic PPC, Poisson and brms are optional.
+If behind: show the logistic comparison as a demonstration; retain allometry
+prediction, both checks, its debrief and the final buffer.
 -->
 
 ```{r setup, include=FALSE}
@@ -70,6 +76,8 @@ dbh_ref <- allometry_truth$dbh_ref
 <h2>Bayesian statistics for ecology</h2>
 
 <h3>Day 2: Regression and model checking</h3>
+
+<p>AFEC-X 2026 · 22 October · 19:00–20:30 China time (UTC+8)</p>
 
 <h3>🧑🏻‍💻 [Masatoshi Katabuchi \@ XTBG, CAS]{.author}</h3>
 :::
@@ -191,53 +199,6 @@ $$
 
 Are these reasonable? How would we know?
 :::
-:::
-:::
-
-## Priors in ecology: Why scale matters
-
-::: footer
-We often use weakly informative priors in ecology.
-:::
-
-::: columns
-::: {.column width=40%}
-
-```{r, fig.height=5, fig.width=5}
-set.seed(123)
-x1 <- rnorm(100)
-y1 <- rnorm(100, 2 * x1 - 1)
-p1 <- tibble(x1, y1) |>
-  ggplot() +
-  xlab("x") +
-  ylab("y") +
-  ggtitle("y = ax + b") +
-  geom_point(aes(x1, y1), size = 5) +
-  geom_abline(intercept = 2, slope = 100, col = "blue", linewidth = 2, lty = 2) +
-  annotate(
-    "text",
-    x     = -2.5,
-    y     = 3.4,
-    label = "y = 100x + 2",
-    color = "blue",
-    hjust = 0,
-    size  = 9
-  ) +
-  theme(
-    axis.title   = element_text(size = 32),
-    axis.text    = element_text(size = 28))
-p1
-```
-:::
-
-::: {.column width=60%}
-
-::: incremental
-- We consider variables *x* = {-3, ..., 3} and *y* = {-6, ..., 4}. We don't yet know if there is a correlation (*y = ax + b*).
-- However, given the similar scales of *x* and *y*, it's reasonable to guess that *a* falls within a narrow range (e.g., **strongly informative prior**: -5 to 5, **weakly informative prior**: $a \sim \mathcal{N}(0,  2.5)$).
-- In contrast, a slope like *a* = 100 (blue line) clearly doesn't match the data. A **vague prior** such as $a \sim \mathcal{N}(0,  10^4)$ says that such slopes are as plausible as *a* = 2.
-:::
-
 :::
 :::
 
@@ -432,18 +393,18 @@ ggplot() +
 ## Exercise 2A: tree allometry {background-color="#f3e8f5"}
 
 ::: large
-`day2/exercise.html`, Exercise 2A (20 minutes, live sampling)
+`day2/exercise-student.qmd`, Exercise 2A (24 minutes including discussion)
 :::
 
 - Fit the regression and interpret $\alpha$, $\beta$, $\sigma$ in words.
 - Is the exponent smaller than 2/3?
 - Predict the height of a tree with DBH = 80 cm: the typical tree, and a new tree.
 - Check the model against the data.
-- Refit with only 10 trees. What changes?
 
 ::: notes
-- core: tasks 1-4; task 5 and the prior sensitivity task are for fast groups
-- debrief 3 min: two kinds of uncertainty; what 10 trees do to the interval
+- core: tasks 1-4; changed-input refits require separate instructor approval to run
+- checkpoints after 7/15 min: coefficient sentence / two prediction intervals
+- debrief 3 min: two kinds of uncertainty; global vs species-level checks
 :::
 
 # Did the computation work?
@@ -465,7 +426,7 @@ ggplot(trace_df, aes(.iteration, value, colour = factor(.chain))) +
 ```
 
 ::: incremental
-- We run several chains from different starting points (remember the two Metropolis chains on Day 1).
+- We run several chains from different starting points.
 - **Good**: the chains overlap and look like noise ("fuzzy caterpillar").
 - **Bad**: chains sit at different values or wander slowly. The draws do not describe the posterior.
 :::
@@ -682,15 +643,17 @@ Mean (90% interval). True values used in the simulation: $\alpha$ = `r round(ndd
 ## Exercise 2B: diagnose, then interpret {background-color="#f3e8f5"}
 
 ::: large
-`day2/exercise.html`, Exercise 2B (15 minutes)
+`day2/exercise-student.qmd`, Exercise 2B Part 2 (8 minutes including discussion)
 :::
 
-- **Part 1 (stored result)**: a colleague's fit looks strange. Find out what is wrong before reading any estimate.
-- **Part 2 (live sampling)**: fit the seedling model. How strong is NDD on the probability scale?
+- **Part 1 (whole-class demonstration)**: diagnose the supplied problematic fit.
+- **Part 2 (stored draws)**: compare survival at low and high density, with intervals.
 
 ::: notes
 - part 1 uses a stored fit on purpose: the broken model is slow and nobody should wait for it
-- debrief 3 min: diagnostics first, interpretation second
+- Part 1 was a whole-class demonstration at 53-65 min
+- Part 2 core: diagnostics + probabilities at cons = -1 and +1 + one sentence
+- debrief 2 min: diagnostics first, interpretation second
 :::
 
 ## A Bayesian workflow
@@ -734,6 +697,54 @@ allo |>
 :::
 
 # Appendix: optional material {visibility="uncounted"}
+
+## Priors in ecology: Why scale matters {visibility="uncounted"}
+
+::: footer
+We often use weakly informative priors in ecology.
+:::
+
+::: columns
+::: {.column width=40%}
+
+```{r, fig.height=5, fig.width=5}
+set.seed(123)
+x1 <- rnorm(100)
+y1 <- rnorm(100, 2 * x1 - 1)
+p1 <- tibble(x1, y1) |>
+  ggplot() +
+  xlab("x") +
+  ylab("y") +
+  ggtitle("y = ax + b") +
+  geom_point(aes(x1, y1), size = 5) +
+  geom_abline(intercept = 2, slope = 100, col = "blue", linewidth = 2, lty = 2) +
+  annotate(
+    "text",
+    x     = -2.5,
+    y     = 3.4,
+    label = "y = 100x + 2",
+    color = "blue",
+    hjust = 0,
+    size  = 9
+  ) +
+  theme(
+    axis.title   = element_text(size = 32),
+    axis.text    = element_text(size = 28))
+p1
+```
+:::
+
+::: {.column width=60%}
+
+::: incremental
+- We consider variables *x* = {-3, ..., 3} and *y* = {-6, ..., 4}. We don't yet know if there is a correlation (*y = ax + b*).
+- However, given the similar scales of *x* and *y*, it's reasonable to guess that *a* falls within a narrow range (e.g., **strongly informative prior**: -5 to 5, **weakly informative prior**: $a \sim \mathcal{N}(0,  2.5)$).
+- In contrast, a slope like *a* = 100 (blue line) clearly doesn't match the data. A **vague prior** such as $a \sim \mathcal{N}(0,  10^4)$ says that such slopes are as plausible as *a* = 2.
+:::
+
+:::
+:::
+
 
 ## Count data: the same recipe {visibility="uncounted"}
 
@@ -793,4 +804,5 @@ brm(
 `brms` writes the Stan code for you. Note that `brms` places the `Intercept` prior on the intercept after centring the predictors, so results can differ slightly from our Stan files when a predictor is far from centred.
 :::
 
-<!-- TODO: brms is not installed in the validation environment; run these two calls and compare with the Stan results before teaching. -->
+<!-- brms is installed in the classroom image. These examples have not been
+compared with the Stan fits; compilation and prior matching are extensions. -->

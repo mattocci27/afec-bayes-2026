@@ -6,8 +6,8 @@
 <script src="slides_files/libs/quarto-html/tippy.umd.min.js"></script>
 <link href="slides_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="slides_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="slides_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.9.37">
+<link href="slides_files/libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.10.19">
 
   <meta name="author" content="Masatoshi Katabuchi">
   <title>Bayesian statistics for ecology: Day 1</title>
@@ -20,15 +20,18 @@
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
     */
-    code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
       width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
@@ -131,12 +134,12 @@
     }
     .reveal .footnotes ol {
       counter-reset: ol;
-      list-style-type: none; 
+      list-style-type: none;
       margin-left: 0;
     }
     .reveal .footnotes ol li:before {
       counter-increment: ol;
-      content: counter(ol) ". "; 
+      content: counter(ol) ". ";
     }
     .reveal .footnotes ol li > p:first-child {
       display: inline-block;
@@ -178,19 +181,19 @@
     .reveal .slide > img.r-stretch.quarto-figure-center {
       display: block;
       margin-left: auto;
-      margin-right: auto; 
+      margin-right: auto;
     }
     .reveal .slide > img.stretch.quarto-figure-left,
     .reveal .slide > img.r-stretch.quarto-figure-left  {
       display: block;
       margin-left: 0;
-      margin-right: auto; 
+      margin-right: auto;
     }
     .reveal .slide > img.stretch.quarto-figure-right,
     .reveal .slide > img.r-stretch.quarto-figure-right  {
       display: block;
       margin-left: auto;
-      margin-right: 0; 
+      margin-right: 0;
     }
   </style>
   <script src="slides_files/libs/kePrint-0.0.1/kePrint.js"></script>
@@ -210,6 +213,9 @@ Bayesian statistics for ecology
 <h3>
 Day 1: From likelihood to posterior
 </h3>
+<p>
+AFEC-X 2026 · 21 October · 19:00–20:30 China time (UTC+8)
+</p>
 <h3>
 🧑🏻‍💻 <span class="author">Masatoshi Katabuchi @ XTBG, CAS</span>
 </h3>
@@ -249,14 +255,14 @@ Day 1: From likelihood to posterior
 <ul>
 <li>Each day: short lectures + two exercises in the browser-based R environment.</li>
 <li>The goal is to <strong>think with and interpret</strong> Bayesian models, not to memorise Stan syntax.</li>
-<li>Small models are run live. For heavier models we provide fitted results.</li>
+<li>Core tasks use supplied posterior draws. The instructor may demonstrate live sampling.</li>
 </ul>
 </div>
 </div>
 <aside class="notes">
 <ul>
 <li>3 x 90 minutes</li>
-<li>nobody needs to install anything</li>
+<li>nobody needs to install anything; work in pairs and swap driver/reader roles</li>
 </ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -372,7 +378,7 @@ Day 1: From likelihood to posterior
 <li class="fragment">explain what <strong>likelihood</strong>, <strong>prior</strong>, and <strong>posterior</strong> mean;</li>
 <li class="fragment">predict how the posterior changes with <strong>more data</strong> or a <strong>different prior</strong>;</li>
 <li class="fragment">summarise a posterior distribution: mean, interval, and statements such as <span class="math inline">\(P(p &gt; 0.5 \mid \text{data})\)</span>;</li>
-<li class="fragment">run a small Stan model and read its output.</li>
+<li class="fragment">identify Stan’s three blocks and summarise its supplied posterior draws.</li>
 </ul>
 </section>
 <section>
@@ -380,81 +386,33 @@ Day 1: From likelihood to posterior
 <h1>Likelihood</h1>
 
 </section>
-<section id="likelihood-and-probability-density-distribution" class="slide level2">
-<h2>Likelihood and probability density distribution</h2>
+<section id="likelihood-start-with-five-seedlings" class="slide level2">
+<h2>Likelihood: start with five seedlings</h2>
+<p><span class="math display">\[
+Y\mid p\sim\mathrm{Binomial}(5,p),\qquad P(Y=y\mid p)=\binom{5}{y}p^y(1-p)^{5-y}
+\]</span></p>
 <div class="columns">
-<div class="column" style="width:40%;">
+<div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<div class="small">
-<p><span class="math inline">\(f(x \mid \mu, \sigma) = \frac{1}{\sqrt{2\pi\sigma^2}}\mathrm{exp} \bigl[{-\frac{1}{2}\bigl\{\frac{x-\mu}{\sigma}}\bigr\}^2\bigr]\)</span></p>
-</div>
-</div><div class="column" style="width:60%;">
+</div><div class="column" style="width:50%;">
 <ul>
-<li class="fragment"><p><strong>P(data | parameters)</strong>: Probability of observing the data given the parameters.</p></li>
-<li class="fragment"><p>e.g., when your model is <span class="math inline">\(x_i \sim \mathcal{N}(\mu = 0, \sigma = 1)\)</span> (normal distribution with mean 0 and standard deviation 1), what is the probability density at x = 1.96?</p></li>
+<li class="fragment">Forward: hold <span class="math inline">\(p\)</span> fixed and compare possible data <span class="math inline">\(y\)</span>.</li>
+<li class="fragment">We observed <span class="math inline">\(y=2\)</span>. The <strong>likelihood</strong> holds these data fixed and compares values of <span class="math inline">\(p\)</span>:</li>
 </ul>
-<div class="fragment">
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a><span class="fu">dnorm</span>(<span class="fl">1.96</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  [1] 0.05844094</code></pre>
-</div>
-</div>
-</div>
-<div class="fragment">
+<p><span class="math display">\[L(p)=\binom{5}{2}p^2(1-p)^3\]</span></p>
 <ul>
-<li>A statistical model always has this form: a distribution for the data (normal, binomial, Poisson, …) with unknown parameters.</li>
+<li class="fragment">In R: <code>dbinom(2, size=5, prob=p)</code>.</li>
+<li class="fragment">This is not yet a probability distribution for <span class="math inline">\(p\)</span>.</li>
 </ul>
-</div>
 </div></div>
-<aside class="notes">
-<ul>
-<li>likelihood is all about probability density (mass) function (normal, log-normal, poisson, beta, gamma, binomial, negative-binomial…)</li>
-<li>NOTE: throughout the course N(mu, sigma) is written with the standard deviation, as in Stan and in dnorm()</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="likelihood-of-several-observations" class="slide level2">
-<h2>Likelihood of several observations</h2>
-<p>When your data is x = {-1.5, 0, 1.5} and your model is <span class="math inline">\(x \sim \mathcal{N}(\mu, 1)\)</span>, how probable is the data for a given <span class="math inline">\(\mu\)</span>?</p>
-<div class="small">
-<ul>
-<li class="fragment"><span class="math inline">\(L(\mu) = P(-1.5 \mid \mu, 1) \times P(0 \mid \mu, 1) \times P(1.5 \mid \mu, 1)\)</span></li>
-<li class="fragment"><span class="math inline">\(\mathrm{ln}\;L(\mu) = \mathrm{ln}\;P(-1.5 \mid \mu, 1) + \mathrm{ln}\;P(0 \mid \mu, 1) +  \mathrm{ln}\;P(1.5 \mid \mu, 1)\)</span></li>
-</ul>
-</div>
-<div class="fragment">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-</div>
-<div class="fragment">
-<p>The data are fixed. The likelihood is a function of the <strong>parameter</strong>.</p>
-</div>
 </section>
 <section id="maximum-likelihood-estimation-mle" class="slide level2">
 <h2>Maximum Likelihood Estimation (MLE)</h2>
@@ -482,7 +440,7 @@ Day 1: From likelihood to posterior
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
@@ -525,7 +483,7 @@ Day 1: From likelihood to posterior
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
 </figure>
 </div>
 </div>
@@ -589,83 +547,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <section class="slide level2">
 
 
-<img src="../images/fip_1.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
-<section class="slide level2">
-
-
-<img src="../images/fip_2.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
-<section class="slide level2">
-
-
-<img src="../images/fip_3.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
-<section class="slide level2">
-
-
-<img src="../images/fip_4.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
-<section class="slide level2">
-
-
-<img src="../images/fip_5.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
-<section class="slide level2">
-
-
 <img src="../images/fip_6.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
-<section id="forward-and-inverse-problems-pcr-and-disease-example" class="slide level2">
-<h2>Forward and Inverse Problems: PCR and disease example</h2>
-<div class="footer">
-<ul>
-<li><span class="math inline">\(P(\text{Positive})\)</span>: 2%, <span class="math inline">\(P(\text{Infected})\)</span>: 0.05%</li>
-</ul>
-</div>
-<p><strong>➡️Forward problem:</strong> If you are infected, what is the probability that PCR test is positive?</p>
-<p><br></p>
-<div class="fragment">
-<p><span class="math inline">\(P(\text{Positive} \mid \text{Infected})\)</span>: 95%</p>
-</div>
-<p><br></p>
-<div class="fragment">
-<p>This is what the lab test is designed to estimate — how likely we are to observe a positive signal given the known infection status (e.g., 95 out of 100 infected samples test positive).</p>
-</div>
-</section>
-<section id="forward-and-inverse-problems-pcr-and-disease-example-1" class="slide level2">
-<h2>Forward and Inverse Problems: PCR and disease example</h2>
-<div class="footer">
-<ul>
-<li><span class="math inline">\(P(\text{Positive})\)</span>: 2%, <span class="math inline">\(P(\text{Infected})\)</span>: 0.05%</li>
-</ul>
-</div>
-<p><strong>🔁Inverse problem (Bayesian):</strong> If the PCR test is positive, what is the probability that you are infected?</p>
-<p><br></p>
-<div class="fragment">
-<ul>
-<li><span class="math inline">\(P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected}) \cdot  P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%\)</span></li>
-</ul>
-</div>
-<p><br></p>
-<div class="fragment">
-<p>This isn’t intuitive, but it’s the probability we actually care about — how likely someone is to be infected, given a positive test result.</p>
-</div>
-<aside class="notes">
-<ul>
-<li>ask the room to guess before revealing 2.4%</li>
-<li>0.95 * 0.0005 / 0.02 = 0.02375</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section class="slide level2">
-
-
-<img src="../images/bayes_re.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
 <section id="bayes-theorem-1" class="slide level2">
 <h2>Bayes’ theorem</h2>
 <p><span class="math display">\[
@@ -720,7 +602,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
@@ -762,69 +644,6 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
           display:block!important;
       }</style></aside>
 </section>
-<section id="prior-vs.-data-mle-and-bayesian-comparison-coin-toss" class="slide level2">
-<h2>Prior vs.&nbsp;Data: MLE and Bayesian comparison (Coin Toss)</h2>
-<p>We compare two coins, A and B, with the same prior but different likelihood (due to data sizes) to illustrate how prior beliefs influence posterior estimates.</p>
-<h3 id="mle">MLE</h3>
-<ul>
-<li class="fragment">A: 2 head out of 3 tosses -&gt; P(H) = 2/3 = 0.666</li>
-<li class="fragment">B: 60 heads out of 100 tosses -&gt; P(H) = 60/100 = 0.6</li>
-</ul>
-<div class="columns">
-<div class="column" style="width:50%;">
-<h3 id="bayesian">Bayesian</h3>
-<ul>
-<li class="fragment"><p><span class="math inline">\(\textcolor{#1b9e77}{L_A = {}_3C_2 p^2 (1-p)^1}\)</span></p></li>
-<li class="fragment"><p><span class="math inline">\(\textcolor{#1b9e77}{L_B = {}_{100}C_{60} p^{60} (1-p)^{40}}\)</span></p></li>
-<li class="fragment"><p><span class="math inline">\(\textcolor{#7570b3}{\mathrm{Prior} \propto  p^{50} (1-p)^{50}}\)</span></p>
-<ul>
-<li class="fragment">Beta(51, 51): we believe coins are fair</li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:50%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section>
-<section id="bayesian-update-with-prior-coin-toss" class="slide level2">
-<h2>Bayesian Update with Prior (Coin Toss)</h2>
-<p><span class="orange">Posterior</span> <span class="math inline">\(\propto\)</span> <span class="teal">Likelihood</span> <span class="math inline">\(\times\)</span> <span class="purple">Prior</span></p>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div class="fragment">
-<p>Coin A: <span class="math inline">\(\textcolor{#d95f02}{Post_A}\propto\textcolor{#1b9e77}{p^2 (1-p)^1} \times\textcolor{#7570b3}{p^{50} (1-p)^{50}}\)</span></p>
-<p>Peak of the posterior: <span class="math inline">\(p = 52/103 \approx 0.505\)</span></p>
-</div>
-<div class="fragment">
-<ul>
-<li><span class="math inline">\(Post_A\)</span>: With only 3 coin tosses, the likelihood is weak, so the posterior stays close to the prior.</li>
-</ul>
-</div>
-</div><div class="column" style="width:50%;">
-<div class="fragment">
-<p>Coin B: <span class="math inline">\(\textcolor{#d95f02}{Post_B} \propto \textcolor{#1b9e77}{p^{60} (1-p)^{40}} \times\textcolor{#7570b3}{p^{50} (1-p)^{50}}\)</span></p>
-<p>Peak of the posterior: <span class="math inline">\(p = 110/200 = 0.55\)</span></p>
-</div>
-<div class="fragment">
-<ul>
-<li><span class="math inline">\(Post_B\)</span>: With 100 coin tosses, the likelihood dominates, so the posterior shifts more towards the data.</li>
-</ul>
-</div>
-</div></div>
-<div class="small">
-<ul>
-<li class="fragment">The same prior can have a strong or weak influence depending on how much data we have.</li>
-<li class="fragment">We usually have some sense of scale for our parameters, and we are allowed to use that information.</li>
-</ul>
-</div>
-</section>
 <section id="four-things-that-are-easy-to-mix-up" class="slide level2">
 <h2>Four things that are easy to mix up</h2>
 <div class="small">
@@ -838,29 +657,29 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <tr class="header">
 <th></th>
 <th>What it is</th>
-<th>Coin A (2 of 3, prior Beta(51, 51))</th>
+<th>Seedlings (2 of 5, prior Beta(8, 2))</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><strong>MLE</strong></td>
 <td>the <span class="math inline">\(p\)</span> that maximises the <span class="teal">likelihood</span></td>
-<td>0.667</td>
+<td>0.4</td>
 </tr>
 <tr class="even">
 <td><strong>MAP</strong></td>
 <td>the <span class="math inline">\(p\)</span> that maximises the <span class="orange">posterior</span> (its peak)</td>
-<td>0.505</td>
+<td>0.692</td>
 </tr>
 <tr class="odd">
 <td><strong>Posterior mean</strong></td>
 <td>the average of the <span class="orange">posterior</span></td>
-<td>0.505</td>
+<td>0.667</td>
 </tr>
 <tr class="even">
 <td><strong>Posterior distribution</strong></td>
 <td>every value of <span class="math inline">\(p\)</span> with its plausibility</td>
-<td>Beta(53, 52)</td>
+<td>Beta(10, 5)</td>
 </tr>
 </tbody>
 </table>
@@ -874,7 +693,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <section id="which-prior-simulate-from-it" class="slide level2">
 <h2>Which prior? Simulate from it</h2>
 
-<img data-src="slides_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
+<img data-src="slides_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
 <ul>
 <li class="fragment"><strong>Prior predictive check</strong>: draw <span class="math inline">\(p\)</span> from the prior, simulate data, and ask “could data like these happen?”</li>
 <li class="fragment">A prior is a statement about plausible <em>data</em>, so judge it on the scale of the data.</li>
@@ -901,7 +720,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <section id="exercise-1a-prior-likelihood-by-hand" class="slide level2" data-background-color="#f3e8f5">
 <h2>Exercise 1A: prior × likelihood by hand</h2>
 <div class="large">
-<p><code>day1/exercise.html</code>, Exercise 1A (12 minutes, R only)</p>
+<p><code>day1/exercise-student.qmd</code>, Exercise 1A (15 minutes including discussion)</p>
 </div>
 <ul>
 <li><strong>Predict first</strong>, then run.</li>
@@ -912,7 +731,8 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <aside class="notes">
 <ul>
 <li>walk around; ask pairs to explain the Beta(8, 2) result to each other</li>
-<li>debrief 2 min: posterior mean is a compromise; the weight of the data grows with N</li>
+<li>checkpoint after 6 min: everyone has compared 2/5 and 40/100</li>
+<li>debrief 3 min: posterior mean is a compromise; the weight of the data grows with N</li>
 </ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -940,43 +760,6 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <li class="fragment">Solution: draw many random samples from the posterior and summarise the samples.</li>
 <li class="fragment"><strong>MCMC</strong> (Markov Chain Monte Carlo) is a family of algorithms that produce such samples using only <span class="teal">likelihood</span> × <span class="purple">prior</span>.</li>
 </ul>
-</section>
-<section id="mcmc-a-simplified-metropolis-hastings-mh-algorithm" class="slide level2">
-<h2>MCMC: a simplified Metropolis-Hastings (MH) algorithm</h2>
-<div class="columns">
-<div class="column" style="width:40%;">
-<p><img data-src="../images/mh_trace.gif" height="290"></p>
-<p><img data-src="../images/mh_post.gif" height="290"></p>
-</div><div class="column" style="width:60%;">
-<ul>
-<li class="fragment">Start with some values of <em>p</em> (e.g., 0.2 and 0.8).</li>
-<li class="fragment">Calculate the posterior of those values.</li>
-<li class="fragment">Repeat the following steps N times:
-<ul>
-<li class="fragment">Propose a new value of <span class="math inline">\(p_{\text{new}}\)</span> (e.g., <span class="math inline">\(p \pm 0.01\)</span>)</li>
-<li class="fragment">Calculate the posterior at <span class="math inline">\(p_{\text{new}}\)</span>.</li>
-<li class="fragment">If <span class="math inline">\(\text{Post}(p_{\text{new}}) \geq \text{Post}(p_t), \text{ then } p_{t+1} = p_{\text{new}}\)</span>.</li>
-<li class="fragment">Else, accept <span class="math inline">\(p_{\text{new}}\)</span> with probability <span class="math inline">\(\frac{\text{Post}(p_{\text{new}})}{\text{Post}(p_t)}\)</span>.</li>
-</ul></li>
-<li class="fragment">After the first steps (grey: <strong>warmup</strong>), the chain visits each value of <span class="math inline">\(p\)</span> in proportion to its posterior probability.</li>
-</ul>
-</div></div>
-<aside class="notes">
-<ul>
-<li>example: coin B, posterior proportional to p^110 (1-p)^90</li>
-<li>two chains from different starting points end up in the same place: this idea returns on Day 2 as R-hat</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
 </section>
 <section id="stan-a-modern-languagesoftware-for-bayesian-modeling" class="slide level2">
 <h2>Stan: A modern language/software for Bayesian modeling</h2>
@@ -1024,23 +807,23 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="columns">
 <div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb3-1"><a href=""></a><span class="kw">data</span> {</span>
-<span id="cb3-2"><a href=""></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;             <span class="co">// number of seedlings</span></span>
-<span id="cb3-3"><a href=""></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=N&gt; y;    <span class="co">// number of survivors</span></span>
-<span id="cb3-4"><a href=""></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; a;            <span class="co">// prior: p ~ Beta(a, b)</span></span>
-<span id="cb3-5"><a href=""></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; b;</span>
-<span id="cb3-6"><a href=""></a>}</span>
-<span id="cb3-7"><a href=""></a></span>
-<span id="cb3-8"><a href=""></a><span class="kw">parameters</span> {</span>
-<span id="cb3-9"><a href=""></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; p;   <span class="co">// survival probability</span></span>
-<span id="cb3-10"><a href=""></a>}</span>
-<span id="cb3-11"><a href=""></a></span>
-<span id="cb3-12"><a href=""></a><span class="kw">model</span> {</span>
-<span id="cb3-13"><a href=""></a>  <span class="co">// prior</span></span>
-<span id="cb3-14"><a href=""></a>  p ~ beta(a, b);</span>
-<span id="cb3-15"><a href=""></a>  <span class="co">// likelihood</span></span>
-<span id="cb3-16"><a href=""></a>  y ~ binomial(N, p);</span>
-<span id="cb3-17"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
+<span id="cb1-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;             <span class="co">// number of seedlings</span></span>
+<span id="cb1-3"><a href="" aria-label="3"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=N&gt; y;    <span class="co">// number of survivors</span></span>
+<span id="cb1-4"><a href="" aria-label="4"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; a;            <span class="co">// prior: p ~ Beta(a, b)</span></span>
+<span id="cb1-5"><a href="" aria-label="5"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; b;</span>
+<span id="cb1-6"><a href="" aria-label="6"></a>}</span>
+<span id="cb1-7"><a href="" aria-label="7"></a></span>
+<span id="cb1-8"><a href="" aria-label="8"></a><span class="kw">parameters</span> {</span>
+<span id="cb1-9"><a href="" aria-label="9"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; p;   <span class="co">// survival probability</span></span>
+<span id="cb1-10"><a href="" aria-label="10"></a>}</span>
+<span id="cb1-11"><a href="" aria-label="11"></a></span>
+<span id="cb1-12"><a href="" aria-label="12"></a><span class="kw">model</span> {</span>
+<span id="cb1-13"><a href="" aria-label="13"></a>  <span class="co">// prior</span></span>
+<span id="cb1-14"><a href="" aria-label="14"></a>  p ~ beta(a, b);</span>
+<span id="cb1-15"><a href="" aria-label="15"></a>  <span class="co">// likelihood</span></span>
+<span id="cb1-16"><a href="" aria-label="16"></a>  y ~ binomial(N, p);</span>
+<span id="cb1-17"><a href="" aria-label="17"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div><div class="column" style="width:50%;">
 <div class="small">
@@ -1073,12 +856,12 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="columns">
 <div class="column" style="width:45%;">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href=""></a>fit <span class="ot">&lt;-</span> <span class="fu">fit_or_load</span>(</span>
-<span id="cb4-2"><a href=""></a>  <span class="st">"day1_seedling"</span>,</span>
-<span id="cb4-3"><a href=""></a>  <span class="st">"stan/binomial.stan"</span>,</span>
-<span id="cb4-4"><a href=""></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="dv">5</span>, <span class="at">y =</span> <span class="dv">2</span>, <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="dv">1</span>)</span>
-<span id="cb4-5"><a href=""></a>)</span>
-<span id="cb4-6"><a href=""></a>fit<span class="sc">$</span>draws</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="" aria-label="1"></a>fit <span class="ot">&lt;-</span> <span class="fu">fit_or_load</span>(</span>
+<span id="cb2-2"><a href="" aria-label="2"></a>  <span class="st">"day1_seedling"</span>,</span>
+<span id="cb2-3"><a href="" aria-label="3"></a>  <span class="st">"stan/binomial.stan"</span>,</span>
+<span id="cb2-4"><a href="" aria-label="4"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="dv">5</span>, <span class="at">y =</span> <span class="dv">2</span>, <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="dv">1</span>), <span class="at">use_precomputed =</span> <span class="cn">TRUE</span></span>
+<span id="cb2-5"><a href="" aria-label="5"></a>)</span>
+<span id="cb2-6"><a href="" aria-label="6"></a>fit<span class="sc">$</span>draws</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -1123,7 +906,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-14-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
@@ -1139,7 +922,8 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 </div></div>
 <aside class="notes">
 <ul>
-<li>fit_or_load() = cmdstan_model() + $sample(), with a fallback to stored results if sampling fails</li>
+<li>core: fit_or_load(…, use_precomputed = TRUE) reads the supplied Stan result</li>
+<li>optional live example uses the matching precompiled executable; no classroom compilation</li>
 <li>the summary numbers differ slightly from the exact ones: Monte Carlo error</li>
 </ul>
 <style type="text/css">
@@ -1157,17 +941,17 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <section id="exercise-1b-your-first-stan-model" class="slide level2" data-background-color="#f3e8f5">
 <h2>Exercise 1B: your first Stan model</h2>
 <div class="large">
-<p><code>day1/exercise.html</code>, Exercise 1B (15 minutes, live sampling)</p>
+<p><code>day1/exercise-student.qmd</code>, Exercise 1B (15 minutes including discussion)</p>
 </div>
 <ul>
-<li>Run the seedling model and summarise the draws.</li>
+<li>Load the supplied seedling fit and summarise the draws.</li>
 <li>Compare with the exact posterior from Exercise 1A.</li>
-<li>Change the data and the prior (no recompiling needed).</li>
 <li>Predict the number of survivors among 50 new seedlings.</li>
 </ul>
 <aside class="notes">
 <ul>
-<li>if sampling fails for someone: fit_or_load() loads the stored result automatically</li>
+<li>core tasks 1-3; changed-input refits are optional and need instructor coordination</li>
+<li>checkpoint after 5 min: everyone has the mean and interval</li>
 <li>debrief 3 min: draws -&gt; any derived quantity</li>
 </ul>
 <style type="text/css">
@@ -1199,6 +983,238 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <section id="appendix-optional-material" class="title-slide slide level1 center" data-visibility="uncounted">
 <h1>Appendix: optional material</h1>
 
+</section>
+<section id="extension-probability-density-for-continuous-data" class="slide level2" data-visibility="uncounted">
+<h2>Extension: probability density for continuous data</h2>
+<div class="columns">
+<div class="column" style="width:40%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="small">
+<p><span class="math inline">\(f(x \mid \mu, \sigma) = \frac{1}{\sqrt{2\pi\sigma^2}}\mathrm{exp} \bigl[{-\frac{1}{2}\bigl\{\frac{x-\mu}{\sigma}}\bigr\}^2\bigr]\)</span></p>
+</div>
+</div><div class="column" style="width:60%;">
+<ul>
+<li class="fragment"><p><strong>P(data | parameters)</strong>: Probability of observing the data given the parameters.</p></li>
+<li class="fragment"><p>e.g., when your model is <span class="math inline">\(x_i \sim \mathcal{N}(\mu = 0, \sigma = 1)\)</span> (normal distribution with mean 0 and standard deviation 1), what is the probability density at x = 1.96?</p></li>
+</ul>
+<div class="fragment">
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="" aria-label="1"></a><span class="fu">dnorm</span>(<span class="fl">1.96</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] 0.05844094</code></pre>
+</div>
+</div>
+</div>
+<div class="fragment">
+<ul>
+<li>A statistical model always has this form: a distribution for the data (normal, binomial, Poisson, …) with unknown parameters.</li>
+</ul>
+</div>
+</div></div>
+<aside class="notes">
+<ul>
+<li>likelihood is all about probability density (mass) function (normal, log-normal, poisson, beta, gamma, binomial, negative-binomial…)</li>
+<li>NOTE: throughout the course N(mu, sigma) is written with the standard deviation, as in Stan and in dnorm()</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="likelihood-of-several-observations" class="slide level2" data-visibility="uncounted">
+<h2>Likelihood of several observations</h2>
+<p>When your data is x = {-1.5, 0, 1.5} and your model is <span class="math inline">\(x \sim \mathcal{N}(\mu, 1)\)</span>, how probable is the data for a given <span class="math inline">\(\mu\)</span>?</p>
+<div class="small">
+<ul>
+<li class="fragment"><span class="math inline">\(L(\mu) = P(-1.5 \mid \mu, 1) \times P(0 \mid \mu, 1) \times P(1.5 \mid \mu, 1)\)</span></li>
+<li class="fragment"><span class="math inline">\(\mathrm{ln}\;L(\mu) = \mathrm{ln}\;P(-1.5 \mid \mu, 1) + \mathrm{ln}\;P(0 \mid \mu, 1) +  \mathrm{ln}\;P(1.5 \mid \mu, 1)\)</span></li>
+</ul>
+</div>
+<div class="fragment">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-14-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div class="fragment">
+<p>The data are fixed. The likelihood is a function of the <strong>parameter</strong>.</p>
+</div>
+</section>
+<section id="forward-and-inverse-problems-pcr-and-disease-example" class="slide level2" data-visibility="uncounted">
+<h2>Forward and Inverse Problems: PCR and disease example</h2>
+<div class="footer">
+<ul>
+<li><span class="math inline">\(P(\text{Positive})\)</span>: 2%, <span class="math inline">\(P(\text{Infected})\)</span>: 0.05%</li>
+</ul>
+</div>
+<p><strong>➡️Forward problem:</strong> If you are infected, what is the probability that PCR test is positive?</p>
+<p><br></p>
+<div class="fragment">
+<p><span class="math inline">\(P(\text{Positive} \mid \text{Infected})\)</span>: 95%</p>
+</div>
+<p><br></p>
+<div class="fragment">
+<p>This is what the lab test is designed to estimate — how likely we are to observe a positive signal given the known infection status (e.g., 95 out of 100 infected samples test positive).</p>
+</div>
+</section>
+<section id="forward-and-inverse-problems-pcr-and-disease-example-1" class="slide level2" data-visibility="uncounted">
+<h2>Forward and Inverse Problems: PCR and disease example</h2>
+<div class="footer">
+<ul>
+<li><span class="math inline">\(P(\text{Positive})\)</span>: 2%, <span class="math inline">\(P(\text{Infected})\)</span>: 0.05%</li>
+</ul>
+</div>
+<p><strong>🔁Inverse problem (Bayesian):</strong> If the PCR test is positive, what is the probability that you are infected?</p>
+<p><br></p>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected}) \cdot  P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%\)</span></li>
+</ul>
+</div>
+<p><br></p>
+<div class="fragment">
+<p>This isn’t intuitive, but it’s the probability we actually care about — how likely someone is to be infected, given a positive test result.</p>
+</div>
+<aside class="notes">
+<ul>
+<li>ask the room to guess before revealing 2.4%</li>
+<li>0.95 * 0.0005 / 0.02 = 0.02375</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section class="slide level2">
+
+
+<img src="../images/bayes_re.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
+<section id="prior-vs.-data-mle-and-bayesian-comparison-coin-toss" class="slide level2" data-visibility="uncounted">
+<h2>Prior vs.&nbsp;Data: MLE and Bayesian comparison (Coin Toss)</h2>
+<p>We compare two coins, A and B, with the same prior but different likelihood (due to data sizes) to illustrate how prior beliefs influence posterior estimates.</p>
+<h3 id="mle">MLE</h3>
+<ul>
+<li class="fragment">A: 2 head out of 3 tosses -&gt; P(H) = 2/3 = 0.666</li>
+<li class="fragment">B: 60 heads out of 100 tosses -&gt; P(H) = 60/100 = 0.6</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="bayesian">Bayesian</h3>
+<ul>
+<li class="fragment"><p><span class="math inline">\(\textcolor{#1b9e77}{L_A = {}_3C_2 p^2 (1-p)^1}\)</span></p></li>
+<li class="fragment"><p><span class="math inline">\(\textcolor{#1b9e77}{L_B = {}_{100}C_{60} p^{60} (1-p)^{40}}\)</span></p></li>
+<li class="fragment"><p><span class="math inline">\(\textcolor{#7570b3}{\mathrm{Prior} \propto  p^{50} (1-p)^{50}}\)</span></p>
+<ul>
+<li class="fragment">Beta(51, 51): we believe coins are fair</li>
+</ul></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-15-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+</section>
+<section id="bayesian-update-with-prior-coin-toss" class="slide level2" data-visibility="uncounted">
+<h2>Bayesian Update with Prior (Coin Toss)</h2>
+<p><span class="orange">Posterior</span> <span class="math inline">\(\propto\)</span> <span class="teal">Likelihood</span> <span class="math inline">\(\times\)</span> <span class="purple">Prior</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="fragment">
+<p>Coin A: <span class="math inline">\(\textcolor{#d95f02}{Post_A}\propto\textcolor{#1b9e77}{p^2 (1-p)^1} \times\textcolor{#7570b3}{p^{50} (1-p)^{50}}\)</span></p>
+<p>Peak of the posterior: <span class="math inline">\(p = 52/103 \approx 0.505\)</span></p>
+</div>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(Post_A\)</span>: With only 3 coin tosses, the likelihood is weak, so the posterior stays close to the prior.</li>
+</ul>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="fragment">
+<p>Coin B: <span class="math inline">\(\textcolor{#d95f02}{Post_B} \propto \textcolor{#1b9e77}{p^{60} (1-p)^{40}} \times\textcolor{#7570b3}{p^{50} (1-p)^{50}}\)</span></p>
+<p>Peak of the posterior: <span class="math inline">\(p = 110/200 = 0.55\)</span></p>
+</div>
+<div class="fragment">
+<ul>
+<li><span class="math inline">\(Post_B\)</span>: With 100 coin tosses, the likelihood dominates, so the posterior shifts more towards the data.</li>
+</ul>
+</div>
+</div></div>
+<div class="small">
+<ul>
+<li class="fragment">The same prior can have a strong or weak influence depending on how much data we have.</li>
+<li class="fragment">We usually have some sense of scale for our parameters, and we are allowed to use that information.</li>
+</ul>
+</div>
+</section>
+<section id="mcmc-a-simplified-metropolis-hastings-mh-algorithm" class="slide level2" data-visibility="uncounted">
+<h2>MCMC: a simplified Metropolis-Hastings (MH) algorithm</h2>
+<div class="columns">
+<div class="column" style="width:40%;">
+<p><img data-src="../images/mh_trace.gif" height="290"></p>
+<p><img data-src="../images/mh_post.gif" height="290"></p>
+</div><div class="column" style="width:60%;">
+<ul>
+<li class="fragment">Start with some values of <em>p</em> (e.g., 0.2 and 0.8).</li>
+<li class="fragment">Calculate the posterior of those values.</li>
+<li class="fragment">Repeat the following steps N times:
+<ul>
+<li class="fragment">Propose a new value of <span class="math inline">\(p_{\text{new}}\)</span> (e.g., <span class="math inline">\(p \pm 0.01\)</span>)</li>
+<li class="fragment">Calculate the posterior at <span class="math inline">\(p_{\text{new}}\)</span>.</li>
+<li class="fragment">If <span class="math inline">\(\text{Post}(p_{\text{new}}) \geq \text{Post}(p_t), \text{ then } p_{t+1} = p_{\text{new}}\)</span>.</li>
+<li class="fragment">Else, accept <span class="math inline">\(p_{\text{new}}\)</span> with probability <span class="math inline">\(\frac{\text{Post}(p_{\text{new}})}{\text{Post}(p_t)}\)</span>.</li>
+</ul></li>
+<li class="fragment">After the first steps (grey: <strong>warmup</strong>), the chain visits each value of <span class="math inline">\(p\)</span> in proportion to its posterior probability.</li>
+</ul>
+</div></div>
+<aside class="notes">
+<ul>
+<li>example: coin B, posterior proportional to p^110 (1-p)^90</li>
+<li>two chains from different starting points end up in the same place: this idea returns on Day 2 as R-hat</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
 <section id="mcmc-hamiltonian-monte-carlo-hmc" class="slide level2" data-visibility="uncounted">
 <h2>MCMC: Hamiltonian Monte Carlo (HMC)</h2>
@@ -1323,7 +1339,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
   <script src="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
   <script src="slides_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="slides_files/libs/revealjs/plugin/quarto-support/support.js"></script>
-  
+
 
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
@@ -1346,7 +1362,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
 'smaller': false,
- 
+
         // Display controls in the bottom right corner
         controls: true,
 
@@ -1500,7 +1516,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
         maxScale: 1,
 
         math: {
-          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js',
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js',
           config: 'TeX-AMS_HTML-full',
           tex2jax: {
             inlineMath: [['\\(','\\)']],
@@ -1526,7 +1542,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
         ]
       });
     </script>
-    
+
     <script>
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
@@ -1572,7 +1588,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
         });
         const isCodeAnnotation = (el) => {
           for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {                     
+            if (clz.startsWith('code-annotation-')) {
               return true;
             }
           }
@@ -1592,11 +1608,11 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
             button.setAttribute("data-bs-toggle", "tooltip");
             button.setAttribute("data-bs-placement", "left");
             button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button, 
-              { trigger: "manual", 
+            tooltip = new bootstrap.Tooltip(button,
+              { trigger: "manual",
                 customClass: "code-copy-button-tooltip",
                 offset: [0, -8]});
-            tooltip.show();    
+            tooltip.show();
           }
           setTimeout(function() {
             if (tooltip) {
@@ -1675,7 +1691,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
           }
             config['offset'] = [0,0];
             config['maxWidth'] = 700;
-          window.tippy(el, config); 
+          window.tippy(el, config);
         }
         const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
         for (var i=0; i<noterefs.length; i++) {
@@ -1734,6 +1750,6 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
       </script>
     <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
     <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
-    
+
 
 </body></html>

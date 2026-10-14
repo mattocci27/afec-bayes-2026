@@ -6,8 +6,8 @@
 <script src="slides_files/libs/quarto-html/tippy.umd.min.js"></script>
 <link href="slides_files/libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="slides_files/libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="slides_files/libs/quarto-html/quarto-syntax-highlighting-7f8f88aac4f3542376d5c11b86a4c14d.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.9.37">
+<link href="slides_files/libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.10.19">
 
   <meta name="author" content="Masatoshi Katabuchi">
   <title>Bayesian statistics for ecology: Day 2</title>
@@ -20,15 +20,18 @@
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
     */
-    code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
     ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
       width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
@@ -131,12 +134,12 @@
     }
     .reveal .footnotes ol {
       counter-reset: ol;
-      list-style-type: none; 
+      list-style-type: none;
       margin-left: 0;
     }
     .reveal .footnotes ol li:before {
       counter-increment: ol;
-      content: counter(ol) ". "; 
+      content: counter(ol) ". ";
     }
     .reveal .footnotes ol li > p:first-child {
       display: inline-block;
@@ -178,19 +181,19 @@
     .reveal .slide > img.r-stretch.quarto-figure-center {
       display: block;
       margin-left: auto;
-      margin-right: auto; 
+      margin-right: auto;
     }
     .reveal .slide > img.stretch.quarto-figure-left,
     .reveal .slide > img.r-stretch.quarto-figure-left  {
       display: block;
       margin-left: 0;
-      margin-right: auto; 
+      margin-right: auto;
     }
     .reveal .slide > img.stretch.quarto-figure-right,
     .reveal .slide > img.r-stretch.quarto-figure-right  {
       display: block;
       margin-left: auto;
-      margin-right: 0; 
+      margin-right: 0;
     }
   </style>
   <script src="slides_files/libs/kePrint-0.0.1/kePrint.js"></script>
@@ -210,6 +213,9 @@ Bayesian statistics for ecology
 <h3>
 Day 2: Regression and model checking
 </h3>
+<p>
+AFEC-X 2026 · 22 October · 19:00–20:30 China time (UTC+8)
+</p>
 <h3>
 🧑🏻‍💻 <span class="author">Masatoshi Katabuchi @ XTBG, CAS</span>
 </h3>
@@ -324,34 +330,10 @@ Day 2: Regression and model checking
 </div>
 </div></div>
 </section>
-<section id="priors-in-ecology-why-scale-matters" class="slide level2">
-<h2>Priors in ecology: Why scale matters</h2>
-<div class="footer">
-<p>We often use weakly informative priors in ecology.</p>
-</div>
-<div class="columns">
-<div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center" width="480"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:60%;">
-<ul>
-<li class="fragment">We consider variables <em>x</em> = {-3, …, 3} and <em>y</em> = {-6, …, 4}. We don’t yet know if there is a correlation (<em>y = ax + b</em>).</li>
-<li class="fragment">However, given the similar scales of <em>x</em> and <em>y</em>, it’s reasonable to guess that <em>a</em> falls within a narrow range (e.g., <strong>strongly informative prior</strong>: -5 to 5, <strong>weakly informative prior</strong>: <span class="math inline">\(a \sim \mathcal{N}(0,  2.5)\)</span>).</li>
-<li class="fragment">In contrast, a slope like <em>a</em> = 100 (blue line) clearly doesn’t match the data. A <strong>vague prior</strong> such as <span class="math inline">\(a \sim \mathcal{N}(0,  10^4)\)</span> says that such slopes are as plausible as <em>a</em> = 2.</li>
-</ul>
-</div></div>
-</section>
 <section id="prior-predictive-check-what-trees-do-the-priors-expect" class="slide level2">
 <h2>Prior predictive check: what trees do the priors expect?</h2>
 
-<img data-src="slides_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
+<img data-src="slides_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
 <ul>
 <li class="fragment">Each line is one draw from the prior. Green band: heights of real trees (1 to 100 m).</li>
 <li class="fragment">The vague prior expects trees that are <span class="math inline">\(10^{50}\)</span> m tall, or <span class="math inline">\(10^{-50}\)</span> m. It is not “uninformative”: it puts most of its weight on nonsense.</li>
@@ -381,27 +363,27 @@ Day 2: Regression and model checking
 <div class="column" style="width:56%;">
 <div style="font-size: 0.9em;">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href=""></a><span class="kw">data</span> {</span>
-<span id="cb1-2"><a href=""></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;           <span class="co">// number of observations</span></span>
-<span id="cb1-3"><a href=""></a>  <span class="dt">vector</span>[N] x;              <span class="co">// predictor</span></span>
-<span id="cb1-4"><a href=""></a>  <span class="dt">vector</span>[N] y;              <span class="co">// response</span></span>
-<span id="cb1-5"><a href=""></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; beta_sd;    <span class="co">// prior SD for the slope</span></span>
-<span id="cb1-6"><a href=""></a>}</span>
-<span id="cb1-7"><a href=""></a></span>
-<span id="cb1-8"><a href=""></a><span class="kw">parameters</span> {</span>
-<span id="cb1-9"><a href=""></a>  <span class="dt">real</span> alpha;               <span class="co">// intercept</span></span>
-<span id="cb1-10"><a href=""></a>  <span class="dt">real</span> beta;                <span class="co">// slope</span></span>
-<span id="cb1-11"><a href=""></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;      <span class="co">// residual SD</span></span>
-<span id="cb1-12"><a href=""></a>}</span>
-<span id="cb1-13"><a href=""></a></span>
-<span id="cb1-14"><a href=""></a><span class="kw">model</span> {</span>
-<span id="cb1-15"><a href=""></a>  <span class="co">// likelihood</span></span>
-<span id="cb1-16"><a href=""></a>  y ~ normal(alpha + beta * x, sigma);</span>
-<span id="cb1-17"><a href=""></a>  <span class="co">// priors</span></span>
-<span id="cb1-18"><a href=""></a>  alpha ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
-<span id="cb1-19"><a href=""></a>  beta ~ normal(<span class="dv">0</span>, beta_sd);</span>
-<span id="cb1-20"><a href=""></a>  sigma ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);     <span class="co">// half-normal, because sigma &gt; 0</span></span>
-<span id="cb1-21"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
+<span id="cb1-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;           <span class="co">// number of observations</span></span>
+<span id="cb1-3"><a href="" aria-label="3"></a>  <span class="dt">vector</span>[N] x;              <span class="co">// predictor</span></span>
+<span id="cb1-4"><a href="" aria-label="4"></a>  <span class="dt">vector</span>[N] y;              <span class="co">// response</span></span>
+<span id="cb1-5"><a href="" aria-label="5"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; beta_sd;    <span class="co">// prior SD for the slope</span></span>
+<span id="cb1-6"><a href="" aria-label="6"></a>}</span>
+<span id="cb1-7"><a href="" aria-label="7"></a></span>
+<span id="cb1-8"><a href="" aria-label="8"></a><span class="kw">parameters</span> {</span>
+<span id="cb1-9"><a href="" aria-label="9"></a>  <span class="dt">real</span> alpha;               <span class="co">// intercept</span></span>
+<span id="cb1-10"><a href="" aria-label="10"></a>  <span class="dt">real</span> beta;                <span class="co">// slope</span></span>
+<span id="cb1-11"><a href="" aria-label="11"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;      <span class="co">// residual SD</span></span>
+<span id="cb1-12"><a href="" aria-label="12"></a>}</span>
+<span id="cb1-13"><a href="" aria-label="13"></a></span>
+<span id="cb1-14"><a href="" aria-label="14"></a><span class="kw">model</span> {</span>
+<span id="cb1-15"><a href="" aria-label="15"></a>  <span class="co">// likelihood</span></span>
+<span id="cb1-16"><a href="" aria-label="16"></a>  y ~ normal(alpha + beta * x, sigma);</span>
+<span id="cb1-17"><a href="" aria-label="17"></a>  <span class="co">// priors</span></span>
+<span id="cb1-18"><a href="" aria-label="18"></a>  alpha ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb1-19"><a href="" aria-label="19"></a>  beta ~ normal(<span class="dv">0</span>, beta_sd);</span>
+<span id="cb1-20"><a href="" aria-label="20"></a>  sigma ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);     <span class="co">// half-normal, because sigma &gt; 0</span></span>
+<span id="cb1-21"><a href="" aria-label="21"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 </div><div class="column" style="width:44%;">
@@ -485,14 +467,14 @@ y_i &amp;\sim \mathcal{N}(\alpha + \beta x_i, \sigma)\\
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
 </div></div>
 <div class="footer">
-<p>Elastic similarity: McMahon 1973 <em>Science</em>. </p>
+<p>Elastic similarity: McMahon 1973 <em>Science</em>.</p>
 </div>
 <aside class="notes">
 <ul>
@@ -519,7 +501,7 @@ y_i &amp;\sim \mathcal{N}(\alpha + \beta x_i, \sigma)\\
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
 </figure>
 </div>
 </div>
@@ -548,7 +530,7 @@ y_i &amp;\sim \mathcal{N}(\alpha + \beta x_i, \sigma)\\
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
 </figure>
 </div>
 </div>
@@ -567,19 +549,19 @@ y_i &amp;\sim \mathcal{N}(\alpha + \beta x_i, \sigma)\\
 <section id="exercise-2a-tree-allometry" class="slide level2" data-background-color="#f3e8f5">
 <h2>Exercise 2A: tree allometry</h2>
 <div class="large">
-<p><code>day2/exercise.html</code>, Exercise 2A (20 minutes, live sampling)</p>
+<p><code>day2/exercise-student.qmd</code>, Exercise 2A (24 minutes including discussion)</p>
 </div>
 <ul>
 <li>Fit the regression and interpret <span class="math inline">\(\alpha\)</span>, <span class="math inline">\(\beta\)</span>, <span class="math inline">\(\sigma\)</span> in words.</li>
 <li>Is the exponent smaller than 2/3?</li>
 <li>Predict the height of a tree with DBH = 80 cm: the typical tree, and a new tree.</li>
 <li>Check the model against the data.</li>
-<li>Refit with only 10 trees. What changes?</li>
 </ul>
 <aside class="notes">
 <ul>
-<li>core: tasks 1-4; task 5 and the prior sensitivity task are for fast groups</li>
-<li>debrief 3 min: two kinds of uncertainty; what 10 trees do to the interval</li>
+<li>core: tasks 1-4; changed-input refits require separate instructor approval to run</li>
+<li>checkpoints after 7/15 min: coefficient sentence / two prediction intervals</li>
+<li>debrief 3 min: two kinds of uncertainty; global vs species-level checks</li>
 </ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -601,8 +583,8 @@ y_i &amp;\sim \mathcal{N}(\alpha + \beta x_i, \sigma)\\
 <section id="chains-should-tell-the-same-story" class="slide level2">
 <h2>Chains should tell the same story</h2>
 
-<img data-src="slides_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><ul>
-<li class="fragment">We run several chains from different starting points (remember the two Metropolis chains on Day 1).</li>
+<img data-src="slides_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><ul>
+<li class="fragment">We run several chains from different starting points.</li>
 <li class="fragment"><strong>Good</strong>: the chains overlap and look like noise (“fuzzy caterpillar”).</li>
 <li class="fragment"><strong>Bad</strong>: chains sit at different values or wander slowly. The draws do not describe the posterior.</li>
 </ul>
@@ -735,7 +717,7 @@ y_i &amp;\sim \mathcal{N}(\alpha + \beta x_i, \sigma)\\
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
 </figure>
 </div>
 </div>
@@ -791,7 +773,7 @@ s_i &amp;\sim \mathcal{B}(n_i, p_i)\\
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
@@ -801,7 +783,7 @@ s_i &amp;\sim \mathcal{B}(n_i, p_i)\\
 <section id="priors-on-the-logit-scale-are-not-intuitive-simulate" class="slide level2">
 <h2>Priors on the logit scale are not intuitive: simulate</h2>
 
-<img data-src="slides_files/figure-revealjs/unnamed-chunk-13-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
+<img data-src="slides_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
 <ul>
 <li class="fragment">A “vague” <span class="math inline">\(\mathcal{N}(0, 10)\)</span> prior on the logit scale says: survival is almost certainly near 0% or near 100%.</li>
 <li class="fragment"><span class="math inline">\(\mathcal{N}(0, 2.5)\)</span> is weakly informative; <span class="math inline">\(\mathcal{N}(0, 1.5)\)</span> is roughly flat on the probability scale.</li>
@@ -817,7 +799,7 @@ s_i &amp;\sim \mathcal{B}(n_i, p_i)\\
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-14-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-13-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
 </figure>
 </div>
 </div>
@@ -846,16 +828,18 @@ s_i &amp;\sim \mathcal{B}(n_i, p_i)\\
 <section id="exercise-2b-diagnose-then-interpret" class="slide level2" data-background-color="#f3e8f5">
 <h2>Exercise 2B: diagnose, then interpret</h2>
 <div class="large">
-<p><code>day2/exercise.html</code>, Exercise 2B (15 minutes)</p>
+<p><code>day2/exercise-student.qmd</code>, Exercise 2B Part 2 (8 minutes including discussion)</p>
 </div>
 <ul>
-<li><strong>Part 1 (stored result)</strong>: a colleague’s fit looks strange. Find out what is wrong before reading any estimate.</li>
-<li><strong>Part 2 (live sampling)</strong>: fit the seedling model. How strong is NDD on the probability scale?</li>
+<li><strong>Part 1 (whole-class demonstration)</strong>: diagnose the supplied problematic fit.</li>
+<li><strong>Part 2 (stored draws)</strong>: compare survival at low and high density, with intervals.</li>
 </ul>
 <aside class="notes">
 <ul>
 <li>part 1 uses a stored fit on purpose: the broken model is slow and nobody should wait for it</li>
-<li>debrief 3 min: diagnostics first, interpretation second</li>
+<li>Part 1 was a whole-class demonstration at 53-65 min</li>
+<li>Part 2 core: diagnostics + probabilities at cons = -1 and +1 + one sentence</li>
+<li>debrief 2 min: diagnostics first, interpretation second</li>
 </ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -891,7 +875,7 @@ s_i &amp;\sim \mathcal{B}(n_i, p_i)\\
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-16-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-15-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
 </figure>
 </div>
 </div>
@@ -910,24 +894,48 @@ s_i &amp;\sim \mathcal{B}(n_i, p_i)\\
 <h1>Appendix: optional material</h1>
 
 </section>
+<section id="priors-in-ecology-why-scale-matters" class="slide level2" data-visibility="uncounted">
+<h2>Priors in ecology: Why scale matters</h2>
+<div class="footer">
+<p>We often use weakly informative priors in ecology.</p>
+</div>
+<div class="columns">
+<div class="column" style="width:40%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-16-1.png" class="quarto-figure quarto-figure-center" width="480"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:60%;">
+<ul>
+<li class="fragment">We consider variables <em>x</em> = {-3, …, 3} and <em>y</em> = {-6, …, 4}. We don’t yet know if there is a correlation (<em>y = ax + b</em>).</li>
+<li class="fragment">However, given the similar scales of <em>x</em> and <em>y</em>, it’s reasonable to guess that <em>a</em> falls within a narrow range (e.g., <strong>strongly informative prior</strong>: -5 to 5, <strong>weakly informative prior</strong>: <span class="math inline">\(a \sim \mathcal{N}(0,  2.5)\)</span>).</li>
+<li class="fragment">In contrast, a slope like <em>a</em> = 100 (blue line) clearly doesn’t match the data. A <strong>vague prior</strong> such as <span class="math inline">\(a \sim \mathcal{N}(0,  10^4)\)</span> says that such slopes are as plausible as <em>a</em> = 2.</li>
+</ul>
+</div></div>
+</section>
 <section id="count-data-the-same-recipe" class="slide level2" data-visibility="uncounted">
 <h2>Count data: the same recipe</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><a href=""></a><span class="kw">data</span> {</span>
-<span id="cb2-2"><a href=""></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
-<span id="cb2-3"><a href=""></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; y;</span>
-<span id="cb2-4"><a href=""></a>}</span>
-<span id="cb2-5"><a href=""></a></span>
-<span id="cb2-6"><a href=""></a><span class="kw">parameters</span> {</span>
-<span id="cb2-7"><a href=""></a>  <span class="dt">real</span> log_lambda;</span>
-<span id="cb2-8"><a href=""></a>}</span>
-<span id="cb2-9"><a href=""></a></span>
-<span id="cb2-10"><a href=""></a><span class="kw">model</span> {</span>
-<span id="cb2-11"><a href=""></a>  y ~ poisson_log(log_lambda);</span>
-<span id="cb2-12"><a href=""></a>  log_lambda ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
-<span id="cb2-13"><a href=""></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
+<span id="cb2-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb2-3"><a href="" aria-label="3"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; y;</span>
+<span id="cb2-4"><a href="" aria-label="4"></a>}</span>
+<span id="cb2-5"><a href="" aria-label="5"></a></span>
+<span id="cb2-6"><a href="" aria-label="6"></a><span class="kw">parameters</span> {</span>
+<span id="cb2-7"><a href="" aria-label="7"></a>  <span class="dt">real</span> log_lambda;</span>
+<span id="cb2-8"><a href="" aria-label="8"></a>}</span>
+<span id="cb2-9"><a href="" aria-label="9"></a></span>
+<span id="cb2-10"><a href="" aria-label="10"></a><span class="kw">model</span> {</span>
+<span id="cb2-11"><a href="" aria-label="11"></a>  y ~ poisson_log(log_lambda);</span>
+<span id="cb2-12"><a href="" aria-label="12"></a>  log_lambda ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb2-13"><a href="" aria-label="13"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div><div class="column" style="width:50%;">
 <p><span class="math display">\[
@@ -947,28 +955,28 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
 <h2>The same models with <code>brms</code></h2>
 <div style="font-size: 0.8em;">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href=""></a><span class="fu">library</span>(brms)</span>
-<span id="cb3-2"><a href=""></a></span>
-<span id="cb3-3"><a href=""></a><span class="co"># Tree allometry</span></span>
-<span id="cb3-4"><a href=""></a><span class="fu">brm</span>(</span>
-<span id="cb3-5"><a href=""></a>  <span class="fu">log</span>(h) <span class="sc">~</span> <span class="fu">log</span>(dbh <span class="sc">/</span> <span class="dv">40</span>),</span>
-<span id="cb3-6"><a href=""></a>  <span class="at">family =</span> <span class="fu">gaussian</span>(), <span class="at">data =</span> allo,</span>
-<span id="cb3-7"><a href=""></a>  <span class="at">prior =</span> <span class="fu">c</span>(</span>
-<span id="cb3-8"><a href=""></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">2.5</span>), <span class="at">class =</span> <span class="st">"Intercept"</span>),</span>
-<span id="cb3-9"><a href=""></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">2.5</span>), <span class="at">class =</span> <span class="st">"b"</span>),</span>
-<span id="cb3-10"><a href=""></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">class =</span> <span class="st">"sigma"</span>)</span>
-<span id="cb3-11"><a href=""></a>  )</span>
-<span id="cb3-12"><a href=""></a>)</span>
-<span id="cb3-13"><a href=""></a></span>
-<span id="cb3-14"><a href=""></a><span class="co"># Seedling survival</span></span>
-<span id="cb3-15"><a href=""></a><span class="fu">brm</span>(</span>
-<span id="cb3-16"><a href=""></a>  suv <span class="sc">|</span> <span class="fu">trials</span>(n) <span class="sc">~</span> cons,</span>
-<span id="cb3-17"><a href=""></a>  <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">data =</span> ndd,</span>
-<span id="cb3-18"><a href=""></a>  <span class="at">prior =</span> <span class="fu">c</span>(</span>
-<span id="cb3-19"><a href=""></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">2.5</span>), <span class="at">class =</span> <span class="st">"Intercept"</span>),</span>
-<span id="cb3-20"><a href=""></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">2.5</span>), <span class="at">class =</span> <span class="st">"b"</span>)</span>
-<span id="cb3-21"><a href=""></a>  )</span>
-<span id="cb3-22"><a href=""></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="" aria-label="1"></a><span class="fu">library</span>(brms)</span>
+<span id="cb3-2"><a href="" aria-label="2"></a></span>
+<span id="cb3-3"><a href="" aria-label="3"></a><span class="co"># Tree allometry</span></span>
+<span id="cb3-4"><a href="" aria-label="4"></a><span class="fu">brm</span>(</span>
+<span id="cb3-5"><a href="" aria-label="5"></a>  <span class="fu">log</span>(h) <span class="sc">~</span> <span class="fu">log</span>(dbh <span class="sc">/</span> <span class="dv">40</span>),</span>
+<span id="cb3-6"><a href="" aria-label="6"></a>  <span class="at">family =</span> <span class="fu">gaussian</span>(), <span class="at">data =</span> allo,</span>
+<span id="cb3-7"><a href="" aria-label="7"></a>  <span class="at">prior =</span> <span class="fu">c</span>(</span>
+<span id="cb3-8"><a href="" aria-label="8"></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">2.5</span>), <span class="at">class =</span> <span class="st">"Intercept"</span>),</span>
+<span id="cb3-9"><a href="" aria-label="9"></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">2.5</span>), <span class="at">class =</span> <span class="st">"b"</span>),</span>
+<span id="cb3-10"><a href="" aria-label="10"></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">class =</span> <span class="st">"sigma"</span>)</span>
+<span id="cb3-11"><a href="" aria-label="11"></a>  )</span>
+<span id="cb3-12"><a href="" aria-label="12"></a>)</span>
+<span id="cb3-13"><a href="" aria-label="13"></a></span>
+<span id="cb3-14"><a href="" aria-label="14"></a><span class="co"># Seedling survival</span></span>
+<span id="cb3-15"><a href="" aria-label="15"></a><span class="fu">brm</span>(</span>
+<span id="cb3-16"><a href="" aria-label="16"></a>  suv <span class="sc">|</span> <span class="fu">trials</span>(n) <span class="sc">~</span> cons,</span>
+<span id="cb3-17"><a href="" aria-label="17"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">data =</span> ndd,</span>
+<span id="cb3-18"><a href="" aria-label="18"></a>  <span class="at">prior =</span> <span class="fu">c</span>(</span>
+<span id="cb3-19"><a href="" aria-label="19"></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">2.5</span>), <span class="at">class =</span> <span class="st">"Intercept"</span>),</span>
+<span id="cb3-20"><a href="" aria-label="20"></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">2.5</span>), <span class="at">class =</span> <span class="st">"b"</span>)</span>
+<span id="cb3-21"><a href="" aria-label="21"></a>  )</span>
+<span id="cb3-22"><a href="" aria-label="22"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="small">
@@ -993,7 +1001,7 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
   <script src="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
   <script src="slides_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="slides_files/libs/revealjs/plugin/quarto-support/support.js"></script>
-  
+
 
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
@@ -1016,7 +1024,7 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
 'smaller': false,
- 
+
         // Display controls in the bottom right corner
         controls: true,
 
@@ -1170,7 +1178,7 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
         maxScale: 1,
 
         math: {
-          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js',
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js',
           config: 'TeX-AMS_HTML-full',
           tex2jax: {
             inlineMath: [['\\(','\\)']],
@@ -1196,7 +1204,7 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
         ]
       });
     </script>
-    
+
     <script>
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
@@ -1242,7 +1250,7 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
         });
         const isCodeAnnotation = (el) => {
           for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {                     
+            if (clz.startsWith('code-annotation-')) {
               return true;
             }
           }
@@ -1262,11 +1270,11 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
             button.setAttribute("data-bs-toggle", "tooltip");
             button.setAttribute("data-bs-placement", "left");
             button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button, 
-              { trigger: "manual", 
+            tooltip = new bootstrap.Tooltip(button,
+              { trigger: "manual",
                 customClass: "code-copy-button-tooltip",
                 offset: [0, -8]});
-            tooltip.show();    
+            tooltip.show();
           }
           setTimeout(function() {
             if (tooltip) {
@@ -1345,7 +1353,7 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
           }
             config['offset'] = [0,0];
             config['maxWidth'] = 700;
-          window.tippy(el, config); 
+          window.tippy(el, config);
         }
         const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
         for (var i=0; i<noterefs.length; i++) {
@@ -1404,6 +1412,6 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
       </script>
     <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
     <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
-    
+
 
 </body></html>

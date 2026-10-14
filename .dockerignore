@@ -17,6 +17,11 @@
 !R/course_utils.R
 !R/functions.R
 !R/slides_setup.R
+!R/classroom_materials.R
+!R/build_classroom_materials.R
+!classroom/
+!classroom/readiness.qmd
+!classroom/instructor.md
 !stan/
 !stan/*.stan
 !fits/

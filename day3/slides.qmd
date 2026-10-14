@@ -33,21 +33,28 @@ Learning outcomes: by the end of the session participants can
      which groups change most under partial pooling;
   2. interpret a group-level standard deviation and a group-level predictor;
   3. predict for an existing group and for a new group;
-  4. read the diagnostics of a hierarchical model (including divergences);
+  4. check R-hat, ESS and sampler warnings, and recognise divergence as a
+     reason to investigate (repairing a divergent fit is an extension);
   5. outline a workflow for their own grouped ecological data.
+
+Assumptions: same as Day 1; 15 pairs, one instructor; stored fits are core.
 
 Timing
    0- 5  Recap, today's question: grouped data
-   5-25  Eight mother trees: complete / no / partial pooling
-  25-45  Exercise 3A (live: three ways to estimate eight survival rates)
-  45-60  Multilevel regression: varying intercepts, varying slopes,
-         group-level predictor, diagnostics
-  60-80  Exercise 3B (stored results by default: species differences in allometry)
-  80-90  Why Bayes for multilevel models, workflow, looking ahead, summary
+   5-18  Complete / no / partial pooling
+  18-43  Exercise 3A tasks 1-4: 22 min pair work + 3 min explanation/questions
+  43-55  From varying intercepts to species-level regression; warning checklist
+  55-76  Exercise 3B selected core: 18 min pair work + 3 min explanation/questions
+  76-82  Exercise 3A task 5: new mother tree, 4 min pair work + 2 min discussion
+  82-87  Workflow for own data, NDD callback and summary
+  87-90  Questions and delay buffer
 
-If time runs short: skip "Same model, different tools" and "Divergent
-transitions" (keep one sentence), and do Exercise 3B part 2 as a demonstration.
-The eight schools and spatial slides are in the appendix.
+Core: mother-tree shrinkage and group SD; existing vs new group prediction;
+allometry group-level effect and rare-species shrinkage from stored draws.
+Move covariance/Cholesky/LKJ details, tool comparisons, MLE integration,
+divergence remedies, new-species predictions and extra models to extensions.
+If behind: demonstrate 3B part 1 and its plot, retain the wood-density question,
+new-mother-tree task and debrief. Never replace the buffer with another model.
 -->
 
 ```{r setup, include=FALSE}
@@ -77,6 +84,8 @@ rmse <- function(est) sqrt(mean((est - trees$p_true)^2))
 <h2>Bayesian statistics for ecology</h2>
 
 <h3>Day 3: Hierarchical models and ecological applications</h3>
+
+<p>AFEC-X 2026 · 23 October · 19:00–20:30 China time (UTC+8)</p>
 
 <h3>🧑🏻‍💻 [Masatoshi Katabuchi \@ XTBG, CAS]{.author}</h3>
 :::
@@ -454,7 +463,7 @@ show_stan("stan/logistic.stan")
 ::: {.column width="48%"}
 ::: small
 - `z[i]` is $\mathrm{logit}(p_i)$ for tree $i$.
-- `z = mu + sigma * z_tilde` with `z_tilde ~ std_normal()` is the same model as $z_i \sim \mathcal{N}(\mu, \sigma)$. Written this way it is easier for Stan to sample (more on this later today).
+- `z = mu + sigma * z_tilde` with `z_tilde ~ std_normal()` is the same model as $z_i \sim \mathcal{N}(\mu, \sigma)$. Its sampling implications are an extension.
 - `generated quantities` computes things we want for every draw: here $p_i$ on the probability scale.
 - `mu` and `sigma` are parameters like any other: they get posterior distributions too.
 :::
@@ -464,7 +473,7 @@ show_stan("stan/logistic.stan")
 ## Exercise 3A: eight mother trees, three models {background-color="#f3e8f5"}
 
 ::: large
-`day3/exercise.html`, Exercise 3A (20 minutes, live sampling)
+`day3/exercise-student.qmd`, Exercise 3A Tasks 1–4 (25 minutes with discussion)
 :::
 
 - **Predict first**: which tree's estimate will move the most?
@@ -473,8 +482,10 @@ show_stan("stan/logistic.stan")
 - Predict the survival rate under a **new** mother tree.
 
 ::: notes
-- complete pooling and no pooling use the Day 1 formula (Beta posterior); only the partial pooling model runs Stan
-- debrief 3 min: shrinkage depends on n and on sigma; a new tree needs sigma
+- complete/no pooling use the Day 1 formula; partial pooling reads supplied Stan draws
+- checkpoints after 7/16 min: all three estimates loaded / tree H interpreted
+- debrief 3 min: shrinkage depends on n and on sigma
+- return to Task 5 at 76 min: a new tree needs sigma
 :::
 
 # Multilevel regression
@@ -626,36 +637,29 @@ vs <- function(v, col = "mean", digits = 2) round(vint_sum[[col]][vint_sum$varia
 - Day 2's pooled sigma was 0.135: part of it was variation among species
 :::
 
-## Step 2: varying slopes and a species-level predictor
+## Step 2: species-level regression
 
 $$
-\begin{align*}
-\log h_{ij} &\sim \mathcal{N}(\log \beta_{0j} + \beta_{1j} x_{ij},\; \sigma)\\
-\begin{bmatrix} \log \beta_{0j} \\ \beta_{1j} \end{bmatrix}
-&\sim \mathrm{MVN}\Biggl(
-\begin{bmatrix} \gamma_{11} + \gamma_{12}\, \mathrm{wd}_j \\ \gamma_{21} + \gamma_{22}\, \mathrm{wd}_j \end{bmatrix},
-\begin{bmatrix} \tau_1^2 & \rho \tau_1 \tau_2 \\ \rho \tau_1 \tau_2 & \tau_2^2 \end{bmatrix}
-\Biggr)
-\end{align*}
+\log h_{ij} \sim \mathcal{N}(a_j + b_j x_{ij},\; \sigma), \qquad x_{ij}=\log(\mathrm{DBH}_{ij}/40)
 $$
 
-::: small
 ::: incremental
-- Now the exponent $\beta_{1j}$ also varies among species.
-- Species-level regression: the *typical* intercept and exponent depend on wood density.
-  - $\gamma_{22}$ answers our hypothesis: does the exponent increase with wood density?
-- $\tau_1$, $\tau_2$: variation among species that wood density does not explain. $\rho$: correlation between intercepts and slopes.
-- Priors: $\gamma \sim \mathcal{N}(0, 2.5)$, $\tau \sim \text{Half-Cauchy}(0, 2.5)$, correlation matrix $\sim \text{LKJ}(2)$ (mildly favours weak correlations).
-:::
-:::
+- Each species has an intercept $a_j$ and an exponent $b_j$.
+- Their expected values depend on the wood density of the species:
 
-::: footer
-Model file: `stan/vslope.stan` (indices of $\gamma$ as in the Stan code: `gamma[2,2]` $= \gamma_{22}$).
+$$
+E(a_j \mid \mathrm{wd}_j)=\gamma_{11}+\gamma_{12}\mathrm{wd}_j, \qquad
+E(b_j \mid \mathrm{wd}_j)=\gamma_{21}+\gamma_{22}\mathrm{wd}_j
+$$
+
+- `gamma[2,2]` answers: does the exponent increase with wood density?
+- `tau[1]`, `tau[2]`: remaining variation among species; `sigma`: variation within a species.
+- Same regression idea as Day 2, now applied to **species coefficients**.
 :::
 
 ::: notes
-- we do not walk through vslope.stan line by line; the Cholesky/LKJ details are in the Stan User's Guide (hierarchical priors section)
-- wd is scaled: mean 0, sd 1
+- a_j = log(beta0_j), b_j = beta1_j; keep these names beside the output table
+- covariance, Cholesky and LKJ details are an extension
 :::
 
 ## Result: does wood density change the exponent?
@@ -722,79 +726,19 @@ ggplot(slopes, aes(wd)) +
 Mean (90% interval). True values in the simulation: $\gamma_{22}$ = `r allometry_truth$gamma11`, $\gamma_{12}$ = `r allometry_truth$gamma01`.
 :::
 
-## Same model, different tools
+## Check computation before interpretation
 
-::: footer
-Two-stage, e.g., [Song *et al.* 2021 *Journal of Ecology*](https://doi.org/10.1111/1365-2745.13497), [Jevon *et al.* 2022 *Ecology*](https://doi.org/10.1002/ecy.3808); simultaneous MLE, e.g., [Chen *et al.* 2019 *Science*](https://doi.org/10.1126/science.aau1361)
-:::
-
-::: small
-**Two-stage**: a regression per species, then a regression of the slopes on wood density.
-
-```{r, echo=TRUE, eval=FALSE}
-fit_gr <- lm(slope_coef ~ wd, data = slopes_per_species)
-```
-
-- Treats a slope estimated from 3 trees like a slope estimated from 40 trees.
-
-::: fragment
-**Simultaneous MLE** (`lme4`) and **Bayesian** (`brms`): the same formula.
-
-```{r, echo=TRUE, eval=FALSE}
-lme4::lmer(log(h) ~ log(dbh / 40) * wd + (1 + log(dbh / 40) | sp), data = allo)
-brms::brm(log(h) ~ log(dbh / 40) * wd + (1 + log(dbh / 40) | sp), data = allo)
-```
-
-- For these data `lmer()` gives a similar wood-density effect, but warns about a *singular fit*: with 10 species it estimates the correlation between intercepts and slopes as exactly 1.
-- The Bayesian model returns a distribution for every variance and correlation instead of a boundary value.
-:::
-
-::: fragment
-**Stan**: full control over likelihood, priors, and structure. Needed when the model does not fit a formula interface.
-:::
-:::
-
-<!-- TODO: brms is not installed in the validation environment; run the brm() call and compare with stan/vslope.stan (priors differ unless set explicitly). -->
-
-## Divergent transitions: a warning you will meet
-
-::: columns
-::: {.column width="50%"}
-**Centered** (intuitive)
-
-$$
-\theta_j \sim \mathcal{N}(\mu, \tau)
-$$
-
-**Non-centered** (same model)
-
-$$
-\tilde{\theta}_j \sim \mathcal{N}(0, 1), \qquad \theta_j = \mu + \tau \cdot \tilde{\theta}_j
-$$
-:::
-
-::: {.column width="50%"}
-::: small
 ::: incremental
-- In hierarchical models, when $\tau$ is small all $\theta_j$ are squeezed together. The sampler cannot follow this shape and reports **divergent transitions**.
-- Even a few divergences mean that part of the posterior may be missing. Do not ignore them.
-- Remedies: write the model in the non-centered form, as `logistic.stan` and `vslope.stan` do; let the sampler take smaller steps (`adapt_delta = 0.95`); reconsider the priors.
-- Checklist for today's fits: `rhat`, ESS, **and** divergences.
+- Check `rhat`, bulk/tail ESS, trace plots, treedepth and E-BFMI warnings.
+- A **divergence** means sampling may have missed part of the posterior. Investigate before interpreting.
+- The supplied core hierarchical fits have zero divergences; this is a warning checklist, not a divergent-fit repair exercise.
+- Then check predictions and group structure against the data. No single number proves adequacy.
 :::
-:::
-:::
-:::
-
-::: footer
-Betancourt (2017) [Diagnosing Biased Inference with Divergences](https://betanalpha.github.io/assets/case_studies/divergences_and_bias.html)
-:::
-
-<!-- TODO: add a precomputed centered-parameterisation fit that actually diverges (e.g. the mother trees with a centered model) so participants can see the warning. -->
 
 ## Exercise 3B: species differences in tree allometry {background-color="#f3e8f5"}
 
 ::: large
-`day3/exercise.html`, Exercise 3B (20 minutes, stored results by default)
+`day3/exercise-student.qmd`, Exercise 3B (21 minutes including discussion)
 :::
 
 - Varying intercepts: what do $\mu_0$, $\tau$, and $\sigma$ mean for these trees?
@@ -802,38 +746,28 @@ Betancourt (2017) [Diagnosing Biased Inference with Divergences](https://betanal
 - Which species benefit most from partial pooling, and why?
 
 ::: notes
-- vint runs in about 1 s and vslope in about 7 s, so live sampling is possible if the server is not busy
+- stored results for both models; no live fitting in the core
+- checkpoints after 6/12 min: tau vs sigma / probability for gamma[2,2]
 - debrief 3 min: shrinkage was strong for mother trees, weak for species intercepts, strong for slopes of rare species: it depends on the data
 :::
 
-# Putting it together
+## A new mother tree: return to Exercise 3A Task 5
 
-## MLE vs. Bayesian estimation for multilevel models
-
-::: small
-**MLE** (e.g., `lme4`{.small}): integrate the group-level parameters out, then maximise.
-
-$L(\mu, \sigma) = \prod_i \int_{-\infty}^{\infty} \mathcal{B}(S_i \mid N_i, p_i) \times \mathcal{N}(\mathrm{logit}(p_i) \mid \mu, \sigma)\, dp_i$
-
-- Requires numerical integration; this becomes difficult for complex models.
-- No prior; variance estimates can be unstable or sit on the boundary with few groups.
-
-::: fragment
-**Bayesian estimation**: sample all parameters jointly.
-
-$P(\mu, \sigma, p_1, \dots, p_8 \mid S, N) \propto \prod_i \mathcal{B}(S_i \mid N_i, p_i) \times \prod_i \mathcal{N}(\mathrm{logit}(p_i) \mid \mu, \sigma)$
-
-$\qquad\qquad\qquad\qquad\qquad\quad \times\; \mathcal{N}(\mu \mid 0, 5) \times \text{Half-}\mathcal{N}(\sigma \mid 0, 1)$
-
-- MCMC approximates the whole posterior: every parameter, including each $p_i$ and $\sigma$, comes with its uncertainty.
-- Priors help stabilize estimates, especially with limited data.
-- The hierarchical prior is what shares information among groups.
+::: large
+Core task: 6 minutes including discussion. Use the same supplied mother-tree fit.
 :::
+
+::: incremental
+- Predict: is a new-tree interval wider than the complete-pooling interval?
+- For each draw: $z_{new}\sim\mathcal{N}(\mu,\sigma)$, then $p_{new}=\mathrm{logit}^{-1}(z_{new})$.
+- Summarise the survival probability of the new tree, and explain where the extra uncertainty comes from.
 :::
 
 ::: notes
-posterior distribution is proportional to the likelihood times the prior
+- 4 min pair work + 2 min discussion; distinguish a survival probability from a future survivor count
 :::
+
+# Putting it together
 
 ## A workflow for your own data
 
@@ -854,44 +788,18 @@ posterior distribution is proportional to the likelihood times the prior
 Expect to go around this loop several times.
 :::
 
-## Looking ahead: a real research model
+## Back to NDD: the same two levels
+
+::: incremental
+- **Tree height**: individual DBH predicts height; species wood density predicts the species exponent.
+- **Seedling survival**: local conspecific density predicts survival; species abundance could predict the species density effect.
+- Change the likelihood from normal log height to binomial/Bernoulli survival, and use a logit link.
+- On your own data: draw the levels, fit a simpler model first, then check before interpreting.
+:::
 
 ::: footer
-e.g.,
-[Comita *et al.* 2010 *Science*](https://doi.org/10.1126/science.1190772),
-[Song & Katabuchi *et al.* 2024 *Ecology*](https://doi.org/10.1002/ecy.4382)
+Comita et al. (2010) [Science](https://doi.org/10.1126/science.1190772); Song & Katabuchi et al. (2024) [Ecology](https://doi.org/10.1002/ecy.4382).
 :::
-
-::: columns
-
-::: {.column width=52%}
-::: {style="font-size: 0.62em;"}
-```{r, results="asis"}
-mv <- readLines(here("stan/mv_logistic.stan"))
-cat("```stan\n", paste(mv[seq_len(grep("^generated quantities", mv) - 2)], collapse = "\n"),
-  "\n```\n", sep = "")
-```
-:::
-:::
-
-::: {.column width=48%}
-::: small
-*H: Rare species tend to be rare because they suffer stronger conspecific NDD than common species.*
-
-- $s_{i} \sim \mathcal{B}(p_{i})$: [likelihood]{.teal} (Day 1, Day 2)
-
-- $\mathrm{logit}(p_{i}) = \boldsymbol{x_{i}} \cdot \boldsymbol{\beta_{j}}$: seedling-level model (Day 2)
-
-- $\boldsymbol{\beta_j} = \boldsymbol{\gamma} \cdot \boldsymbol{u_j} + \mathrm{diag}(\boldsymbol{\tau})\cdot \boldsymbol{L} \cdot \boldsymbol{z_j}$: species-level model with abundance as predictor (today)
-
-- $\boldsymbol{z}$, $\boldsymbol{L}$, $\boldsymbol{\tau}$, $\boldsymbol{\gamma}$: [priors]{.purple}
-
-This is the question from Day 1. It is the allometry model of Exercise 3B with a Bernoulli likelihood, and abundance in place of wood density. You can now read every block.
-:::
-:::
-:::
-
-<!-- TODO: the generated quantities block of stan/mv_logistic.stan refers to variables (phi, xi, psi) that are not declared; the file is for display only and does not compile. -->
 
 ## Summary
 
@@ -932,6 +840,179 @@ This is the question from Day 1. It is the allometry model of Exercise 3B with a
 - [AIcia Solid Project](https://youtu.be/mX_NpDD7wwg) (in Japanese and Math)
 
 # Appendix: optional material {visibility="uncounted"}
+
+## Same model, different tools {visibility="uncounted"}
+
+::: footer
+Two-stage, e.g., [Song *et al.* 2021 *Journal of Ecology*](https://doi.org/10.1111/1365-2745.13497), [Jevon *et al.* 2022 *Ecology*](https://doi.org/10.1002/ecy.3808); simultaneous MLE, e.g., [Chen *et al.* 2019 *Science*](https://doi.org/10.1126/science.aau1361)
+:::
+
+::: small
+**Two-stage**: a regression per species, then a regression of the slopes on wood density.
+
+```{r, echo=TRUE, eval=FALSE}
+fit_gr <- lm(slope_coef ~ wd, data = slopes_per_species)
+```
+
+- Treats a slope estimated from 3 trees like a slope estimated from 40 trees.
+
+::: fragment
+**Simultaneous MLE** (`lme4`) and **Bayesian** (`brms`): the same formula.
+
+```{r, echo=TRUE, eval=FALSE}
+lme4::lmer(log(h) ~ log(dbh / 40) * wd + (1 + log(dbh / 40) | sp), data = allo)
+brms::brm(log(h) ~ log(dbh / 40) * wd + (1 + log(dbh / 40) | sp), data = allo)
+```
+
+- For these data `lmer()` gives a similar wood-density effect, but warns about a *singular fit*: with 10 species it estimates the correlation between intercepts and slopes as exactly 1.
+- The Bayesian model returns a distribution for every variance and correlation instead of a boundary value.
+:::
+
+::: fragment
+**Stan**: full control over likelihood, priors, and structure. Needed when the model does not fit a formula interface.
+:::
+:::
+
+<!-- brms is installed in the classroom image; this call and its prior
+differences still need comparison. Keep compilation outside the core route. -->
+
+
+## Divergent transitions: a warning you will meet {visibility="uncounted"}
+
+::: columns
+::: {.column width="50%"}
+**Centered** (intuitive)
+
+$$
+\theta_j \sim \mathcal{N}(\mu, \tau)
+$$
+
+**Non-centered** (same model)
+
+$$
+\tilde{\theta}_j \sim \mathcal{N}(0, 1), \qquad \theta_j = \mu + \tau \cdot \tilde{\theta}_j
+$$
+:::
+
+::: {.column width="50%"}
+::: small
+::: incremental
+- In hierarchical models, when $\tau$ is small all $\theta_j$ are squeezed together. The sampler cannot follow this shape and reports **divergent transitions**.
+- Even a few divergences mean that part of the posterior may be missing. Do not ignore them.
+- Remedies: write the model in the non-centered form, as `logistic.stan` and `vslope.stan` do; let the sampler take smaller steps (`adapt_delta = 0.95`); reconsider the priors.
+- Checklist for today's fits: `rhat`, ESS, **and** divergences.
+:::
+:::
+:::
+:::
+
+::: footer
+Betancourt (2017) [Diagnosing Biased Inference with Divergences](https://betanalpha.github.io/assets/case_studies/divergences_and_bias.html)
+:::
+
+<!-- TODO: add a precomputed centered-parameterisation fit that actually diverges (e.g. the mother trees with a centered model) so participants can see the warning. -->
+
+
+## MLE vs. Bayesian estimation for multilevel models {visibility="uncounted"}
+
+::: small
+**MLE** (e.g., `lme4`{.small}): integrate the group-level parameters out, then maximise.
+
+$L(\mu, \sigma) = \prod_i \int_{-\infty}^{\infty} \mathcal{B}(S_i \mid N_i, \mathrm{logit}^{-1}(z_i)) \times \mathcal{N}(z_i \mid \mu, \sigma)\, dz_i$
+
+- Requires numerical integration; this becomes difficult for complex models.
+- No prior; variance estimates can be unstable or sit on the boundary with few groups.
+
+::: fragment
+**Bayesian estimation**: sample all parameters jointly.
+
+$P(\mu, \sigma, z_1, \dots, z_8 \mid S, N) \propto \prod_i \mathcal{B}(S_i \mid N_i, \mathrm{logit}^{-1}(z_i)) \times \prod_i \mathcal{N}(z_i \mid \mu, \sigma)$
+
+$\qquad\qquad\qquad\qquad\qquad\quad \times\; \mathcal{N}(\mu \mid 0, 5) \times \text{Half-}\mathcal{N}(\sigma \mid 0, 1)$
+
+- MCMC approximates the whole posterior: every parameter, including each $p_i$ and $\sigma$, comes with its uncertainty.
+- Priors help stabilize estimates, especially with limited data.
+- The hierarchical prior is what shares information among groups.
+:::
+:::
+
+::: notes
+posterior distribution is proportional to the likelihood times the prior
+:::
+
+
+## Extension: covariance and priors for varying slopes {visibility="uncounted"}
+
+$$
+\begin{align*}
+\log h_{ij} &\sim \mathcal{N}(\log \beta_{0j} + \beta_{1j} x_{ij},\; \sigma)\\
+\begin{bmatrix} \log \beta_{0j} \\ \beta_{1j} \end{bmatrix}
+&\sim \mathrm{MVN}\Biggl(
+\begin{bmatrix} \gamma_{11} + \gamma_{12}\, \mathrm{wd}_j \\ \gamma_{21} + \gamma_{22}\, \mathrm{wd}_j \end{bmatrix},
+\begin{bmatrix} \tau_1^2 & \rho \tau_1 \tau_2 \\ \rho \tau_1 \tau_2 & \tau_2^2 \end{bmatrix}
+\Biggr)
+\end{align*}
+$$
+
+::: small
+::: incremental
+- Now the exponent $\beta_{1j}$ also varies among species.
+- Species-level regression: the *typical* intercept and exponent depend on wood density.
+  - $\gamma_{22}$ answers our hypothesis: does the exponent increase with wood density?
+- $\tau_1$, $\tau_2$: variation among species that wood density does not explain. $\rho$: correlation between intercepts and slopes.
+- Priors: $\gamma \sim \mathcal{N}(0, 2.5)$, $\tau \sim \text{Half-Cauchy}(0, 2.5)$, correlation matrix $\sim \text{LKJ}(2)$ (mildly favours weak correlations).
+:::
+:::
+
+::: footer
+Model file: `stan/vslope.stan` (indices of $\gamma$ as in the Stan code: `gamma[2,2]` $= \gamma_{22}$).
+:::
+
+::: notes
+- we do not walk through vslope.stan line by line; the Cholesky/LKJ details are in the Stan User's Guide (hierarchical priors section)
+- wd is scaled: mean 0, sd 1
+:::
+
+
+## Extension: reading the research-model code {visibility="uncounted"}
+
+::: footer
+e.g.,
+[Comita *et al.* 2010 *Science*](https://doi.org/10.1126/science.1190772),
+[Song & Katabuchi *et al.* 2024 *Ecology*](https://doi.org/10.1002/ecy.4382)
+:::
+
+::: columns
+
+::: {.column width=52%}
+::: {style="font-size: 0.62em;"}
+```{r, results="asis"}
+mv <- readLines(here("stan/mv_logistic.stan"))
+cat("```stan\n", paste(mv[seq_len(grep("^generated quantities", mv) - 2)], collapse = "\n"),
+  "\n```\n", sep = "")
+```
+:::
+:::
+
+::: {.column width=48%}
+::: small
+*H: Rare species tend to be rare because they suffer stronger conspecific NDD than common species.*
+
+- $s_{i} \sim \mathcal{B}(p_{i})$: [likelihood]{.teal} (Day 1, Day 2)
+
+- $\mathrm{logit}(p_{i}) = \boldsymbol{x_{i}} \cdot \boldsymbol{\beta_{j}}$: seedling-level model (Day 2)
+
+- $\boldsymbol{\beta_j} = \boldsymbol{\gamma} \cdot \boldsymbol{u_j} + \mathrm{diag}(\boldsymbol{\tau})\cdot \boldsymbol{L} \cdot \boldsymbol{z_j}$: species-level model with abundance as predictor (today)
+
+- $\boldsymbol{z}$, $\boldsymbol{L}$, $\boldsymbol{\tau}$, $\boldsymbol{\gamma}$: [priors]{.purple}
+
+This is the question from Day 1. It is the allometry model of Exercise 3B with a Bernoulli likelihood, and abundance in place of wood density. The likelihood and the two predictor levels follow the course structure. The matrix parameterisation is an optional extension; this legacy file is not executable.
+:::
+:::
+:::
+
+<!-- TODO: the generated quantities block of stan/mv_logistic.stan refers to variables (phi, xi, psi) that are not declared; the file is for display only and does not compile. -->
+
 
 ## Eight schools problem {visibility="uncounted"}
 
