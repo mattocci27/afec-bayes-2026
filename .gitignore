@@ -3,6 +3,7 @@
 !*/
 !*.*
 !Dockerfile
+!Makefile
 
 *.key
 *.rds

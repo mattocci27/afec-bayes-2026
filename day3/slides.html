@@ -31,7 +31,7 @@
     ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
       width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
@@ -134,12 +134,12 @@
     }
     .reveal .footnotes ol {
       counter-reset: ol;
-      list-style-type: none;
+      list-style-type: none; 
       margin-left: 0;
     }
     .reveal .footnotes ol li:before {
       counter-increment: ol;
-      content: counter(ol) ". ";
+      content: counter(ol) ". "; 
     }
     .reveal .footnotes ol li > p:first-child {
       display: inline-block;
@@ -181,19 +181,19 @@
     .reveal .slide > img.r-stretch.quarto-figure-center {
       display: block;
       margin-left: auto;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .reveal .slide > img.stretch.quarto-figure-left,
     .reveal .slide > img.r-stretch.quarto-figure-left  {
       display: block;
       margin-left: 0;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .reveal .slide > img.stretch.quarto-figure-right,
     .reveal .slide > img.r-stretch.quarto-figure-right  {
       display: block;
       margin-left: auto;
-      margin-right: 0;
+      margin-right: 0; 
     }
   </style>
   <script src="slides_files/libs/kePrint-0.0.1/kePrint.js"></script>
@@ -214,7 +214,7 @@ Bayesian statistics for ecology
 Day 3: Hierarchical models and ecological applications
 </h3>
 <p>
-AFEC-X 2026 · 23 October · 19:00–20:30 China time (UTC+8)
+AFEC-X 2026 · 23 October
 </p>
 <h3>
 🧑🏻‍💻 <span class="author">Masatoshi Katabuchi @ XTBG, CAS</span>
@@ -329,7 +329,7 @@ AFEC-X 2026 · 23 October · 19:00–20:30 China time (UTC+8)
 </ul>
 </div></div>
 <div class="footer">
-<p>The ecological cousin of the “eight schools” problem (Rubin 1981; Gelman et al.&nbsp;2013). See the appendix.</p>
+<p>This is the ecological version of the “eight schools” problem (Rubin 1981; Gelman et al.&nbsp;2013). See the appendix.</p>
 </div>
 </section>
 <section id="eight-mother-trees-problem-separate-estimates" class="slide level2">
@@ -448,7 +448,7 @@ AFEC-X 2026 · 23 October · 19:00–20:30 China time (UTC+8)
           display:block!important;
       }</style></aside>
 <div class="footer">
-<p>We know <code>p_true</code> because we generated this data using <code>p_true</code> as a known parameter. In practical scenarios, we don’t know <code>p_true</code>.</p>
+<p>We know <code>p_true</code> because we used it to generate these data. In practice, we do not know <code>p_true</code>.</p>
 </div>
 </section>
 <section id="extreme-case-1-pooled-estimates" class="slide level2">
@@ -513,7 +513,7 @@ AFEC-X 2026 · 23 October · 19:00–20:30 China time (UTC+8)
 </ul>
 <p><img src="../images/multilevel.png" style="display: block; margin: auto; height: 300px;"></p>
 <div class="fragment">
-<p>The prior for each tree is no longer fixed by us. Its mean <span class="math inline">\(\mu\)</span> and spread <span class="math inline">\(\sigma\)</span> are <strong>estimated from all trees</strong>.</p>
+<p>The model estimates the mean <span class="math inline">\(\mu\)</span> and spread <span class="math inline">\(\sigma\)</span> of the tree-level distribution using data from all trees.</p>
 </div>
 <aside class="notes">
 <ul>
@@ -679,7 +679,7 @@ AFEC-X 2026 · 23 October · 19:00–20:30 China time (UTC+8)
 <div class="small">
 <ul>
 <li class="fragment"><p><code class="small">p_bayes</code> (posterior median) is closer to the 1:1 line: average error 0.055, against 0.103 for <code class="small">p_like</code>.</p></li>
-<li class="fragment"><p>The model compensates for limited data by using the information that trees of one species are similar. How similar is learned from the data.</p></li>
+<li class="fragment"><p>The model estimates how similar trees within a species are. It uses that estimate to stabilize estimates when data are limited.</p></li>
 </ul>
 </div>
 </div></div>
@@ -687,7 +687,7 @@ AFEC-X 2026 · 23 October · 19:00–20:30 China time (UTC+8)
 <ul>
 <li>less influenced by overfitting for each tree</li>
 <li>average error = root mean squared error against p_true</li>
-<li>honest note: in this data set the completely pooled estimate has a similar error, because the true variation among trees is small. Partial pooling found that out by itself; complete pooling assumed it. Exercise 3A comes back to this.</li>
+<li>Honest note: the completely pooled estimate has a similar error in this data set because true variation among trees is small. Partial pooling estimates this variation from the data; complete pooling assumes it is zero. Exercise 3A revisits this comparison.</li>
 </ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -724,7 +724,7 @@ AFEC-X 2026 · 23 October · 19:00–20:30 China time (UTC+8)
 <li class="fragment">the estimate is <strong>far from the mean</strong>.</li>
 </ul></li>
 <li class="fragment">How far also depends on <span class="math inline">\(\sigma\)</span>: here the trees turn out to be similar (<span class="math inline">\(\sigma\)</span> small), so shrinkage is strong.</li>
-<li class="fragment">Partial pooling is not a fixed correction. It depends on the model and on the data.</li>
+<li class="fragment">Partial pooling is not a fixed correction. Its effect depends on the model and the data.</li>
 </ul>
 </div>
 </div></div>
@@ -818,7 +818,7 @@ AFEC-X 2026 · 23 October · 19:00–20:30 China time (UTC+8)
 <section id="multilevel-model-verbal-model-tree-allometry-example" class="slide level2">
 <h2>Multilevel model (verbal model: tree allometry example)</h2>
 <div class="footer">
-<p>Example inspired by Nguyen &amp; Katabuchi <em>Journal of Forestry Research</em> (accepted). Wood density is scaled (mean = 0, sd = 1).</p>
+<p>Example inspired by Nguyen &amp; Katabuchi, <em>Journal of Forestry Research</em> (accepted). Wood density is scaled to mean 0 and sd 1.</p>
 </div>
 <div class="small">
 <p><em>H: Dense wood can support taller trees than less dense wood.</em></p>
@@ -830,7 +830,7 @@ AFEC-X 2026 · 23 October · 19:00–20:30 China time (UTC+8)
 <li class="fragment"><p>Slope <em>b</em> ~ wood density (species-level)</p></li>
 </ul>
 <div class="fragment">
-<p>The same shape as the NDD question from Day 1. We practise it on tree height, and return to NDD at the end.</p>
+<p>This follows the same structure as the Day 1 NDD question. We use tree height as an example and return to NDD at the end.</p>
 </div>
 </div>
 
@@ -853,7 +853,7 @@ AFEC-X 2026 · 23 October · 19:00–20:30 China time (UTC+8)
 <li class="fragment">Green: a separate regression for each species (no pooling).</li>
 <li class="fragment">Common species: well estimated.</li>
 <li class="fragment">Rare species (3 to 6 trees): the separate lines are driven by noise.</li>
-<li class="fragment">Rare species are the rule in tropical forests. Dropping them throws away most of the community.</li>
+<li class="fragment">Many species in tropical forests are rare. Excluding them would leave much of the community out of the analysis.</li>
 </ul>
 </div></div>
 </section>
@@ -869,10 +869,10 @@ AFEC-X 2026 · 23 October · 19:00–20:30 China time (UTC+8)
 \]</span></p>
 <div class="small">
 <ul>
-<li class="fragment">Tree <span class="math inline">\(i\)</span> of species <span class="math inline">\(j\)</span>; <span class="math inline">\(x_{ij} = \log(\mathrm{DBH}_{ij}/40)\)</span>. Same structure as the mother trees: each species has its own intercept, and the intercepts come from a common distribution.</li>
-<li class="fragment"><span class="math inline">\(e^{\mu_0}\)</span>: height of a 40-cm tree of a <em>typical</em> species. <span class="math inline">\(\tau\)</span>: how much species differ (log scale).</li>
-<li class="fragment">Result: <span class="math inline">\(\tau\)</span> = 0.11 (90% interval 0.07 to 0.18): species differ by roughly 11% in height at the same DBH. <span class="math inline">\(\sigma\)</span> = 0.11: trees within a species differ by about the same amount.</li>
-<li class="fragment"><code>stan/vint.stan</code> uses half-Cauchy priors for the two SDs; yesterday we used half-normal. Both are weakly informative here.</li>
+<li class="fragment">For tree <span class="math inline">\(i\)</span> of species <span class="math inline">\(j\)</span>, <span class="math inline">\(x_{ij} = \log(\mathrm{DBH}_{ij}/40)\)</span>. As with the mother trees, each species has its own intercept, and the intercepts share a common distribution.</li>
+<li class="fragment"><span class="math inline">\(e^{\mu_0}\)</span> is the height of a 40-cm tree for a <em>typical</em> species. <span class="math inline">\(\tau\)</span> measures how much species differ on the log scale.</li>
+<li class="fragment">Estimated <span class="math inline">\(\tau\)</span> is 0.11 (90% interval 0.07 to 0.18). Species differ by roughly 11% in height at the same DBH. Estimated <span class="math inline">\(\sigma\)</span> is 0.11. Trees within a species differ by about the same amount.</li>
+<li class="fragment"><code>stan/vint.stan</code> uses half-Cauchy priors for the two SDs. Day 2 used half-normal priors. Both prior choices are weakly informative here.</li>
 </ul>
 </div>
 <aside class="notes">
@@ -953,16 +953,16 @@ E(b_j \mid \mathrm{wd}_j)=\gamma_{21}+\gamma_{22}\mathrm{wd}_j
 </div>
 </div></div>
 <div class="footer">
-<p>Mean (90% interval). True values in the simulation: <span class="math inline">\(\gamma_{22}\)</span> = 0.1, <span class="math inline">\(\gamma_{12}\)</span> = 0.05.</p>
+<p>Means and 90% intervals are shown. The true simulation values are <span class="math inline">\(\gamma_{22}\)</span> = 0.1 and <span class="math inline">\(\gamma_{12}\)</span> = 0.05.</p>
 </div>
 </section>
 <section id="check-computation-before-interpretation" class="slide level2">
 <h2>Check computation before interpretation</h2>
 <ul>
 <li class="fragment">Check <code>rhat</code>, bulk/tail ESS, trace plots, treedepth and E-BFMI warnings.</li>
-<li class="fragment">A <strong>divergence</strong> means sampling may have missed part of the posterior. Investigate before interpreting.</li>
+<li class="fragment">A <strong>divergence</strong> means sampling may have missed part of the posterior. Investigate the cause before interpreting the results.</li>
 <li class="fragment">The supplied core hierarchical fits have zero divergences; this is a warning checklist, not a divergent-fit repair exercise.</li>
-<li class="fragment">Then check predictions and group structure against the data. No single number proves adequacy.</li>
+<li class="fragment">Then check predictions and group structure against the data. No single number proves that the model is adequate.</li>
 </ul>
 </section>
 <section id="exercise-3b-species-differences-in-tree-allometry" class="slide level2" data-background-color="#f3e8f5">
@@ -996,7 +996,7 @@ E(b_j \mid \mathrm{wd}_j)=\gamma_{21}+\gamma_{22}\mathrm{wd}_j
 <section id="a-new-mother-tree-return-to-exercise-3a-task-5" class="slide level2">
 <h2>A new mother tree: return to Exercise 3A Task 5</h2>
 <div class="large">
-<p>Core task: 6 minutes including discussion. Use the same supplied mother-tree fit.</p>
+<p>Core task: 6 minutes including discussion. Use the supplied mother-tree fit.</p>
 </div>
 <ul>
 <li class="fragment">Predict: is a new-tree interval wider than the complete-pooling interval?</li>
@@ -1028,7 +1028,7 @@ E(b_j \mid \mathrm{wd}_j)=\gamma_{21}+\gamma_{22}\mathrm{wd}_j
 <h2>A workflow for your own data</h2>
 <div class="small">
 <ol type="1">
-<li class="fragment"><strong>Draw the structure</strong>: what is the response, what are the groups (species, plots, years), which predictors act at which level?</li>
+<li class="fragment"><strong>Draw the structure</strong>: What is the response? Which groups are present (species, plots, years)? Which predictors act at each level?</li>
 <li class="fragment"><strong>Start simple</strong>: one group-free model (Day 2), then add varying intercepts, then varying slopes if the question needs them.</li>
 <li class="fragment"><strong>Scale and centre predictors</strong>, so that priors and intercepts have a meaning.</li>
 <li class="fragment"><strong>Priors</strong>: weakly informative, checked with a prior predictive simulation.</li>
@@ -1120,7 +1120,7 @@ E(b_j \mid \mathrm{wd}_j)=\gamma_{21}+\gamma_{22}\mathrm{wd}_j
 </ul>
 </div>
 <div class="fragment">
-<p><strong>Stan</strong>: full control over likelihood, priors, and structure. Needed when the model does not fit a formula interface.</p>
+<p><strong>Stan</strong> gives full control over the likelihood, priors, and model structure. Use Stan when the model cannot be expressed with a formula interface.</p>
 </div>
 </div>
 </section>
@@ -1139,8 +1139,8 @@ E(b_j \mid \mathrm{wd}_j)=\gamma_{21}+\gamma_{22}\mathrm{wd}_j
 </div><div class="column" style="width:50%;">
 <div class="small">
 <ul>
-<li class="fragment">In hierarchical models, when <span class="math inline">\(\tau\)</span> is small all <span class="math inline">\(\theta_j\)</span> are squeezed together. The sampler cannot follow this shape and reports <strong>divergent transitions</strong>.</li>
-<li class="fragment">Even a few divergences mean that part of the posterior may be missing. Do not ignore them.</li>
+<li class="fragment">In hierarchical models, all <span class="math inline">\(\theta_j\)</span> values are close when <span class="math inline">\(\tau\)</span> is small. The sampler may have difficulty exploring this posterior and produce <strong>divergent transitions</strong>.</li>
+<li class="fragment">Even a few divergences may mean that part of the posterior is missing. Do not ignore them.</li>
 <li class="fragment">Remedies: write the model in the non-centered form, as <code>logistic.stan</code> and <code>vslope.stan</code> do; let the sampler take smaller steps (<code>adapt_delta = 0.95</code>); reconsider the priors.</li>
 <li class="fragment">Checklist for today’s fits: <code>rhat</code>, ESS, <strong>and</strong> divergences.</li>
 </ul>
@@ -1203,7 +1203,7 @@ E(b_j \mid \mathrm{wd}_j)=\gamma_{21}+\gamma_{22}\mathrm{wd}_j
 <ul>
 <li class="fragment"><span class="math inline">\(\gamma_{22}\)</span> answers our hypothesis: does the exponent increase with wood density?</li>
 </ul></li>
-<li class="fragment"><span class="math inline">\(\tau_1\)</span>, <span class="math inline">\(\tau_2\)</span>: variation among species that wood density does not explain. <span class="math inline">\(\rho\)</span>: correlation between intercepts and slopes.</li>
+<li class="fragment"><span class="math inline">\(\tau_1\)</span> and <span class="math inline">\(\tau_2\)</span> measure variation among species that wood density does not explain. <span class="math inline">\(\rho\)</span> is the correlation between intercepts and slopes.</li>
 <li class="fragment">Priors: <span class="math inline">\(\gamma \sim \mathcal{N}(0, 2.5)\)</span>, <span class="math inline">\(\tau \sim \text{Half-Cauchy}(0, 2.5)\)</span>, correlation matrix <span class="math inline">\(\sim \text{LKJ}(2)\)</span> (mildly favours weak correlations).</li>
 </ul>
 </div>
@@ -1282,7 +1282,7 @@ E(b_j \mid \mathrm{wd}_j)=\gamma_{21}+\gamma_{22}\mathrm{wd}_j
 <li><p><span class="math inline">\(\boldsymbol{\beta_j} = \boldsymbol{\gamma} \cdot \boldsymbol{u_j} + \mathrm{diag}(\boldsymbol{\tau})\cdot \boldsymbol{L} \cdot \boldsymbol{z_j}\)</span>: species-level model with abundance as predictor (today)</p></li>
 <li><p><span class="math inline">\(\boldsymbol{z}\)</span>, <span class="math inline">\(\boldsymbol{L}\)</span>, <span class="math inline">\(\boldsymbol{\tau}\)</span>, <span class="math inline">\(\boldsymbol{\gamma}\)</span>: <span class="purple">priors</span></p></li>
 </ul>
-<p>This is the question from Day 1. It is the allometry model of Exercise 3B with a Bernoulli likelihood, and abundance in place of wood density. The likelihood and the two predictor levels follow the course structure. The matrix parameterisation is an optional extension; this legacy file is not executable.</p>
+<p>This is the Day 1 question. The model uses the allometry structure from Exercise 3B, with a Bernoulli likelihood and species abundance in place of wood density. It retains the course structure: one likelihood and two predictor levels. The matrix parameterisation is an optional extension. This legacy file is for display and does not run.</p>
 </div>
 </div></div>
 </section>
@@ -1368,7 +1368,7 @@ r_{m-1,n-1} + r_{m-1,n} + r_{m-1,n+1} + \\
   <script src="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
   <script src="slides_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="slides_files/libs/revealjs/plugin/quarto-support/support.js"></script>
-
+  
 
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
@@ -1391,7 +1391,7 @@ r_{m-1,n-1} + r_{m-1,n} + r_{m-1,n+1} + \\
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
 'smaller': false,
-
+ 
         // Display controls in the bottom right corner
         controls: true,
 
@@ -1571,7 +1571,7 @@ r_{m-1,n-1} + r_{m-1,n} + r_{m-1,n+1} + \\
         ]
       });
     </script>
-
+    
     <script>
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
@@ -1617,7 +1617,7 @@ r_{m-1,n-1} + r_{m-1,n} + r_{m-1,n+1} + \\
         });
         const isCodeAnnotation = (el) => {
           for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {
+            if (clz.startsWith('code-annotation-')) {                     
               return true;
             }
           }
@@ -1637,11 +1637,11 @@ r_{m-1,n-1} + r_{m-1,n} + r_{m-1,n+1} + \\
             button.setAttribute("data-bs-toggle", "tooltip");
             button.setAttribute("data-bs-placement", "left");
             button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button,
-              { trigger: "manual",
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
                 customClass: "code-copy-button-tooltip",
                 offset: [0, -8]});
-            tooltip.show();
+            tooltip.show();    
           }
           setTimeout(function() {
             if (tooltip) {
@@ -1720,7 +1720,7 @@ r_{m-1,n-1} + r_{m-1,n} + r_{m-1,n+1} + \\
           }
             config['offset'] = [0,0];
             config['maxWidth'] = 700;
-          window.tippy(el, config);
+          window.tippy(el, config); 
         }
         const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
         for (var i=0; i<noterefs.length; i++) {
@@ -1779,6 +1779,6 @@ r_{m-1,n-1} + r_{m-1,n} + r_{m-1,n+1} + \\
       </script>
     <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
     <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
-
+    
 
 </body></html>

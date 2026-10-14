@@ -31,7 +31,7 @@
     ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
       width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
@@ -134,12 +134,12 @@
     }
     .reveal .footnotes ol {
       counter-reset: ol;
-      list-style-type: none;
+      list-style-type: none; 
       margin-left: 0;
     }
     .reveal .footnotes ol li:before {
       counter-increment: ol;
-      content: counter(ol) ". ";
+      content: counter(ol) ". "; 
     }
     .reveal .footnotes ol li > p:first-child {
       display: inline-block;
@@ -181,19 +181,19 @@
     .reveal .slide > img.r-stretch.quarto-figure-center {
       display: block;
       margin-left: auto;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .reveal .slide > img.stretch.quarto-figure-left,
     .reveal .slide > img.r-stretch.quarto-figure-left  {
       display: block;
       margin-left: 0;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .reveal .slide > img.stretch.quarto-figure-right,
     .reveal .slide > img.r-stretch.quarto-figure-right  {
       display: block;
       margin-left: auto;
-      margin-right: 0;
+      margin-right: 0; 
     }
   </style>
   <script src="slides_files/libs/kePrint-0.0.1/kePrint.js"></script>
@@ -214,7 +214,7 @@ Bayesian statistics for ecology
 Day 1: From likelihood to posterior
 </h3>
 <p>
-AFEC-X 2026 · 21 October · 19:00–20:30 China time (UTC+8)
+AFEC-X 2026 · 21 October
 </p>
 <h3>
 🧑🏻‍💻 <span class="author">Masatoshi Katabuchi @ XTBG, CAS</span>
@@ -333,7 +333,7 @@ AFEC-X 2026 · 21 October · 19:00–20:30 China time (UTC+8)
 
 <img data-src="slides_files/figure-revealjs/unnamed-chunk-1-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
 <div class="fragment">
-<p>Rare species have few seedlings. We want the slope of <strong>every</strong> species and the pattern <strong>among</strong> species in one model: a <strong>hierarchical (multilevel) model</strong>. This is where the course ends.</p>
+<p>Rare species have few seedlings. We want to estimate <strong>each species’ slope</strong> and how the slopes vary with species abundance. By Day 3, we will fit one hierarchical model to estimate both.</p>
 </div>
 </div>
 <aside class="notes">
@@ -358,7 +358,7 @@ AFEC-X 2026 · 21 October · 19:00–20:30 China time (UTC+8)
 <h2>Today’s question: the smallest version</h2>
 <div class="columns">
 <div class="column" style="width:40%;">
-<p><img data-src="../images/seedling.png"></p>
+<p><img data-src="../images/seedlings.png"></p>
 </div><div class="column" style="width:60%;">
 <p>We planted 5 seedlings. One year later, 2 are alive.</p>
 <ul>
@@ -367,13 +367,12 @@ AFEC-X 2026 · 21 October · 19:00–20:30 China time (UTC+8)
 <li class="fragment">Would we be equally sure with 40 survivors out of 100?</li>
 </ul>
 <div class="fragment">
-<p>One species, no predictor, one parameter. We keep this example all day, then climb back up: <strong>Day 2</strong>: <span class="math inline">\(p\)</span> depends on conspecific density. <strong>Day 3</strong>: it differs among mother trees and species.</p>
+<p>One species, no predictor, one parameter. We start with this simple model of one survival probability. On Day 2, survival probability depends on conspecific density. On Day 3, survival rates vary among mother trees and species.</p>
 </div>
 </div></div>
 </section>
 <section id="todays-objectives" class="slide level2">
 <h2>Today’s objectives</h2>
-<p>By the end of today, you can</p>
 <ul>
 <li class="fragment">explain what <strong>likelihood</strong>, <strong>prior</strong>, and <strong>posterior</strong> mean;</li>
 <li class="fragment">predict how the posterior changes with <strong>more data</strong> or a <strong>different prior</strong>;</li>
@@ -386,11 +385,10 @@ AFEC-X 2026 · 21 October · 19:00–20:30 China time (UTC+8)
 <h1>Likelihood</h1>
 
 </section>
-<section id="likelihood-start-with-five-seedlings" class="slide level2">
-<h2>Likelihood: start with five seedlings</h2>
-<p><span class="math display">\[
-Y\mid p\sim\mathrm{Binomial}(5,p),\qquad P(Y=y\mid p)=\binom{5}{y}p^y(1-p)^{5-y}
-\]</span></p>
+<section id="probability-of-observing-data" class="slide level2">
+<h2>Probability of observing data</h2>
+<p><span class="math display">\[\boxed{P(\text{data}\mid\text{parameters})}\]</span></p>
+<p>Probability of observing the data given the parameters.</p>
 <div class="columns">
 <div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
@@ -403,33 +401,109 @@ Y\mid p\sim\mathrm{Binomial}(5,p),\qquad P(Y=y\mid p)=\binom{5}{y}p^y(1-p)^{5-y}
 </div>
 </div>
 </div><div class="column" style="width:50%;">
+<p>Suppose we plant five seedlings.</p>
 <ul>
-<li class="fragment">Forward: hold <span class="math inline">\(p\)</span> fixed and compare possible data <span class="math inline">\(y\)</span>.</li>
-<li class="fragment">We observed <span class="math inline">\(y=2\)</span>. The <strong>likelihood</strong> holds these data fixed and compares values of <span class="math inline">\(p\)</span>:</li>
+<li class="fragment">Each seedling has a survival probability of <span class="math inline">\(p=0.6\)</span>.</li>
+<li class="fragment">What is the probability that exactly two survive?</li>
 </ul>
-<p><span class="math display">\[L(p)=\binom{5}{2}p^2(1-p)^3\]</span></p>
-<ul>
-<li class="fragment">In R: <code>dbinom(2, size=5, prob=p)</code>.</li>
-<li class="fragment">This is not yet a probability distribution for <span class="math inline">\(p\)</span>.</li>
-</ul>
+<div class="fragment">
+<p><span class="math display">\[
+\begin{aligned}
+P(Y=2\mid p=0.6) &amp;= \binom{5}{2}(0.6)^2(0.4)^3 \\
+&amp;= 0.2304
+\end{aligned}
+\]</span></p>
+</div>
 </div></div>
+<aside class="notes">
+<ul>
+<li>The vertical bar means “given”: calculate the chance of an outcome assuming a particular survival probability.</li>
+<li>The count Y follows a binomial distribution with five independent seedlings and the same survival probability p for each seedling.</li>
+<li>The highlighted bar is the probability of exactly two survivors.</li>
+<li>This is a discrete count, so we use probability here.</li>
+<li>For continuous data, use probability density; that distinction is introduced in the appendix.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="from-probability-to-likelihood" class="slide level2">
+<h2>From probability to likelihood</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<p>We observed <strong>two survivors out of five</strong> (<span class="math inline">\(y=2\)</span>).</p>
+<ul>
+<li class="fragment">Try different values of the survival probability <span class="math inline">\(p\)</span>.</li>
+<li class="fragment">For each <span class="math inline">\(p\)</span>, how likely are those two survivors?</li>
+<li class="fragment">These probabilities give the <strong>likelihood</strong> <span class="math inline">\(L(p)\)</span>.</li>
+</ul>
+<div class="fragment">
+<p><span class="math display">\[L(p)=P(Y=2\mid p)=\binom{5}{2}p^2(1-p)^3\]</span></p>
+<p>The formula is the same; we now vary <span class="math inline">\(p\)</span>.</p>
+<div class="small">
+<p>In R: <code>dbinom(2, size=5, prob=p)</code>.</p>
+</div>
+</div>
+</div></div>
+<aside class="notes">
+<ul>
+<li>Before observing the count, hold p fixed and compare possible survivor counts.</li>
+<li>After observing two survivors, keep that count fixed and compare values of p using the same binomial formula.</li>
+<li>A likelihood is not a probability distribution for p.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
 <section id="maximum-likelihood-estimation-mle" class="slide level2">
 <h2>Maximum Likelihood Estimation (MLE)</h2>
-<ul>
-<li>2 survivors out of 5 seedlings: What is the survival probability of seedlings?</li>
-</ul>
 <div class="columns">
-<div class="column" style="width:40%;">
-<p><img data-src="../images/seedling.png"></p>
-</div><div class="column" style="width:60%;">
+<div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<p>Which value of <span class="math inline">\(p\)</span> makes two survivors most likely?</p>
 <ul>
-<li class="fragment"><p><span class="math inline">\(p\)</span>: survival rates, <span class="math inline">\(1-p\)</span>: mortality rate</p></li>
-<li class="fragment"><p><span class="math inline">\(L = {}_5C_2 p^2(1-p)^3\)</span> (Binomial distribution)</p></li>
-<li class="fragment"><p><span class="math inline">\(\mathrm{ln}\;L = \mathrm{ln}\;{}_5C_2 + 2\mathrm{ln}\;p + 3\mathrm{ln}(1-p)\)</span></p></li>
-<li class="fragment"><p><span class="math inline">\(\frac{d}{dp}\mathrm{ln}\;L = \frac{2}{p} - \frac{3}{1-p} = 0\)</span></p></li>
-<li class="fragment"><p>Solve: <span class="math inline">\(p = \frac{2}{5}\)</span></p></li>
+<li class="fragment">The curve is highest at <span class="math inline">\(p=0.4\)</span>.</li>
+<li class="fragment">This value is the <strong>maximum likelihood estimate</strong> (MLE).</li>
 </ul>
+<div class="fragment">
+<p><span class="math display">\[\hat{p}_{\mathrm{MLE}}=\frac{2}{5}=0.4\]</span></p>
+<p>For this binomial model, the MLE is the fraction of seedlings that survived.</p>
+</div>
 </div></div>
 </section>
 <section id="what-the-mle-does-not-tell-us" class="slide level2">
@@ -440,7 +514,7 @@ Y\mid p\sim\mathrm{Binomial}(5,p),\qquad P(Y=y\mid p)=\binom{5}{y}p^y(1-p)^{5-y}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
@@ -483,7 +557,7 @@ Y\mid p\sim\mathrm{Binomial}(5,p),\qquad P(Y=y\mid p)=\binom{5}{y}p^y(1-p)^{5-y}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
 </figure>
 </div>
 </div>
@@ -602,7 +676,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
@@ -693,7 +767,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <section id="which-prior-simulate-from-it" class="slide level2">
 <h2>Which prior? Simulate from it</h2>
 
-<img data-src="slides_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
+<img data-src="slides_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
 <ul>
 <li class="fragment"><strong>Prior predictive check</strong>: draw <span class="math inline">\(p\)</span> from the prior, simulate data, and ask “could data like these happen?”</li>
 <li class="fragment">A prior is a statement about plausible <em>data</em>, so judge it on the scale of the data.</li>
@@ -780,7 +854,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 </ul></li>
 <li class="fragment"><p>💻 <strong>Multiplatform</strong></p>
 <ul>
-<li class="fragment">Stan works with R, Python, Julia, and more. In this course we call Stan from R with <code>cmdstanr</code>.</li>
+<li class="fragment">Stan works with R, Python, Julia, and more. In this course, we call Stan from R with <code>cmdstanr</code>.</li>
 </ul></li>
 </ul>
 </div>
@@ -906,7 +980,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-13-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
@@ -973,16 +1047,34 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <li class="fragment"><strong>Bayes’ theorem</strong> turns this around: <span class="orange">posterior</span> <span class="math inline">\(\propto\)</span> <span class="teal">likelihood</span> <span class="math inline">\(\times\)</span> <span class="purple">prior</span>.</li>
 <li class="fragment">The posterior is a <strong>distribution</strong>. We report means, intervals, and probabilities, not just the peak.</li>
 <li class="fragment">The prior matters when data are few, and fades as data accumulate.</li>
-<li class="fragment">When there is no formula, <strong>MCMC</strong> gives draws from the posterior. Everything we want is computed from the draws.</li>
+<li class="fragment">When there is no formula, <strong>MCMC</strong> gives draws from the posterior. We compute the quantities of interest from those draws.</li>
 </ul>
 <div class="fragment">
-<p><strong>Tomorrow</strong>: survival and tree height depend on <em>predictors</em>. Regression models, predictions, and how to check that a fitted model can be trusted.</p>
+<p><strong>Day 2</strong>: survival and tree height depend on <em>predictors</em>. We will fit regression models, make predictions, and check how well the models fit the data.</p>
 </div>
 </section></section>
 <section>
 <section id="appendix-optional-material" class="title-slide slide level1 center" data-visibility="uncounted">
 <h1>Appendix: optional material</h1>
 
+</section>
+<section id="extension-deriving-the-binomial-mle" class="slide level2" data-visibility="uncounted">
+<h2>Extension: deriving the binomial MLE</h2>
+<ul>
+<li>2 survivors out of 5 seedlings: What is the survival probability of seedlings?</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:40%;">
+<p><img data-src="../images/seedling.png"></p>
+</div><div class="column" style="width:60%;">
+<ul>
+<li class="fragment"><p><span class="math inline">\(p\)</span>: survival probability; <span class="math inline">\(1-p\)</span>: probability of dying</p></li>
+<li class="fragment"><p><span class="math inline">\(L = {}_5C_2 p^2(1-p)^3\)</span> (Binomial distribution)</p></li>
+<li class="fragment"><p><span class="math inline">\(\mathrm{ln}\;L = \mathrm{ln}\;{}_5C_2 + 2\mathrm{ln}\;p + 3\mathrm{ln}(1-p)\)</span></p></li>
+<li class="fragment"><p><span class="math inline">\(\frac{d}{dp}\mathrm{ln}\;L = \frac{2}{p} - \frac{3}{1-p} = 0\)</span></p></li>
+<li class="fragment"><p>Solve: <span class="math inline">\(p = \frac{2}{5}\)</span></p></li>
+</ul>
+</div></div>
 </section>
 <section id="extension-probability-density-for-continuous-data" class="slide level2" data-visibility="uncounted">
 <h2>Extension: probability density for continuous data</h2>
@@ -992,7 +1084,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-14-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
 </figure>
 </div>
 </div>
@@ -1002,7 +1094,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 </div>
 </div><div class="column" style="width:60%;">
 <ul>
-<li class="fragment"><p><strong>P(data | parameters)</strong>: Probability of observing the data given the parameters.</p></li>
+<li class="fragment"><p>For continuous data, <span class="math inline">\(f(\text{data}\mid\text{parameters})\)</span> gives the <strong>probability density</strong> at the observed values.</p></li>
 <li class="fragment"><p>e.g., when your model is <span class="math inline">\(x_i \sim \mathcal{N}(\mu = 0, \sigma = 1)\)</span> (normal distribution with mean 0 and standard deviation 1), what is the probability density at x = 1.96?</p></li>
 </ul>
 <div class="fragment">
@@ -1050,7 +1142,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-14-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-16-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
 </figure>
 </div>
 </div>
@@ -1067,14 +1159,14 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <li><span class="math inline">\(P(\text{Positive})\)</span>: 2%, <span class="math inline">\(P(\text{Infected})\)</span>: 0.05%</li>
 </ul>
 </div>
-<p><strong>➡️Forward problem:</strong> If you are infected, what is the probability that PCR test is positive?</p>
+<p><strong>➡️Forward problem:</strong> If a person is infected, what is the probability that the PCR test is positive?</p>
 <p><br></p>
 <div class="fragment">
 <p><span class="math inline">\(P(\text{Positive} \mid \text{Infected})\)</span>: 95%</p>
 </div>
 <p><br></p>
 <div class="fragment">
-<p>This is what the lab test is designed to estimate — how likely we are to observe a positive signal given the known infection status (e.g., 95 out of 100 infected samples test positive).</p>
+<p>Sensitivity is the probability that the test is positive when infection is present. For example, 95 of 100 infected samples may test positive.</p>
 </div>
 </section>
 <section id="forward-and-inverse-problems-pcr-and-disease-example-1" class="slide level2" data-visibility="uncounted">
@@ -1084,7 +1176,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <li><span class="math inline">\(P(\text{Positive})\)</span>: 2%, <span class="math inline">\(P(\text{Infected})\)</span>: 0.05%</li>
 </ul>
 </div>
-<p><strong>🔁Inverse problem (Bayesian):</strong> If the PCR test is positive, what is the probability that you are infected?</p>
+<p><strong>🔁Inverse problem (Bayesian):</strong> If a person’s PCR test is positive, how likely is it that they are infected?</p>
 <p><br></p>
 <div class="fragment">
 <ul>
@@ -1093,7 +1185,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 </div>
 <p><br></p>
 <div class="fragment">
-<p>This isn’t intuitive, but it’s the probability we actually care about — how likely someone is to be infected, given a positive test result.</p>
+<p>This probability may be less intuitive. It answers the practical question: how likely is infection after a positive test result?</p>
 </div>
 <aside class="notes">
 <ul>
@@ -1140,7 +1232,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-15-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-17-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
 </figure>
 </div>
 </div>
@@ -1309,7 +1401,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <li><p>CmdStan: Command line interface (you write Stan code and run it via terminal).</p></li>
 <li><p><code>rstan</code>, <code>cmdstanr</code>: R interface to Stan/Cmdstan (you write Stan code and run it within R).</p></li>
 <li><p><code>brms</code>, <code>rstanarm</code>: Higher-level R packages that generate and run Stan models for you (you write an R formula, without writing Stan code).</p></li>
-<li><p>In this course, we use <code>cmdstanr</code> with models that are already written. <code>brms</code> versions of the same models are shown as optional material on Day 2 and Day 3.</p></li>
+<li><p>In this course, we use <code>cmdstanr</code> with models that are already written. <code>brms</code> versions of the same models are optional material on Days 2 and 3.</p></li>
 </ul>
 </section>
 <section id="references" class="slide level2" data-visibility="uncounted">
@@ -1339,7 +1431,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
   <script src="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
   <script src="slides_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="slides_files/libs/revealjs/plugin/quarto-support/support.js"></script>
-
+  
 
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
@@ -1362,7 +1454,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
 'smaller': false,
-
+ 
         // Display controls in the bottom right corner
         controls: true,
 
@@ -1542,7 +1634,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
         ]
       });
     </script>
-
+    
     <script>
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
@@ -1588,7 +1680,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
         });
         const isCodeAnnotation = (el) => {
           for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {
+            if (clz.startsWith('code-annotation-')) {                     
               return true;
             }
           }
@@ -1608,11 +1700,11 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
             button.setAttribute("data-bs-toggle", "tooltip");
             button.setAttribute("data-bs-placement", "left");
             button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button,
-              { trigger: "manual",
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
                 customClass: "code-copy-button-tooltip",
                 offset: [0, -8]});
-            tooltip.show();
+            tooltip.show();    
           }
           setTimeout(function() {
             if (tooltip) {
@@ -1691,7 +1783,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
           }
             config['offset'] = [0,0];
             config['maxWidth'] = 700;
-          window.tippy(el, config);
+          window.tippy(el, config); 
         }
         const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
         for (var i=0; i<noterefs.length; i++) {
@@ -1750,6 +1842,6 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
       </script>
     <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
     <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
-
+    
 
 </body></html>

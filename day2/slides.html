@@ -31,7 +31,7 @@
     ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
       width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
@@ -134,12 +134,12 @@
     }
     .reveal .footnotes ol {
       counter-reset: ol;
-      list-style-type: none;
+      list-style-type: none; 
       margin-left: 0;
     }
     .reveal .footnotes ol li:before {
       counter-increment: ol;
-      content: counter(ol) ". ";
+      content: counter(ol) ". "; 
     }
     .reveal .footnotes ol li > p:first-child {
       display: inline-block;
@@ -181,19 +181,19 @@
     .reveal .slide > img.r-stretch.quarto-figure-center {
       display: block;
       margin-left: auto;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .reveal .slide > img.stretch.quarto-figure-left,
     .reveal .slide > img.r-stretch.quarto-figure-left  {
       display: block;
       margin-left: 0;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .reveal .slide > img.stretch.quarto-figure-right,
     .reveal .slide > img.r-stretch.quarto-figure-right  {
       display: block;
       margin-left: auto;
-      margin-right: 0;
+      margin-right: 0; 
     }
   </style>
   <script src="slides_files/libs/kePrint-0.0.1/kePrint.js"></script>
@@ -214,7 +214,7 @@ Bayesian statistics for ecology
 Day 2: Regression and model checking
 </h3>
 <p>
-AFEC-X 2026 · 22 October · 19:00–20:30 China time (UTC+8)
+AFEC-X 2026 · 22 October
 </p>
 <h3>
 🧑🏻‍💻 <span class="author">Masatoshi Katabuchi @ XTBG, CAS</span>
@@ -309,9 +309,9 @@ AFEC-X 2026 · 22 October · 19:00–20:30 China time (UTC+8)
 <ul>
 <li class="fragment"><span class="teal">Likelihood</span>: log height is normally distributed around a line.</li>
 <li class="fragment"><span class="math inline">\(\beta\)</span>: scaling exponent.</li>
-<li class="fragment"><span class="math inline">\(\alpha\)</span>: log height of a tree with DBH = 40 cm. So <span class="math inline">\(e^{\alpha}\)</span> is the typical height (m) of a 40-cm tree.
+<li class="fragment"><span class="math inline">\(\alpha\)</span> is the log height of a tree with DBH = 40 cm. Therefore, <span class="math inline">\(e^{\alpha}\)</span> is the typical height (m) of a 40-cm tree.
 <ul>
-<li class="fragment">Dividing DBH by 40 gives the intercept a meaning. Without it, <span class="math inline">\(\alpha\)</span> would describe a tree with DBH = 1 cm.</li>
+<li class="fragment">Dividing DBH by 40 gives the intercept a clear meaning. Without this scaling, <span class="math inline">\(\alpha\)</span> would describe a tree with DBH = 1 cm.</li>
 </ul></li>
 <li class="fragment"><span class="math inline">\(\sigma\)</span>: scatter of individual trees around the line (log scale).</li>
 </ul>
@@ -335,14 +335,14 @@ AFEC-X 2026 · 22 October · 19:00–20:30 China time (UTC+8)
 
 <img data-src="slides_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
 <ul>
-<li class="fragment">Each line is one draw from the prior. Green band: heights of real trees (1 to 100 m).</li>
-<li class="fragment">The vague prior expects trees that are <span class="math inline">\(10^{50}\)</span> m tall, or <span class="math inline">\(10^{-50}\)</span> m. It is not “uninformative”: it puts most of its weight on nonsense.</li>
+<li class="fragment">Each line is one draw from the prior. The green band shows the heights of real trees (1 to 100 m).</li>
+<li class="fragment">The vague prior gives substantial probability to trees as tall as <span class="math inline">\(10^{50}\)</span> m or as short as <span class="math inline">\(10^{-50}\)</span> m. It is not “uninformative”: most of its probability is on unrealistic heights.</li>
 <li class="fragment">The weakly informative prior is still generous, but it stays within a few orders of magnitude of reality.</li>
 </ul>
 </div>
 <aside class="notes">
 <ul>
-<li>intercept prior N(0, 2.5): a 40-cm tree between e^-5 and e^5 m. Wide, but finite.</li>
+<li>An intercept prior of N(0, 2.5) allows 40-cm tree heights from <span class="math inline">\(e^{-5}\)</span> to <span class="math inline">\(e^5\)</span> m. This range is wide but finite.</li>
 <li>with 188 trees the prior hardly matters here; with 5 trees it does (optional task in Exercise 2A)</li>
 </ul>
 <style type="text/css">
@@ -459,7 +459,7 @@ y_i &amp;\sim \mathcal{N}(\alpha + \beta x_i, \sigma)\\
 <ul>
 <li class="fragment">Exponent: 0.65 (90% interval 0.62 to 0.68).</li>
 <li class="fragment">A 40-cm tree is typically <span class="math inline">\(e^{\alpha}\)</span> = 15.4 m tall.</li>
-<li class="fragment">Elastic similarity theory predicts <span class="math inline">\(\beta = 2/3\)</span>. Here <span class="math inline">\(P(\beta &lt; 2/3 \mid \text{data})\)</span> = 0.8.</li>
+<li class="fragment">Elastic similarity theory predicts <span class="math inline">\(\beta = 2/3\)</span>. The posterior probability that <span class="math inline">\(\beta &lt; 2/3\)</span> is <span class="math inline">\(P(\beta &lt; 2/3 \mid \text{data})\)</span> = 0.8.</li>
 </ul>
 </div>
 </div><div class="column" style="width:50%;">
@@ -516,7 +516,7 @@ y_i &amp;\sim \mathcal{N}(\alpha + \beta x_i, \sigma)\\
 <ul>
 <li class="fragment">For every draw: <span class="math inline">\(y^{\text{new}} \sim \mathcal{N}(\mu, \sigma)\)</span></li>
 </ul></li>
-<li class="fragment">More data shrink the dark band. They do not shrink the light band much: trees really differ.</li>
+<li class="fragment">More data narrow the dark band. They have little effect on the light band because trees differ from one another.</li>
 <li class="fragment">Same idea as predicting the 50 new seedlings on Day 1.</li>
 </ul>
 </div></div>
@@ -538,10 +538,10 @@ y_i &amp;\sim \mathcal{N}(\alpha + \beta x_i, \sigma)\\
 </div><div class="column" style="width:45%;">
 <div class="small">
 <ul>
-<li class="fragment">Take one posterior draw, simulate a complete new data set from the model. Repeat.</li>
+<li class="fragment">Take one posterior draw and simulate a complete new data set from the model. Repeat this process for many draws.</li>
 <li class="fragment">If the model is adequate, the observed data look like one of the simulated data sets.</li>
 <li class="fragment">A check, not a test: we look for <strong>systematic</strong> differences that matter for our question.</li>
-<li class="fragment">Different checks look at different features. We will find a problem with this model at the end of today.</li>
+<li class="fragment">Different checks assess different features. We will find a problem with this model later today.</li>
 </ul>
 </div>
 </div></div>
@@ -586,22 +586,22 @@ y_i &amp;\sim \mathcal{N}(\alpha + \beta x_i, \sigma)\\
 <img data-src="slides_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><ul>
 <li class="fragment">We run several chains from different starting points.</li>
 <li class="fragment"><strong>Good</strong>: the chains overlap and look like noise (“fuzzy caterpillar”).</li>
-<li class="fragment"><strong>Bad</strong>: chains sit at different values or wander slowly. The draws do not describe the posterior.</li>
+<li class="fragment"><strong>Bad</strong>: chains stay at different values or move slowly. The draws do not describe the posterior.</li>
 </ul>
 </section>
 <section id="two-numbers-to-check-before-you-interpret-anything" class="slide level2">
 <h2>Two numbers to check before you interpret anything</h2>
 <ul>
-<li class="fragment"><code>rhat</code>: compares variation between chains with variation within chains. Should be close to 1.
+<li class="fragment"><code>rhat</code> compares variation between chains with variation within chains. It should be close to 1.
 <ul>
-<li class="fragment"><code>rhat</code> &lt;= 1.01: good. 1.01 &lt; <code>rhat</code> &lt; 1.1: suspicious. <code>rhat</code> &gt; 1.1: definitely bad.</li>
+<li class="fragment"><code>rhat</code> values at or below 1.01 indicate good mixing. Values above 1.01 and below 1.1 are suspicious. Values above 1.1 indicate poor mixing.</li>
 </ul></li>
-<li class="fragment"><code>ess_bulk</code>, <code>ess_tail</code>: effective sample size. Draws within a chain are correlated, so 4000 draws are worth fewer independent draws.
+<li class="fragment"><code>ess_bulk</code> and <code>ess_tail</code> are effective sample sizes. Draws within a chain are correlated, so the effective sample size can be lower than the draw count.
 <ul>
 <li class="fragment"><code>ess_bulk</code> (means, medians) and <code>ess_tail</code> (interval ends) &gt; 400: good.</li>
 </ul></li>
-<li class="fragment">Stan also warns about <strong>divergent transitions</strong> and <strong>maximum treedepth</strong>. We meet divergences on Day 3.</li>
-<li class="fragment">No single diagnostic is enough. Look at all of them, and at the trace plots.</li>
+<li class="fragment">Stan also warns about <strong>divergent transitions</strong> and <strong>maximum treedepth</strong>. We discuss divergences on Day 3.</li>
+<li class="fragment">No single diagnostic is enough. Check all of them, including the trace plots.</li>
 </ul>
 </section>
 <section id="the-same-two-fits-in-numbers" class="slide level2">
@@ -691,7 +691,7 @@ y_i &amp;\sim \mathcal{N}(\alpha + \beta x_i, \sigma)\\
 <div class="small">
 <ul>
 <li class="fragment">OK fit: <code>rhat</code> = 1.00 and thousands of effective draws for every parameter.</li>
-<li class="fragment">PROBLEM fit: <code>rhat</code> far above 1.01 and an effective sample size of about 5. The means and SDs in these rows mean nothing.</li>
+<li class="fragment"><strong>PROBLEM fit</strong>: <code>rhat</code> is far above 1.01, and the effective sample size is about 5. The means and SDs in these rows are not meaningful.</li>
 <li class="fragment">In the PROBLEM fit almost every iteration also hit the maximum treedepth.</li>
 </ul>
 </div>
@@ -708,7 +708,7 @@ y_i &amp;\sim \mathcal{N}(\alpha + \beta x_i, \sigma)\\
 <ul>
 <li class="fragment">The data inform only the <strong>sum</strong> <span class="math inline">\(\alpha_1 + \alpha_2\)</span>.</li>
 <li class="fragment"><span class="math inline">\(\alpha_1 = 100, \alpha_2 = -97.3\)</span> fits exactly as well as <span class="math inline">\(\alpha_1 = 2.7, \alpha_2 = 0\)</span>.</li>
-<li class="fragment">Running longer does not help. The <strong>model</strong> must be fixed.</li>
+<li class="fragment">Running the model longer does not help. The <strong>model</strong> must be fixed.</li>
 <li class="fragment">This happens in real analyses: e.g., an intercept plus a dummy variable for every site.</li>
 </ul>
 </div>
@@ -763,7 +763,7 @@ s_i &amp;\sim \mathcal{B}(n_i, p_i)\\
 \]</span></p>
 <div class="small">
 <ul>
-<li class="fragment">Day 1: one <span class="math inline">\(p\)</span> for all seedlings. Now <span class="math inline">\(p_i\)</span> depends on conspecific density (scaled: mean 0, sd 1).</li>
+<li class="fragment">Day 1 used one <span class="math inline">\(p\)</span> for all seedlings. On Day 2, <span class="math inline">\(p_i\)</span> depends on conspecific density, scaled to mean 0 and sd 1.</li>
 <li class="fragment">A probability must stay between 0 and 1, so the line is drawn on the <strong>logit</strong> scale: <span class="math inline">\(\mathrm{logit}(p) = \log\frac{p}{1-p}\)</span>.</li>
 <li class="fragment"><span class="math inline">\(\beta &lt; 0\)</span> means NDD.</li>
 </ul>
@@ -787,7 +787,7 @@ s_i &amp;\sim \mathcal{B}(n_i, p_i)\\
 <ul>
 <li class="fragment">A “vague” <span class="math inline">\(\mathcal{N}(0, 10)\)</span> prior on the logit scale says: survival is almost certainly near 0% or near 100%.</li>
 <li class="fragment"><span class="math inline">\(\mathcal{N}(0, 2.5)\)</span> is weakly informative; <span class="math inline">\(\mathcal{N}(0, 1.5)\)</span> is roughly flat on the probability scale.</li>
-<li class="fragment">Relate every prior to the scale of the variable. If you cannot picture it, simulate from it.</li>
+<li class="fragment">Relate each prior to the scale of its variable. If its implications are unclear, simulate from it.</li>
 </ul>
 </div>
 </section>
@@ -817,12 +817,12 @@ s_i &amp;\sim \mathcal{B}(n_i, p_i)\\
 <li class="fragment">high density (+1 SD): 0.17 (0.14 to 0.21)</li>
 <li class="fragment">difference: -0.35 (-0.41 to -0.29)</li>
 </ul></li>
-<li class="fragment">The effect on the probability scale depends on where you start. Always say at which values you compare.</li>
+<li class="fragment">The effect on the probability scale depends on the starting value. State the values you compare.</li>
 </ul>
 </div>
 </div></div>
 <div class="footer">
-<p>Mean (90% interval). True values used in the simulation: <span class="math inline">\(\alpha\)</span> = -0.85, <span class="math inline">\(\beta\)</span> = -0.8.</p>
+<p>Means and 90% intervals are shown. The true values used in the simulation are <span class="math inline">\(\alpha\)</span> = -0.85 and <span class="math inline">\(\beta\)</span> = -0.8.</p>
 </div>
 </section>
 <section id="exercise-2b-diagnose-then-interpret" class="slide level2" data-background-color="#f3e8f5">
@@ -856,10 +856,10 @@ s_i &amp;\sim \mathcal{B}(n_i, p_i)\\
 <section id="a-bayesian-workflow" class="slide level2">
 <h2>A Bayesian workflow</h2>
 <ol type="1">
-<li class="fragment"><strong>Question and model</strong>: what is the data-generating story? Which parameters answer the question?</li>
-<li class="fragment"><strong>Priors</strong>: relate them to the scale of the variables. Prior predictive check.</li>
+<li class="fragment"><strong>Question and model</strong>: What is the data-generating story? Which parameters answer the question?</li>
+<li class="fragment"><strong>Priors</strong>: Relate them to the scale of the variables and run a prior predictive check.</li>
 <li class="fragment"><strong>Fit</strong>.</li>
-<li class="fragment"><strong>Computation check</strong>: <code>rhat</code>, ESS, warnings, trace plots. Stop here if they fail.</li>
+<li class="fragment"><strong>Computation check</strong>: Check <code>rhat</code>, ESS, warnings, and trace plots. Stop here if they fail.</li>
 <li class="fragment"><strong>Model check</strong>: posterior predictive checks that matter for the question.</li>
 <li class="fragment"><strong>Interpret</strong>: distributions of parameters and predictions, on the scale of the data.</li>
 </ol>
@@ -883,8 +883,8 @@ s_i &amp;\sim \mathcal{B}(n_i, p_i)\\
 </div><div class="column" style="width:45%;">
 <ul>
 <li class="fragment">The 188 trees belong to 10 species.</li>
-<li class="fragment">Our model assumed one line for all trees. The residuals say otherwise: some species are consistently taller or shorter than predicted.</li>
-<li class="fragment">Fit each species separately? Some species have only 3 or 4 trees.</li>
+<li class="fragment">Our model assumed one line for all trees. The residuals show that some species are consistently taller or shorter than predicted.</li>
+<li class="fragment">Should we fit each species separately? Some species have only 3 or 4 trees.</li>
 <li class="fragment"><strong>Day 3</strong>: hierarchical models learn about each species <em>and</em> about the variation among species.</li>
 </ul>
 </div></div>
@@ -912,9 +912,9 @@ s_i &amp;\sim \mathcal{B}(n_i, p_i)\\
 </div>
 </div><div class="column" style="width:60%;">
 <ul>
-<li class="fragment">We consider variables <em>x</em> = {-3, …, 3} and <em>y</em> = {-6, …, 4}. We don’t yet know if there is a correlation (<em>y = ax + b</em>).</li>
+<li class="fragment">We consider variables <em>x</em> = {-3, …, 3} and <em>y</em> = {-6, …, 4}. We do not yet know whether they are correlated (<em>y = ax + b</em>).</li>
 <li class="fragment">However, given the similar scales of <em>x</em> and <em>y</em>, it’s reasonable to guess that <em>a</em> falls within a narrow range (e.g., <strong>strongly informative prior</strong>: -5 to 5, <strong>weakly informative prior</strong>: <span class="math inline">\(a \sim \mathcal{N}(0,  2.5)\)</span>).</li>
-<li class="fragment">In contrast, a slope like <em>a</em> = 100 (blue line) clearly doesn’t match the data. A <strong>vague prior</strong> such as <span class="math inline">\(a \sim \mathcal{N}(0,  10^4)\)</span> says that such slopes are as plausible as <em>a</em> = 2.</li>
+<li class="fragment">A slope of <em>a</em> = 100 (blue line) clearly does not match the data. A <strong>vague prior</strong> such as <span class="math inline">\(a \sim \mathcal{N}(0, 10^4)\)</span> treats this slope as plausible as <em>a</em> = 2.</li>
 </ul>
 </div></div>
 </section>
@@ -980,7 +980,7 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
 </div>
 </div>
 <div class="small">
-<p><code>brms</code> writes the Stan code for you. Note that <code>brms</code> places the <code>Intercept</code> prior on the intercept after centring the predictors, so results can differ slightly from our Stan files when a predictor is far from centred.</p>
+<p><code>brms</code> writes the Stan code for you. It places the <code>Intercept</code> prior on the intercept after centring predictors, so results can differ slightly from our Stan files when a predictor is far from centred.</p>
 </div>
 
 </section></section>
@@ -1001,7 +1001,7 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
   <script src="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
   <script src="slides_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="slides_files/libs/revealjs/plugin/quarto-support/support.js"></script>
-
+  
 
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
@@ -1024,7 +1024,7 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
 'smaller': false,
-
+ 
         // Display controls in the bottom right corner
         controls: true,
 
@@ -1204,7 +1204,7 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
         ]
       });
     </script>
-
+    
     <script>
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
@@ -1250,7 +1250,7 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
         });
         const isCodeAnnotation = (el) => {
           for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {
+            if (clz.startsWith('code-annotation-')) {                     
               return true;
             }
           }
@@ -1270,11 +1270,11 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
             button.setAttribute("data-bs-toggle", "tooltip");
             button.setAttribute("data-bs-placement", "left");
             button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button,
-              { trigger: "manual",
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
                 customClass: "code-copy-button-tooltip",
                 offset: [0, -8]});
-            tooltip.show();
+            tooltip.show();    
           }
           setTimeout(function() {
             if (tooltip) {
@@ -1353,7 +1353,7 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
           }
             config['offset'] = [0,0];
             config['maxWidth'] = 700;
-          window.tippy(el, config);
+          window.tippy(el, config); 
         }
         const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
         for (var i=0; i<noterefs.length; i++) {
@@ -1412,6 +1412,6 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
       </script>
     <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
     <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
-
+    
 
 </body></html>

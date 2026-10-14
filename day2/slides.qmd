@@ -77,7 +77,7 @@ dbh_ref <- allometry_truth$dbh_ref
 
 <h3>Day 2: Regression and model checking</h3>
 
-<p>AFEC-X 2026 · 22 October · 19:00–20:30 China time (UTC+8)</p>
+<p>AFEC-X 2026 · 22 October</p>
 
 <h3>🧑🏻‍💻 [Masatoshi Katabuchi \@ XTBG, CAS]{.author}</h3>
 :::
@@ -89,7 +89,8 @@ dbh_ref <- allometry_truth$dbh_ref
 ### Day 1
 
 - [Posterior]{.orange} $\propto$ [likelihood]{.teal} $\times$ [prior]{.purple}
-- The posterior is a distribution. We summarise its draws.
+- The posterior is a distribution.
+  We summarise its draws.
 - One parameter: survival probability $p$
 :::
 
@@ -178,8 +179,10 @@ $$
 ::: incremental
 - [Likelihood]{.teal}: log height is normally distributed around a line.
 - $\beta$: scaling exponent.
-- $\alpha$: log height of a tree with DBH = 40 cm. So $e^{\alpha}$ is the typical height (m) of a 40-cm tree.
-  - Dividing DBH by 40 gives the intercept a meaning. Without it, $\alpha$ would describe a tree with DBH = 1 cm.
+- $\alpha$ is the log height of a tree with DBH = 40 cm.
+  Therefore, $e^{\alpha}$ is the typical height (m) of a 40-cm tree.
+  - Dividing DBH by 40 gives the intercept a clear meaning.
+    Without this scaling, $\alpha$ would describe a tree with DBH = 1 cm.
 - $\sigma$: scatter of individual trees around the line (log scale).
 :::
 :::
@@ -197,7 +200,8 @@ $$
 \end{align*}
 $$
 
-Are these reasonable? How would we know?
+Are these reasonable?
+How would we know?
 :::
 :::
 :::
@@ -231,14 +235,17 @@ bind_rows(
 
 ::: small
 ::: incremental
-- Each line is one draw from the prior. Green band: heights of real trees (1 to 100 m).
-- The vague prior expects trees that are $10^{50}$ m tall, or $10^{-50}$ m. It is not "uninformative": it puts most of its weight on nonsense.
+- Each line is one draw from the prior.
+  The green band shows the heights of real trees (1 to 100 m).
+- The vague prior gives substantial probability to trees as tall as $10^{50}$ m or as short as $10^{-50}$ m.
+  It is not "uninformative": most of its probability is on unrealistic heights.
 - The weakly informative prior is still generous, but it stays within a few orders of magnitude of reality.
 :::
 :::
 
 ::: notes
-- intercept prior N(0, 2.5): a 40-cm tree between e^-5 and e^5 m. Wide, but finite.
+- An intercept prior of N(0, 2.5) allows 40-cm tree heights from $e^{-5}$ to $e^5$ m.
+  This range is wide but finite.
 - with 188 trees the prior hardly matters here; with 5 trees it does (optional task in Exercise 2A)
 :::
 
@@ -290,7 +297,8 @@ allo_draws |>
 ::: incremental
 - Exponent: `r round(mean(allo_draws$beta), 2)` (90% interval `r paste(round(quantile(allo_draws$beta, c(0.05, 0.95)), 2), collapse = " to ")`).
 - A 40-cm tree is typically $e^{\alpha}$ = `r round(mean(exp(allo_draws$alpha)), 1)` m tall.
-- Elastic similarity theory predicts $\beta = 2/3$. Here $P(\beta < 2/3 \mid \text{data})$ = `r round(mean(allo_draws$beta < 2/3), 2)`.
+- Elastic similarity theory predicts $\beta = 2/3$.
+  The posterior probability that $\beta < 2/3$ is $P(\beta < 2/3 \mid \text{data})$ = `r round(mean(allo_draws$beta < 2/3), 2)`.
 :::
 :::
 :::
@@ -351,7 +359,8 @@ ggplot(pred, aes(dbh)) +
   - For every draw: $\mu = \alpha + \beta x$
 - **Light band**: where we expect a *new tree* to be.
   - For every draw: $y^{\text{new}} \sim \mathcal{N}(\mu, \sigma)$
-- More data shrink the dark band. They do not shrink the light band much: trees really differ.
+- More data narrow the dark band.
+  They have little effect on the light band because trees differ from one another.
 - Same idea as predicting the 50 new seedlings on Day 1.
 :::
 :::
@@ -381,10 +390,12 @@ ggplot() +
 ::: {.column width="45%"}
 ::: small
 ::: incremental
-- Take one posterior draw, simulate a complete new data set from the model. Repeat.
+- Take one posterior draw and simulate a complete new data set from the model.
+  Repeat this process for many draws.
 - If the model is adequate, the observed data look like one of the simulated data sets.
 - A check, not a test: we look for **systematic** differences that matter for our question.
-- Different checks look at different features. We will find a problem with this model at the end of today.
+- Different checks assess different features.
+  We will find a problem with this model later today.
 :::
 :::
 :::
@@ -428,18 +439,25 @@ ggplot(trace_df, aes(.iteration, value, colour = factor(.chain))) +
 ::: incremental
 - We run several chains from different starting points.
 - **Good**: the chains overlap and look like noise ("fuzzy caterpillar").
-- **Bad**: chains sit at different values or wander slowly. The draws do not describe the posterior.
+- **Bad**: chains stay at different values or move slowly.
+  The draws do not describe the posterior.
 :::
 
 ## Two numbers to check before you interpret anything
 
 ::: incremental
-- `rhat`: compares variation between chains with variation within chains. Should be close to 1.
-  - `rhat` <= 1.01: good. 1.01 < `rhat` < 1.1: suspicious. `rhat` > 1.1: definitely bad.
-- `ess_bulk`, `ess_tail`: effective sample size. Draws within a chain are correlated, so 4000 draws are worth fewer independent draws.
+- `rhat` compares variation between chains with variation within chains.
+  It should be close to 1.
+  - `rhat` values at or below 1.01 indicate good mixing.
+    Values above 1.01 and below 1.1 are suspicious.
+    Values above 1.1 indicate poor mixing.
+- `ess_bulk` and `ess_tail` are effective sample sizes.
+  Draws within a chain are correlated, so the effective sample size can be lower than the draw count.
   - `ess_bulk` (means, medians) and `ess_tail` (interval ends) > 400: good.
-- Stan also warns about **divergent transitions** and **maximum treedepth**. We meet divergences on Day 3.
-- No single diagnostic is enough. Look at all of them, and at the trace plots.
+- Stan also warns about **divergent transitions** and **maximum treedepth**.
+  We discuss divergences on Day 3.
+- No single diagnostic is enough.
+  Check all of them, including the trace plots.
 :::
 
 ## The same two fits in numbers
@@ -459,7 +477,8 @@ bind_rows(
 ::: small
 ::: incremental
 - OK fit: `rhat` = 1.00 and thousands of effective draws for every parameter.
-- PROBLEM fit: `rhat` far above 1.01 and an effective sample size of about 5. The means and SDs in these rows mean nothing.
+- **PROBLEM fit**: `rhat` is far above 1.01, and the effective sample size is about 5.
+  The means and SDs in these rows are not meaningful.
 - In the PROBLEM fit almost every iteration also hit the maximum treedepth.
 :::
 :::
@@ -478,7 +497,8 @@ $$
 ::: incremental
 - The data inform only the **sum** $\alpha_1 + \alpha_2$.
 - $\alpha_1 = 100, \alpha_2 = -97.3$ fits exactly as well as $\alpha_1 = 2.7, \alpha_2 = 0$.
-- Running longer does not help. The **model** must be fixed.
+- Running the model longer does not help.
+  The **model** must be fixed.
 - This happens in real analyses: e.g., an intercept plus a dummy variable for every site.
 :::
 :::
@@ -540,7 +560,8 @@ $$
 
 ::: small
 ::: incremental
-- Day 1: one $p$ for all seedlings. Now $p_i$ depends on conspecific density (scaled: mean 0, sd 1).
+- Day 1 used one $p$ for all seedlings.
+  On Day 2, $p_i$ depends on conspecific density, scaled to mean 0 and sd 1.
 - A probability must stay between 0 and 1, so the line is drawn on the **logit** scale: $\mathrm{logit}(p) = \log\frac{p}{1-p}$.
 - $\beta < 0$ means NDD.
 :::
@@ -588,7 +609,8 @@ tibble(sd = c(10, 2.5, 1.5)) |>
 ::: incremental
 - A "vague" $\mathcal{N}(0, 10)$ prior on the logit scale says: survival is almost certainly near 0% or near 100%.
 - $\mathcal{N}(0, 2.5)$ is weakly informative; $\mathcal{N}(0, 1.5)$ is roughly flat on the probability scale.
-- Relate every prior to the scale of the variable. If you cannot picture it, simulate from it.
+- Relate each prior to the scale of its variable.
+  If its implications are unclear, simulate from it.
 :::
 :::
 
@@ -630,14 +652,16 @@ fmt <- function(x, digits = 2) sprintf(paste0("%.", digits, "f (%.", digits, "f 
   - low density (−1 SD): `r fmt(p_low)`
   - high density (+1 SD): `r fmt(p_high)`
   - difference: `r fmt(p_high - p_low)`
-- The effect on the probability scale depends on where you start. Always say at which values you compare.
+- The effect on the probability scale depends on the starting value.
+  State the values you compare.
 :::
 :::
 :::
 :::
 
 ::: footer
-Mean (90% interval). True values used in the simulation: $\alpha$ = `r round(ndd_truth$alpha, 2)`, $\beta$ = `r ndd_truth$beta`.
+Means and 90% intervals are shown.
+The true values used in the simulation are $\alpha$ = `r round(ndd_truth$alpha, 2)` and $\beta$ = `r ndd_truth$beta`.
 :::
 
 ## Exercise 2B: diagnose, then interpret {background-color="#f3e8f5"}
@@ -659,10 +683,12 @@ Mean (90% interval). True values used in the simulation: $\alpha$ = `r round(ndd
 ## A Bayesian workflow
 
 ::: incremental
-1. **Question and model**: what is the data-generating story? Which parameters answer the question?
-2. **Priors**: relate them to the scale of the variables. Prior predictive check.
+1. **Question and model**: What is the data-generating story?
+   Which parameters answer the question?
+2. **Priors**: Relate them to the scale of the variables and run a prior predictive check.
 3. **Fit**.
-4. **Computation check**: `rhat`, ESS, warnings, trace plots. Stop here if they fail.
+4. **Computation check**: Check `rhat`, ESS, warnings, and trace plots.
+   Stop here if they fail.
 5. **Model check**: posterior predictive checks that matter for the question.
 6. **Interpret**: distributions of parameters and predictions, on the scale of the data.
 :::
@@ -689,8 +715,10 @@ allo |>
 ::: {.column width="45%"}
 ::: incremental
 - The `r nrow(allo)` trees belong to `r nlevels(allo$sp)` species.
-- Our model assumed one line for all trees. The residuals say otherwise: some species are consistently taller or shorter than predicted.
-- Fit each species separately? Some species have only 3 or 4 trees.
+- Our model assumed one line for all trees.
+  The residuals show that some species are consistently taller or shorter than predicted.
+- Should we fit each species separately?
+  Some species have only 3 or 4 trees.
 - **Day 3**: hierarchical models learn about each species *and* about the variation among species.
 :::
 :::
@@ -737,9 +765,11 @@ p1
 ::: {.column width=60%}
 
 ::: incremental
-- We consider variables *x* = {-3, ..., 3} and *y* = {-6, ..., 4}. We don't yet know if there is a correlation (*y = ax + b*).
+- We consider variables *x* = {-3, ..., 3} and *y* = {-6, ..., 4}.
+  We do not yet know whether they are correlated (*y = ax + b*).
 - However, given the similar scales of *x* and *y*, it's reasonable to guess that *a* falls within a narrow range (e.g., **strongly informative prior**: -5 to 5, **weakly informative prior**: $a \sim \mathcal{N}(0,  2.5)$).
-- In contrast, a slope like *a* = 100 (blue line) clearly doesn't match the data. A **vague prior** such as $a \sim \mathcal{N}(0,  10^4)$ says that such slopes are as plausible as *a* = 2.
+- A slope of *a* = 100 (blue line) clearly does not match the data.
+  A **vague prior** such as $a \sim \mathcal{N}(0, 10^4)$ treats this slope as plausible as *a* = 2.
 :::
 
 :::
@@ -801,7 +831,8 @@ brm(
 :::
 
 ::: small
-`brms` writes the Stan code for you. Note that `brms` places the `Intercept` prior on the intercept after centring the predictors, so results can differ slightly from our Stan files when a predictor is far from centred.
+`brms` writes the Stan code for you.
+It places the `Intercept` prior on the intercept after centring predictors, so results can differ slightly from our Stan files when a predictor is far from centred.
 :::
 
 <!-- brms is installed in the classroom image. These examples have not been

@@ -66,6 +66,21 @@ Rscript R/build_classroom_materials.R --package-only
 Rscript R/check_classroom_materials.R
 ```
 
+### Direct Quarto renders
+
+From this project directory, `make day1`, `make day2`, or `make day3` renders
+the day's slides and instructor exercise to `dayN/slides.html` and
+`dayN/exercise.html`. `make slides` renders all three slide decks, and `make`
+(or `make help`) lists the targets. From another directory, you can use
+`make -C` with the project path, for example `make -C /path/to/afec-bayes-2026 day1`.
+
+These renders execute the chunks needed for figures and summaries. The slides
+read their saved fits from `fits/`; core exercise inference tasks load supplied
+fits, while other core chunks do summaries or lightweight simulation. Optional
+changed-input Stan chunks remain disabled. These Make targets never
+run `R/precompute_fits.R` and do not build the solution-free classroom package
+(the separate `R/build_classroom_materials.R` workflow above does that).
+
 Participants open `exercise-student.qmd` and run indicated chunks. Solutions
 are physically removed from this source. `exercise.qmd`/`exercise.html` are
 instructor versions. Distribute the ZIP through your existing course channel

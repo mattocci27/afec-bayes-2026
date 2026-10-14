@@ -85,7 +85,7 @@ rmse <- function(est) sqrt(mean((est - trees$p_true)^2))
 
 <h3>Day 3: Hierarchical models and ecological applications</h3>
 
-<p>AFEC-X 2026 · 23 October · 19:00–20:30 China time (UTC+8)</p>
+<p>AFEC-X 2026 · 23 October</p>
 
 <h3>🧑🏻‍💻 [Masatoshi Katabuchi \@ XTBG, CAS]{.author}</h3>
 :::
@@ -165,7 +165,8 @@ sum(trees$suv) / sum(trees$n)
 :::
 
 ::: footer
-The ecological cousin of the "eight schools" problem (Rubin 1981; Gelman et al. 2013). See the appendix.
+This is the ecological version of the "eight schools" problem (Rubin 1981; Gelman et al. 2013).
+See the appendix.
 :::
 
 ## Eight mother trees problem (separate estimates)
@@ -214,7 +215,8 @@ ggplot(trees, aes(x = p_true, y = p_like)) +
 :::
 
 ::: footer
-We know `p_true` because we generated this data using `p_true` as a known parameter. In practical scenarios, we don't know `p_true`.
+We know `p_true` because we used it to generate these data.
+In practice, we do not know `p_true`.
 :::
 
 ## Extreme case 1: Pooled estimates
@@ -277,7 +279,7 @@ We know `p_true` because we generated this data using `p_true` as a known parame
 <img src="../images/multilevel.png" style="display: block; margin: auto; height: 300px;"/>
 
 ::: fragment
-The prior for each tree is no longer fixed by us. Its mean $\mu$ and spread $\sigma$ are **estimated from all trees**.
+The model estimates the mean $\mu$ and spread $\sigma$ of the tree-level distribution using data from all trees.
 :::
 
 ::: notes
@@ -404,7 +406,8 @@ trees_re |>
 ::: incremental
 - `p_bayes`{.small} (posterior median) is closer to the 1:1 line: average error `r round(rmse(trees_re$p_bayes), 3)`, against `r round(rmse(trees$p_like), 3)` for `p_like`{.small}.
 
-- The model compensates for limited data by using the information that trees of one species are similar. How similar is learned from the data.
+- The model estimates how similar trees within a species are.
+  It uses that estimate to stabilize estimates when data are limited.
 :::
 :::
 
@@ -414,7 +417,9 @@ trees_re |>
 ::: notes
 - less influenced by overfitting for each tree
 - average error = root mean squared error against p_true
-- honest note: in this data set the completely pooled estimate has a similar error, because the true variation among trees is small. Partial pooling found that out by itself; complete pooling assumed it. Exercise 3A comes back to this.
+- Honest note: the completely pooled estimate has a similar error in this data set because true variation among trees is small.
+  Partial pooling estimates this variation from the data; complete pooling assumes it is zero.
+  Exercise 3A revisits this comparison.
 :::
 
 ## Who is pulled, and how far?
@@ -443,7 +448,8 @@ trees_re |>
   - the tree has **few seedlings**, and
   - the estimate is **far from the mean**.
 - How far also depends on $\sigma$: here the trees turn out to be similar ($\sigma$ small), so shrinkage is strong.
-- Partial pooling is not a fixed correction. It depends on the model and on the data.
+- Partial pooling is not a fixed correction.
+  Its effect depends on the model and the data.
 :::
 :::
 :::
@@ -463,7 +469,8 @@ show_stan("stan/logistic.stan")
 ::: {.column width="48%"}
 ::: small
 - `z[i]` is $\mathrm{logit}(p_i)$ for tree $i$.
-- `z = mu + sigma * z_tilde` with `z_tilde ~ std_normal()` is the same model as $z_i \sim \mathcal{N}(\mu, \sigma)$. Its sampling implications are an extension.
+- `z = mu + sigma * z_tilde` with `z_tilde ~ std_normal()` is the same model as $z_i \sim \mathcal{N}(\mu, \sigma)$.
+  Its sampling implications are an extension.
 - `generated quantities` computes things we want for every draw: here $p_i$ on the probability scale.
 - `mu` and `sigma` are parameters like any other: they get posterior distributions too.
 :::
@@ -494,7 +501,8 @@ show_stan("stan/logistic.stan")
 
 ::: footer
 Example inspired by
-Nguyen & Katabuchi *Journal of Forestry Research* (accepted). Wood density is scaled (mean = 0, sd = 1).
+Nguyen & Katabuchi, *Journal of Forestry Research* (accepted).
+Wood density is scaled to mean 0 and sd 1.
 :::
 
 ::: small
@@ -513,7 +521,8 @@ Those relationships depend on wood density.
 :::
 
 ::: fragment
-The same shape as the NDD question from Day 1. We practise it on tree height, and return to NDD at the end.
+This follows the same structure as the Day 1 NDD question.
+We use tree height as an example and return to NDD at the end.
 :::
 :::
 
@@ -600,7 +609,8 @@ allo |>
 - Green: a separate regression for each species (no pooling).
 - Common species: well estimated.
 - Rare species (3 to 6 trees): the separate lines are driven by noise.
-- Rare species are the rule in tropical forests. Dropping them throws away most of the community.
+- Many species in tropical forests are rare.
+  Excluding them would leave much of the community out of the analysis.
 :::
 :::
 :::
@@ -625,10 +635,17 @@ vs <- function(v, col = "mean", digits = 2) round(vint_sum[[col]][vint_sum$varia
 
 ::: small
 ::: incremental
-- Tree $i$ of species $j$; $x_{ij} = \log(\mathrm{DBH}_{ij}/40)$. Same structure as the mother trees: each species has its own intercept, and the intercepts come from a common distribution.
-- $e^{\mu_0}$: height of a 40-cm tree of a *typical* species. $\tau$: how much species differ (log scale).
-- Result: $\tau$ = `r vs("tau")` (90% interval `r vs("tau", "5%")` to `r vs("tau", "95%")`): species differ by roughly 11% in height at the same DBH. $\sigma$ = `r vs("sigma")`: trees within a species differ by about the same amount.
-- `stan/vint.stan` uses half-Cauchy priors for the two SDs; yesterday we used half-normal. Both are weakly informative here.
+- For tree $i$ of species $j$, $x_{ij} = \log(\mathrm{DBH}_{ij}/40)$.
+  As with the mother trees, each species has its own intercept, and the intercepts share a common distribution.
+- $e^{\mu_0}$ is the height of a 40-cm tree for a *typical* species.
+  $\tau$ measures how much species differ on the log scale.
+- Estimated $\tau$ is `r vs("tau")` (90% interval `r vs("tau", "5%")` to `r vs("tau", "95%")`).
+  Species differ by roughly 11% in height at the same DBH.
+  Estimated $\sigma$ is `r vs("sigma")`.
+  Trees within a species differ by about the same amount.
+- `stan/vint.stan` uses half-Cauchy priors for the two SDs.
+  Day 2 used half-normal priors.
+  Both prior choices are weakly informative here.
 :::
 :::
 
@@ -723,16 +740,19 @@ ggplot(slopes, aes(wd)) +
 :::
 
 ::: footer
-Mean (90% interval). True values in the simulation: $\gamma_{22}$ = `r allometry_truth$gamma11`, $\gamma_{12}$ = `r allometry_truth$gamma01`.
+Means and 90% intervals are shown.
+The true simulation values are $\gamma_{22}$ = `r allometry_truth$gamma11` and $\gamma_{12}$ = `r allometry_truth$gamma01`.
 :::
 
 ## Check computation before interpretation
 
 ::: incremental
 - Check `rhat`, bulk/tail ESS, trace plots, treedepth and E-BFMI warnings.
-- A **divergence** means sampling may have missed part of the posterior. Investigate before interpreting.
+- A **divergence** means sampling may have missed part of the posterior.
+  Investigate the cause before interpreting the results.
 - The supplied core hierarchical fits have zero divergences; this is a warning checklist, not a divergent-fit repair exercise.
-- Then check predictions and group structure against the data. No single number proves adequacy.
+- Then check predictions and group structure against the data.
+  No single number proves that the model is adequate.
 :::
 
 ## Exercise 3B: species differences in tree allometry {background-color="#f3e8f5"}
@@ -754,7 +774,8 @@ Mean (90% interval). True values in the simulation: $\gamma_{22}$ = `r allometry
 ## A new mother tree: return to Exercise 3A Task 5
 
 ::: large
-Core task: 6 minutes including discussion. Use the same supplied mother-tree fit.
+Core task: 6 minutes including discussion.
+Use the supplied mother-tree fit.
 :::
 
 ::: incremental
@@ -773,7 +794,9 @@ Core task: 6 minutes including discussion. Use the same supplied mother-tree fit
 
 ::: small
 ::: incremental
-1. **Draw the structure**: what is the response, what are the groups (species, plots, years), which predictors act at which level?
+1. **Draw the structure**: What is the response?
+   Which groups are present (species, plots, years)?
+   Which predictors act at each level?
 2. **Start simple**: one group-free model (Day 2), then add varying intercepts, then varying slopes if the question needs them.
 3. **Scale and centre predictors**, so that priors and intercepts have a meaning.
 4. **Priors**: weakly informative, checked with a prior predictive simulation.
@@ -869,7 +892,8 @@ brms::brm(log(h) ~ log(dbh / 40) * wd + (1 + log(dbh / 40) | sp), data = allo)
 :::
 
 ::: fragment
-**Stan**: full control over likelihood, priors, and structure. Needed when the model does not fit a formula interface.
+**Stan** gives full control over the likelihood, priors, and model structure.
+Use Stan when the model cannot be expressed with a formula interface.
 :::
 :::
 
@@ -897,8 +921,10 @@ $$
 ::: {.column width="50%"}
 ::: small
 ::: incremental
-- In hierarchical models, when $\tau$ is small all $\theta_j$ are squeezed together. The sampler cannot follow this shape and reports **divergent transitions**.
-- Even a few divergences mean that part of the posterior may be missing. Do not ignore them.
+- In hierarchical models, all $\theta_j$ values are close when $\tau$ is small.
+  The sampler may have difficulty exploring this posterior and produce **divergent transitions**.
+- Even a few divergences may mean that part of the posterior is missing.
+  Do not ignore them.
 - Remedies: write the model in the non-centered form, as `logistic.stan` and `vslope.stan` do; let the sampler take smaller steps (`adapt_delta = 0.95`); reconsider the priors.
 - Checklist for today's fits: `rhat`, ESS, **and** divergences.
 :::
@@ -959,7 +985,8 @@ $$
 - Now the exponent $\beta_{1j}$ also varies among species.
 - Species-level regression: the *typical* intercept and exponent depend on wood density.
   - $\gamma_{22}$ answers our hypothesis: does the exponent increase with wood density?
-- $\tau_1$, $\tau_2$: variation among species that wood density does not explain. $\rho$: correlation between intercepts and slopes.
+- $\tau_1$ and $\tau_2$ measure variation among species that wood density does not explain.
+  $\rho$ is the correlation between intercepts and slopes.
 - Priors: $\gamma \sim \mathcal{N}(0, 2.5)$, $\tau \sim \text{Half-Cauchy}(0, 2.5)$, correlation matrix $\sim \text{LKJ}(2)$ (mildly favours weak correlations).
 :::
 :::
@@ -1006,7 +1033,11 @@ cat("```stan\n", paste(mv[seq_len(grep("^generated quantities", mv) - 2)], colla
 
 - $\boldsymbol{z}$, $\boldsymbol{L}$, $\boldsymbol{\tau}$, $\boldsymbol{\gamma}$: [priors]{.purple}
 
-This is the question from Day 1. It is the allometry model of Exercise 3B with a Bernoulli likelihood, and abundance in place of wood density. The likelihood and the two predictor levels follow the course structure. The matrix parameterisation is an optional extension; this legacy file is not executable.
+This is the Day 1 question.
+The model uses the allometry structure from Exercise 3B, with a Bernoulli likelihood and species abundance in place of wood density.
+It retains the course structure: one likelihood and two predictor levels.
+The matrix parameterisation is an optional extension.
+This legacy file is for display and does not run.
 :::
 :::
 :::

@@ -73,7 +73,7 @@ source(here::here("R/slides_setup.R"))
 
 <h3>Day 1: From likelihood to posterior</h3>
 
-<p>AFEC-X 2026 · 21 October · 19:00–20:30 China time (UTC+8)</p>
+<p>AFEC-X 2026 · 21 October</p>
 
 <h3>🧑🏻‍💻 [Masatoshi Katabuchi \@ XTBG, CAS]{.author}</h3>
 :::
@@ -118,7 +118,8 @@ source(here::here("R/slides_setup.R"))
 ::: small
 - Each day: short lectures + two exercises in the browser-based R environment.
 - The goal is to **think with and interpret** Bayesian models, not to memorise Stan syntax.
-- Core tasks use supplied posterior draws. The instructor may demonstrate live sampling.
+- Core tasks use supplied posterior draws.
+  The instructor may demonstrate live sampling.
 :::
 :::
 
@@ -236,7 +237,9 @@ p1 + p2 + p3
 
 ::: small
 ::: fragment
-Rare species have few seedlings. We want the slope of **every** species and the pattern **among** species in one model: a **hierarchical (multilevel) model**. This is where the course ends.
+Rare species have few seedlings.
+We want to estimate **each species' slope** and how the slopes vary with species abundance.
+By Day 3, we will fit one hierarchical model to estimate both.
 :::
 :::
 
@@ -250,11 +253,12 @@ Rare species have few seedlings. We want the slope of **every** species and the 
 
 ::: columns
 ::: {.column width="40%"}
-![](../images/seedling.png)
+![](../images/seedlings.png)
 :::
 
 ::: {.column width="60%"}
-We planted 5 seedlings. One year later, 2 are alive.
+We planted 5 seedlings.
+One year later, 2 are alive.
 
 ::: incremental
 - What is the survival probability $p$ of this species?
@@ -263,15 +267,15 @@ We planted 5 seedlings. One year later, 2 are alive.
 :::
 
 ::: fragment
-One species, no predictor, one parameter. We keep this example all day, then climb back up:
-**Day 2**: $p$ depends on conspecific density. **Day 3**: it differs among mother trees and species.
+One species, no predictor, one parameter.
+We start with this simple model of one survival probability.
+On Day 2, survival probability depends on conspecific density.
+On Day 3, survival rates vary among mother trees and species.
 :::
 :::
 :::
 
 ## Today's objectives
-
-By the end of today, you can
 
 ::: incremental
 - explain what **likelihood**, **prior**, and **posterior** mean;
@@ -282,57 +286,158 @@ By the end of today, you can
 
 # Likelihood
 
-## Likelihood: start with five seedlings
+<!-- Normal examples adapted from main.qmd at commit 3013b7c. -->
 
-$$
-Y\mid p\sim\mathrm{Binomial}(5,p),\qquad P(Y=y\mid p)=\binom{5}{y}p^y(1-p)^{5-y}
-$$
+## Normal model: from parameters to data
+
+$$\boxed{f(\text{data}\mid\text{parameters})}$$
+
+Probability density of the data given the parameters.
 
 ::: columns
 ::: {.column width="50%"}
 ```{r, fig.height=4.5, fig.width=7}
-tibble(y=0:5, probability=dbinom(0:5,5,.4)) |>
-  ggplot(aes(y,probability))+geom_col(fill=col_like)+
-  labs(x="Survivors out of 5",y="Probability",title="p = 0.4")
+normal_observations <- tibble(x = c(-1.5, 0, 1.5))
+x <- seq(-5, 5, length.out = 501)
+y <- dnorm(x, mean = 0, sd = 1)
+tibble(x, y) |>
+  ggplot(aes(x, y)) +
+  geom_line(linewidth = 1.5, colour = col_like) +
+  geom_segment(
+    data = normal_observations,
+    aes(x = x, xend = x, y = 0, yend = dnorm(x, mean = 0, sd = 1)),
+    inherit.aes = FALSE, linetype = 3
+  ) +
+  geom_point(
+    data = normal_observations,
+    aes(x, dnorm(x, mean = 0, sd = 1)),
+    inherit.aes = FALSE, size = 4, colour = col_like
+  ) +
+  geom_rug(data = normal_observations, aes(x = x), inherit.aes = FALSE, sides = "b") +
+  labs(x = "Observed value x", y = "Density", title = "Mean = 0, SD = 1")
 ```
 :::
 ::: {.column width="50%"}
+Three observations: $x=\{-1.5,\;0,\;1.5\}$.
+
 ::: incremental
-- Forward: hold $p$ fixed and compare possible data $y$.
-- We observed $y=2$. The **likelihood** holds these data fixed and compares values of $p$:
-
-$$L(p)=\binom{5}{2}p^2(1-p)^3$$
-
-- In R: `dbinom(2, size=5, prob=p)`.
-- This is not yet a probability distribution for $p$.
+- Suppose the mean is $\mu=0$ and the standard deviation is $\sigma=1$.
+- How high is the curve at each observed value?
+- For continuous data, this height is a **probability density**.
 :::
 :::
 :::
 
-## Maximum Likelihood Estimation (MLE)
+::: notes
+- The original Normal examples and data come from main.qmd at commit 3013b7c.
+- The vertical bar means "given": evaluate the data under specified parameter values.
+- The marks on the horizontal axis show the observed data; the dots on the curve show their densities.
+- Assume the three observations are independent and follow the same Normal model.
+- Throughout the course, Normal(mu, sigma) uses the standard deviation as its second argument, as in Stan and dnorm().
+- Density is not the probability of observing an exact value; for continuous data, probabilities are areas over intervals.
+- The displayed notation f(data | parameters) means the joint density; this plot shows each observation's density before combining them on the next slide.
+:::
 
-- 2 survivors out of 5 seedlings: What is the survival probability of seedlings?
+## Normal model: from data to likelihood
 
 ::: columns
-
-::: {.column width=40%}
-![](../images/seedling.png)
+::: {.column width="50%"}
+```{r, fig.height=6, fig.width=7}
+# Use the original likelihood calculation from main.qmd at 3013b7c.
+like_fun <- function(mu) {
+  dnorm(-1.5, mean = mu, sd = 1, log = TRUE) +
+    dnorm(0, mean = mu, sd = 1, log = TRUE) +
+    dnorm(1.5, mean = mu, sd = 1, log = TRUE)
+}
+normal_comparison <- crossing(x = seq(-5, 5, length.out = 501), mu = c(0, 2)) |>
+  mutate(density = dnorm(x, mean = mu, sd = 1), model = factor(mu))
+normal_point_densities <- crossing(normal_observations, mu = c(0, 2)) |>
+  mutate(density = dnorm(x, mean = mu, sd = 1), model = factor(mu))
+normal_density_plot <- ggplot(normal_comparison, aes(x, density, colour = model, linetype = model)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(data = normal_point_densities, size = 3) +
+  geom_rug(data = normal_observations, aes(x = x), inherit.aes = FALSE, sides = "b") +
+  scale_colour_manual(values = c("0" = col_like, "2" = "grey50"), labels = c("Mean = 0", "Mean = 2")) +
+  scale_linetype_manual(values = c("0" = "solid", "2" = "dashed"), labels = c("Mean = 0", "Mean = 2")) +
+  labs(x = "Observed value x", y = "Density", colour = NULL, linetype = NULL) +
+  theme(legend.position = "top", legend.text = element_text(size = 18),
+        axis.title = element_text(size = 22), axis.text = element_text(size = 18))
+normal_likelihood <- tibble(mu = seq(-5, 5, length.out = 501)) |>
+  mutate(log_likelihood = like_fun(mu), likelihood = exp(log_likelihood - max(log_likelihood)))
+normal_likelihood_plot <- ggplot(normal_likelihood, aes(mu, likelihood)) +
+  geom_line(linewidth = 1.5, colour = col_like) +
+  geom_vline(xintercept = 0, linetype = 3) +
+  labs(x = expression("Mean " * mu), y = "Likelihood (rescaled)") +
+  theme(axis.title = element_text(size = 22), axis.text = element_text(size = 18))
+normal_density_plot / normal_likelihood_plot
+```
 :::
+::: {.column width="50%"}
+Keep the three observations fixed.
 
-::: {.column width=60%}
 ::: incremental
-- $p$: survival rates, $1-p$: mortality rate
+- Keep $\sigma=1$ and move the mean $\mu$.
+- For each $\mu$, multiply the densities at the three observed values.
+- This gives the **likelihood** $L(\mu)$.
+:::
 
-- $L = {}_5C_2 p^2(1-p)^3$ (Binomial distribution)
+::: fragment
+::: small
+$$L(\mu)=f(-1.5\mid\mu,1)\,f(0\mid\mu,1)\,f(1.5\mid\mu,1)$$
+:::
 
-- $\mathrm{ln}\;L = \mathrm{ln}\;{}_5C_2 + 2\mathrm{ln}\;p + 3\mathrm{ln}(1-p)$
-
-- $\frac{d}{dp}\mathrm{ln}\;L = \frac{2}{p} - \frac{3}{1-p} = 0$
-
-- Solve: $p = \frac{2}{5}$
-
+Which mean fits these observations best?
 :::
 :::
+:::
+
+::: notes
+- The top graph compares means 0 and 2, with SD fixed at 1; the observed x values stay in the same places.
+- The bottom graph evaluates many means, always using the same three observed values.
+- The likelihood is highest at mu = 0 for these observations.
+- Multiplying the densities is justified by the independence assumption.
+- The computation sums log densities and then exponentiates; the displayed curve is rescaled to a maximum of one.
+- Rescaling does not change the relative likelihoods or the position of the maximum.
+- A likelihood is not a probability distribution for mu.
+:::
+
+## Binomial MLE: back to the seedlings
+
+::: columns
+::: {.column width="50%"}
+```{r, fig.height=5, fig.width=7}
+seedling_likelihood <- tibble(p = seq(0, 1, length.out = 501)) |>
+  mutate(likelihood = dbinom(2, size = 5, prob = p))
+seedling_likelihood_plot <- ggplot(seedling_likelihood, aes(p, likelihood)) +
+  geom_line(linewidth = 1.5, colour = col_like) +
+  labs(x = "Survival probability p", y = "Likelihood", title = "2 survivors out of 5")
+seedling_likelihood_plot +
+  geom_vline(xintercept = 0.4, linetype = 3, colour = col_like) +
+  annotate("point", x = 0.4, y = dbinom(2, 5, 0.4), size = 4, colour = col_like)
+```
+:::
+::: {.column width="50%"}
+We return to **two survivors out of five**.
+
+::: incremental
+- Now compare survival probabilities $p$ instead of Normal means $\mu$.
+- The likelihood is highest at $p=0.4$.
+- This is the **maximum likelihood estimate** (MLE).
+:::
+
+::: fragment
+$$L(p)=P(Y=2\mid p)=\binom{5}{2}p^2(1-p)^3$$
+
+$$\hat{p}_{\mathrm{MLE}}=\frac{2}{5}=0.4$$
+:::
+:::
+:::
+
+::: notes
+- The data stay fixed, just as in the Normal example; now the parameter is a survival probability.
+- For a discrete count, use the probability P(Y=2 | p), rather than a density.
+- Assume five independent seedlings with the same survival probability p.
+- The MLE makes the observed two survivors most likely under this model.
 :::
 
 ## What the MLE does not tell us
@@ -561,8 +666,10 @@ plot_update(2, 5, 1, 1, linewidth = 1.8) +
 :::
 
 ::: incremental
-- MLE and MAP are single numbers. They say nothing about uncertainty.
-- With a flat prior, MAP = MLE. The posterior is still a distribution.
+- MLE and MAP are single numbers.
+  They say nothing about uncertainty.
+- With a flat prior, MAP = MLE.
+  The posterior is still a distribution.
 - In this course we work with the **whole posterior** and summarise it with a mean (or median) and an interval.
 :::
 
@@ -624,8 +731,10 @@ p1 / p2
 :::
 
 - **Predict first**, then run.
-- Change the amount of data. Keep the prior fixed.
-- Change the prior. Keep the data fixed.
+- Change the amount of data.
+  Keep the prior fixed.
+- Change the prior.
+  Keep the data fixed.
 - Write one sentence that interprets the posterior.
 
 ::: notes
@@ -666,7 +775,8 @@ p1 / p2
 
 - 🧑🏻‍💻 **Bayesian Modeling**
 
-  - Stan uses the No-U-Turn sampler (NUTS), a variant of Hamiltonian Monte Carlo (HMC). It uses the slope of the posterior to make long, efficient moves, so it works for models with many parameters.
+  - Stan uses the No-U-Turn sampler (NUTS), a variant of Hamiltonian Monte Carlo (HMC).
+    It uses the slope of the posterior to make long, efficient moves, so it works for models with many parameters.
 
 - ⚙️ **Flexible and Scalable**
 
@@ -674,7 +784,8 @@ p1 / p2
 
 - 💻 **Multiplatform**
 
-  - Stan works with R, Python, Julia, and more. In this course we call Stan from R with `cmdstanr`.
+  - Stan works with R, Python, Julia, and more.
+    In this course, we call Stan from R with `cmdstanr`.
 
 :::
 :::
@@ -795,18 +906,47 @@ ggplot(as_tibble(seedling_fit$draws), aes(p)) +
 ::: incremental
 - **Likelihood**: how probable are the data for given parameter values.
 - **Bayes' theorem** turns this around: [posterior]{.orange} $\propto$ [likelihood]{.teal} $\times$ [prior]{.purple}.
-- The posterior is a **distribution**. We report means, intervals, and probabilities, not just the peak.
+- The posterior is a **distribution**.
+  We report means, intervals, and probabilities, not just the peak.
 - The prior matters when data are few, and fades as data accumulate.
-- When there is no formula, **MCMC** gives draws from the posterior. Everything we want is computed from the draws.
+- When there is no formula, **MCMC** gives draws from the posterior.
+  We compute the quantities of interest from those draws.
 :::
 
 ::: fragment
-**Tomorrow**: survival and tree height depend on *predictors*. Regression models, predictions, and how to check that a fitted model can be trusted.
+**Day 2**: survival and tree height depend on *predictors*.
+We will fit regression models, make predictions, and check how well the models fit the data.
 :::
 
 # Appendix: optional material {visibility="uncounted"}
 
-## Extension: probability density for continuous data {visibility="uncounted"}
+## Extension: deriving the binomial MLE {visibility="uncounted"}
+
+- 2 survivors out of 5 seedlings: What is the survival probability of seedlings?
+
+::: columns
+
+::: {.column width=40%}
+![](../images/seedling.png)
+:::
+
+::: {.column width=60%}
+::: incremental
+- $p$: survival probability; $1-p$: probability of dying
+
+- $L = {}_5C_2 p^2(1-p)^3$ (Binomial distribution)
+
+- $\mathrm{ln}\;L = \mathrm{ln}\;{}_5C_2 + 2\mathrm{ln}\;p + 3\mathrm{ln}(1-p)$
+
+- $\frac{d}{dp}\mathrm{ln}\;L = \frac{2}{p} - \frac{3}{1-p} = 0$
+
+- Solve: $p = \frac{2}{5}$
+
+:::
+:::
+:::
+
+## Extension: Normal density in R {visibility="uncounted"}
 
 ::: columns
 
@@ -833,7 +973,7 @@ $f(x \mid \mu, \sigma) = \frac{1}{\sqrt{2\pi\sigma^2}}\mathrm{exp} \bigl[{-\frac
 :::
 ::: {.column width=60%}
 ::: incremental
-- **P(data | parameters)**: Probability of observing the data given the parameters.
+- For continuous data, $f(\text{data}\mid\text{parameters})$ gives the **probability density** at the observed values.
 
 - e.g., when your model is $x_i \sim \mathcal{N}(\mu = 0, \sigma = 1)$ (normal distribution with mean 0 and standard deviation 1), what is the probability density at x = 1.96?
 :::
@@ -860,12 +1000,13 @@ dnorm(1.96, mean = 0, sd = 1)
 
 ## Likelihood of several observations {visibility="uncounted"}
 
-When your data is x = {-1.5, 0, 1.5} and your model is $x \sim \mathcal{N}(\mu, 1)$, how probable is the data for a given $\mu$?
+For independent observations $x=\{-1.5,\;0,\;1.5\}$, assume a Normal model with mean $\mu$ and standard deviation 1.
+The likelihood is the joint probability density, viewed as a function of $\mu$.
 
 ::: small
 ::: incremental
-- $L(\mu) = P(-1.5 \mid \mu, 1) \times P(0 \mid \mu, 1) \times P(1.5 \mid \mu, 1)$
-- $\mathrm{ln}\;L(\mu) = \mathrm{ln}\;P(-1.5 \mid \mu, 1) + \mathrm{ln}\;P(0 \mid \mu, 1) +  \mathrm{ln}\;P(1.5 \mid \mu, 1)$
+- $L(\mu) = f(-1.5 \mid \mu, 1) \times f(0 \mid \mu, 1) \times f(1.5 \mid \mu, 1)$
+- $\mathrm{ln}\;L(\mu) = \mathrm{ln}\;f(-1.5 \mid \mu, 1) + \mathrm{ln}\;f(0 \mid \mu, 1) +  \mathrm{ln}\;f(1.5 \mid \mu, 1)$
 :::
 :::
 
@@ -892,7 +1033,8 @@ tibble(x, y) |>
 :::
 
 ::: fragment
-The data are fixed. The likelihood is a function of the **parameter**.
+The data are fixed.
+The likelihood is a function of the **parameter**.
 :::
 
 
@@ -903,7 +1045,7 @@ The data are fixed. The likelihood is a function of the **parameter**.
 :::
 
 **➡️Forward problem:**
-If you are infected, what is the probability that PCR test is positive?
+If a person is infected, what is the probability that the PCR test is positive?
 
 <br>
 
@@ -914,7 +1056,8 @@ $P(\text{Positive} \mid \text{Infected})$: 95%
 <br>
 
 ::: fragment
-This is what the lab test is designed to estimate — how likely we are to observe a positive signal given the known infection status (e.g., 95 out of 100 infected samples test positive).
+Sensitivity is the probability that the test is positive when infection is present.
+For example, 95 of 100 infected samples may test positive.
 :::
 
 ## Forward and Inverse Problems: PCR and disease example {visibility="uncounted"}
@@ -924,7 +1067,7 @@ This is what the lab test is designed to estimate — how likely we are to obser
 :::
 
 **🔁Inverse problem (Bayesian):**
-If the PCR test is positive, what is the probability that you are infected?
+If a person's PCR test is positive, how likely is it that they are infected?
 
 <br>
 
@@ -935,7 +1078,8 @@ If the PCR test is positive, what is the probability that you are infected?
 <br>
 
 ::: fragment
-This isn’t intuitive, but it’s the probability we actually care about — how likely someone is to be infected, given a positive test result.
+This probability may be less intuitive.
+It answers the practical question: how likely is infection after a positive test result?
 
 :::
 
@@ -1148,7 +1292,8 @@ The code behind these animations: `docs/hmc.qmd`, `R/hmc.R`
 
 - `brms`, `rstanarm`: Higher-level R packages that generate and run Stan models for you (you write an R formula, without writing Stan code).
 
-- In this course, we use `cmdstanr` with models that are already written. `brms` versions of the same models are shown as optional material on Day 2 and Day 3.
+- In this course, we use `cmdstanr` with models that are already written.
+  `brms` versions of the same models are optional material on Days 2 and 3.
 
 ## References {visibility="uncounted"}
 
