@@ -385,10 +385,10 @@ AFEC-X 2026 · 21 October
 <h1>Likelihood</h1>
 
 </section>
-<section id="probability-of-observing-data" class="slide level2">
-<h2>Probability of observing data</h2>
-<p><span class="math display">\[\boxed{P(\text{data}\mid\text{parameters})}\]</span></p>
-<p>Probability of observing the data given the parameters.</p>
+<section id="normal-model-from-parameters-to-data" class="slide level2">
+<h2>Normal model: from parameters to data</h2>
+<p><span class="math display">\[\boxed{f(\text{data}\mid\text{parameters})}\]</span></p>
+<p>Probability density of the data given the parameters.</p>
 <div class="columns">
 <div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
@@ -401,27 +401,22 @@ AFEC-X 2026 · 21 October
 </div>
 </div>
 </div><div class="column" style="width:50%;">
-<p>Suppose we plant five seedlings.</p>
+<p>Three observations: <span class="math inline">\(x=\{-1.5,\;0,\;1.5\}\)</span>.</p>
 <ul>
-<li class="fragment">Each seedling has a survival probability of <span class="math inline">\(p=0.6\)</span>.</li>
-<li class="fragment">What is the probability that exactly two survive?</li>
+<li class="fragment">Suppose the mean is <span class="math inline">\(\mu=0\)</span> and the standard deviation is <span class="math inline">\(\sigma=1\)</span>.</li>
+<li class="fragment">How high is the curve at each observed value?</li>
+<li class="fragment">For continuous data, this height is a <strong>probability density</strong>.</li>
 </ul>
-<div class="fragment">
-<p><span class="math display">\[
-\begin{aligned}
-P(Y=2\mid p=0.6) &amp;= \binom{5}{2}(0.6)^2(0.4)^3 \\
-&amp;= 0.2304
-\end{aligned}
-\]</span></p>
-</div>
 </div></div>
 <aside class="notes">
 <ul>
-<li>The vertical bar means “given”: calculate the chance of an outcome assuming a particular survival probability.</li>
-<li>The count Y follows a binomial distribution with five independent seedlings and the same survival probability p for each seedling.</li>
-<li>The highlighted bar is the probability of exactly two survivors.</li>
-<li>This is a discrete count, so we use probability here.</li>
-<li>For continuous data, use probability density; that distinction is introduced in the appendix.</li>
+<li>The original Normal examples and data come from main.qmd at commit 3013b7c.</li>
+<li>The vertical bar means “given”: evaluate the data under specified parameter values.</li>
+<li>The marks on the horizontal axis show the observed data; the dots on the curve show their densities.</li>
+<li>Assume the three observations are independent and follow the same Normal model.</li>
+<li>Throughout the course, Normal(mu, sigma) uses the standard deviation as its second argument, as in Stan and dnorm().</li>
+<li>Density is not the probability of observing an exact value; for continuous data, probabilities are areas over intervals.</li>
+<li>The displayed notation f(data | parameters) means the joint density; this plot shows each observation’s density before combining them on the next slide.</li>
 </ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -435,8 +430,8 @@ P(Y=2\mid p=0.6) &amp;= \binom{5}{2}(0.6)^2(0.4)^3 \\
           display:block!important;
       }</style></aside>
 </section>
-<section id="from-probability-to-likelihood" class="slide level2">
-<h2>From probability to likelihood</h2>
+<section id="normal-model-from-data-to-likelihood" class="slide level2">
+<h2>Normal model: from data to likelihood</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
@@ -449,25 +444,28 @@ P(Y=2\mid p=0.6) &amp;= \binom{5}{2}(0.6)^2(0.4)^3 \\
 </div>
 </div>
 </div><div class="column" style="width:50%;">
-<p>We observed <strong>two survivors out of five</strong> (<span class="math inline">\(y=2\)</span>).</p>
+<p>Keep the three observations fixed.</p>
 <ul>
-<li class="fragment">Try different values of the survival probability <span class="math inline">\(p\)</span>.</li>
-<li class="fragment">For each <span class="math inline">\(p\)</span>, how likely are those two survivors?</li>
-<li class="fragment">These probabilities give the <strong>likelihood</strong> <span class="math inline">\(L(p)\)</span>.</li>
+<li class="fragment">Keep <span class="math inline">\(\sigma=1\)</span> and move the mean <span class="math inline">\(\mu\)</span>.</li>
+<li class="fragment">For each <span class="math inline">\(\mu\)</span>, multiply the densities at the three observed values.</li>
+<li class="fragment">This gives the <strong>likelihood</strong> <span class="math inline">\(L(\mu)\)</span>.</li>
 </ul>
 <div class="fragment">
-<p><span class="math display">\[L(p)=P(Y=2\mid p)=\binom{5}{2}p^2(1-p)^3\]</span></p>
-<p>The formula is the same; we now vary <span class="math inline">\(p\)</span>.</p>
 <div class="small">
-<p>In R: <code>dbinom(2, size=5, prob=p)</code>.</p>
+<p><span class="math display">\[L(\mu)=f(-1.5\mid\mu,1)\,f(0\mid\mu,1)\,f(1.5\mid\mu,1)\]</span></p>
 </div>
+<p>Which mean fits these observations best?</p>
 </div>
 </div></div>
 <aside class="notes">
 <ul>
-<li>Before observing the count, hold p fixed and compare possible survivor counts.</li>
-<li>After observing two survivors, keep that count fixed and compare values of p using the same binomial formula.</li>
-<li>A likelihood is not a probability distribution for p.</li>
+<li>The top graph compares means 0 and 2, with SD fixed at 1; the observed x values stay in the same places.</li>
+<li>The bottom graph evaluates many means, always using the same three observed values.</li>
+<li>The likelihood is highest at mu = 0 for these observations.</li>
+<li>Multiplying the densities is justified by the independence assumption.</li>
+<li>The computation sums log densities and then exponentiates; the displayed curve is rescaled to a maximum of one.</li>
+<li>Rescaling does not change the relative likelihoods or the position of the maximum.</li>
+<li>A likelihood is not a probability distribution for mu.</li>
 </ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -481,8 +479,8 @@ P(Y=2\mid p=0.6) &amp;= \binom{5}{2}(0.6)^2(0.4)^3 \\
           display:block!important;
       }</style></aside>
 </section>
-<section id="maximum-likelihood-estimation-mle" class="slide level2">
-<h2>Maximum Likelihood Estimation (MLE)</h2>
+<section id="binomial-mle-back-to-the-seedlings" class="slide level2">
+<h2>Binomial MLE: back to the seedlings</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
@@ -495,16 +493,35 @@ P(Y=2\mid p=0.6) &amp;= \binom{5}{2}(0.6)^2(0.4)^3 \\
 </div>
 </div>
 </div><div class="column" style="width:50%;">
-<p>Which value of <span class="math inline">\(p\)</span> makes two survivors most likely?</p>
+<p>We return to <strong>two survivors out of five</strong>.</p>
 <ul>
-<li class="fragment">The curve is highest at <span class="math inline">\(p=0.4\)</span>.</li>
-<li class="fragment">This value is the <strong>maximum likelihood estimate</strong> (MLE).</li>
+<li class="fragment">Now compare survival probabilities <span class="math inline">\(p\)</span> instead of Normal means <span class="math inline">\(\mu\)</span>.</li>
+<li class="fragment">The likelihood is highest at <span class="math inline">\(p=0.4\)</span>.</li>
+<li class="fragment">This is the <strong>maximum likelihood estimate</strong> (MLE).</li>
 </ul>
 <div class="fragment">
+<p><span class="math display">\[L(p)=P(Y=2\mid p)=\binom{5}{2}p^2(1-p)^3\]</span></p>
 <p><span class="math display">\[\hat{p}_{\mathrm{MLE}}=\frac{2}{5}=0.4\]</span></p>
-<p>For this binomial model, the MLE is the fraction of seedlings that survived.</p>
 </div>
 </div></div>
+<aside class="notes">
+<ul>
+<li>The data stay fixed, just as in the Normal example; now the parameter is a survival probability.</li>
+<li>For a discrete count, use the probability P(Y=2 | p), rather than a density.</li>
+<li>Assume five independent seedlings with the same survival probability p.</li>
+<li>The MLE makes the observed two survivors most likely under this model.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
 <section id="what-the-mle-does-not-tell-us" class="slide level2">
 <h2>What the MLE does not tell us</h2>
@@ -621,7 +638,61 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <section class="slide level2">
 
 
-<img src="../images/fip_6.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
+<img src="../images/fip_1.png" width="100%" style="display: block; margin: auto;" class="r-stretch"><aside class="notes">
+<ul>
+<li>Read the first row from left to right: given beer, what is the chance of a hangover?</li>
+<li>This is the forward direction: start with a cause or parameter and predict an outcome or data.</li>
+<li>In a statistical model, the forward quantity is <span class="math inline">\(P(\mathrm{Data} \mid \mathrm{Parameter})\)</span>.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section class="slide level2">
+
+
+<img src="../images/fip_2.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
+<section class="slide level2">
+
+
+<img src="../images/fip_3.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
+<section class="slide level2">
+
+
+<img src="../images/fip_4.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
+<section class="slide level2">
+
+
+<img src="../images/fip_5.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
+<section class="slide level2">
+
+
+<img src="../images/fip_6.png" width="100%" style="display: block; margin: auto;" class="r-stretch"><aside class="notes">
+<ul>
+<li>Now reverse the conditioning: given a hangover, what is the chance that beer was involved?</li>
+<li>This is the inverse direction: use observed data to learn about an unknown cause or parameter.</li>
+<li>Bayes’ theorem relates this posterior to the forward probability and the prior.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
 <section id="bayes-theorem-1" class="slide level2">
 <h2>Bayes’ theorem</h2>
 <p><span class="math display">\[
@@ -662,7 +733,67 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <section class="slide level2">
 
 
-<img src="../images/bayes_re_2.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section></section>
+<img src="../images/bayes_re_2.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
+<section id="forward-problem-a-positive-pcr-test" class="slide level2">
+<h2>Forward problem: a positive PCR test</h2>
+<div class="footer">
+<ul>
+<li><span class="math inline">\(P(\text{Positive})\)</span>: 2%; <span class="math inline">\(P(\text{Infected})\)</span>: 0.05%</li>
+</ul>
+</div>
+<p>If a person is infected, what is the probability that the PCR test is positive?</p>
+<ul>
+<li class="fragment"><span class="math inline">\(P(\text{Positive} \mid \text{Infected}) = 95\%\)</span></li>
+<li class="fragment">This is the <strong>forward problem</strong>: given infection status, predict the test result.</li>
+</ul>
+<aside class="notes">
+<ul>
+<li>Sensitivity is the probability of a positive result among infected people.</li>
+<li>For example, 95 of 100 infected samples may test positive.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="inverse-problem-infection-after-a-positive-test" class="slide level2">
+<h2>Inverse problem: infection after a positive test</h2>
+<div class="footer">
+<ul>
+<li><span class="math inline">\(P(\text{Positive})\)</span>: 2%; <span class="math inline">\(P(\text{Infected})\)</span>: 0.05%</li>
+</ul>
+</div>
+<p>If the PCR test is positive, how likely is it that the person is infected?</p>
+<ul>
+<li class="fragment">Predict before revealing the calculation.</li>
+<li class="fragment"><span class="math inline">\(P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected})\,P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%\)</span></li>
+<li class="fragment">This is the <strong>inverse problem</strong>: use the result to update what we believe about infection.</li>
+</ul>
+<aside class="notes">
+<ul>
+<li>0.95 * 0.0005 / 0.02 = 0.02375</li>
+<li>The low prevalence matters: most people are not infected before testing.</li>
+<li>The calculation uses the specified 2% positive rate; it is not derived from sensitivity and prevalence here.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section></section>
 <section>
 <section id="prior-and-posterior" class="title-slide slide level1 center">
 <h1>Prior and posterior</h1>
@@ -778,6 +909,107 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <ul>
 <li>informative prior here: earlier censuses suggest about 30% of seedlings survive</li>
 <li>more on priors for regression coefficients on Day 2</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="prior-vs.-data-mle-and-bayesian-comparison-coin-toss" class="slide level2">
+<h2>Prior vs.&nbsp;Data: MLE and Bayesian comparison (Coin Toss)</h2>
+<p>As with seedling survival, the number of heads follows a Binomial model. Keep the observed proportion at 0.6 and the prior fixed; change the number of tosses.</p>
+<h3 id="mle">MLE</h3>
+<ul>
+<li class="fragment">A: 3 heads out of 5 tosses → <span class="math inline">\(\hat p_{\mathrm{MLE}} = 3/5 = 0.6\)</span></li>
+<li class="fragment">B: 60 heads out of 100 tosses → <span class="math inline">\(\hat p_{\mathrm{MLE}} = 60/100 = 0.6\)</span></li>
+</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="bayesian">Bayesian</h3>
+<ul>
+<li class="fragment"><span class="math inline">\(\textcolor{#1b9e77}{L_A = \binom{5}{3} p^3 (1-p)^2}\)</span></li>
+<li class="fragment"><span class="math inline">\(\textcolor{#1b9e77}{L_B = \binom{100}{60} p^{60} (1-p)^{40}}\)</span></li>
+<li class="fragment"><span class="math inline">\(\textcolor{#7570b3}{\mathrm{Prior} \propto p^{50} (1-p)^{50}}\)</span>
+<ul>
+<li class="fragment">Beta(51, 51): a <strong>strong prior</strong> concentrated near <span class="math inline">\(p=0.5\)</span>.</li>
+</ul></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+<aside class="notes">
+<ul>
+<li>Allow 3–5 minutes for these two slides, including a prediction before revealing the updates.</li>
+<li>Ask: will each posterior peak be closer to 0.5 or to 0.6?</li>
+<li>The observed proportion and prior are identical, so the comparison isolates the amount of data.</li>
+<li>This deliberately strong prior illustrates its influence; it is not a default prior for ecological survival.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="bayesian-update-with-prior-coin-toss" class="slide level2">
+<h2>Bayesian Update with Prior (Coin Toss)</h2>
+<p><span class="orange">Posterior</span> <span class="math inline">\(\propto\)</span> <span class="teal">Likelihood</span> <span class="math inline">\(\times\)</span> <span class="purple">Prior</span></p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="fragment">
+<p>Coin A: <span class="math inline">\(\textcolor{#d95f02}{Post_A} \propto \textcolor{#1b9e77}{p^3 (1-p)^2} \times \textcolor{#7570b3}{p^{50} (1-p)^{50}}\)</span></p>
+<p>Posterior: Beta(54, 53).</p>
+<p>Posterior peak (<strong>MAP</strong>): <span class="math inline">\(p = 53/105 \approx 0.505\)</span>.</p>
+</div>
+<div class="fragment">
+<ul>
+<li>With only 5 tosses, the posterior stays close to the strong prior near 0.5.</li>
+</ul>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="fragment">
+<p>Coin B: <span class="math inline">\(\textcolor{#d95f02}{Post_B} \propto \textcolor{#1b9e77}{p^{60} (1-p)^{40}} \times \textcolor{#7570b3}{p^{50} (1-p)^{50}}\)</span></p>
+<p>Posterior: Beta(111, 91).</p>
+<p>Posterior peak (<strong>MAP</strong>): <span class="math inline">\(p = 110/200 = 0.55\)</span>.</p>
+</div>
+<div class="fragment">
+<ul>
+<li>With 100 tosses, the data have more weight. The strong prior still has a substantial influence.</li>
+</ul>
+</div>
+</div></div>
+<div class="small">
+<ul>
+<li class="fragment">Both MLEs are 0.6; both posterior peaks lie between 0.5 and 0.6.</li>
+<li class="fragment">More data reduce the influence of this fixed prior.</li>
+</ul>
+</div>
+<aside class="notes">
+<ul>
+<li>The reported peaks are MAP estimates, not posterior means. The means are 54/107 and 111/202.</li>
+<li>For this prior, MAP = (N * 0.6 + 100 * 0.5) / (N + 100).</li>
+<li>At N = 100, prior and data have equal weight in this MAP calculation; the likelihood does not dominate.</li>
+<li>Return to the seedling example in Exercise 1A: hold one input fixed and predict the effect of changing the other.</li>
 </ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -980,7 +1212,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-13-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-14-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
@@ -1076,15 +1308,15 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 </ul>
 </div></div>
 </section>
-<section id="extension-probability-density-for-continuous-data" class="slide level2" data-visibility="uncounted">
-<h2>Extension: probability density for continuous data</h2>
+<section id="extension-normal-density-in-r" class="slide level2" data-visibility="uncounted">
+<h2>Extension: Normal density in R</h2>
 <div class="columns">
 <div class="column" style="width:40%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-14-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-15-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
 </figure>
 </div>
 </div>
@@ -1130,104 +1362,14 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 </section>
 <section id="likelihood-of-several-observations" class="slide level2" data-visibility="uncounted">
 <h2>Likelihood of several observations</h2>
-<p>When your data is x = {-1.5, 0, 1.5} and your model is <span class="math inline">\(x \sim \mathcal{N}(\mu, 1)\)</span>, how probable is the data for a given <span class="math inline">\(\mu\)</span>?</p>
+<p>For independent observations <span class="math inline">\(x=\{-1.5,\;0,\;1.5\}\)</span>, assume a Normal model with mean <span class="math inline">\(\mu\)</span> and standard deviation 1. The likelihood is the joint probability density, viewed as a function of <span class="math inline">\(\mu\)</span>.</p>
 <div class="small">
 <ul>
-<li class="fragment"><span class="math inline">\(L(\mu) = P(-1.5 \mid \mu, 1) \times P(0 \mid \mu, 1) \times P(1.5 \mid \mu, 1)\)</span></li>
-<li class="fragment"><span class="math inline">\(\mathrm{ln}\;L(\mu) = \mathrm{ln}\;P(-1.5 \mid \mu, 1) + \mathrm{ln}\;P(0 \mid \mu, 1) +  \mathrm{ln}\;P(1.5 \mid \mu, 1)\)</span></li>
+<li class="fragment"><span class="math inline">\(L(\mu) = f(-1.5 \mid \mu, 1) \times f(0 \mid \mu, 1) \times f(1.5 \mid \mu, 1)\)</span></li>
+<li class="fragment"><span class="math inline">\(\mathrm{ln}\;L(\mu) = \mathrm{ln}\;f(-1.5 \mid \mu, 1) + \mathrm{ln}\;f(0 \mid \mu, 1) +  \mathrm{ln}\;f(1.5 \mid \mu, 1)\)</span></li>
 </ul>
 </div>
 <div class="fragment">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-16-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-</div>
-<div class="fragment">
-<p>The data are fixed. The likelihood is a function of the <strong>parameter</strong>.</p>
-</div>
-</section>
-<section id="forward-and-inverse-problems-pcr-and-disease-example" class="slide level2" data-visibility="uncounted">
-<h2>Forward and Inverse Problems: PCR and disease example</h2>
-<div class="footer">
-<ul>
-<li><span class="math inline">\(P(\text{Positive})\)</span>: 2%, <span class="math inline">\(P(\text{Infected})\)</span>: 0.05%</li>
-</ul>
-</div>
-<p><strong>➡️Forward problem:</strong> If a person is infected, what is the probability that the PCR test is positive?</p>
-<p><br></p>
-<div class="fragment">
-<p><span class="math inline">\(P(\text{Positive} \mid \text{Infected})\)</span>: 95%</p>
-</div>
-<p><br></p>
-<div class="fragment">
-<p>Sensitivity is the probability that the test is positive when infection is present. For example, 95 of 100 infected samples may test positive.</p>
-</div>
-</section>
-<section id="forward-and-inverse-problems-pcr-and-disease-example-1" class="slide level2" data-visibility="uncounted">
-<h2>Forward and Inverse Problems: PCR and disease example</h2>
-<div class="footer">
-<ul>
-<li><span class="math inline">\(P(\text{Positive})\)</span>: 2%, <span class="math inline">\(P(\text{Infected})\)</span>: 0.05%</li>
-</ul>
-</div>
-<p><strong>🔁Inverse problem (Bayesian):</strong> If a person’s PCR test is positive, how likely is it that they are infected?</p>
-<p><br></p>
-<div class="fragment">
-<ul>
-<li><span class="math inline">\(P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected}) \cdot  P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%\)</span></li>
-</ul>
-</div>
-<p><br></p>
-<div class="fragment">
-<p>This probability may be less intuitive. It answers the practical question: how likely is infection after a positive test result?</p>
-</div>
-<aside class="notes">
-<ul>
-<li>ask the room to guess before revealing 2.4%</li>
-<li>0.95 * 0.0005 / 0.02 = 0.02375</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section class="slide level2">
-
-
-<img src="../images/bayes_re.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
-<section id="prior-vs.-data-mle-and-bayesian-comparison-coin-toss" class="slide level2" data-visibility="uncounted">
-<h2>Prior vs.&nbsp;Data: MLE and Bayesian comparison (Coin Toss)</h2>
-<p>We compare two coins, A and B, with the same prior but different likelihood (due to data sizes) to illustrate how prior beliefs influence posterior estimates.</p>
-<h3 id="mle">MLE</h3>
-<ul>
-<li class="fragment">A: 2 head out of 3 tosses -&gt; P(H) = 2/3 = 0.666</li>
-<li class="fragment">B: 60 heads out of 100 tosses -&gt; P(H) = 60/100 = 0.6</li>
-</ul>
-<div class="columns">
-<div class="column" style="width:50%;">
-<h3 id="bayesian">Bayesian</h3>
-<ul>
-<li class="fragment"><p><span class="math inline">\(\textcolor{#1b9e77}{L_A = {}_3C_2 p^2 (1-p)^1}\)</span></p></li>
-<li class="fragment"><p><span class="math inline">\(\textcolor{#1b9e77}{L_B = {}_{100}C_{60} p^{60} (1-p)^{40}}\)</span></p></li>
-<li class="fragment"><p><span class="math inline">\(\textcolor{#7570b3}{\mathrm{Prior} \propto  p^{50} (1-p)^{50}}\)</span></p>
-<ul>
-<li class="fragment">Beta(51, 51): we believe coins are fair</li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -1237,40 +1379,15 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 </div>
 </div>
 </div>
-</div></div>
-</section>
-<section id="bayesian-update-with-prior-coin-toss" class="slide level2" data-visibility="uncounted">
-<h2>Bayesian Update with Prior (Coin Toss)</h2>
-<p><span class="orange">Posterior</span> <span class="math inline">\(\propto\)</span> <span class="teal">Likelihood</span> <span class="math inline">\(\times\)</span> <span class="purple">Prior</span></p>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div class="fragment">
-<p>Coin A: <span class="math inline">\(\textcolor{#d95f02}{Post_A}\propto\textcolor{#1b9e77}{p^2 (1-p)^1} \times\textcolor{#7570b3}{p^{50} (1-p)^{50}}\)</span></p>
-<p>Peak of the posterior: <span class="math inline">\(p = 52/103 \approx 0.505\)</span></p>
 </div>
 <div class="fragment">
-<ul>
-<li><span class="math inline">\(Post_A\)</span>: With only 3 coin tosses, the likelihood is weak, so the posterior stays close to the prior.</li>
-</ul>
-</div>
-</div><div class="column" style="width:50%;">
-<div class="fragment">
-<p>Coin B: <span class="math inline">\(\textcolor{#d95f02}{Post_B} \propto \textcolor{#1b9e77}{p^{60} (1-p)^{40}} \times\textcolor{#7570b3}{p^{50} (1-p)^{50}}\)</span></p>
-<p>Peak of the posterior: <span class="math inline">\(p = 110/200 = 0.55\)</span></p>
-</div>
-<div class="fragment">
-<ul>
-<li><span class="math inline">\(Post_B\)</span>: With 100 coin tosses, the likelihood dominates, so the posterior shifts more towards the data.</li>
-</ul>
-</div>
-</div></div>
-<div class="small">
-<ul>
-<li class="fragment">The same prior can have a strong or weak influence depending on how much data we have.</li>
-<li class="fragment">We usually have some sense of scale for our parameters, and we are allowed to use that information.</li>
-</ul>
+<p>The data are fixed. The likelihood is a function of the <strong>parameter</strong>.</p>
 </div>
 </section>
+<section class="slide level2">
+
+
+<img src="../images/bayes_re.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
 <section id="mcmc-a-simplified-metropolis-hastings-mh-algorithm" class="slide level2" data-visibility="uncounted">
 <h2>MCMC: a simplified Metropolis-Hastings (MH) algorithm</h2>
 <div class="columns">

@@ -47,8 +47,8 @@ Assumptions (TODO: confirm with the organisers)
 Timing
    0- 8  Login/setup checkpoint, course map, ecological question
    8-18  Likelihood, using the seedling question
-  18-30  Bayes' theorem; one forward/inverse figure
-  30-42  Prior, posterior, prior predictive thinking
+  18-30  Bayes' theorem; forward/inverse examples
+  30-42  Prior, posterior, coin comparison and prior predictive thinking
   42-57  Exercise 1A: 12 min pair work + 3 min explanation/questions
   57-67  Stan's three blocks and posterior draws
   67-82  Exercise 1B core: 12 min pair work + 3 min explanation/questions
@@ -56,8 +56,9 @@ Timing
   86-90  Questions and delay buffer
 
 Core: Exercise 1A tasks 1-3; Exercise 1B tasks 1-3 (draws, probability, prediction).
-The PCR sequence, coin comparisons, MH/HMC mechanics and changed-input Stan
-refits are extensions. If behind: keep one prior comparison in 1A, give the
+The forward/inverse and coin comparisons are short lecture demonstrations.
+MH/HMC mechanics and changed-input Stan refits are extensions.
+If behind: keep one prior comparison in 1A, give the
 prediction plotting code in 1B, and omit live sampling. Preserve the debrief.
 Login must be tried before class; use the static result sheet if access fails.
 -->
@@ -574,7 +575,39 @@ $$
 
 ---
 
+<img src="../images/fip_1.png" width="100%" style="display: block; margin: auto;"/>
+
+::: notes
+- Read the first row from left to right: given beer, what is the chance of a hangover?
+- This is the forward direction: start with a cause or parameter and predict an outcome or data.
+- In a statistical model, the forward quantity is $P(\mathrm{Data} \mid \mathrm{Parameter})$.
+:::
+
+---
+
+<img src="../images/fip_2.png" width="100%" style="display: block; margin: auto;"/>
+
+---
+
+<img src="../images/fip_3.png" width="100%" style="display: block; margin: auto;"/>
+
+---
+
+<img src="../images/fip_4.png" width="100%" style="display: block; margin: auto;"/>
+
+---
+
+<img src="../images/fip_5.png" width="100%" style="display: block; margin: auto;"/>
+
+---
+
 <img src="../images/fip_6.png" width="100%" style="display: block; margin: auto;"/>
+
+::: notes
+- Now reverse the conditioning: given a hangover, what is the chance that beer was involved?
+- This is the inverse direction: use observed data to learn about an unknown cause or parameter.
+- Bayes' theorem relates this posterior to the forward probability and the prior.
+:::
 
 ## Bayes' theorem
 
@@ -616,6 +649,44 @@ $$
 ---
 
 <img src="../images/bayes_re_2.png" width="100%" style="display: block; margin: auto;"/>
+
+## Forward problem: a positive PCR test
+
+::: footer
+- $P(\text{Positive})$: 2%; $P(\text{Infected})$: 0.05%
+:::
+
+If a person is infected, what is the probability that the PCR test is positive?
+
+::: incremental
+- $P(\text{Positive} \mid \text{Infected}) = 95\%$
+- This is the **forward problem**: given infection status, predict the test result.
+:::
+
+::: notes
+- Sensitivity is the probability of a positive result among infected people.
+- For example, 95 of 100 infected samples may test positive.
+:::
+
+## Inverse problem: infection after a positive test
+
+::: footer
+- $P(\text{Positive})$: 2%; $P(\text{Infected})$: 0.05%
+:::
+
+If the PCR test is positive, how likely is it that the person is infected?
+
+::: incremental
+- Predict before revealing the calculation.
+- $P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected})\,P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%$
+- This is the **inverse problem**: use the result to update what we believe about infection.
+:::
+
+::: notes
+- 0.95 * 0.0005 / 0.02 = 0.02375
+- The low prevalence matters: most people are not infected before testing.
+- The calculation uses the specified 2% positive rate; it is not derived from sensitivity and prevalence here.
+:::
 
 # Prior and posterior
 
@@ -722,6 +793,105 @@ p1 / p2
 ::: notes
 - informative prior here: earlier censuses suggest about 30% of seedlings survive
 - more on priors for regression coefficients on Day 2
+:::
+
+## Prior vs. Data: MLE and Bayesian comparison (Coin Toss)
+
+As with seedling survival, the number of heads follows a Binomial model.
+Keep the observed proportion at 0.6 and the prior fixed; change the number of tosses.
+
+::: incremental
+
+### MLE
+
+- A: 3 heads out of 5 tosses → $\hat p_{\mathrm{MLE}} = 3/5 = 0.6$
+- B: 60 heads out of 100 tosses → $\hat p_{\mathrm{MLE}} = 60/100 = 0.6$
+
+::: columns
+::: {.column width="50%"}
+### Bayesian
+
+- $\textcolor{#1b9e77}{L_A = \binom{5}{3} p^3 (1-p)^2}$
+- $\textcolor{#1b9e77}{L_B = \binom{100}{60} p^{60} (1-p)^{40}}$
+- $\textcolor{#7570b3}{\mathrm{Prior} \propto p^{50} (1-p)^{50}}$
+  - Beta(51, 51): a **strong prior** concentrated near $p=0.5$.
+
+:::
+
+::: {.column width="50%"}
+```{r, fig.height=4}
+tibble(x = seq(0, 1, length = 200)) |>
+  mutate(prior = dbeta(x, 51, 51)) |>
+  ggplot(aes(x, prior)) +
+  geom_line(linewidth = 1.5, colour = col_prior) +
+  labs(x = "p", y = "Prior density") +
+  theme(
+    legend.position = "none",
+    axis.text = element_text(size = 28),
+    axis.title = element_text(size = 32))
+```
+:::
+
+:::
+:::
+
+::: notes
+- Allow 3–5 minutes for these two slides, including a prediction before revealing the updates.
+- Ask: will each posterior peak be closer to 0.5 or to 0.6?
+- The observed proportion and prior are identical, so the comparison isolates the amount of data.
+- This deliberately strong prior illustrates its influence; it is not a default prior for ecological survival.
+:::
+
+## Bayesian Update with Prior (Coin Toss)
+
+[Posterior]{.orange} $\propto$ [Likelihood]{.teal} $\times$ [Prior]{.purple}
+
+::: columns
+::: {.column width="50%"}
+
+::: fragment
+Coin A:
+$\textcolor{#d95f02}{Post_A} \propto \textcolor{#1b9e77}{p^3 (1-p)^2} \times \textcolor{#7570b3}{p^{50} (1-p)^{50}}$
+
+Posterior: Beta(54, 53).
+
+Posterior peak (**MAP**): $p = 53/105 \approx 0.505$.
+:::
+
+::: fragment
+- With only 5 tosses, the posterior stays close to the strong prior near 0.5.
+:::
+:::
+
+::: {.column width="50%"}
+::: fragment
+Coin B:
+$\textcolor{#d95f02}{Post_B} \propto \textcolor{#1b9e77}{p^{60} (1-p)^{40}} \times \textcolor{#7570b3}{p^{50} (1-p)^{50}}$
+
+Posterior: Beta(111, 91).
+
+Posterior peak (**MAP**): $p = 110/200 = 0.55$.
+:::
+
+::: fragment
+- With 100 tosses, the data have more weight. The strong prior still has a substantial influence.
+:::
+
+:::
+:::
+
+::: small
+::: incremental
+- Both MLEs are 0.6; both posterior peaks lie between 0.5 and 0.6.
+- More data reduce the influence of this fixed prior.
+:::
+:::
+
+::: notes
+- The reported peaks are MAP estimates, not posterior means. The means are 54/107 and 111/202.
+- For this prior, MAP = (N * 0.6 + 100 * 0.5) / (N + 100).
+- At N = 100, prior and data have equal weight in this MAP calculation; the likelihood does not dominate.
+- Return to the seedling example in Exercise 1A: hold one input fixed and predict the effect of changing the other.
 :::
 
 ## Exercise 1A: prior × likelihood by hand {background-color="#f3e8f5"}
@@ -1038,146 +1208,11 @@ The likelihood is a function of the **parameter**.
 :::
 
 
-## Forward and Inverse Problems: PCR and disease example {visibility="uncounted"}
-
-::: footer
-- $P(\text{Positive})$: 2%, $P(\text{Infected})$: 0.05%
-:::
-
-**➡️Forward problem:**
-If a person is infected, what is the probability that the PCR test is positive?
-
-<br>
-
-::: fragment
-$P(\text{Positive} \mid \text{Infected})$: 95%
-:::
-
-<br>
-
-::: fragment
-Sensitivity is the probability that the test is positive when infection is present.
-For example, 95 of 100 infected samples may test positive.
-:::
-
-## Forward and Inverse Problems: PCR and disease example {visibility="uncounted"}
-
-::: footer
-- $P(\text{Positive})$: 2%, $P(\text{Infected})$: 0.05%
-:::
-
-**🔁Inverse problem (Bayesian):**
-If a person's PCR test is positive, how likely is it that they are infected?
-
-<br>
-
-::: fragment
-- $P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected}) \cdot  P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%$
-:::
-
-<br>
-
-::: fragment
-This probability may be less intuitive.
-It answers the practical question: how likely is infection after a positive test result?
-
-:::
-
-::: notes
-- ask the room to guess before revealing 2.4%
-- 0.95 * 0.0005 / 0.02 = 0.02375
-:::
-
 ---
 
 <img src="../images/bayes_re.png" width="100%" style="display: block; margin: auto;"/>
 
 ---
-
-
-##  Prior vs. Data: MLE and Bayesian comparison (Coin Toss) {visibility="uncounted"}
-
-We compare two coins, A and B, with the same prior but different likelihood (due to data sizes) to illustrate how prior beliefs influence posterior estimates.
-
-::: incremental
-
-### MLE
-
-- A: 2 head out of 3 tosses -> P(H) = 2/3 = 0.666
-- B: 60 heads out of 100 tosses -> P(H) = 60/100 = 0.6
-
-::: columns
-::: {.column width="50%"}
-### Bayesian
-
-- $\textcolor{#1b9e77}{L_A = {}_3C_2 p^2 (1-p)^1}$
-
-- $\textcolor{#1b9e77}{L_B = {}_{100}C_{60} p^{60} (1-p)^{40}}$
-
-- $\textcolor{#7570b3}{\mathrm{Prior} \propto  p^{50} (1-p)^{50}}$
-  - Beta(51, 51): we believe coins are fair
-
-:::
-
-::: {.column width="50%"}
-```{r, fig.height=4}
-tibble(x = seq(0, 1, length = 200)) |>
-  mutate(prior = dbeta(x, 51, 51)) |>
-  ggplot(aes(x, prior)) +
-  geom_line(linewidth = 1.5, colour = col_prior) +
-  labs(x = "p", y = "Prior density") +
-  theme(
-    legend.position = "none",
-    axis.text = element_text(size = 28),
-    axis.title = element_text(size = 32))
-```
-:::
-
-:::
-:::
-
----
-
-##  Bayesian Update with Prior (Coin Toss) {visibility="uncounted"}
-
-[Posterior]{.orange} $\propto$ [Likelihood]{.teal} $\times$ [Prior]{.purple}
-
-::: columns
-::: {.column width="50%"}
-
-::: fragment
-Coin A:
-$\textcolor{#d95f02}{Post_A}\propto\textcolor{#1b9e77}{p^2 (1-p)^1} \times\textcolor{#7570b3}{p^{50} (1-p)^{50}}$
-
-Peak of the posterior: $p = 52/103 \approx 0.505$
-:::
-::: fragment
-- $Post_A$: With only 3 coin tosses, the likelihood is weak, so the posterior stays close to the prior.
-:::
-:::
-
-::: {.column width="50%"}
-::: fragment
-Coin B:
-$\textcolor{#d95f02}{Post_B} \propto \textcolor{#1b9e77}{p^{60} (1-p)^{40}} \times\textcolor{#7570b3}{p^{50} (1-p)^{50}}$
-
-Peak of the posterior: $p = 110/200 = 0.55$
-:::
-
-::: fragment
-- $Post_B$:
-With 100 coin tosses, the likelihood dominates, so the posterior shifts more towards the data.
-:::
-
-:::
-:::
-
-::: small
-::: incremental
-- The same prior can have a strong or weak influence depending on how much data we have.
-- We usually have some sense of scale for our parameters, and we are allowed to use that information.
-:::
-:::
 
 
 ## MCMC: a simplified Metropolis-Hastings (MH) algorithm {visibility="uncounted"}

@@ -1,10 +1,8 @@
 # ==============================================================================
 # 1. Network & Proxy Settings (Earliest possible for renv/activate.R)
 # ==============================================================================
-if (identical(Sys.info()[["sysname"]], "Darwin") && Sys.getenv("INSIDE_CONTAINER") != "true") {
-  # Keep the renv package cache in a user-controlled location on macOS.
-  Sys.setenv(RENV_PATHS_CACHE = path.expand("~/renv"))
-}
+# Use renv's platform-default cache unless RENV_PATHS_CACHE is set externally.
+# Do not force ~/renv: a cache shared with Docker may belong to a container user.
 
 if (Sys.getenv("INSIDE_CONTAINER") == "true") {
 

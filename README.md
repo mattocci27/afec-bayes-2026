@@ -100,6 +100,11 @@ dependency versions updated for R 4.6. `devtools` (used by `exercise.qmd`) and i
 dependencies are also included. `renv/settings.json` uses snapshot type `all` so
 future snapshots retain the complete project library.
 
+The project uses renv's default user cache (on macOS,
+`~/Library/Caches/org.R-project.R/R/renv`). Set `RENV_PATHS_CACHE` before starting
+R if a custom cache is needed; its directory must be writable by your user.
+Restart R after changing cache configuration.
+
 ```bash
 Rscript -e 'renv::restore(prompt = FALSE); renv::status()'
 Rscript R/build_classroom_materials.R
