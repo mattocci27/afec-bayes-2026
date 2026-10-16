@@ -1,0 +1,25 @@
+Day 1 Normal likelihood calculation, 2026-10-16
+
+Restored main.qmd's explicit sum of three dnorm(..., log=TRUE) terms.
+Compare mu=0 and mu=2 with observations (-1.5,0,1.5) and SD=1 held fixed.
+The prediction figure precedes numerical results; results appear as fragments;
+the likelihood curve is shown afterwards on its own slide.
+The approximately 3-minute comparison is within the existing 15-minute likelihood
+block. The single required code exercise remains the prior/data comparison.
+Today's objectives remain the two agreed figure-interpretation/prediction outcomes.
+
+R 4.6.1: executed both restored calculations and checked against the vectorised
+sum of log densities. Results: -5.006816 and -11.006816; mu=0 has higher likelihood.
+The assumptions are independent Normal observations with known SD=1.
+These are log-likelihood values, not probabilities of parameter values.
+The displayed likelihood curve uses exp(log_likelihood - max(log_likelihood)).
+
+Build commands:
+  quarto render day1/slides.qmd
+  quarto render classroom/instructor.md
+  Rscript R/build_classroom_materials.R --package-only
+
+Quarto 1.10.19 executed all slide chunks successfully. Browser inspection of the
+three changed layouts confirmed readable equations, axes and code, hidden initial
+numeric results, sequential result reveals, and a subsequent likelihood curve.
+The instructor schedule and distribution ZIP were refreshed. No model refitting.

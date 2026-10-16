@@ -1,0 +1,43 @@
+Day 1 brms instructor demonstration, 2026-10-16
+
+Change
+  Added a brms alternative inside the existing Stan demonstration in day1/exercise.qmd.
+  Same data y=2, N=5; same direct p ~ Beta(1,1) prior and binomial likelihood.
+  Formula: y | trials(N) ~ 0 + Intercept; binomial identity link;
+  beta(1,1) prior on class b, with lower=0 and upper=1.
+  Thus b_Intercept is p. This is not a Normal prior on logit(p).
+  The three new chunks have eval=FALSE: rendering and participant core work do not
+  compile or sample a new model. The existing saved Stan draws remain a separate,
+  explicitly identified fallback. No stored course fits or Stan sources changed.
+
+Validation in the prepared local instructor environment
+  R 4.6.1, brms 2.23.0, cmdstanr 0.9.0.9000, CmdStan 2.37.0.
+  Executed demo-brms-model and demo-brms-fit from the QMD, with existing setup helpers.
+  Verified generated Stan has one coefficient bounded to [0,1], beta_lpdf(b|1,1),
+  and binomial_lpmf(Y|trials,mu). Generated data have one row, Y=2, trials=5, X=1.
+  Compiled and sampled 4 chains, 2 in parallel, 1,000 warmup and 1,000 retained
+  iterations per chain, seed 20261021. Existing CmdStan header cache required
+  normal filesystem write permissions; no software was installed or rebuilt wholesale.
+  Posterior mean: 0.4249717 (exact Beta(3,4) mean: 0.4285714).
+  90% interval: [0.1585847, 0.7212698] (exact: [0.1531611, 0.7286616]).
+  b_Intercept R-hat rounds to 1.00; bulk ESS 1,798; tail ESS 2,069.
+  Divergences 0; maximum treedepth 3; chain E-BFMI 1.03 to 1.18.
+  The posterior histogram was generated; comparisons agree to Monte Carlo precision.
+  This local optional run does not validate compilation on the classroom server.
+
+Build commands (repository root)
+  Rscript -e 'source("R/classroom_materials.R"); writeLines(student_source(readLines("day1/exercise.qmd")), "day1/exercise-student.qmd")'
+  quarto render day1/exercise.qmd
+  quarto render day1/exercise-student.qmd
+  Rscript R/build_classroom_materials.R --package-only
+
+  Generated participant source retains the optional brms demonstration and strips
+  instructor solutions. Both HTML versions rendered without executing brms inference.
+  Browser review of the local HTML confirmed readable formulas, code and the Stan/brms
+  mapping table with the existing page theme. The participant ZIP was refreshed.
+  No additional core exercise or time allocation was introduced.
+
+References checked
+  https://paulbuerkner.com/brms/reference/brmsformula.html
+  https://paulbuerkner.com/brms/reference/set_prior.html
+  https://paulbuerkner.com/brms/reference/brmsfamily.html

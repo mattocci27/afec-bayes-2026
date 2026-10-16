@@ -31,7 +31,7 @@
     ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
       width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
@@ -150,12 +150,12 @@
     }
     .reveal .footnotes ol {
       counter-reset: ol;
-      list-style-type: none; 
+      list-style-type: none;
       margin-left: 0;
     }
     .reveal .footnotes ol li:before {
       counter-increment: ol;
-      content: counter(ol) ". "; 
+      content: counter(ol) ". ";
     }
     .reveal .footnotes ol li > p:first-child {
       display: inline-block;
@@ -197,19 +197,19 @@
     .reveal .slide > img.r-stretch.quarto-figure-center {
       display: block;
       margin-left: auto;
-      margin-right: auto; 
+      margin-right: auto;
     }
     .reveal .slide > img.stretch.quarto-figure-left,
     .reveal .slide > img.r-stretch.quarto-figure-left  {
       display: block;
       margin-left: 0;
-      margin-right: auto; 
+      margin-right: auto;
     }
     .reveal .slide > img.stretch.quarto-figure-right,
     .reveal .slide > img.r-stretch.quarto-figure-right  {
       display: block;
       margin-left: auto;
-      margin-right: 0; 
+      margin-right: 0;
     }
   </style>
   <script src="slides_files/libs/kePrint-0.0.1/kePrint.js"></script>
@@ -350,7 +350,6 @@ AFEC-X 2026 · 21 October
 <ul>
 <li>Explain likelihood, prior and posterior using a figure.</li>
 <li>Predict how changing data or the prior changes the posterior.</li>
-<li>Match data, unknowns and assumptions to a completed Stan model.</li>
 </ul>
 <aside class="notes">
 <p>Ask for explanations in words. Independent implementation is an optional extension.</p>
@@ -441,17 +440,114 @@ AFEC-X 2026 · 21 October
 <p><span class="math display">L(\mu)=f(-1.5\mid\mu,1)\,f(0\mid\mu,1)\,f(1.5\mid\mu,1)</span></p>
 </div>
 <p>Which mean fits these observations best?</p>
+<p>Compare <span class="math inline">\mu=0</span> and <span class="math inline">\mu=2</span>. Explain your prediction to your partner.</p>
 </div>
 </div></div>
 <aside class="notes">
 <ul>
-<li>The top graph compares means 0 and 2, with SD fixed at 1; the observed x values stay in the same places.</li>
-<li>The bottom graph evaluates many means, always using the same three observed values.</li>
-<li>The likelihood is highest at mu = 0 for these observations.</li>
+<li>This graph compares means 0 and 2, with SD fixed at 1; the observed x values stay in the same places.</li>
+<li>Allow about 30 seconds to predict and a brief pair explanation before the R comparison.</li>
+<li>The prediction, R comparison and likelihood-curve explanation use about 3 minutes of the existing 8-23 minute likelihood block, not an additional code exercise.</li>
 <li>Multiplying the densities is justified by the independence assumption.</li>
-<li>The computation sums log densities and then exponentiates; the displayed curve is rescaled to a maximum of one.</li>
-<li>Rescaling does not change the relative likelihoods or the position of the maximum.</li>
-<li>A likelihood is not a probability distribution for mu.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="compare-the-two-means-in-r" class="slide level2">
+<h2>Compare the two means in R</h2>
+<p>Keep <span class="math inline">x=\{-1.5,\;0,\;1.5\}</span> and <span class="math inline">\sigma=1</span> fixed. Change only the mean.</p>
+<p><code>log=TRUE</code> returns log densities. Their sum is the <strong>log-likelihood</strong>.</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="mean-0">Mean = 0</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="" aria-label="1"></a><span class="fu">dnorm</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>, <span class="at">log =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb1-2"><a href="" aria-label="2"></a>  <span class="fu">dnorm</span>(<span class="dv">0</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>, <span class="at">log =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb1-3"><a href="" aria-label="3"></a>  <span class="fu">dnorm</span>(<span class="fl">1.5</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>, <span class="at">log =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<div class="cell" data-layout-align="center">
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] -5.006816</code></pre>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<h3 id="mean-2">Mean = 2</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="" aria-label="1"></a><span class="fu">dnorm</span>(<span class="sc">-</span><span class="fl">1.5</span>, <span class="at">mean =</span> <span class="dv">2</span>, <span class="at">sd =</span> <span class="dv">1</span>, <span class="at">log =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb3-2"><a href="" aria-label="2"></a>  <span class="fu">dnorm</span>(<span class="dv">0</span>, <span class="at">mean =</span> <span class="dv">2</span>, <span class="at">sd =</span> <span class="dv">1</span>, <span class="at">log =</span> <span class="cn">TRUE</span>) <span class="sc">+</span></span>
+<span id="cb3-3"><a href="" aria-label="3"></a>  <span class="fu">dnorm</span>(<span class="fl">1.5</span>, <span class="at">mean =</span> <span class="dv">2</span>, <span class="at">sd =</span> <span class="dv">1</span>, <span class="at">log =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="fragment">
+<div class="cell" data-layout-align="center">
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] -11.00682</code></pre>
+</div>
+</div>
+</div>
+</div></div>
+<div class="fragment">
+<p>Which value is larger (less negative)? <strong>Mean = 0 fits these data better.</strong></p>
+<p>Taking logs preserves the ordering: larger likelihood, larger log-likelihood.</p>
+</div>
+<aside class="notes">
+<ul>
+<li>Restore the explicit dnorm calculation from main.qmd, with short lines for readability.</li>
+<li>Ask what stays fixed and which argument changes. Participants may read the code and explain their prediction; running it is optional.</li>
+<li>Reveal the two values only after the pair explanation: about -5.007 and -11.007.</li>
+<li>These are log-likelihoods, not probabilities or posterior probabilities of the two means.</li>
+<li>The dnorm terms are densities. Independence makes their product the joint likelihood; taking logs turns the product into a sum.</li>
+<li>A larger log-likelihood is better here even though both values are negative. No log derivation, derivative or optimisation code is required.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="from-two-means-to-a-likelihood-curve" class="slide level2">
+<h2>From two means to a likelihood curve</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/normal-likelihood-curve-1.png" class="quarto-figure quarto-figure-center" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:45%;">
+<ul>
+<li>Repeat the same calculation for many values of <span class="math inline">\mu</span>.</li>
+<li>Keep the observations and <span class="math inline">\sigma=1</span> fixed throughout.</li>
+<li>The likelihood is highest at <span class="math inline">\mu=0</span> for these data.</li>
+</ul>
+<p>This curve compares possible means using the same observations.</p>
+</div></div>
+<aside class="notes">
+<ul>
+<li>This curve appears after the prediction and numerical comparison, so it does not reveal the answer first.</li>
+<li>The computation sums log densities, then exponentiates after subtracting the maximum. The displayed likelihood is rescaled to a maximum of one.</li>
+<li>Rescaling does not change relative likelihoods or the position of the maximum. It does not make this a probability distribution for mu.</li>
+<li>Connect to the next slide: for seedling counts we compare p instead of the Normal mean, using a binomial likelihood.</li>
 </ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -957,19 +1053,19 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="columns">
 <div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
-<span id="cb1-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
-<span id="cb1-3"><a href="" aria-label="3"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=N&gt; y;</span>
-<span id="cb1-4"><a href="" aria-label="4"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; a;</span>
-<span id="cb1-5"><a href="" aria-label="5"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; b;</span>
-<span id="cb1-6"><a href="" aria-label="6"></a>}</span>
-<span id="cb1-7"><a href="" aria-label="7"></a><span class="kw">parameters</span> {</span>
-<span id="cb1-8"><a href="" aria-label="8"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; p;</span>
-<span id="cb1-9"><a href="" aria-label="9"></a>}</span>
-<span id="cb1-10"><a href="" aria-label="10"></a><span class="kw">model</span> {</span>
-<span id="cb1-11"><a href="" aria-label="11"></a>  p ~ beta(a, b);</span>
-<span id="cb1-12"><a href="" aria-label="12"></a>  y ~ binomial(N, p);</span>
-<span id="cb1-13"><a href="" aria-label="13"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb5-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
+<span id="cb5-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb5-3"><a href="" aria-label="3"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=N&gt; y;</span>
+<span id="cb5-4"><a href="" aria-label="4"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; a;</span>
+<span id="cb5-5"><a href="" aria-label="5"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; b;</span>
+<span id="cb5-6"><a href="" aria-label="6"></a>}</span>
+<span id="cb5-7"><a href="" aria-label="7"></a><span class="kw">parameters</span> {</span>
+<span id="cb5-8"><a href="" aria-label="8"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; p;</span>
+<span id="cb5-9"><a href="" aria-label="9"></a>}</span>
+<span id="cb5-10"><a href="" aria-label="10"></a><span class="kw">model</span> {</span>
+<span id="cb5-11"><a href="" aria-label="11"></a>  p ~ beta(a, b);</span>
+<span id="cb5-12"><a href="" aria-label="12"></a>  y ~ binomial(N, p);</span>
+<span id="cb5-13"><a href="" aria-label="13"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div><div class="column" style="width:50%;">
 <div class="small">
@@ -1002,8 +1098,8 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="columns">
 <div class="column" style="width:45%;">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="" aria-label="1"></a>fit <span class="ot">&lt;-</span> <span class="fu">course_fit</span>(<span class="st">"day1_seedling"</span>)</span>
-<span id="cb2-2"><a href="" aria-label="2"></a>fit<span class="sc">$</span>draws</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="" aria-label="1"></a>fit <span class="ot">&lt;-</span> <span class="fu">course_fit</span>(<span class="st">"day1_seedling"</span>)</span>
+<span id="cb6-2"><a href="" aria-label="2"></a>fit<span class="sc">$</span>draws</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -1234,7 +1330,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 </ul>
 <div class="fragment">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="" aria-label="1"></a><span class="fu">dnorm</span>(<span class="fl">1.96</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="" aria-label="1"></a><span class="fu">dnorm</span>(<span class="fl">1.96</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  [1] 0.05844094</code></pre>
 </div>
@@ -1451,7 +1547,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
   <script src="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
   <script src="slides_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="slides_files/libs/revealjs/plugin/quarto-support/support.js"></script>
-  
+
 
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
@@ -1473,7 +1569,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
 'smaller': false,
- 
+
         // Display controls in the bottom right corner
         controls: true,
 
@@ -1635,7 +1731,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
         ]
       });
     </script>
-    
+
     <script>
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
@@ -1681,7 +1777,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
         });
         const isCodeAnnotation = (el) => {
           for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {                     
+            if (clz.startsWith('code-annotation-')) {
               return true;
             }
           }
@@ -1701,11 +1797,11 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
             button.setAttribute("data-bs-toggle", "tooltip");
             button.setAttribute("data-bs-placement", "left");
             button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button, 
-              { trigger: "manual", 
+            tooltip = new bootstrap.Tooltip(button,
+              { trigger: "manual",
                 customClass: "code-copy-button-tooltip",
                 offset: [0, -8]});
-            tooltip.show();    
+            tooltip.show();
           }
           setTimeout(function() {
             if (tooltip) {
@@ -1784,7 +1880,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
           }
             config['offset'] = [0,0];
             config['maxWidth'] = 700;
-          window.tippy(el, config); 
+          window.tippy(el, config);
         }
         const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
         for (var i=0; i<noterefs.length; i++) {
@@ -1843,6 +1939,6 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
       </script>
     <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
     <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
-    
+
 
 </body></html>

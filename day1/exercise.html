@@ -2298,7 +2298,10 @@ window.Quarto = {
   <li><a href="#more-data-same-observed-proportion-4-minutes" id="toc-more-data-same-observed-proportion-4-minutes" class="nav-link" data-scroll-target="#more-data-same-observed-proportion-4-minutes">1. More data, same observed proportion (4 minutes)</a></li>
   <li><a href="#a-different-prior-same-data-4-minutes" id="toc-a-different-prior-same-data-4-minutes" class="nav-link" data-scroll-target="#a-different-prior-same-data-4-minutes">2. A different prior, same data (4 minutes)</a></li>
   </ul></li>
-  <li><a href="#instructor-demonstration-stan-reads-the-same-model" id="toc-instructor-demonstration-stan-reads-the-same-model" class="nav-link" data-scroll-target="#instructor-demonstration-stan-reads-the-same-model">Instructor demonstration: Stan reads the same model</a></li>
+  <li><a href="#instructor-demonstration-stan-reads-the-same-model" id="toc-instructor-demonstration-stan-reads-the-same-model" class="nav-link" data-scroll-target="#instructor-demonstration-stan-reads-the-same-model">Instructor demonstration: Stan reads the same model</a>
+  <ul class="collapse">
+  <li><a href="#the-same-model-in-brms" id="toc-the-same-model-in-brms" class="nav-link" data-scroll-target="#the-same-model-in-brms">The same model in brms</a></li>
+  </ul></li>
   <li><a href="#optional-extension-a-numerical-summary" id="toc-optional-extension-a-numerical-summary" class="nav-link" data-scroll-target="#optional-extension-a-numerical-summary">Optional extension: a numerical summary</a></li>
   <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection">Reflection</a></li>
   </ul>
@@ -2480,29 +2483,103 @@ window.Quarto = {
 </div>
 </div>
 <p>The histogram approximates the exact posterior curve. Stan returns samples from a distribution. It does not return only a best value. The saved result uses the same 2/5 data and Beta(1,1) prior as our first plot.</p>
+<section id="the-same-model-in-brms" class="level2">
+<h2 class="anchored" data-anchor-id="the-same-model-in-brms">The same model in brms</h2>
+<p>brms writes Stan code from an R formula. Here we keep exactly the same model:</p>
+<p><span class="math display">y\sim\operatorname{Binomial}(5,p),\qquad p\sim\operatorname{Beta}(1,1).</span></p>
+<p>Read this as an alternative way to specify the model within the same demonstration, not an additional exercise. These chunks are not run when building the handout. The saved Stan result above remains the classroom fallback; it is not a brms fit.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(brms)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>seedlings <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">y=</span><span class="dv">2</span>L, <span class="at">N=</span><span class="dv">5</span>L)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>seedling_formula <span class="ot">&lt;-</span> <span class="fu">bf</span>(y <span class="sc">|</span> <span class="fu">trials</span>(N) <span class="sc">~</span> <span class="dv">0</span> <span class="sc">+</span> Intercept)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>seedling_family <span class="ot">&lt;-</span> <span class="fu">binomial</span>(<span class="at">link=</span><span class="st">&quot;identity&quot;</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>seedling_prior <span class="ot">&lt;-</span> <span class="fu">set_prior</span>(<span class="st">&quot;beta(1, 1)&quot;</span>, <span class="at">class=</span><span class="st">&quot;b&quot;</span>, <span class="at">lb=</span><span class="dv">0</span>, <span class="at">ub=</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Part of the model</th>
+<th>Stan</th>
+<th>brms</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Observed counts</td>
+<td><code>N=5</code>, <code>y=2</code></td>
+<td>One row of <code>seedlings</code>; <code>trials(N)</code> supplies the number of seedlings</td>
+</tr>
+<tr class="even">
+<td>Unknown probability</td>
+<td><code>p</code>, bounded between 0 and 1</td>
+<td><code>0 + Intercept</code> gives one coefficient, bounded by <code>lb=0, ub=1</code></td>
+</tr>
+<tr class="odd">
+<td>Observation model</td>
+<td><code>y ~ binomial(N, p)</code></td>
+<td><code>binomial(link=&quot;identity&quot;)</code> makes that coefficient equal to <span class="math inline">p</span></td>
+</tr>
+<tr class="even">
+<td>Prior</td>
+<td><code>p ~ beta(1, 1)</code></td>
+<td>The Beta prior on this coefficient, <code>class=&quot;b&quot;</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>0 + Intercept</code> treats the intercept as an ordinary coefficient so that the bounded prior applies to it. With the identity link, this coefficient is the probability itself. This bounded, intercept-only example matches our Stan model. The usual logit link instead models log-odds; a Normal prior there would give a different prior on <span class="math inline">p</span>. Day 2 uses that logit formulation for a density-dependent probability.</p>
+<p><strong>Optional instructor execution:</strong> run the following only in a prepared environment with brms, CmdStan and a working C++ toolchain. It compiles a new model and runs new inference; participants do not need to run it or install anything. Prepare the result before class rather than waiting for compilation during the demonstration.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fit_brms <span class="ot">&lt;-</span> <span class="fu">brm</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula=</span>seedling_formula, <span class="at">data=</span>seedlings,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">family=</span>seedling_family, <span class="at">prior=</span>seedling_prior,</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">backend=</span><span class="st">&quot;cmdstanr&quot;</span>, <span class="at">seed=</span><span class="dv">20261021</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains=</span><span class="dv">4</span>, <span class="at">cores=</span><span class="dv">2</span>, <span class="at">iter=</span><span class="dv">2000</span>, <span class="at">warmup=</span><span class="dv">1000</span>, <span class="at">refresh=</span><span class="dv">0</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>brms_draws <span class="ot">&lt;-</span> posterior<span class="sc">::</span><span class="fu">as_draws_df</span>(fit_brms)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>p_brms <span class="ot">&lt;-</span> brms_draws<span class="sc">$</span>b_Intercept  <span class="co"># identity link: this is p, not logit(p)</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(p_brms)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(p_brms, <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.95</span>))</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_update</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">1</span>, <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">data=</span><span class="fu">data.frame</span>(<span class="at">p=</span>p_brms), <span class="fu">aes</span>(<span class="at">x=</span>p, <span class="at">y=</span><span class="fu">after_stat</span>(density)),</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>                 <span class="at">inherit.aes=</span><span class="cn">FALSE</span>, <span class="at">bins=</span><span class="dv">30</span>, <span class="at">fill=</span><span class="st">&quot;grey40&quot;</span>, <span class="at">alpha=</span>.<span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The target posterior is again Beta(3,4): mean <span class="math inline">3/7</span> and the same exact interval as the first plot. The brms and handwritten Stan histograms should approximate the same distribution; individual draws and summaries need not match exactly. Before using a new fit, inspect chain traces, R-hat, bulk/tail ESS, divergences, treedepth and E-BFMI together. Model checking is still needed beyond computation.</p>
+<p>For an optional look at the generated Stan code, without compilation or sampling:</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="fu">make_stancode</span>(seedling_formula, <span class="at">data=</span>seedlings,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">family=</span>seedling_family, <span class="at">prior=</span>seedling_prior))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>References: brms documentation on <a href="https://paulbuerkner.com/brms/reference/brmsformula.html">formulas</a>, <a href="https://paulbuerkner.com/brms/reference/set_prior.html">bounded priors</a>, and <a href="https://paulbuerkner.com/brms/reference/brmsfamily.html">supported links</a>.</p>
+</section>
 </section>
 <section id="optional-extension-a-numerical-summary" class="level1">
 <h1>Optional extension: a numerical summary</h1>
 <p>Do this after the core exercise or after class. The data and model stay fixed.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>draws <span class="ot">&lt;-</span> <span class="fu">course_fit</span>(<span class="st">&quot;day1_seedling&quot;</span>)<span class="sc">$</span>draws</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise_update</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">1</span>, <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>draws <span class="ot">&lt;-</span> <span class="fu">course_fit</span>(<span class="st">&quot;day1_seedling&quot;</span>)<span class="sc">$</span>draws</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summarise_update</span>(<span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">1</span>, <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; # A tibble: 1 × 6
 #&gt;   data  prior        mle post_mean    q5   q95
 #&gt;   &lt;chr&gt; &lt;chr&gt;      &lt;dbl&gt;     &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
 #&gt; 1 2/5   Beta(1, 1)   0.4     0.429 0.153 0.729</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(draws<span class="sc">$</span>p)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(draws<span class="sc">$</span>p)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 0.4251282</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(draws<span class="sc">$</span>p, <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.95</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(draws<span class="sc">$</span>p, <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.95</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;        5%       95%
 #&gt; 0.1505791 0.7226701</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(draws<span class="sc">$</span>p <span class="sc">&gt;</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(draws<span class="sc">$</span>p <span class="sc">&gt;</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 0.3375</code></pre>
 </div>

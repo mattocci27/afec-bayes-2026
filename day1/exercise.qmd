@@ -125,6 +125,76 @@ The histogram approximates the exact posterior curve. Stan returns samples from
 a distribution. It does not return only a best value. The saved result uses the
 same 2/5 data and Beta(1,1) prior as our first plot.
 
+## The same model in brms
+
+brms writes Stan code from an R formula. Here we keep exactly the same model:
+
+$$y\sim\operatorname{Binomial}(5,p),\qquad p\sim\operatorname{Beta}(1,1).$$
+
+Read this as an alternative way to specify the model within the same demonstration,
+not an additional exercise. These chunks are not run when building the handout.
+The saved Stan result above remains the classroom fallback; it is not a brms fit.
+
+```{r demo-brms-model, eval=FALSE}
+library(brms)
+seedlings <- data.frame(y=2L, N=5L)
+seedling_formula <- bf(y | trials(N) ~ 0 + Intercept)
+seedling_family <- binomial(link="identity")
+seedling_prior <- set_prior("beta(1, 1)", class="b", lb=0, ub=1)
+```
+
+| Part of the model | Stan | brms |
+|---|---|---|
+| Observed counts | `N=5`, `y=2` | One row of `seedlings`; `trials(N)` supplies the number of seedlings |
+| Unknown probability | `p`, bounded between 0 and 1 | `0 + Intercept` gives one coefficient, bounded by `lb=0, ub=1` |
+| Observation model | `y ~ binomial(N, p)` | `binomial(link="identity")` makes that coefficient equal to $p$ |
+| Prior | `p ~ beta(1, 1)` | The Beta prior on this coefficient, `class="b"` |
+
+`0 + Intercept` treats the intercept as an ordinary coefficient so that the bounded
+prior applies to it. With the identity link, this coefficient is the probability
+itself. This bounded, intercept-only example matches our Stan model. The usual
+logit link instead models log-odds; a Normal prior there would give a different
+prior on $p$. Day 2 uses that logit formulation for a density-dependent probability.
+
+**Optional instructor execution:** run the following only in a prepared environment
+with brms, CmdStan and a working C++ toolchain. It compiles a new model and runs new
+inference; participants do not need to run it or install anything. Prepare the result
+before class rather than waiting for compilation during the demonstration.
+
+```{r demo-brms-fit, eval=FALSE}
+fit_brms <- brm(
+  formula=seedling_formula, data=seedlings,
+  family=seedling_family, prior=seedling_prior,
+  backend="cmdstanr", seed=20261021,
+  chains=4, cores=2, iter=2000, warmup=1000, refresh=0
+)
+brms_draws <- posterior::as_draws_df(fit_brms)
+p_brms <- brms_draws$b_Intercept  # identity link: this is p, not logit(p)
+mean(p_brms)
+quantile(p_brms, c(0.05, 0.95))
+
+plot_update(2, 5, 1, 1) +
+  geom_histogram(data=data.frame(p=p_brms), aes(x=p, y=after_stat(density)),
+                 inherit.aes=FALSE, bins=30, fill="grey40", alpha=.2)
+```
+
+The target posterior is again Beta(3,4): mean $3/7$ and the same exact interval as
+the first plot. The brms and handwritten Stan histograms should approximate the
+same distribution; individual draws and summaries need not match exactly.
+Before using a new fit, inspect chain traces, R-hat, bulk/tail ESS, divergences,
+treedepth and E-BFMI together. Model checking is still needed beyond computation.
+
+For an optional look at the generated Stan code, without compilation or sampling:
+
+```{r demo-brms-stancode, eval=FALSE}
+cat(make_stancode(seedling_formula, data=seedlings,
+                  family=seedling_family, prior=seedling_prior))
+```
+
+References: brms documentation on [formulas](https://paulbuerkner.com/brms/reference/brmsformula.html),
+[bounded priors](https://paulbuerkner.com/brms/reference/set_prior.html),
+and [supported links](https://paulbuerkner.com/brms/reference/brmsfamily.html).
+
 # Optional extension: a numerical summary
 
 Do this after the core exercise or after class. The data and model stay fixed.

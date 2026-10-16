@@ -29,7 +29,7 @@ execute:
 <!--
 DAY 1 SESSION PLAN (90 min). Agreed direction: classroom/restructure-proposal.md.
 Outcomes: explain likelihood/prior/posterior in words; predict how data/prior changes
-alter a posterior; connect data, unknowns and assumptions in completed Stan code.
+alter a posterior.
 Assume basic R execution, daytime GLM practice, English and no homework. Confirm
 language, prior experience and the prepared browser environment with organisers.
 0-8 setup/course question; 8-23 likelihood; 23-43 fip/PCR/Bayes;
@@ -170,7 +170,6 @@ On Day 3, survival rates vary among mother trees and species.
 
 - Explain likelihood, prior and posterior using a figure.
 - Predict how changing data or the prior changes the posterior.
-- Match data, unknowns and assumptions to a completed Stan model.
 
 ::: notes
 Ask for explanations in words. Independent implementation is an optional extension.
@@ -234,7 +233,7 @@ Three observations: $x=\{-1.5,\;0,\;1.5\}$.
 
 ::: columns
 ::: {.column width="50%"}
-```{r, fig.height=6, fig.width=7}
+```{r, fig.height=4.5, fig.width=7}
 # Use the original likelihood calculation from main.qmd at 3013b7c.
 like_fun <- function(mu) {
   dnorm(-1.5, mean = mu, sd = 1, log = TRUE) +
@@ -261,7 +260,7 @@ normal_likelihood_plot <- ggplot(normal_likelihood, aes(mu, likelihood)) +
   geom_vline(xintercept = 0, linetype = 3) +
   labs(x = expression("Mean " * mu), y = "Likelihood (rescaled)") +
   theme(axis.title = element_text(size = 22), axis.text = element_text(size = 18))
-normal_density_plot / normal_likelihood_plot
+normal_density_plot
 ```
 :::
 ::: {.column width="50%"}
@@ -279,18 +278,96 @@ $$L(\mu)=f(-1.5\mid\mu,1)\,f(0\mid\mu,1)\,f(1.5\mid\mu,1)$$
 :::
 
 Which mean fits these observations best?
+
+Compare $\mu=0$ and $\mu=2$. Explain your prediction to your partner.
 :::
 :::
 :::
 
 ::: notes
-- The top graph compares means 0 and 2, with SD fixed at 1; the observed x values stay in the same places.
-- The bottom graph evaluates many means, always using the same three observed values.
-- The likelihood is highest at mu = 0 for these observations.
+- This graph compares means 0 and 2, with SD fixed at 1; the observed x values stay in the same places.
+- Allow about 30 seconds to predict and a brief pair explanation before the R comparison.
+- The prediction, R comparison and likelihood-curve explanation use about 3 minutes of the existing 8-23 minute likelihood block, not an additional code exercise.
 - Multiplying the densities is justified by the independence assumption.
-- The computation sums log densities and then exponentiates; the displayed curve is rescaled to a maximum of one.
-- Rescaling does not change the relative likelihoods or the position of the maximum.
-- A likelihood is not a probability distribution for mu.
+:::
+
+## Compare the two means in R
+
+Keep $x=\{-1.5,\;0,\;1.5\}$ and $\sigma=1$ fixed. Change only the mean.
+
+`log=TRUE` returns log densities. Their sum is the **log-likelihood**.
+
+::: columns
+::: {.column width="50%"}
+### Mean = 0
+
+```{r normal-loglik-0, echo=TRUE, results="hide"}
+dnorm(-1.5, mean = 0, sd = 1, log = TRUE) +
+  dnorm(0, mean = 0, sd = 1, log = TRUE) +
+  dnorm(1.5, mean = 0, sd = 1, log = TRUE)
+```
+
+::: fragment
+```{r normal-loglik-0-result, echo=FALSE}
+like_fun(0)
+```
+:::
+:::
+::: {.column width="50%"}
+### Mean = 2
+
+```{r normal-loglik-2, echo=TRUE, results="hide"}
+dnorm(-1.5, mean = 2, sd = 1, log = TRUE) +
+  dnorm(0, mean = 2, sd = 1, log = TRUE) +
+  dnorm(1.5, mean = 2, sd = 1, log = TRUE)
+```
+
+::: fragment
+```{r normal-loglik-2-result, echo=FALSE}
+like_fun(2)
+```
+:::
+:::
+:::
+
+::: fragment
+Which value is larger (less negative)? **Mean = 0 fits these data better.**
+
+Taking logs preserves the ordering: larger likelihood, larger log-likelihood.
+:::
+
+::: notes
+- Restore the explicit dnorm calculation from main.qmd, with short lines for readability.
+- Ask what stays fixed and which argument changes. Participants may read the code and explain their prediction; running it is optional.
+- Reveal the two values only after the pair explanation: about -5.007 and -11.007.
+- These are log-likelihoods, not probabilities or posterior probabilities of the two means.
+- The dnorm terms are densities. Independence makes their product the joint likelihood; taking logs turns the product into a sum.
+- A larger log-likelihood is better here even though both values are negative. No log derivation, derivative or optimisation code is required.
+:::
+
+## From two means to a likelihood curve
+
+::: columns
+::: {.column width="55%"}
+```{r normal-likelihood-curve, fig.height=4.5, fig.width=7}
+normal_likelihood_plot
+```
+:::
+::: {.column width="45%"}
+
+- Repeat the same calculation for many values of $\mu$.
+- Keep the observations and $\sigma=1$ fixed throughout.
+- The likelihood is highest at $\mu=0$ for these data.
+
+This curve compares possible means using the same observations.
+:::
+:::
+
+::: notes
+- This curve appears after the prediction and numerical comparison, so it does not reveal the answer first.
+- The computation sums log densities, then exponentiates after subtracting the maximum. The displayed likelihood is rescaled to a maximum of one.
+- Rescaling does not change relative likelihoods or the position of the maximum. It does not make this a probability distribution for mu.
+- Connect to the next slide: for seedling counts we compare p instead of the Normal mean, using a binomial likelihood.
 :::
 
 ## Binomial MLE: back to the seedlings
