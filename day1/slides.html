@@ -885,8 +885,8 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
           display:block!important;
       }</style></aside>
 </section>
-<section id="bayesian-updating-two-amounts-of-coin-data" class="slide level2">
-<h2>Bayesian updating: two amounts of coin data</h2>
+<section id="bayesian-updating-more-data-less-infulence-from-the-prior" class="slide level2">
+<h2>Bayesian updating: More data, less infulence from the prior</h2>
 <style>
 #bayesian-updating-two-amounts-of-coin-data .coin-interpretation {
   font-size: 0.7em;
@@ -899,8 +899,7 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
 
 <img data-src="slides_files/figure-revealjs/coin-posteriors-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><div class="coin-interpretation">
 <p><span style="color: #F8766D;"><strong>Post A (5 tosses):</strong></span> The prior has a stronger influence, so the posterior stays close to the prior.</p>
-<p><span style="color: #00BA38;"><strong>Post B (100 tosses):</strong></span> The data have more influence, shifting the posterior toward the observed proportion (0.6).</p>
-<p><strong>Take-home message:</strong> <strong>Same MLE (0.6), different posteriors.</strong></p>
+<p><span style="color: #00BA38;"><strong>Post B (100 tosses):</strong></span> The data have more influence, shifting the posterior toward 0.6.</p>
 </div>
 <aside class="notes">
 <p>The posteriors are Beta(54,53) and Beta(111,91). MAPs are 53/105 and 110/200. The means differ from the peaks. At 100 tosses the prior still has substantial influence. These are deliberate teaching priors. Do not use them as defaults. No derivation is required. Explain the figure before discussing the numbers.</p>
@@ -916,17 +915,17 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
           display:block!important;
       }</style></aside>
 </section>
-<section id="exercise-data-and-prior-comparisons" class="slide level2" data-background-color="#f3e8f5">
-<h2>Exercise: data and prior comparisons</h2>
-<p><code>day1/exercise-student.qmd</code> · 12 minutes including explanation</p>
+<section id="exercise-calculate-a-seedling-posterior" class="slide level2" data-background-color="#f3e8f5">
+<h2>Exercise: calculate a seedling posterior</h2>
+<p><code>day1/exercise-student.qmd</code></p>
 <ul>
-<li>Predict, then compare 2/5 with 40/100 under the same flat prior.</li>
-<li>Keep the data at 2/5 and change the prior to Beta(8,2).</li>
-<li>Write one sentence for each comparison.</li>
+<li>Find the prior, likelihood and their product in the supplied R code.</li>
+<li>Predict what happens when 2/5 becomes 40/100; change only the two counts.</li>
+<li>Use your plot to explain what the observed proportion alone cannot tell us.</li>
 </ul>
-<p>All code is supplied. Explain why a high-survival prior would or would not fit your habitat.</p>
+<p>The prior stays flat. Changing the prior is an optional extension.</p>
 <aside class="notes">
-<p>58-70 minutes: 8 minutes of pair work and 4 minutes debrief. Checkpoint at 4 minutes: both partners have predicted the sample-size comparison. If R fails, use day1/results.html. This is the only required operation exercise.</p>
+<p>58-70 minutes: 8 minutes of pair work and 4 minutes debrief. The coin slides illustrated strong-prior influence. Here participants transfer that binomial structure to seedlings, identify the updating calculation and change the inputs themselves. Do not repeat the coin explanation or reveal the sample-size answer before their prediction. Checkpoint at 4 minutes: both partners have identified the prior and likelihood and predicted the sample-size comparison. If R fails, use day1/results.html. Skip the optional prior change if needed. This is the only required operation exercise.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;

@@ -311,7 +311,7 @@ count, so the contrast changes density only.
 
 ## Exercise: survival at two densities {background-color="#f3e8f5"}
 
-`day2/exercise-student.qmd` · 15 minutes including explanation
+`day2/exercise-student.qmd`
 
 - Predict which density has higher survival probability.
 - Run the supplied code and read the two probabilities with 90% intervals.

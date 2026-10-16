@@ -765,7 +765,7 @@ wrap_ggplot_grob(coin_likelihood_grob) + (coin_prior_panel + coin_panel_theme) +
 - This deliberately strong prior illustrates its influence; it is not a default prior for ecological survival.
 :::
 
-## Bayesian updating: two amounts of coin data
+## Bayesian updating: More data, less infulence from the prior
 
 ```{=html}
 <style>
@@ -796,9 +796,7 @@ ggplot(coin,aes(p,density,colour=Distribution,linetype=Distribution))+
 The prior has a stronger influence, so the posterior stays close to the prior.
 
 [**Post B (100 tosses):**]{style="color: #00BA38;"}
-The data have more influence, shifting the posterior toward the observed proportion (0.6).
-
-**Take-home message:** **Same MLE (0.6), different posteriors.**
+The data have more influence, shifting the posterior toward 0.6.
 :::
 
 ::: notes
@@ -808,20 +806,25 @@ influence. These are deliberate teaching priors. Do not use them as defaults.
 No derivation is required. Explain the figure before discussing the numbers.
 :::
 
-## Exercise: data and prior comparisons {background-color="#f3e8f5"}
+## Exercise: calculate a seedling posterior {background-color="#f3e8f5"}
 
-`day1/exercise-student.qmd` · 12 minutes including explanation
+`day1/exercise-student.qmd`
 
-- Predict, then compare 2/5 with 40/100 under the same flat prior.
-- Keep the data at 2/5 and change the prior to Beta(8,2).
-- Write one sentence for each comparison.
+- Find the prior, likelihood and their product in the supplied R code.
+- Predict what happens when 2/5 becomes 40/100; change only the two counts.
+- Use your plot to explain what the observed proportion alone cannot tell us.
 
-All code is supplied. Explain why a high-survival prior would or would not fit your habitat.
+The prior stays flat. Changing the prior is an optional extension.
 
 ::: notes
 58-70 minutes: 8 minutes of pair work and 4 minutes debrief.
-Checkpoint at 4 minutes: both partners have predicted the sample-size comparison.
-If R fails, use day1/results.html. This is the only required operation exercise.
+The coin slides illustrated strong-prior influence. Here participants transfer
+that binomial structure to seedlings, identify the updating calculation and
+change the inputs themselves. Do not repeat the coin explanation or reveal
+the sample-size answer before their prediction.
+Checkpoint at 4 minutes: both partners have identified the prior and likelihood
+and predicted the sample-size comparison. If R fails, use day1/results.html.
+Skip the optional prior change if needed. This is the only required operation exercise.
 :::
 
 # From formulas to samples

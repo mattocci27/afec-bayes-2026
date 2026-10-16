@@ -49,7 +49,6 @@ theme_set(theme_bw(base_size=14))
 | | |
 |---|---|
 | **Purpose** | Explain information sharing using each mother tree's data and the model's assumptions. |
-| **Time** | 15 minutes: 10 minutes prediction, code and pair discussion, then 5 minutes explanation. |
 | **Computation** | Supplied partial-pooling fit plus exact Beta updating for the two comparison models. No new Stan inference. |
 | **Data** | Eight mother trees of one species. Simulated, and different from the Day 2 quadrats. |
 
@@ -57,7 +56,7 @@ This example leaves out the density predictor so that we can focus on difference
 among mother trees. The binomial survival model is shared with Days 1 and 2.
 Mother trees and species are different kinds of groups.
 
-## 1. Predict before seeing the fitted results (3 minutes)
+## 1. Predict before seeing the fitted results
 
 ```{r core-trees}
 trees <- make_tree_data()
@@ -68,7 +67,7 @@ Choose two trees whose estimates you expect to change when they share informatio
 Write their letters and your reasons. Consider both seedling count and the observed
 survival proportion.
 
-## 2. Compare three ways of estimating survival (5 minutes)
+## 2. Compare three ways of estimating survival
 
 - **Complete pooling** assumes one shared survival probability.
 - **Separate estimates** give each mother tree an independent probability.
@@ -87,7 +86,7 @@ models use the Day 1 flat Beta(1,1) prior on each probability. The partial model
 Normal group effects on the logit scale, with their centre and SD estimated from
 all trees. Thus the prior specifications also differ across these comparisons.
 
-## 3. Interpret the movement (2 minutes)
+## 3. Interpret the movement
 
 Did your predictions agree with the figures? Explain one tree's change in words.
 Would information sharing have the same strength if the data supported large

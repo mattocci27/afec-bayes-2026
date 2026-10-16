@@ -37,7 +37,7 @@ The restructured course lives in:
 
 | | Slides | Exercises | Theme |
 |---|---|---|---|
-| Day 1 | `day1/slides.qmd` | `day1/exercise.qmd` | Bayesian foundations through familiar examples and a prior/data figure comparison |
+| Day 1 | `day1/slides.qmd` | `day1/exercise.qmd` | Bayesian foundations and an explicit R update: change sample size and interpret uncertainty |
 | Day 2 | `day2/slides.qmd` | `day2/exercise.qmd` | CNDD: survival probabilities, prediction and model checking |
 | Day 3 | `day3/slides.qmd` | `day3/exercise.qmd` | Mother-tree partial pooling and instructor demonstrations of ecological applications |
 
@@ -86,6 +86,12 @@ run `R/precompute_fits.R` and do not build the solution-free classroom package
 (the separate `R/build_classroom_materials.R` workflow above does that).
 
 Participants open `exercise-student.qmd` and run the indicated completed chunks.
+Day 1 uses tidyverse/ggplot2 for plotting: participants read the explicit prior–likelihood multiplication,
+edit survival counts and compare posterior widths. Its participant QMD needs no
+external R files or saved fits; the optional Stan/brms demonstrations stay in
+the instructor exercise.
+The standalone Day 1 grid calculations and count edits were also checked with
+R 4.6.1; the revised handouts were rendered with Quarto 1.10.19.
 Solutions are physically removed from this source. `exercise.qmd`/`exercise.html`
 are instructor versions. Distribute the ZIP before class and have students check
 exercise/result HTMLs offline. The ZIP includes the shared figure code, all seven

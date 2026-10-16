@@ -225,7 +225,7 @@ fitted comparisons. Participants can write predictions on paper.
 
 ## Exercise: mother trees and shared information {background-color="#f3e8f5"}
 
-`day3/exercise-student.qmd` · 15 minutes including explanation
+`day3/exercise-student.qmd`
 
 - Predict which estimates will move and why.
 - Run the completed figure code.

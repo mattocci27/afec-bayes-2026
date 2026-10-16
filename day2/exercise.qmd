@@ -49,7 +49,6 @@ theme_set(theme_bw(base_size=14))
 | | |
 |---|---|
 | **Purpose** | Interpret the density relationship and its uncertainty on the probability scale. |
-| **Time** | 15 minutes: 10 minutes prediction, code and pair discussion, then 5 minutes explanation. |
 | **Computation** | Analyse the supplied `day2_ndd` fit. No new inference or compilation. |
 | **Data** | Seedlings and survivors in 60 simulated quadrats, with scaled conspecific density. |
 
@@ -57,7 +56,7 @@ CNDD means conspecific negative density dependence. Today we ask whether seedlin
 survival probability decreases with conspecific density. These simulated data illustrate
 the analysis. They are not observations from the research papers.
 
-## 1. Predict the relationship (2 minutes)
+## 1. Predict the relationship
 
 ```{r core-data}
 ndd <- make_ndd_data()
@@ -69,7 +68,7 @@ ggplot(ndd, aes(cons, suv/n, size=n)) + geom_point(alpha=.65) +
 Which density would you expect to have higher survival probability? Write a prediction.
 Each point is a quadrat. Different quadrats can contain different numbers of seedlings.
 
-## 2. Read the curve and intervals (5 minutes)
+## 2. Read the curve and intervals
 
 The model is the Day 1 binomial model with a density predictor:
 
@@ -102,7 +101,7 @@ probability_summary
 plot_cndd_comparison(draws)
 ```
 
-## 3. Explain the ecological result (3 minutes)
+## 3. Explain the ecological result
 
 Complete this sentence with values and intervals from the table:
 

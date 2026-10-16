@@ -28,19 +28,57 @@ knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE,fig.width=8,fig.hei
 theme_set(theme_bw(base_size=14))
 ```
 
-## The core comparisons
+## More seedlings, same observed proportion
 
-```{r comparisons}
-plot_update(2,5,1,1)
-plot_update(40,100,1,1)
-plot_update(2,5,8,2)
-cases <- tribble(~y,~N,~a,~b, 2,5,1,1, 40,100,1,1, 2,5,8,2)
-knitr::kable(pmap_dfr(cases,summarise_update),digits=3)
+These are the two outcomes of the participant calculation. Both plots use the
+same prior, equally spaced grid and axes. Predict the change before viewing the
+second figure.
+
+```{r comparisons, fig.height=3.4}
+p <- seq(0, 1, length.out = 501)
+for (N in c(5, 100)) {
+  y <- if (N == 5) 2 else 40
+  prior <- dbeta(p, shape1 = 1, shape2 = 1)
+  likelihood <- dbinom(x = y, size = N, prob = p)
+  posterior <- prior * likelihood
+  posterior <- posterior / sum(posterior)
+  figure <- tibble(p = p, posterior = posterior) |>
+    ggplot(aes(x = p, y = posterior)) +
+    geom_line(linewidth = 1.2, colour = "#d95f02") +
+    coord_cartesian(xlim = c(0, 1), ylim = c(0, 0.02)) +
+    labs(x = "Survival probability p",
+         y = "Posterior probability per grid point",
+         title = paste(y, "survivors out of", N, "seedlings"))
+  print(figure)
+}
 ```
 
-The first two cases fix the prior and observed proportion. The first and third fix
-the data. More data narrow this posterior. A high-survival prior moves the small-data
-posterior towards higher values. The prior needs ecological justification.
+Both observed proportions are 0.4. Under this model and prior, the larger survey
+gives a narrower posterior: less uncertainty about the survival probability.
+The continuous posteriors approximated here are Beta(3,4) and Beta(41,61).
+Their means are close, but not identical.
+
+## Optional: a different prior with the same 2/5 data
+
+```{r prior-comparison, fig.height=3.4}
+y <- 2
+N <- 5
+prior <- dbeta(p, shape1 = 8, shape2 = 2)
+likelihood <- dbinom(x = y, size = N, prob = p)
+posterior <- prior * likelihood
+posterior <- posterior / sum(posterior)
+tibble(p = p, posterior = posterior) |>
+  ggplot(aes(x = p, y = posterior)) +
+  geom_line(linewidth = 1.2, colour = "#d95f02") +
+  coord_cartesian(xlim = c(0, 1), ylim = c(0, 0.02)) +
+  labs(x = "Survival probability p",
+       y = "Posterior probability per grid point",
+       title = "2 survivors out of 5 seedlings; prior Beta(8,2)")
+```
+
+Only the prior changes. The posterior shifts towards higher survival
+probabilities; a high-survival prior needs ecological justification.
+All these figures show probability per grid point, rather than continuous density.
 
 ## Stan demonstration
 

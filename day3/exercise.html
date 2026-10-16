@@ -2295,9 +2295,9 @@ window.Quarto = {
   <li><a href="#before-you-begin" id="toc-before-you-begin" class="nav-link active" data-scroll-target="#before-you-begin">Before you begin</a></li>
   <li><a href="#core-exercise-which-mother-tree-estimates-will-move" id="toc-core-exercise-which-mother-tree-estimates-will-move" class="nav-link" data-scroll-target="#core-exercise-which-mother-tree-estimates-will-move">Core exercise: which mother-tree estimates will move?</a>
   <ul class="collapse">
-  <li><a href="#predict-before-seeing-the-fitted-results-3-minutes" id="toc-predict-before-seeing-the-fitted-results-3-minutes" class="nav-link" data-scroll-target="#predict-before-seeing-the-fitted-results-3-minutes">1. Predict before seeing the fitted results (3 minutes)</a></li>
-  <li><a href="#compare-three-ways-of-estimating-survival-5-minutes" id="toc-compare-three-ways-of-estimating-survival-5-minutes" class="nav-link" data-scroll-target="#compare-three-ways-of-estimating-survival-5-minutes">2. Compare three ways of estimating survival (5 minutes)</a></li>
-  <li><a href="#interpret-the-movement-2-minutes" id="toc-interpret-the-movement-2-minutes" class="nav-link" data-scroll-target="#interpret-the-movement-2-minutes">3. Interpret the movement (2 minutes)</a></li>
+  <li><a href="#predict-before-seeing-the-fitted-results" id="toc-predict-before-seeing-the-fitted-results" class="nav-link" data-scroll-target="#predict-before-seeing-the-fitted-results">1. Predict before seeing the fitted results</a></li>
+  <li><a href="#compare-three-ways-of-estimating-survival" id="toc-compare-three-ways-of-estimating-survival" class="nav-link" data-scroll-target="#compare-three-ways-of-estimating-survival">2. Compare three ways of estimating survival</a></li>
+  <li><a href="#interpret-the-movement" id="toc-interpret-the-movement" class="nav-link" data-scroll-target="#interpret-the-movement">3. Interpret the movement</a></li>
   </ul></li>
   <li><a href="#instructor-demonstrations" id="toc-instructor-demonstrations" class="nav-link" data-scroll-target="#instructor-demonstrations">Instructor demonstrations</a>
   <ul class="collapse">
@@ -2374,22 +2374,18 @@ window.Quarto = {
 <td>Explain information sharing using each mother tree’s data and the model’s assumptions.</td>
 </tr>
 <tr class="even">
-<td><strong>Time</strong></td>
-<td>15 minutes: 10 minutes prediction, code and pair discussion, then 5 minutes explanation.</td>
-</tr>
-<tr class="odd">
 <td><strong>Computation</strong></td>
 <td>Supplied partial-pooling fit plus exact Beta updating for the two comparison models. No new Stan inference.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>Data</strong></td>
 <td>Eight mother trees of one species. Simulated, and different from the Day 2 quadrats.</td>
 </tr>
 </tbody>
 </table>
 <p>This example leaves out the density predictor so that we can focus on differences among mother trees. The binomial survival model is shared with Days 1 and 2. Mother trees and species are different kinds of groups.</p>
-<section id="predict-before-seeing-the-fitted-results-3-minutes" class="level2">
-<h2 class="anchored" data-anchor-id="predict-before-seeing-the-fitted-results-3-minutes">1. Predict before seeing the fitted results (3 minutes)</h2>
+<section id="predict-before-seeing-the-fitted-results" class="level2">
+<h2 class="anchored" data-anchor-id="predict-before-seeing-the-fitted-results">1. Predict before seeing the fitted results</h2>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>trees <span class="ot">&lt;-</span> <span class="fu">make_tree_data</span>()</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>trees <span class="sc">|&gt;</span> <span class="fu">select</span>(tree, n, suv) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">observed_proportion=</span>suv<span class="sc">/</span>n)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -2409,8 +2405,8 @@ window.Quarto = {
 </div>
 <p>Choose two trees whose estimates you expect to change when they share information. Write their letters and your reasons. Consider both seedling count and the observed survival proportion.</p>
 </section>
-<section id="compare-three-ways-of-estimating-survival-5-minutes" class="level2">
-<h2 class="anchored" data-anchor-id="compare-three-ways-of-estimating-survival-5-minutes">2. Compare three ways of estimating survival (5 minutes)</h2>
+<section id="compare-three-ways-of-estimating-survival" class="level2">
+<h2 class="anchored" data-anchor-id="compare-three-ways-of-estimating-survival">2. Compare three ways of estimating survival</h2>
 <ul>
 <li><strong>Complete pooling</strong> assumes one shared survival probability.</li>
 <li><strong>Separate estimates</strong> give each mother tree an independent probability.</li>
@@ -2442,8 +2438,8 @@ window.Quarto = {
 </div>
 <p>Points are posterior means and bars are 90% intervals. The complete and separate models use the Day 1 flat Beta(1,1) prior on each probability. The partial model uses Normal group effects on the logit scale, with their centre and SD estimated from all trees. Thus the prior specifications also differ across these comparisons.</p>
 </section>
-<section id="interpret-the-movement-2-minutes" class="level2">
-<h2 class="anchored" data-anchor-id="interpret-the-movement-2-minutes">3. Interpret the movement (2 minutes)</h2>
+<section id="interpret-the-movement" class="level2">
+<h2 class="anchored" data-anchor-id="interpret-the-movement">3. Interpret the movement</h2>
 <p>Did your predictions agree with the figures? Explain one tree’s change in words. Would information sharing have the same strength if the data supported large differences among mother trees? Give a reason.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">

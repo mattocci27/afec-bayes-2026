@@ -50,7 +50,25 @@ check_exercises <- function() {
       }
       i <- j+1L
     }
-    if (day == "day1") stopifnot(mean(env$draws$p)>.4,mean(env$draws$p)<.45)
+    if (day == "day1") {
+      stopifnot(!any(grepl("source\\(|course_fit\\(|plot_update\\(", lines)))
+      exact <- dbeta(env$p, 3, 4); exact <- exact / sum(exact)
+      stopifnot(max(abs(env$posterior - exact)) < 1e-12)
+      # Run the actual participant edit in a separate environment.
+      first <- match("```{r core-data-comparison, fig.height=3.4}", lines)
+      last <- first + match("```", lines[(first + 1L):length(lines)])
+      code <- lines[(first + 1L):(last - 1L)]
+      code[code == "y <- 2"] <- "y <- 40"
+      code[code == "N <- 5"] <- "N <- 100"
+      larger <- new.env(parent=globalenv())
+      eval(parse(text=code), larger)
+      exact <- dbeta(larger$p, 41, 61); exact <- exact / sum(exact)
+      stopifnot(max(abs(larger$posterior - exact)) < 1e-12,
+                larger$y/larger$N == env$y/env$N,
+                identical(larger$p, env$p),
+                sum(larger$posterior * (larger$p - sum(larger$p * larger$posterior))^2) <
+                sum(env$posterior * (env$p - sum(env$p * env$posterior))^2))
+    }
     if (day == "day2") {
       low <- env$probabilities$p[env$probabilities$density == -1]
       high <- env$probabilities$p[env$probabilities$density == 1]
@@ -63,9 +81,11 @@ check_exercises <- function() {
       all(env$comparison$mean<=env$comparison$upper))
     core <- grep("^# Core exercise:",lines,value=TRUE)
     stopifnot(length(core)==1L)
-    diagnostics <- course_diagnostics(env$fit)
-    stopifnot(all(is.finite(as.matrix(diagnostics))),diagnostics$max_rhat<=1.01,
-              diagnostics$min_bulk_ess>400,diagnostics$divergent==0)
+    if (day != "day1") {
+      diagnostics <- course_diagnostics(env$fit)
+      stopifnot(all(is.finite(as.matrix(diagnostics))),diagnostics$max_rhat<=1.01,
+                diagnostics$min_bulk_ess>400,diagnostics$divergent==0)
+    }
     cat(day,":",count,"safe chunks and one completed core exercise passed with classroom guards\n")
   }
   changed <- try(fit_or_load("day1_seedling","stan/binomial.stan",

@@ -2295,9 +2295,9 @@ window.Quarto = {
   <li><a href="#before-you-begin" id="toc-before-you-begin" class="nav-link active" data-scroll-target="#before-you-begin">Before you begin</a></li>
   <li><a href="#core-exercise-survival-at-low-and-high-conspecific-density" id="toc-core-exercise-survival-at-low-and-high-conspecific-density" class="nav-link" data-scroll-target="#core-exercise-survival-at-low-and-high-conspecific-density">Core exercise: survival at low and high conspecific density</a>
   <ul class="collapse">
-  <li><a href="#predict-the-relationship-2-minutes" id="toc-predict-the-relationship-2-minutes" class="nav-link" data-scroll-target="#predict-the-relationship-2-minutes">1. Predict the relationship (2 minutes)</a></li>
-  <li><a href="#read-the-curve-and-intervals-5-minutes" id="toc-read-the-curve-and-intervals-5-minutes" class="nav-link" data-scroll-target="#read-the-curve-and-intervals-5-minutes">2. Read the curve and intervals (5 minutes)</a></li>
-  <li><a href="#explain-the-ecological-result-3-minutes" id="toc-explain-the-ecological-result-3-minutes" class="nav-link" data-scroll-target="#explain-the-ecological-result-3-minutes">3. Explain the ecological result (3 minutes)</a></li>
+  <li><a href="#predict-the-relationship" id="toc-predict-the-relationship" class="nav-link" data-scroll-target="#predict-the-relationship">1. Predict the relationship</a></li>
+  <li><a href="#read-the-curve-and-intervals" id="toc-read-the-curve-and-intervals" class="nav-link" data-scroll-target="#read-the-curve-and-intervals">2. Read the curve and intervals</a></li>
+  <li><a href="#explain-the-ecological-result" id="toc-explain-the-ecological-result" class="nav-link" data-scroll-target="#explain-the-ecological-result">3. Explain the ecological result</a></li>
   </ul></li>
   <li><a href="#instructor-demonstrations" id="toc-instructor-demonstrations" class="nav-link" data-scroll-target="#instructor-demonstrations">Instructor demonstrations</a>
   <ul class="collapse">
@@ -2374,22 +2374,18 @@ window.Quarto = {
 <td>Interpret the density relationship and its uncertainty on the probability scale.</td>
 </tr>
 <tr class="even">
-<td><strong>Time</strong></td>
-<td>15 minutes: 10 minutes prediction, code and pair discussion, then 5 minutes explanation.</td>
-</tr>
-<tr class="odd">
 <td><strong>Computation</strong></td>
 <td>Analyse the supplied <code>day2_ndd</code> fit. No new inference or compilation.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><strong>Data</strong></td>
 <td>Seedlings and survivors in 60 simulated quadrats, with scaled conspecific density.</td>
 </tr>
 </tbody>
 </table>
 <p>CNDD means conspecific negative density dependence. Today we ask whether seedling survival probability decreases with conspecific density. These simulated data illustrate the analysis. They are not observations from the research papers.</p>
-<section id="predict-the-relationship-2-minutes" class="level2">
-<h2 class="anchored" data-anchor-id="predict-the-relationship-2-minutes">1. Predict the relationship (2 minutes)</h2>
+<section id="predict-the-relationship" class="level2">
+<h2 class="anchored" data-anchor-id="predict-the-relationship">1. Predict the relationship</h2>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ndd <span class="ot">&lt;-</span> <span class="fu">make_ndd_data</span>()</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(ndd, <span class="fu">aes</span>(cons, suv<span class="sc">/</span>n, <span class="at">size=</span>n)) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">alpha=</span>.<span class="dv">65</span>) <span class="sc">+</span></span>
@@ -2405,8 +2401,8 @@ window.Quarto = {
 </div>
 <p>Which density would you expect to have higher survival probability? Write a prediction. Each point is a quadrat. Different quadrats can contain different numbers of seedlings.</p>
 </section>
-<section id="read-the-curve-and-intervals-5-minutes" class="level2">
-<h2 class="anchored" data-anchor-id="read-the-curve-and-intervals-5-minutes">2. Read the curve and intervals (5 minutes)</h2>
+<section id="read-the-curve-and-intervals" class="level2">
+<h2 class="anchored" data-anchor-id="read-the-curve-and-intervals">2. Read the curve and intervals</h2>
 <p>The model is the Day 1 binomial model with a density predictor:</p>
 <p><span class="math display">
 s_i \sim \operatorname{Binomial}(n_i,p_i), \qquad
@@ -2452,8 +2448,8 @@ s_i \sim \operatorname{Binomial}(n_i,p_i), \qquad
 </div>
 </div>
 </section>
-<section id="explain-the-ecological-result-3-minutes" class="level2">
-<h2 class="anchored" data-anchor-id="explain-the-ecological-result-3-minutes">3. Explain the ecological result (3 minutes)</h2>
+<section id="explain-the-ecological-result" class="level2">
+<h2 class="anchored" data-anchor-id="explain-the-ecological-result">3. Explain the ecological result</h2>
 <p>Complete this sentence with values and intervals from the table:</p>
 <blockquote class="blockquote">
 <p>Predicted survival probability is ___ (90% interval ___ to <strong><em>) at low density, compared with </em></strong> (___ to ___) at high density, under this model.</p>

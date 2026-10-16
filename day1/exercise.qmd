@@ -20,16 +20,132 @@ knitr::opts_chunk$set(message=FALSE, warning=FALSE, fig.align="center",
                       fig.width=8, fig.height=4.5, comment="#>")
 ```
 
-## Before you begin
+```{r participant-setup}
+library(tidyverse)
+theme_set(theme_bw(base_size = 14))
+```
 
-Work in pairs. One person runs the supplied code, the other reads the figure and
-writes the interpretation. Swap roles during the exercise. Predict before running
-each comparison. All required code is complete.
+# Core exercise: more seedlings, how much uncertainty?
 
-Use the prepared browser R environment. If access fails, open this HTML and
-[the result sheet](results.html) locally and answer the same questions.
-There is one core exercise today. Demonstrations and optional extensions are labelled.
-No installation, independent Stan programming or homework is required.
+| | |
+|---|---|
+| **Purpose** | Use the updating calculation to explain how sample size changes uncertainty about seedling survival. |
+| **Computation** | A grid approximation, plotted with ggplot2. No external R files, saved fits or Stan are needed. |
+| **Model** | Survivors $y \sim \operatorname{Binomial}(N,p)$, with $p \sim \operatorname{Beta}(1,1)$. |
+
+The slides used coin tosses and a strong prior to illustrate how data and a prior
+combine. Here the unknown probability is seedling survival. We use the same
+binomial structure, with a flat prior, and calculate the update ourselves.
+
+## 1. Read the calculation for 2 survivors out of 5
+
+Run the supplied code. `y` is the number surviving; `N` is the number surveyed.
+`p` lists possible values of the unknown survival probability.
+
+```{r core-data-comparison, fig.height=3.4}
+y <- 2
+N <- 5
+p <- seq(0, 1, length.out = 501)
+
+prior <- dbeta(p, shape1 = 1, shape2 = 1)
+likelihood <- dbinom(x = y, size = N, prob = p)
+posterior <- prior * likelihood
+posterior <- posterior / sum(posterior)
+
+tibble(p = p, posterior = posterior) |>
+  ggplot(aes(x = p, y = posterior)) +
+  geom_line(linewidth = 1.2, colour = "#d95f02") +
+  coord_cartesian(xlim = c(0, 1), ylim = c(0, 0.02)) +
+  labs(x = "Survival probability p",
+       y = "Posterior probability per grid point",
+       title = paste(y, "survivors out of", N, "seedlings"))
+```
+
+`dbeta()` gives the prior density at each candidate `p`. Beta(1,1) gives equal
+prior weight across these candidates. `dbinom()` gives the probability of the
+observed count for each candidate `p`: this is the likelihood.
+Multiplication combines them; the last calculation makes the weights sum to 1.
+This is a discrete approximation on an equally spaced grid. The plotted heights
+are probabilities assigned to grid points, rather than a continuous density.
+
+With your partner, point to the line that represents each part of
+**posterior $\propto$ prior $\times$ likelihood**.
+You can use the plotting code as supplied.
+
+## 2. Predict, change the counts, then check
+
+Imagine surveying 100 seedlings and finding 40 survivors.
+
+**Before running anything:** will the posterior be wider or narrower?
+Will the observed survival proportion change?
+
+Change only `y <- 2` to `y <- 40` and `N <- 5` to `N <- 100` in the code above,
+then rerun the whole chunk. Keep the prior, grid and plot axes unchanged.
+Use the earlier figure in this HTML as a reference for the 2/5 case.
+Swap who runs the code and who explains the figure.
+
+Write one sentence: **“The observed survival proportion stays at …, but …”**
+Use the width of the posterior to support your explanation.
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and instructor notes
+
+Assume participants can run supplied R code and edit two assignments; do not
+require function writing or a derivation of the Beta posterior. Allow about
+8 minutes for reading, prediction, editing and discussion, then 4 for explanation.
+If time is short, skip the optional prior comparison below.
+
+`prior <- dbeta(...)` supplies the prior; `likelihood <- dbinom(...)` evaluates
+the likelihood with the counts fixed and p varying; multiplication and
+normalisation produce the grid posterior. The plotting lines only display it.
+
+Both observed proportions are 0.4. The continuous posteriors approximated here
+are Beta(3,4) and Beta(41,61); the second is narrower. Example explanation:
+“The observed survival proportion stays at 0.4, but the larger survey gives a
+narrower posterior and less uncertainty about the survival probability.”
+The means are 3/7 and 41/102, so do not claim that their means are identical.
+A narrower distribution does not mean that survival itself has become less
+variable or that the model assumptions have been verified.
+
+The grid and vertical limits are identical, so widths and heights are comparable.
+The y-axis is probability per grid point: changing the grid would change those
+heights. Do not confuse them with a continuous density.
+
+:::
+:::
+
+# Optional extension: change the prior
+
+Return to `y <- 2` and `N <- 5`. Change only the prior line to:
+
+```{r optional-prior, eval=FALSE}
+prior <- dbeta(p, shape1 = 8, shape2 = 2)
+```
+
+Beta(8,2) gives more prior weight to high survival probabilities.
+Predict which way the posterior will move, then rerun the whole calculation
+with this replacement. Keep the data, grid and plot axes fixed.
+What earlier ecological evidence could support that prior?
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and instructor notes
+
+The continuous posterior is Beta(10,5), with mean 10/15, compared with 3/7 under
+the flat prior. The posterior shifts towards higher survival probabilities.
+These priors are teaching contrasts, not general recommendations; a high-survival
+prior needs evidence from a comparable habitat and census period.
+
+:::
+:::
+
+::: {.content-visible when-meta="solutions"}
+
+# Instructor demonstration: Stan reads the same model
+
+This is a demonstration after the core exercise. Follow the mapping from data to
+unknown survival probability and assumptions. Running these chunks is optional.
 
 ```{r setup}
 library(tidyverse)
@@ -43,70 +159,6 @@ source(here("R/course_utils.R"))
 source(here("R/course_visuals.R"))
 theme_set(theme_bw(base_size=14))
 ```
-
-# Core exercise: how do data and priors change the answer?
-
-| | |
-|---|---|
-| **Purpose** | Explain how the amount of data and the prior affect uncertainty about seedling survival. |
-| **Time** | 12 minutes: 8 minutes prediction, code and pair discussion, then 4 minutes explanation. |
-| **Computation** | Exact Beta updating. No Stan inference or compilation. |
-| **Model** | Survivors $y \sim \operatorname{Binomial}(N,p)$, with $p \sim \operatorname{Beta}(a,b)$. |
-
-## 1. More data, same observed proportion (4 minutes)
-
-We observed 2 survivors out of 5 seedlings. Compare this with 40 out of 100.
-Keep the observed proportion at 0.4 and the prior at Beta(1,1).
-
-**Predict first:** which posterior distribution will be narrower?
-
-```{r core-data-comparison, fig.height=3.4}
-plot_update(2, 5, 1, 1)
-plot_update(40, 100, 1, 1)
-```
-
-Write one sentence describing what changes and what stays the same.
-The likelihood curves are rescaled to area 1 to make their shapes comparable.
-They are functions of $p$ with the data held fixed.
-
-## 2. A different prior, same data (4 minutes)
-
-Keep the data at 2 survivors out of 5. Compare the first plot above with this one.
-Beta(8,2) gives more prior weight to high survival probabilities.
-
-**Predict first:** which way will the posterior move?
-
-```{r core-prior-comparison, fig.height=3.4}
-plot_update(2, 5, 8, 2)
-```
-
-Write one sentence about the change. What ecological evidence could justify
-this prior for seedlings in the habitat you study?
-
-::: {.content-visible when-meta="solutions"}
-::: {.callout-tip collapse="true"}
-## Solution and instructor notes
-
-The first comparison changes only sample size. With the flat prior, the posteriors
-are Beta(3,4) and Beta(41,61). Both favour survival probabilities near the observed
-proportion, but the larger data set gives a narrower posterior.
-
-The second comparison changes only the prior. The posterior becomes Beta(10,5),
-with mean `r round(10/15,2)`, instead of `r round(3/7,2)` under the flat prior.
-Both the data and the prior contribute. The peak need not equal the observed proportion.
-
-A high-survival prior needs support from earlier work in a comparable habitat and
-census period. The numerical Beta parameters are teaching contrasts, not general
-recommendations. Check whether participants are describing the entire distribution
-or just its highest point. A peak is the MAP, not the posterior mean.
-
-:::
-:::
-
-# Instructor demonstration: Stan reads the same model
-
-This is a demonstration after the core exercise. Follow the mapping from data to
-unknown survival probability and assumptions. Running these chunks is optional.
 
 ```{r demo-stan, echo=FALSE, results="asis"}
 cat("```stan\n", paste(readLines(here("stan/binomial.stan")), collapse="\n"), "\n```\n", sep="")
@@ -209,7 +261,6 @@ mean(draws$p > 0.5)
 
 Interpret the interval in words. What does the last line estimate?
 
-::: {.content-visible when-meta="solutions"}
 ::: {.callout-tip collapse="true"}
 ## Solution and instructor notes
 
@@ -219,9 +270,10 @@ that $p>0.5$. Small differences between the exact Beta calculations and saved
 Stan draws reflect Monte Carlo approximation. These summaries are optional today.
 
 :::
+
 :::
 
 # Reflection
 
-What did you learn from the distribution that you could not learn from 2/5 alone?
+What does the posterior width tell you that the observed proportion alone does not?
 On Day 2 we keep the binomial model and let survival probability depend on density.
