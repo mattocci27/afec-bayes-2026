@@ -5,18 +5,19 @@ institute: "XTBG, CAS"
 strip-comments: true
 format:
   revealjs:
-    html-math-method: mathjax
+    html-math-method: katex
+    embed-resources: false
     logo: ../images/xtbg_logo.png
     chalkboard: true
     slide-number: true
-    theme: ../assets/rladies.scss
+    theme: ../assets/course.scss
     show-slide-number: all
     controls: true
     width: 1440
     height: 810
     max-scale: 1.0
     code-block-height: 660px
-    css: [../assets/custom.css]
+    css: [../assets/course.css]
     include-after: |
       <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
       <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
@@ -26,814 +27,436 @@ execute:
 ---
 
 <!--
-DAY 2 SESSION PLAN (90 min) -- Regression and model checking
-
-Learning outcomes: by the end of the session participants can
-  1. read a Bayesian linear and logistic regression (likelihood, link, priors)
-     and say what each parameter means on the scale of the data;
-  2. report a coefficient as a distribution (mean, interval, probability statement);
-  3. make posterior predictions and distinguish uncertainty about the mean
-     from uncertainty about a new observation;
-  4. judge priors with a prior predictive check and the fitted model with a
-     posterior predictive check;
-  5. recognise a fit that cannot be trusted (R-hat, ESS, trace plots).
-
-Assumptions: same as Day 1 (R/tidyverse and lm/glm experience, English,
-supplied Stan code, no homework, 15 pairs, one instructor). Stored fits are core.
-
-Timing
-   0- 5  Recap of Day 1, today's questions
-   5-17  Allometry model, coefficients and priors
-  17-29  Posterior prediction and posterior predictive check
-  29-53  Exercise 2A: 21 min pair work + 3 min explanation/questions
-  53-65  Broken-fit demonstration + whole-class diagnostic questions (2B part 1)
-  65-76  Logistic regression: same linear predictor, different likelihood/link
-  76-84  Exercise 2B part 2: 6 min pair work + 2 min explanation/questions
-  84-87  Workflow summary and bridge to Day 3
-  87-90  Questions and delay buffer
-
-Core: allometry tasks 1-4, diagnose the broken fit as a demonstration, and
-interpret survival at two densities from supplied draws. Changed-data/prior
-refits, odds ratios, logistic PPC, Poisson and brms are optional.
-If behind: show the logistic comparison as a demonstration; retain allometry
-prediction, both checks, its debrief and the final buffer.
+DAY 2 SESSION PLAN: 90 minutes. Agreed CNDD example.
+Outcomes: read a survival curve and uncertainty at low/high density; distinguish
+uncertainty about p from future binomial counts; compare observations with replicated
+data. Match data, parameters, likelihood and priors in completed code.
+0-10 review/question; 10-25 binomial/logit/Normal scale illustration; 25-40 saved results/computation/prediction;
+40-55 ONE exercise (10 work + 5 debrief); 55-70 model-check demo;
+70-80 interpretation/species bridge; 80-85 research reflection; 85-90 questions/buffer.
+All core results are stored. No independent Stan writing or new inference.
+If delayed, shorten code and species preview. Preserve the exercise debrief and checking.
 -->
 
 ```{r setup, include=FALSE}
 source(here::here("R/slides_setup.R"))
-
-allo <- make_allometry_data()
 ndd <- make_ndd_data()
-allo_fit <- read_fit("day2_allo")
-bad_fit <- read_fit("day2_allo_bad")
-ndd_fit <- read_fit("day2_ndd")
-dbh_ref <- allometry_truth$dbh_ref
+fit <- course_fit("day2_ndd")
+draws <- fit$draws
+low <- plogis(draws$alpha-draws$beta)
+high <- plogis(draws$alpha+draws$beta)
+replicates <- cndd_replicates(draws,ndd,seed=20261023)
 ```
 
 ##  {#title-slide background="../images/priors.png" background-size="50%" background-position="50% 20%"}
 
 ::: title-box
 <h2>Bayesian statistics for ecology</h2>
-
-<h3>Day 2: Regression and model checking</h3>
-
+<h3>Day 2: Seedling survival and CNDD</h3>
 <p>AFEC-X 2026 · 22 October</p>
-
-<h3>🧑🏻‍💻 [Masatoshi Katabuchi \@ XTBG, CAS]{.author}</h3>
+<h3>Masatoshi Katabuchi @ XTBG, CAS</h3>
 :::
 
-## Yesterday, and today
+## Yesterday's question, today's question
 
 ::: columns
-::: {.column width="50%"}
-### Day 1
-
-- [Posterior]{.orange} $\propto$ [likelihood]{.teal} $\times$ [prior]{.purple}
-- The posterior is a distribution.
-  We summarise its draws.
-- One parameter: survival probability $p$
+::: {.column width="45%"}
+![](../images/seedlings.png){height=380}
 :::
+::: {.column width="55%"}
 
-::: {.column width="50%"}
-### Today
+**Day 1:** what is the seedling survival probability?
 
-By the end of today, you can
+**Day 2:** does that probability change with conspecific density?
 
-::: incremental
-- read and fit Bayesian **linear** and **logistic** regressions;
-- report coefficients as **distributions**;
-- make **predictions** with honest uncertainty;
-- check **priors**, **computation**, and **model fit**.
-:::
+We keep the binomial model and add a predictor.
 :::
 :::
 
-::: fragment
-Fitting the model is not the end of the analysis.
+## Today's objectives
+
+- Explain the fitted relationship on the probability scale.
+- Compare low-density and high-density predictions with intervals.
+- Compare model-generated survival data with observations.
+
+::: notes
+Read completed models and results together. Coding is optional.
+The only participant exercise is at 40-55 minutes.
 :::
 
-## Today's two questions
+## Conspecific negative density dependence
 
 ::: columns
-::: {.column width="50%"}
-### 🌳 How does tree height scale with stem diameter?
+::: {.column width="35%"}
+![](../images/comita_cover.jpg){height=450}
+:::
+::: {.column width="65%"}
 
-- Data: diameter (DBH) and height of `r nrow(allo)` trees
-- Linear regression
+**CNDD:** in today's example, higher conspecific density goes with lower seedling survival.
+
+Do species differ in this relationship?
+Could those differences relate to species abundance?
+
+Today we read one common survival curve. Tomorrow we consider group differences.
+:::
 :::
 
-::: {.column width="50%"}
-### 🌱 Do seedlings survive less well where conspecifics are dense?
-
-- Data: survivors in `r nrow(ndd)` seedling quadrats
-- Logistic regression
-:::
-:::
-
-::: fragment
-Both data sets are simulated, so we know the truth and can see whether the model recovers it.
+::: footer
+Research motivation: [Comita et al. 2010, Science](https://doi.org/10.1126/science.1190772).
 :::
 
 ::: notes
-- same seedling theme as Day 1, now with a predictor
-- allometry data come back on Day 3 with species
+The research motivates the question. All numerical analyses today use simulated
+teaching data, not the paper's observations or fitted results.
 :::
 
-# Bayesian linear regression
+## The data and a prediction
 
-## Tree allometry
-
-::: footer
-Example inspired by Nguyen & Katabuchi *Journal of Forestry Research* (accepted)
-:::
-
-There is a power-law relationship between tree diameter (DBH) and tree height: $y = ax^b$.
-
-```{r, fig.width=15, fig.height=5}
-p1 <- ggplot(allo, aes(dbh, h)) +
-  geom_point(alpha = 0.5, size = 3) +
-  labs(x = "DBH (cm)", y = "Height (m)", title = expression("y = ax"^b))
-
-p2 <- p1 +
-  scale_x_log10() +
-  scale_y_log10() +
-  ggtitle("log(y) = log(a) + b log(x)")
-
-p1 + p2
+```{r observed-data, fig.width=11, fig.height=4.7}
+ggplot(ndd,aes(cons,suv/n,size=n))+geom_point(alpha=.7)+
+  labs(x="Conspecific density (scaled)",y="Observed proportion surviving",size="Seedlings")
 ```
 
-::: incremental
-- On the log-log scale the relationship is a straight line: a linear regression.
-- $b$ is the **scaling exponent**: when DBH increases by 1%, height increases by about $b$%.
+Which way would you expect the fitted curve to go?
+
+::: notes
+60 simulated quadrats. Point size represents the number of seedlings.
+Distinguish an observed proportion from an unknown survival probability.
+Pause for a prediction before showing a fitted curve.
 :::
 
-## The model
+## The same binomial observation model
 
-$$
-\log h_i \sim \mathcal{N}(\mu_i, \sigma) \qquad \mu_i = \alpha + \beta \log(\mathrm{DBH}_i / 40)
-$$
+$$s_i \sim \operatorname{Binomial}(n_i,p_i)$$
+
+- $i$: a quadrat.
+- $n_i$: number of seedlings, $s_i$: survivors.
+- $p_i$: survival probability in that quadrat.
+
+Now let conspecific density $x_i$ predict $p_i$.
+
+::: notes
+10-25 minutes: the same count model as Day 1. Within a quadrat assume a common
+probability and conditional independence. Missing shared conditions can violate
+these assumptions. We return to this during model checking.
+:::
+
+## A straight line and a probability curve
+
+```{r link-function, fig.width=13, fig.height=4.2}
+link_data <- tibble(x=seq(-3,3,length.out=101)) |>
+  mutate(z=qlogis(.3)-.8*x,p=plogis(z))
+p1 <- ggplot(link_data,aes(x,z))+geom_line(linewidth=1.4,colour=col_like)+
+  labs(x="Density (scaled)",y="logit(p)")
+p2 <- ggplot(link_data,aes(x,p))+geom_line(linewidth=1.4,colour=col_like)+
+  ylim(0,1)+labs(x="Density (scaled)",y="Survival probability")
+p1+p2
+```
+
+$$\operatorname{logit}(p_i)=\alpha+\beta x_i,\qquad
+p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)$$
+
+::: notes
+These are illustrative generating values, not posterior estimates.
+The link keeps probabilities between zero and one. Explain the shapes and the
+sign of the slope. No derivation, odds-ratio exercise or syntax memorisation.
+Source: Stan User's Guide, regression models.
+:::
+
+## Prior scale: a familiar Normal regression
 
 ::: columns
 ::: {.column width="58%"}
-::: small
-::: incremental
-- [Likelihood]{.teal}: log height is normally distributed around a line.
-- $\beta$: scaling exponent.
-- $\alpha$ is the log height of a tree with DBH = 40 cm.
-  Therefore, $e^{\alpha}$ is the typical height (m) of a 40-cm tree.
-  - Dividing DBH by 40 gives the intercept a clear meaning.
-    Without this scaling, $\alpha$ would describe a tree with DBH = 1 cm.
-- $\sigma$: scatter of individual trees around the line (log scale).
+```{r normal-prior-scale, fig.width=8.5, fig.height=5}
+plot_normal_prior_scale()
+```
 :::
-:::
-:::
-
 ::: {.column width="42%"}
-::: fragment
-[Priors]{.purple}
 
-$$
-\begin{align*}
-\alpha &\sim \mathcal{N}(0, 2.5)\\
-\beta &\sim \mathcal{N}(0, 2.5)\\
-\sigma &\sim \text{Half-}\mathcal{N}(0, 1)
-\end{align*}
-$$
+$$y_i\sim\mathcal{N}(a x_i+b,\sigma)$$
 
-Are these reasonable?
-How would we know?
-:::
-:::
-:::
+For these units and ranges, would a slope of 100 make sense?
 
-## Prior predictive check: what trees do the priors expect?
+A candidate slope prior:
 
-```{r, fig.width=15, fig.height=5}
-set.seed(1)
-n_line <- 60
-x_grid <- seq(log(10 / dbh_ref), log(150 / dbh_ref), length.out = 30)
+$$a\sim\mathcal{N}(0,2.5)$$
 
-prior_lines <- function(beta_sd, label) {
-  tibble(line = seq_len(n_line), alpha = rnorm(n_line, 0, 2.5), beta = rnorm(n_line, 0, beta_sd)) |>
-    expand_grid(x = x_grid) |>
-    mutate(dbh = dbh_ref * exp(x), h = exp(alpha + beta * x), prior = label)
-}
-
-bind_rows(
-  prior_lines(100, "Vague slope prior: N(0, 100)"),
-  prior_lines(2.5, "Weakly informative: N(0, 2.5)")
-) |>
-  mutate(prior = fct_inorder(prior)) |>
-  ggplot(aes(dbh, h, group = line)) +
-  annotate("rect", xmin = 10, xmax = 150, ymin = 1, ymax = 100, fill = col_like, alpha = 0.25) +
-  geom_line(alpha = 0.4, colour = col_prior) +
-  facet_wrap(~prior, scales = "free_y") +
-  scale_x_log10() +
-  scale_y_log10(labels = scales::label_log()) +
-  labs(x = "DBH (cm)", y = "Height (m)")
-```
-
-::: small
-::: incremental
-- Each line is one draw from the prior.
-  The green band shows the heights of real trees (1 to 100 m).
-- The vague prior gives substantial probability to trees as tall as $10^{50}$ m or as short as $10^{-50}$ m.
-  It is not "uninformative": most of its probability is on unrealistic heights.
-- The weakly informative prior is still generous, but it stays within a few orders of magnitude of reality.
+The second argument is an SD.
 :::
 :::
 
 ::: notes
-- An intercept prior of N(0, 2.5) allows 40-cm tree heights from $e^{-5}$ to $e^5$ m.
-  This range is wide but finite.
-- with 188 trees the prior hardly matters here; with 5 trees it does (optional task in Exercise 2A)
+Use the same scale intuition as main.qmd, for about 3 minutes within 10-25.
+This is a continuous-response illustration, not another fitted analysis.
+Judge the scale from the measurement units and plausible range, without using
+an observed direction to choose a positive slope prior. A prior with SD 10000
+permits much more extreme lines and should not be called assumption-free.
+Whether SD 2.5 is weakly informative depends on the units. The illustrative blue
+line and label both use slope 100, correcting the source example's mismatch.
 :::
 
-## The same model in Stan
+## The same scale question for CNDD
 
-::: columns
-::: {.column width="56%"}
-::: {style="font-size: 0.9em;"}
-```{r, results="asis"}
-show_stan("stan/linear.stan")
-```
-:::
-:::
+$$\operatorname{logit}(p_i)=\alpha+\beta x_i$$
 
-::: {.column width="44%"}
-::: small
-$$
-\begin{align*}
-y_i &\sim \mathcal{N}(\alpha + \beta x_i, \sigma)\\
-\alpha &\sim \mathcal{N}(0, 2.5)\\
-\beta &\sim \mathcal{N}(0, \texttt{beta\_sd})\\
-\sigma &\sim \text{Half-}\mathcal{N}(0, 1)
-\end{align*}
-$$
+- Density is measured in standard-deviation units.
+- The coefficients describe change on the logit scale.
+- Their priors imply survival curves on the probability scale.
 
-- $y_i = \log h_i$, $x_i = \log(\mathrm{DBH}_i / 40)$
-- Each line of the `model` block is one line of the mathematical model.
-- `real<lower=0> sigma` together with `normal(0, 1)` gives the half-normal prior.
-- `beta_sd` is passed as data so that we can change the prior without recompiling.
-:::
-:::
+Would those curves give plausible survival probabilities in this habitat?
+
+::: notes
+Return explicitly from Normal observations to the binomial survival model.
+The numerical SD 2.5 has a different meaning across these models. In the saved
+CNDD fit both alpha and beta independently have Normal(0,2.5) priors.
+Use this as a short connection. Detailed CNDD prior-curve comparisons are optional.
+No independent allometry fit or extra exercise is introduced.
 :::
 
-## Coefficients are distributions
+## The completed model in Stan
 
 ::: columns
-::: {.column width="50%"}
-```{r}
-allo_draws <- allo_fit$draws
-allo_draws |>
-  summarise_draws(mean, sd, ~quantile(.x, c(0.05, 0.95)), rhat, ess_bulk) |>
-  filter(variable != "lp__") |>
-  mutate(across(mean:rhat, \(x) round(x, 3)), ess_bulk = round(ess_bulk)) |>
-  kable(format = "html") |>
-  kable_material(c("striped"), full_width = FALSE, font_size = 28)
-```
-
-::: small
-::: incremental
-- Exponent: `r round(mean(allo_draws$beta), 2)` (90% interval `r paste(round(quantile(allo_draws$beta, c(0.05, 0.95)), 2), collapse = " to ")`).
-- A 40-cm tree is typically $e^{\alpha}$ = `r round(mean(exp(allo_draws$alpha)), 1)` m tall.
-- Elastic similarity theory predicts $\beta = 2/3$.
-  The posterior probability that $\beta < 2/3$ is $P(\beta < 2/3 \mid \text{data})$ = `r round(mean(allo_draws$beta < 2/3), 2)`.
-:::
-:::
-:::
-
-::: {.column width="50%"}
-```{r, fig.height=6, fig.width=8}
-ggplot(as_tibble(allo_draws), aes(beta)) +
-  geom_histogram(bins = 50, fill = col_post, alpha = 0.6) +
-  geom_vline(xintercept = 2 / 3, linetype = 2, linewidth = 1) +
-  annotate("text", x = 2 / 3, y = Inf, label = "2/3 ", hjust = 1.1, vjust = 2, size = 9) +
-  labs(x = expression(beta ~ "(scaling exponent)"), y = "Number of draws")
+::: {.column width="55%"}
+```{r stan-model, results="asis"}
+show_stan("stan/logit_reg.stan", compact=TRUE)
 ```
 :::
-:::
+::: {.column width="45%"}
 
-::: footer
-Elastic similarity: McMahon 1973 *Science*. <!-- TODO: verify the reference details before teaching. -->
+- **Data:** seedlings, survivors and density.
+- **Unknowns:** intercept and density coefficient.
+- **Assumptions:** binomial survival, logit relationship and priors.
+
+`binomial_logit` uses the straight line on the logit scale.
+:::
 :::
 
 ::: notes
-- transform first, then summarise: mean(exp(alpha)), not exp(mean(alpha))
-- "the data do not rule out 2/3" is a different statement from "beta is not significantly different from 2/3"
+25-40 minutes: read this together. Do not ask participants to edit or compile it.
+The stored fit has the same seeded data, model name and prior specification.
 :::
 
-## Posterior prediction: two kinds of uncertainty
+## Did the computation behave well?
 
-::: columns
-::: {.column width="55%"}
-```{r, fig.height=6.5, fig.width=9}
-set.seed(1)
-dbh_grid <- seq(10, 150, length.out = 60)
-x_grid <- log(dbh_grid / dbh_ref)
-d <- as_tibble(allo_draws)
-
-pred <- map(seq_along(x_grid), \(i) {
-  mu <- d$alpha + d$beta * x_grid[i]
-  y_new <- rnorm(nrow(d), mu, d$sigma)
-  tibble(
-    dbh = dbh_grid[i],
-    mu_lo = exp(quantile(mu, 0.05)), mu_hi = exp(quantile(mu, 0.95)),
-    new_lo = exp(quantile(y_new, 0.05)), new_hi = exp(quantile(y_new, 0.95)),
-    mid = exp(median(mu))
-  )
-}) |> list_rbind()
-
-ggplot(pred, aes(dbh)) +
-  geom_ribbon(aes(ymin = new_lo, ymax = new_hi), fill = col_post, alpha = 0.2) +
-  geom_ribbon(aes(ymin = mu_lo, ymax = mu_hi), fill = col_post, alpha = 0.7) +
-  geom_point(data = allo, aes(dbh, h), alpha = 0.3, size = 2) +
-  geom_line(aes(y = mid), linewidth = 1) +
-  labs(x = "DBH (cm)", y = "Height (m)")
+```{r trace, fig.width=12, fig.height=4.3}
+bayesplot::mcmc_trace(draws,pars=c("alpha","beta"))
 ```
-:::
 
-::: {.column width="45%"}
-::: incremental
-- **Dark band**: uncertainty about the *typical* height at each DBH.
-  - For every draw: $\mu = \alpha + \beta x$
-- **Light band**: where we expect a *new tree* to be.
-  - For every draw: $y^{\text{new}} \sim \mathcal{N}(\mu, \sigma)$
-- More data narrow the dark band.
-  They have little effect on the light band because trees differ from one another.
-- Same idea as predicting the 50 new seedlings on Day 1.
-:::
-:::
-:::
-
-## Posterior predictive check
-
-Does the model generate data like ours?
-
-::: columns
-::: {.column width="55%"}
-```{r, fig.height=5.5, fig.width=9}
-set.seed(1)
-sdat <- allometry_stan_data(allo)
-idx <- sample(nrow(d), 50)
-y_rep <- map(idx, \(i) tibble(rep = i, y = rnorm(sdat$N, d$alpha[i] + d$beta[i] * sdat$x, d$sigma[i]))) |>
-  list_rbind()
-
-ggplot() +
-  geom_density(data = y_rep, aes(y, group = rep), colour = col_post, alpha = 0.3, linewidth = 0.3) +
-  geom_density(data = tibble(y = sdat$y), aes(y), linewidth = 1.8) +
-  labs(x = "log height", y = "Density",
-    subtitle = "Black: observed. Orange: 50 data sets simulated from the posterior")
-```
-:::
-
-::: {.column width="45%"}
-::: small
-::: incremental
-- Take one posterior draw and simulate a complete new data set from the model.
-  Repeat this process for many draws.
-- If the model is adequate, the observed data look like one of the simulated data sets.
-- A check, not a test: we look for **systematic** differences that matter for our question.
-- Different checks assess different features.
-  We will find a problem with this model later today.
-:::
-:::
-:::
-:::
-
-## Exercise 2A: tree allometry {background-color="#f3e8f5"}
-
-::: large
-`day2/exercise-student.qmd`, Exercise 2A (24 minutes including discussion)
-:::
-
-- Fit the regression and interpret $\alpha$, $\beta$, $\sigma$ in words.
-- Is the exponent smaller than 2/3?
-- Predict the height of a tree with DBH = 80 cm: the typical tree, and a new tree.
-- Check the model against the data.
+Do the chains explore the same range without persistent drift?
 
 ::: notes
-- core: tasks 1-4; changed-input refits require separate instructor approval to run
-- checkpoints after 7/15 min: coefficient sentence / two prediction intervals
-- debrief 3 min: two kinds of uncertainty; global vs species-level checks
+Use the actual saved fit. Summaries on the next slide complement these traces.
+No diagnostic alone is sufficient. The optional failure example is outside core time.
 :::
 
-# Did the computation work?
+## Computation diagnostics together
 
-## Chains should tell the same story
-
-```{r, fig.width=15, fig.height=5}
-trace_df <- bind_rows(
-  as_tibble(allo_draws) |> transmute(.chain, .iteration, value = alpha, model = "OK: alpha in the allometry model"),
-  as_tibble(bad_fit$draws) |> transmute(.chain, .iteration, value = alpha1, model = "PROBLEM: alpha1 in a deliberately broken model")
-)
-
-ggplot(trace_df, aes(.iteration, value, colour = factor(.chain))) +
-  geom_line(linewidth = 0.4) +
-  facet_wrap(~model, scales = "free_y") +
-  scale_colour_viridis_d(end = 0.9) +
-  labs(x = "Iteration", y = NULL, colour = "Chain") +
-  theme(legend.position = "bottom")
+```{r diagnostic-numbers}
+course_diagnostics(fit) |> mutate(across(where(is.numeric),~round(.x,2))) |>
+  knitr::kable(format="html") |>
+  kableExtra::kable_styling(font_size=25)
 ```
 
-::: incremental
-- We run several chains from different starting points.
-- **Good**: the chains overlap and look like noise ("fuzzy caterpillar").
-- **Bad**: chains stay at different values or move slowly.
-  The draws do not describe the posterior.
-:::
+- R-hat: do the chains agree?
+- ESS: how much sampling information do the draws provide?
+- Divergences and other sampler warnings: did sampling struggle?
 
-## Two numbers to check before you interpret anything
-
-::: incremental
-- `rhat` compares variation between chains with variation within chains.
-  It should be close to 1.
-  - `rhat` values at or below 1.01 indicate good mixing.
-    Values above 1.01 and below 1.1 are suspicious.
-    Values above 1.1 indicate poor mixing.
-- `ess_bulk` and `ess_tail` are effective sample sizes.
-  Draws within a chain are correlated, so the effective sample size can be lower than the draw count.
-  - `ess_bulk` (means, medians) and `ess_tail` (interval ends) > 400: good.
-- Stan also warns about **divergent transitions** and **maximum treedepth**.
-  We discuss divergences on Day 3.
-- No single diagnostic is enough.
-  Check all of them, including the trace plots.
-:::
-
-## The same two fits in numbers
-
-```{r}
-bind_rows(
-  `OK` = summarise_draws(allo_draws, mean, sd, rhat, ess_bulk, ess_tail),
-  `PROBLEM (broken model)` = summarise_draws(bad_fit$draws, mean, sd, rhat, ess_bulk, ess_tail),
-  .id = "fit"
-) |>
-  filter(variable != "lp__") |>
-  mutate(mean = round(mean, 2), sd = round(sd, 3), rhat = round(rhat, 2), across(starts_with("ess"), round)) |>
-  kable(format = "html") |>
-  kable_material(c("striped"), full_width = FALSE, font_size = 26)
-```
-
-::: small
-::: incremental
-- OK fit: `rhat` = 1.00 and thousands of effective draws for every parameter.
-- **PROBLEM fit**: `rhat` is far above 1.01, and the effective sample size is about 5.
-  The means and SDs in these rows are not meaningful.
-- In the PROBLEM fit almost every iteration also hit the maximum treedepth.
-:::
-:::
-
-## A warning is information about the model
-
-::: columns
-::: {.column width="45%"}
-::: small
-The broken model has two intercepts:
-
-$$
-\mu_i = \alpha_1 + \alpha_2 + \beta x_i
-$$
-
-::: incremental
-- The data inform only the **sum** $\alpha_1 + \alpha_2$.
-- $\alpha_1 = 100, \alpha_2 = -97.3$ fits exactly as well as $\alpha_1 = 2.7, \alpha_2 = 0$.
-- Running the model longer does not help.
-  The **model** must be fixed.
-- This happens in real analyses: e.g., an intercept plus a dummy variable for every site.
-:::
-:::
-:::
-
-::: {.column width="55%"}
-```{r, fig.height=5, fig.width=9}
-as_tibble(bad_fit$draws) |>
-  ggplot(aes(alpha1, alpha2, colour = factor(.chain))) +
-  geom_point(alpha = 0.3, size = 1) +
-  scale_colour_viridis_d(end = 0.9) +
-  labs(x = expression(alpha[1]), y = expression(alpha[2]), colour = "Chain",
-    subtitle = "PROBLEM fit: draws of the two intercepts") +
-  theme(legend.position = "bottom")
-```
-:::
-:::
-
-# Logistic regression
-
-## Back to the question from Day 1 {#ndd-comita}
-
-::: columns
-::: {.column width="28%"}
-![](../images/comita_cover.jpg){height=380}
-:::
-
-::: {.column width="72%"}
-*Rare species tend to be rare because they suffer stronger conspecific negative density dependence (NDD) than common species.*
-
-::: incremental
-- **Day 1**: one species, one survival probability $p$.
-- **Today**: within one species, does survival decline where conspecifics are dense?
-- **Day 3**: does it differ among species?
-:::
-:::
-:::
-
-::: footer
-[Comita *et al.* 2010 *Science*](https://doi.org/10.1126/science.1190772)
-:::
-
-## From survival counts to a regression
-
-::: columns
-::: {.column width="50%"}
-::: small
-In quadrat $i$ we marked $n_i$ seedlings; $s_i$ survived.
-:::
-
-$$
-\begin{align*}
-s_i &\sim \mathcal{B}(n_i, p_i)\\
-\mathrm{logit}(p_i) &= \alpha + \beta\, \mathrm{cons}_i\\
-\alpha &\sim \mathcal{N}(0, 2.5)\\
-\beta &\sim \mathcal{N}(0, 2.5)
-\end{align*}
-$$
-
-::: small
-::: incremental
-- Day 1 used one $p$ for all seedlings.
-  On Day 2, $p_i$ depends on conspecific density, scaled to mean 0 and sd 1.
-- A probability must stay between 0 and 1, so the line is drawn on the **logit** scale: $\mathrm{logit}(p) = \log\frac{p}{1-p}$.
-- $\beta < 0$ means NDD.
-:::
-:::
-:::
-
-::: {.column width="50%"}
-```{r, fig.height=6.2, fig.width=8}
-curve_df <- expand_grid(x = seq(-3, 3, length.out = 100), beta = c(-2, -0.8, 0, 0.8)) |>
-  mutate(z = qlogis(0.3) + beta * x, p = plogis(z), beta_f = factor(beta))
-
-p1 <- ggplot(curve_df, aes(x, z, colour = beta_f)) +
-  geom_line(linewidth = 1.2) +
-  labs(x = NULL, y = "logit(p)", colour = expression(beta)) +
-  scale_colour_viridis_d(end = 0.9)
-p2 <- ggplot(curve_df, aes(x, p, colour = beta_f)) +
-  geom_line(linewidth = 1.2) +
-  labs(x = "Conspecific density (scaled)", y = "Survival probability p", colour = expression(beta)) +
-  scale_colour_viridis_d(end = 0.9)
-
-p1 / p2 + plot_layout(guides = "collect")
-```
-:::
-:::
-
-## Priors on the logit scale are not intuitive: simulate
-
-```{r, fig.width=15, fig.height=4.5}
-set.seed(1)
-tibble(sd = c(10, 2.5, 1.5)) |>
-  mutate(
-    label = fct_inorder(sprintf("alpha ~ N(0, %g)", sd)),
-    p = map(sd, \(s) plogis(rnorm(2e4, 0, s)))
-  ) |>
-  unnest(p) |>
-  ggplot(aes(p)) +
-  geom_histogram(bins = 40, fill = col_prior, alpha = 0.7, boundary = 0) +
-  facet_wrap(~label, scales = "free_y") +
-  scale_x_continuous(breaks = c(0, 0.5, 1)) +
-  labs(x = "Implied survival probability", y = "Prior draws") +
-  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
-```
-
-::: small
-::: incremental
-- A "vague" $\mathcal{N}(0, 10)$ prior on the logit scale says: survival is almost certainly near 0% or near 100%.
-- $\mathcal{N}(0, 2.5)$ is weakly informative; $\mathcal{N}(0, 1.5)$ is roughly flat on the probability scale.
-- Relate each prior to the scale of its variable.
-  If its implications are unclear, simulate from it.
-:::
-:::
-
-## Result: interpret on the probability scale
-
-::: columns
-::: {.column width="55%"}
-```{r, fig.height=6.5, fig.width=9}
-nd <- as_tibble(ndd_fit$draws)
-cons_grid <- seq(-2.5, 2.5, length.out = 60)
-ndd_pred <- map(cons_grid, \(x) {
-  p <- plogis(nd$alpha + nd$beta * x)
-  tibble(cons = x, mid = median(p), lo = quantile(p, 0.05), hi = quantile(p, 0.95))
-}) |> list_rbind()
-
-ggplot(ndd_pred, aes(cons)) +
-  geom_ribbon(aes(ymin = lo, ymax = hi), fill = col_post, alpha = 0.5) +
-  geom_line(aes(y = mid), linewidth = 1) +
-  geom_point(data = ndd, aes(cons, suv / n, size = n), alpha = 0.4) +
-  scale_size_area(max_size = 6) +
-  labs(x = "Conspecific density (scaled)", y = "Proportion surviving", size = "Seedlings")
-```
-:::
-
-::: {.column width="45%"}
-```{r}
-p_low <- plogis(nd$alpha - nd$beta)
-p_high <- plogis(nd$alpha + nd$beta)
-fmt <- function(x, digits = 2) sprintf(paste0("%.", digits, "f (%.", digits, "f to %.", digits, "f)"),
-  mean(x), quantile(x, 0.05), quantile(x, 0.95))
-```
-
-::: small
-- $\beta$ = `r fmt(nd$beta)`; $P(\beta < 0 \mid \text{data})$ = `r round(mean(nd$beta < 0), 3)`
-
-::: incremental
-- Logit scale: one SD more conspecifics multiplies the **odds** of survival by $e^{\beta}$ = `r fmt(exp(nd$beta))`.
-- Probability scale (compute for every draw, then summarise):
-  - low density (−1 SD): `r fmt(p_low)`
-  - high density (+1 SD): `r fmt(p_high)`
-  - difference: `r fmt(p_high - p_low)`
-- The effect on the probability scale depends on the starting value.
-  State the values you compare.
-:::
-:::
-:::
-:::
-
-::: footer
-Means and 90% intervals are shown.
-The true values used in the simulation are $\alpha$ = `r round(ndd_truth$alpha, 2)` and $\beta$ = `r ndd_truth$beta`.
-:::
-
-## Exercise 2B: diagnose, then interpret {background-color="#f3e8f5"}
-
-::: large
-`day2/exercise-student.qmd`, Exercise 2B Part 2 (8 minutes including discussion)
-:::
-
-- **Part 1 (whole-class demonstration)**: diagnose the supplied problematic fit.
-- **Part 2 (stored draws)**: compare survival at low and high density, with intervals.
+These checks concern computation. We still need to compare the model with ecological data.
 
 ::: notes
-- part 1 uses a stored fit on purpose: the broken model is slow and nobody should wait for it
-- Part 1 was a whole-class demonstration at 53-65 min
-- Part 2 core: diagnostics + probabilities at cons = -1 and +1 + one sentence
-- debrief 2 min: diagnostics first, interpretation second
+Also inspect bulk/tail ESS, treedepth and E-BFMI. Explain purposes, not a threshold
+memorisation task. Current values are computed from the saved fit, never invented.
 :::
 
-## A Bayesian workflow
+## A distribution of survival curves
 
-::: incremental
-1. **Question and model**: What is the data-generating story?
-   Which parameters answer the question?
-2. **Priors**: Relate them to the scale of the variables and run a prior predictive check.
-3. **Fit**.
-4. **Computation check**: Check `rhat`, ESS, warnings, and trace plots.
-   Stop here if they fail.
-5. **Model check**: posterior predictive checks that matter for the question.
-6. **Interpret**: distributions of parameters and predictions, on the scale of the data.
-:::
-
-::: fragment
-Go back to step 1 whenever a check fails.
-:::
-
-## One more check, and tomorrow's problem
-
-::: columns
-::: {.column width="55%"}
-```{r, fig.height=6, fig.width=9}
-allo |>
-  mutate(resid = log(h) - (mean(d$alpha) + mean(d$beta) * log(dbh / dbh_ref))) |>
-  ggplot(aes(sp, resid)) +
-  geom_hline(yintercept = 0, linetype = 2) +
-  geom_boxplot(fill = col_post, alpha = 0.4, outlier.shape = NA) +
-  geom_jitter(width = 0.15, alpha = 0.4, size = 2) +
-  labs(x = "Species", y = "Residual (log height)")
+```{r fitted-curve, fig.width=12, fig.height=4.6}
+plot_cndd(draws,ndd)
 ```
+
+The band describes uncertainty about $p$ at each density.
+Points are observed proportions and can lie away from the band.
+
+::: notes
+The line is a posterior median at each x, not MLE or MAP. The 90% band is pointwise.
+Observed binomial proportions also contain survival-count variation.
 :::
 
-::: {.column width="45%"}
-::: incremental
-- The `r nrow(allo)` trees belong to `r nlevels(allo$sp)` species.
-- Our model assumed one line for all trees.
-  The residuals show that some species are consistently taller or shorter than predicted.
-- Should we fit each species separately?
-  Some species have only 3 or 4 trees.
-- **Day 3**: hierarchical models learn about each species *and* about the variation among species.
-:::
-:::
-:::
+## Low density and high density
 
-# Appendix: optional material {visibility="uncounted"}
-
-## Priors in ecology: Why scale matters {visibility="uncounted"}
-
-::: footer
-We often use weakly informative priors in ecology.
-:::
-
-::: columns
-::: {.column width=40%}
-
-```{r, fig.height=5, fig.width=5}
-set.seed(123)
-x1 <- rnorm(100)
-y1 <- rnorm(100, 2 * x1 - 1)
-p1 <- tibble(x1, y1) |>
-  ggplot() +
-  xlab("x") +
-  ylab("y") +
-  ggtitle("y = ax + b") +
-  geom_point(aes(x1, y1), size = 5) +
-  geom_abline(intercept = 2, slope = 100, col = "blue", linewidth = 2, lty = 2) +
-  annotate(
-    "text",
-    x     = -2.5,
-    y     = 3.4,
-    label = "y = 100x + 2",
-    color = "blue",
-    hjust = 0,
-    size  = 9
-  ) +
-  theme(
-    axis.title   = element_text(size = 32),
-    axis.text    = element_text(size = 28))
-p1
+```{r density-comparison, fig.width=10, fig.height=4.3}
+plot_cndd_comparison(draws)
 ```
+
+Compare probabilities at fixed densities. All predictions use the same posterior draws.
+
+::: notes
+Low = one SD below mean density. High = one SD above. Hold the data, model and prior
+fixed. We are predicting new conditions, not refitting altered observations.
 :::
 
-::: {.column width=60%}
+## Probability uncertainty and future survivors
 
-::: incremental
-- We consider variables *x* = {-3, ..., 3} and *y* = {-6, ..., 4}.
-  We do not yet know whether they are correlated (*y = ax + b*).
-- However, given the similar scales of *x* and *y*, it's reasonable to guess that *a* falls within a narrow range (e.g., **strongly informative prior**: -5 to 5, **weakly informative prior**: $a \sim \mathcal{N}(0,  2.5)$).
-- A slope of *a* = 100 (blue line) clearly does not match the data.
-  A **vague prior** such as $a \sim \mathcal{N}(0, 10^4)$ treats this slope as plausible as *a* = 2.
-:::
-
-:::
-:::
-
-
-## Count data: the same recipe {visibility="uncounted"}
-
-::: columns
-::: {.column width="50%"}
-```{r, results="asis"}
-show_stan("stan/pois_re.stan")
+```{r new-counts, fig.width=12, fig.height=4.2}
+plot_cndd_predictions(cndd_predictions(draws,n=20,seed=20261022))
 ```
+
+Both new groups contain **20 seedlings**. Even a known probability allows different counts.
+
+::: notes
+The histogram integrates posterior uncertainty in p and binomial variation given p.
+Compare with the previous probability intervals. Both groups have the same seedling
+count, so the contrast changes density only.
 :::
 
-::: {.column width="50%"}
-$$
-\begin{align*}
-y_i &\sim \text{Poisson}(\lambda)\\
-\log \lambda &\sim \mathcal{N}(0, 2.5)
-\end{align*}
-$$
+## Exercise: survival at two densities {background-color="#f3e8f5"}
 
-- Counts (e.g., number of seedlings per quadrat): Poisson likelihood with a **log** link.
-- Adding a predictor works exactly as in logistic regression: $\log \lambda_i = \alpha + \beta x_i$.
-- Change the likelihood and the link; the workflow stays the same.
+`day2/exercise-student.qmd` · 15 minutes including explanation
+
+- Predict which density has higher survival probability.
+- Run the supplied code and read the two probabilities with 90% intervals.
+- Explain the result in words.
+- Explain why the next survivor count is still uncertain.
+
+::: notes
+40-55 minutes: 10 minutes pair work, 5 minutes debrief. Check progress at minute 5.
+Use results.html when code access fails. No holes to fill and no refit.
 :::
+
+## What the comparison tells us
+
+Low density: median survival probability **`r round(median(low),2)`**,
+90% interval `r round(quantile(low,.05),2)` to `r round(quantile(low,.95),2)`.
+
+High density: **`r round(median(high),2)`**,
+90% interval `r round(quantile(high,.05),2)` to `r round(quantile(high,.95),2)`.
+
+What ecological sentence would you report with those values?
+
+::: notes
+Debrief. Beta is a logit coefficient. Its value is not a percent reduction.
+State the compared densities and the model assumptions with the interpretation.
 :::
 
-<!-- TODO: add a Poisson regression with a predictor and an overdispersion check if a fourth exercise is wanted. -->
+## Model-generated data and the observations
 
-## The same models with `brms` {visibility="uncounted"}
+For every posterior draw:
 
-::: {style="font-size: 0.8em;"}
-```{r, echo=TRUE, eval=FALSE}
-library(brms)
+$$p_i^{(m)}=\operatorname{logit}^{-1}(\alpha^{(m)}+\beta^{(m)}x_i),\qquad
+s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).$$
 
-# Tree allometry
-brm(
-  log(h) ~ log(dbh / 40),
-  family = gaussian(), data = allo,
-  prior = c(
-    prior(normal(0, 2.5), class = "Intercept"),
-    prior(normal(0, 2.5), class = "b"),
-    prior(normal(0, 1), class = "sigma")
-  )
-)
+We keep the observed **density and seedling count** of each quadrat.
 
-# Seedling survival
-brm(
-  suv | trials(n) ~ cons,
-  family = binomial(), data = ndd,
-  prior = c(
-    prior(normal(0, 2.5), class = "Intercept"),
-    prior(normal(0, 2.5), class = "b")
-  )
-)
+What patterns should the model reproduce?
+
+::: notes
+55-70 minutes: lecturer demonstration and discussion. This is posterior predictive
+checking. No new inference. Source: Stan User's Guide, posterior predictive checks.
+:::
+
+## Does the density pattern look compatible?
+
+```{r check-pattern, fig.width=12, fig.height=4.7}
+plot_cndd_check(replicates,ndd)
 ```
+
+Look for systematic differences across density.
+
+::: notes
+The orange bars describe replicated proportions at the observed n_i, not uncertainty
+about p_i alone. A 90% interval does not cover every observation by construction.
 :::
 
-::: small
-`brms` writes the Stan code for you.
-It places the `Intercept` prior on the intercept after centring predictors, so results can differ slightly from our Stan files when a predictor is far from centred.
+## Does the model reproduce the spread?
+
+```{r check-spread, fig.width=11, fig.height=4.5}
+plot_cndd_spread_check(replicates,ndd)
+```
+
+What ecological conditions might create more variation than the model predicts?
+
+::: notes
+This checks one feature, complementing the density plot. These data were generated
+from the simple model, so do not promise a visible mismatch. Rounding the simulated
+predictor means this is an illustrative check, not an exact calibration experiment.
+A discrepancy might involve the relationship, unmodelled conditions or dependence.
 :::
 
-<!-- brms is installed in the classroom image. These examples have not been
-compared with the Stan fits; compilation and prior matching are extensions. -->
+## Interpretation in a real forest
+
+- A fitted association depends on the model and measured conditions.
+- Light, soil and shared enemies could matter as well as density.
+- Ecological knowledge helps decide which comparisons and checks matter.
+
+What additional information would you want before explaining the mechanism?
+
+::: notes
+70-80 minutes. Do not infer a causal effect or the cause of rarity from this simple
+simulation. The basic model assumes common p and conditional independence within
+each quadrat. Discuss what unmeasured shared conditions would imply.
+:::
+
+## Tomorrow: species may differ
+
+```{r species-preview, fig.width=10, fig.height=4.1}
+plot_cndd_species()
+```
+
+Some species have few seedlings. How can we estimate their relationships?
+
+::: notes
+Conceptual simulation, not a species-level fit of today's data. Do not explain all
+hierarchical equations now. Day 3 introduces sharing through mother trees first.
+:::
+
+## Your research question
+
+Name a response you measure and one predictor you care about.
+
+What would you predict, and which observed pattern would you ask the model to reproduce?
+
+::: notes
+80-85 minutes: pair discussion and two brief contributions. Keep the final five
+minutes for questions and delay buffer.
+:::
+
+# Optional reference {visibility="uncounted"}
+
+## Optional: CNDD prior curves {visibility="uncounted"}
+
+```{r prior-curves, fig.width=11, fig.height=4.4}
+set.seed(20261020)
+prior_lines <- tibble(curve=1:30,alpha=rnorm(30,0,2.5),beta=rnorm(30,0,2.5)) |>
+  crossing(density=seq(-2,2,length.out=81)) |>
+  mutate(p=plogis(alpha+beta*density))
+ggplot(prior_lines,aes(density,p,group=curve))+geom_line(alpha=.4,colour=col_prior)+
+  ylim(0,1)+labs(x="Conspecific density (scaled)",y="Prior survival probability")
+```
+
+Are the predicted survival probabilities plausible for this habitat and census period?
+
+::: notes
+The independent alpha and beta priors are Normal(0,2.5), with SD 2.5, as in
+stan/logit_reg.stan. They allow both signs and some extreme probability curves.
+A coefficient prior is interpreted relative to the predictor scale. These are
+prior-predictive probability curves; simulated survivor counts would add binomial
+variation. Do not label this prior universally weak or ecologically justified.
+:::
+
+
+## Probability differences {visibility="uncounted"}
+
+```{r echo=TRUE, eval=FALSE}
+p_low <- plogis(draws$alpha-draws$beta)
+p_high <- plogis(draws$alpha+draws$beta)
+quantile(p_high-p_low,c(.05,.5,.95))
+```
+
+Compute the difference for each paired draw. The comparison holds the two densities fixed.
+
+## References {visibility="uncounted"}
+
+- [Comita et al. 2010, Science](https://doi.org/10.1126/science.1190772)
+- [Song & Katabuchi et al. 2024, Ecology](https://doi.org/10.1002/ecy.4382)
+- [Stan User's Guide: regression](https://mc-stan.org/docs/stan-users-guide/regression.html)
+- [Stan User's Guide: predictive checks](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html)

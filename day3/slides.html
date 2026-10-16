@@ -101,8 +101,24 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-0f0433f7e62300b8124b3919060bd508.css">
-  <link rel="stylesheet" href="../assets/custom.css">
+  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-c23c6b66d12f3bc450971ca9a3a2df29.css">
+  <link rel="stylesheet" href="../assets/course.css">
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
   <link href="slides_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="slides_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -211,286 +227,129 @@
 Bayesian statistics for ecology
 </h2>
 <h3>
-Day 3: Hierarchical models and ecological applications
+Day 3: Mother trees and information sharing
 </h3>
 <p>
 AFEC-X 2026 · 23 October
 </p>
 <h3>
-🧑🏻‍💻 <span class="author">Masatoshi Katabuchi @ XTBG, CAS</span>
+Masatoshi Katabuchi @ XTBG, CAS
 </h3>
 </div>
 </section>
-<section id="so-far-and-today" class="slide level2">
-<h2>So far, and today</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
-<h3 id="day-1-and-day-2">Day 1 and Day 2</h3>
+<section id="survival-density-and-group-differences" class="slide level2">
+<h2>Survival, density and group differences</h2>
 <ul>
-<li><span class="orange">Posterior</span> <span class="math inline">\(\propto\)</span> <span class="teal">likelihood</span> <span class="math inline">\(\times\)</span> <span class="purple">prior</span></li>
-<li>Regression, prediction, model checking</li>
-<li>Yesterday’s last check: one line for all trees does not fit every <strong>species</strong></li>
+<li>Day 1: uncertainty about a survival probability.</li>
+<li>Day 2: survival probability changes with conspecific density.</li>
+<li>Today: mother trees and species can differ while sharing information.</li>
 </ul>
-</div><div class="column" style="width:50%;">
-<h3 id="today">Today</h3>
-<p>By the end of today, you can</p>
-<ul>
-<li class="fragment">explain <strong>complete pooling</strong>, <strong>no pooling</strong>, and <strong>partial pooling</strong>;</li>
-<li class="fragment">interpret variation <strong>among groups</strong>;</li>
-<li class="fragment">predict for a known group and for a <strong>new group</strong>;</li>
-<li class="fragment">plan a Bayesian workflow for your own grouped data.</li>
-</ul>
-</div></div>
-<div class="fragment">
-<p>Ecological data are grouped: seedlings within mother trees, trees within species, quadrats within plots, censuses within years.</p>
-</div>
+<aside class="notes">
+<p>We first leave out the density predictor and use a separate data set to make the idea of information sharing easier to see. We return to species CNDD later.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section>
-<section id="partial-pooling" class="title-slide slide level1 center">
-<h1>Partial pooling</h1>
+<section id="todays-objectives" class="slide level2">
+<h2>Today’s objectives</h2>
+<ul>
+<li>Explain complete pooling, separate estimation and partial pooling using a figure.</li>
+<li>Explain why some estimates respond more to shared information.</li>
+<li>Describe where information sharing could help in your own research.</li>
+</ul>
+</section>
+<section id="eight-mother-trees" class="slide level2">
+<h2>Eight mother trees</h2>
+<div class="columns">
+<div class="column" style="width:42%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="table caption-top" style="font-size: 27px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">tree</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">n</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">suv</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">A</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">B</td>
+<td style="text-align: right;">45</td>
+<td style="text-align: right;">18</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">D</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">E</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">F</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">11</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">H</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">8</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:58%;">
+<p>We followed seedlings under eight mother trees of one species.</p>
+<p>What survival probability would you report for each mother tree?</p>
+<p>Would a hypothetical 0/2 or 2/2 justify complete certainty about survival?</p>
+</div></div>
+<aside class="notes">
+<p>These are simulated mother-tree data, different from Day 2’s quadrats. The 0/2 and 2/2 counts are hypothetical questions, not rows of this table. Focus on n and survivors. Hide p_true until after interpretation.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="separate-observed-proportions" class="slide level2">
+<h2>Separate observed proportions</h2>
 
-</section>
-<section id="eight-mother-trees-problem" class="slide level2">
-<h2>Eight mother trees problem</h2>
-<p>What is the survival rate?</p>
-<div class="columns">
-<div class="column" style="width:30%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<table class="lightable-material lightable-striped lightable-hover caption-top" style="font-family: &quot;Source Sans Pro&quot;, helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">tree</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">n</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">suv</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">A</td>
-<td style="text-align: right;">41</td>
-<td style="text-align: right;">9</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">B</td>
-<td style="text-align: right;">45</td>
-<td style="text-align: right;">18</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">C</td>
-<td style="text-align: right;">32</td>
-<td style="text-align: right;">6</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">D</td>
-<td style="text-align: right;">18</td>
-<td style="text-align: right;">5</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">E</td>
-<td style="text-align: right;">33</td>
-<td style="text-align: right;">8</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">F</td>
-<td style="text-align: right;">26</td>
-<td style="text-align: right;">8</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">G</td>
-<td style="text-align: right;">46</td>
-<td style="text-align: right;">11</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">H</td>
-<td style="text-align: right;">16</td>
-<td style="text-align: right;">8</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div><div class="column" style="width:70%;">
-<p>We followed the seedlings under eight mother trees of one species.</p>
-<ul>
-<li class="fragment"><p>suv <span class="math inline">\(\sim\)</span> B(n, p) (Binomial distribution)</p></li>
-<li class="fragment"><p>p = suv / n (Maximum likelihood estimation: MLE)</p></li>
-</ul>
-<div class="fragment">
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="" aria-label="1"></a><span class="fu">sum</span>(trees<span class="sc">$</span>suv) <span class="sc">/</span> <span class="fu">sum</span>(trees<span class="sc">$</span>n)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  [1] 0.2840467</code></pre>
-</div>
-</div>
-</div>
-<ul>
-<li class="fragment">If we pool all the data, the survival rate will be about 0.284</li>
-</ul>
-</div></div>
-<div class="footer">
-<p>This is the ecological version of the “eight schools” problem (Rubin 1981; Gelman et al.&nbsp;2013). See the appendix.</p>
-</div>
-</section>
-<section id="eight-mother-trees-problem-separate-estimates" class="slide level2">
-<h2>Eight mother trees problem (separate estimates)</h2>
-<div class="columns">
-<div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<table class="lightable-material lightable-striped lightable-hover caption-top" style="font-size: 24px; font-family: &quot;Source Sans Pro&quot;, helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">tree</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">n</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">suv</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">p_like</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">p_true</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">A</td>
-<td style="text-align: right;">41</td>
-<td style="text-align: right;">9</td>
-<td style="text-align: right;">0.22</td>
-<td style="text-align: right;">0.34</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">B</td>
-<td style="text-align: right;">45</td>
-<td style="text-align: right;">18</td>
-<td style="text-align: right;">0.40</td>
-<td style="text-align: right;">0.30</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">C</td>
-<td style="text-align: right;">32</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">0.19</td>
-<td style="text-align: right;">0.34</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">D</td>
-<td style="text-align: right;">18</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0.28</td>
-<td style="text-align: right;">0.36</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">E</td>
-<td style="text-align: right;">33</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">0.24</td>
-<td style="text-align: right;">0.25</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">F</td>
-<td style="text-align: right;">26</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">0.31</td>
-<td style="text-align: right;">0.23</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">G</td>
-<td style="text-align: right;">46</td>
-<td style="text-align: right;">11</td>
-<td style="text-align: right;">0.24</td>
-<td style="text-align: right;">0.25</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">H</td>
-<td style="text-align: right;">16</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">0.50</td>
-<td style="text-align: right;">0.34</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div><div class="column" style="width:60%;">
-<div class="small">
-<ul>
-<li class="fragment"><p>If we estimate each tree separately, survival rates will be <code>p_like</code></p></li>
-<li class="fragment"><p><code>p_true</code> ranges [0.23, 0.36]</p></li>
-<li class="fragment"><p><code>p_like</code> ranges [0.19, 0.5]</p></li>
-<li class="fragment"><p>The estimates vary more than the truth</p></li>
-<li class="fragment"><p>Because of the small sample size (common in ecological studies)</p></li>
-</ul>
-</div>
-<div class="fragment">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center" style="width:75.0%"></p>
-</figure>
-</div>
-</div>
-</div>
-</div>
-</div></div>
+<img data-src="slides_files/figure-revealjs/observed-trees-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>Which differences could reflect sampling variation?</p>
 <aside class="notes">
-<ul>
-<li>These data were simulated based on <code>p_true</code>, but the ML estimates are slightly different</li>
-<li>we want to improve the estimates</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-<div class="footer">
-<p>We know <code>p_true</code> because we used it to generate these data. In practice, we do not know <code>p_true</code>.</p>
-</div>
-</section>
-<section id="extreme-case-1-pooled-estimates" class="slide level2">
-<h2>Extreme case 1: Pooled estimates</h2>
-<div class="columns">
-<div class="column">
-<ul>
-<li><span class="math inline">\(S_i \sim \mathcal{B}(N_i, p)\)</span>: Likelihood</li>
-<li><span class="math inline">\(\mathrm{logit}(p) \sim \mathcal{N}(0, 2.5)\)</span>: Prior</li>
-</ul>
-<p><img data-src="../images/pool.png"></p>
-</div><div class="column">
-<ul>
-<li class="fragment">This model assumes all mother trees share the exact same survival rate.</li>
-<li class="fragment"><strong>Complete pooling</strong>: 8 trees, 1 parameter.</li>
-<li class="fragment">It cannot answer any question about differences among trees.</li>
-</ul>
-</div></div>
-</section>
-<section id="extreme-case-2-separate-estimates" class="slide level2">
-<h2>Extreme case 2: Separate estimates</h2>
-<div class="columns">
-<div class="column">
-<ul>
-<li><span class="math inline">\(S_i \sim \mathcal{B}(N_i, p_i)\)</span>: Likelihood</li>
-<li><span class="math inline">\(\mathrm{logit}(p_i) \sim \mathcal{N}(0, 2.5)\)</span>: Prior</li>
-</ul>
-<p><img data-src="../images/separate.png"></p>
-</div><div class="column">
-<ul>
-<li class="fragment">This model assumes each mother tree has a completely independent survival rate.</li>
-<li class="fragment"><strong>No pooling</strong>: what we learn from tree A tells us nothing about tree B.</li>
-<li class="fragment">With limited data per tree, this model tends to overfit and produces noisy estimates.</li>
-<li class="fragment">We need to find a balance between these two extremes.</li>
-</ul>
-</div></div>
-<aside class="notes">
-<ul>
-<li>if we have infinite amount of data, we can estimate survival rates separately</li>
-<li>usually, we don’t have enough data (model tends to overfit)</li>
-<li>We need to find a balance between these two extremes</li>
-</ul>
+<p>10-25 minutes. These are observed proportions, equal to separate binomial MLEs. The posterior comparison later uses means with explicitly stated priors.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -503,71 +362,18 @@ AFEC-X 2026 · 23 October
           display:block!important;
       }</style></aside>
 </section>
-<section id="multilevel-models-partial-pooling" class="slide level2">
-<h2>Multilevel models: partial pooling</h2>
-<ul>
-<li><p><span class="math inline">\(S_i \sim \mathcal{B}(N_i, p_i)\)</span>: Likelihood</p></li>
-<li><p><span class="math inline">\(\mathrm{logit}(p_i) \sim \mathcal{N}(\mu, \sigma)\)</span>: Group-level model (hierarchical prior)</p></li>
-<li><p><span class="math inline">\(\mu \sim \mathcal{N}(0, 5)\)</span>: Hyperprior</p></li>
-<li><p><span class="math inline">\(\sigma \sim \text{Half-}\mathcal{N}(0, 1)\)</span>: Hyperprior</p></li>
-</ul>
-<p><img src="../images/multilevel.png" style="display: block; margin: auto; height: 300px;"></p>
-<div class="fragment">
-<p>The model estimates the mean <span class="math inline">\(\mu\)</span> and spread <span class="math inline">\(\sigma\)</span> of the tree-level distribution using data from all trees.</p>
-</div>
-<aside class="notes">
-<ul>
-<li>these are the priors in stan/logistic.stan</li>
-<li>complete pooling is the special case sigma = 0; no pooling is sigma = infinity</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="sigma-determines-group-level-variation" class="slide level2">
-<h2><span class="math inline">\(\sigma\)</span> determines group-level variation</h2>
-<p>The overall survival rate is 0.5 in this figure. We have some sense of a scale for <span class="math inline">\(\sigma\)</span>.</p>
+<section id="complete-pooling" class="slide level2">
+<h2>Complete pooling</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
+<p><img data-src="../images/pool.png" height="340"></p>
 </div><div class="column" style="width:50%;">
-<div class="fragment">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-</div>
+<p><span class="math display">s_j\sim\operatorname{Binomial}(n_j,p)</span></p>
+<p>Every mother tree shares the same <span class="math inline">p</span>.</p>
+<p>What ecological difference does this assumption leave out?</p>
 </div></div>
 <aside class="notes">
-<ul>
-<li>on the logit scale</li>
-<li>we have some sense of a scale for sigma</li>
-<li>sigma = 0.3 -&gt; +/- 7%</li>
-<li>sigma = 3 -&gt; +/- 45%</li>
-<li>sigma = 10 -&gt; +/- 49.99%</li>
-<li>left: each curve is one tree; right: candidate priors for sigma. Half-N(0, 10) puts most weight on absurdly large variation</li>
-</ul>
+<p>j indexes mother trees. Our comparison uses p ~ Beta(1,1), the flat Day 1 prior. An uncertainty interval for a common p does not represent between-tree variation.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -580,21 +386,106 @@ AFEC-X 2026 · 23 October
           display:block!important;
       }</style></aside>
 </section>
-<section id="better-estimates-via-partial-pooling" class="slide level2">
-<h2>Better estimates via partial pooling</h2>
+<section id="separate-estimation" class="slide level2">
+<h2>Separate estimation</h2>
 <div class="columns">
-<div class="column" style="width:40%;">
+<div class="column" style="width:50%;">
+<p><img data-src="../images/separate.png" height="340"></p>
+</div><div class="column" style="width:50%;">
+<p><span class="math display">s_j\sim\operatorname{Binomial}(n_j,p_j)</span></p>
+<p>Each mother tree has its own independent <span class="math inline">p_j</span>.</p>
+<p>How much can a tree with few seedlings tell us on its own?</p>
+</div></div>
+<aside class="notes">
+<p>Our comparison uses independent Beta(1,1) priors. What we learn about tree A does not update the probability for tree B. Small data can give wide intervals.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="information-sharing-through-a-prior" class="slide level2">
+<h2>Information sharing through a prior</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<p><img data-src="../images/multilevel.png" height="340"></p>
+</div><div class="column" style="width:50%;">
+<p><span class="math display">s_j\sim\operatorname{Binomial}(n_j,p_j)</span> <span class="math display">\operatorname{logit}(p_j)\sim\mathcal{N}(\mu,\sigma)</span></p>
+<p>Each mother tree can differ. Their shared distribution describes the commonality.</p>
+</div></div>
+<aside class="notes">
+<p>25-40 minutes. A hierarchical prior connects group parameters. The model estimates mu and sigma from all eight trees, with hyperpriors. The Normal second argument is SD, on the logit scale.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-group-variation-matters" class="slide level2">
+<h2>The group variation matters</h2>
+
+<img data-src="slides_files/figure-revealjs/group-variation-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1248"><p>Greater inferred variation generally allows less sharing among mother trees.</p>
+<aside class="notes">
+<p>This illustration fixes mu=0 and changes sigma. It uses fixed Normal quantiles and shows probabilities, not a density transformed without a Jacobian. These hypothetical values are not the fitted rates of our trees.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-completed-model-and-its-assumptions" class="slide level2">
+<h2>The completed model and its assumptions</h2>
+<p>Selected lines from <code>stan/logistic.stan</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="" aria-label="1"></a>mu ~ normal(<span class="dv">0</span>, <span class="dv">5</span>);</span>
+<span id="cb1-2"><a href="" aria-label="2"></a>sigma ~ std_normal();  <span class="co">// sigma is constrained to be positive</span></span>
+<span id="cb1-3"><a href="" aria-label="3"></a>z_tilde ~ std_normal();</span>
+<span id="cb1-4"><a href="" aria-label="4"></a>z = mu + sigma * z_tilde;</span>
+<span id="cb1-5"><a href="" aria-label="5"></a><span class="co">// For every mother tree i:</span></span>
+<span id="cb1-6"><a href="" aria-label="6"></a>suv[i] ~ binomial_logit(N[i], z[ii[i]]);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Data: seedlings and survivors. Unknowns: tree effects, group centre and group SD.</p>
+<aside class="notes">
+<p>These lines come from stan/logistic.stan, shown together for reading. z is a transformed parameter and sigma has lower bound zero. Read the complete file in the handout. No independent coding or non-centred parameterisation lesson. Priors: mu Normal(0,5), sigma half-Normal(0,1). z_tilde is standard Normal.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="which-estimates-might-move" class="slide level2">
+<h2>Which estimates might move?</h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<table class="lightable-material lightable-striped lightable-hover caption-top" style="font-size: 26px; font-family: &quot;Source Sans Pro&quot;, helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;">
+<table class="table caption-top" style="font-size: 25px; margin-left: auto; margin-right: auto;">
 <thead>
 <tr class="header">
 <th style="text-align: left;" data-quarto-table-cell-role="th">tree</th>
 <th style="text-align: right;" data-quarto-table-cell-role="th">n</th>
 <th style="text-align: right;" data-quarto-table-cell-role="th">suv</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">p_like</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">p_true</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">p_bayes</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">proportion</th>
 </tr>
 </thead>
 <tbody>
@@ -603,31 +494,23 @@ AFEC-X 2026 · 23 October
 <td style="text-align: right;">41</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0.22</td>
-<td style="text-align: right;">0.34</td>
-<td style="text-align: right;">0.26</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">B</td>
 <td style="text-align: right;">45</td>
 <td style="text-align: right;">18</td>
 <td style="text-align: right;">0.40</td>
-<td style="text-align: right;">0.30</td>
-<td style="text-align: right;">0.32</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">C</td>
 <td style="text-align: right;">32</td>
 <td style="text-align: right;">6</td>
 <td style="text-align: right;">0.19</td>
-<td style="text-align: right;">0.34</td>
-<td style="text-align: right;">0.25</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">D</td>
 <td style="text-align: right;">18</td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">0.28</td>
-<td style="text-align: right;">0.36</td>
 <td style="text-align: right;">0.28</td>
 </tr>
 <tr class="odd">
@@ -635,60 +518,32 @@ AFEC-X 2026 · 23 October
 <td style="text-align: right;">33</td>
 <td style="text-align: right;">8</td>
 <td style="text-align: right;">0.24</td>
-<td style="text-align: right;">0.25</td>
-<td style="text-align: right;">0.27</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">F</td>
 <td style="text-align: right;">26</td>
 <td style="text-align: right;">8</td>
 <td style="text-align: right;">0.31</td>
-<td style="text-align: right;">0.23</td>
-<td style="text-align: right;">0.29</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">G</td>
 <td style="text-align: right;">46</td>
 <td style="text-align: right;">11</td>
 <td style="text-align: right;">0.24</td>
-<td style="text-align: right;">0.25</td>
-<td style="text-align: right;">0.27</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">H</td>
 <td style="text-align: right;">16</td>
 <td style="text-align: right;">8</td>
 <td style="text-align: right;">0.50</td>
-<td style="text-align: right;">0.34</td>
-<td style="text-align: right;">0.32</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-</div><div class="column" style="width:60%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="small">
-<ul>
-<li class="fragment"><p><code class="small">p_bayes</code> (posterior median) is closer to the 1:1 line: average error 0.055, against 0.103 for <code class="small">p_like</code>.</p></li>
-<li class="fragment"><p>The model estimates how similar trees within a species are. It uses that estimate to stabilize estimates when data are limited.</p></li>
-</ul>
-</div>
-</div></div>
+<p>Choose two mother trees and explain your prediction to your partner.</p>
 <aside class="notes">
-<ul>
-<li>less influenced by overfitting for each tree</li>
-<li>average error = root mean squared error against p_true</li>
-<li>Honest note: the completely pooled estimate has a similar error in this data set because true variation among trees is small. Partial pooling estimates this variation from the data; complete pooling assumes it is zero. Exercise 3A revisits this comparison.</li>
-</ul>
+<p>Begin the 40-55 minute exercise. Display only observed data before revealing fitted comparisons. Participants can write predictions on paper.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -701,103 +556,144 @@ AFEC-X 2026 · 23 October
           display:block!important;
       }</style></aside>
 </section>
-<section id="who-is-pulled-and-how-far" class="slide level2">
-<h2>Who is pulled, and how far?</h2>
-<div class="columns">
-<div class="column" style="width:58%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center" width="912"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:42%;">
-<div class="small">
+<section id="exercise-mother-trees-and-shared-information" class="slide level2" data-background-color="#f3e8f5">
+<h2>Exercise: mother trees and shared information</h2>
+<p><code>day3/exercise-student.qmd</code> · 15 minutes including explanation</p>
 <ul>
-<li class="fragment">Every estimate moves towards the overall mean: <strong>shrinkage</strong>.</li>
-<li class="fragment">Estimates move further when
-<ul>
-<li class="fragment">the tree has <strong>few seedlings</strong>, and</li>
-<li class="fragment">the estimate is <strong>far from the mean</strong>.</li>
-</ul></li>
-<li class="fragment">How far also depends on <span class="math inline">\(\sigma\)</span>: here the trees turn out to be similar (<span class="math inline">\(\sigma\)</span> small), so shrinkage is strong.</li>
-<li class="fragment">Partial pooling is not a fixed correction. Its effect depends on the model and the data.</li>
+<li>Predict which estimates will move and why.</li>
+<li>Run the completed figure code.</li>
+<li>Compare the prediction with the figure and explain one tree.</li>
+<li>Consider what would change if the trees differed much more.</li>
 </ul>
-</div>
-</div></div>
+<aside class="notes">
+<p>10 minutes pair work and 5 minutes debrief. At 5 minutes, check that all pairs have chosen trees and a reason. Use results.html if needed. No other core exercise.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="the-model-in-stan" class="slide level2">
-<h2>The model in Stan</h2>
+<section id="three-ways-of-estimating-survival" class="slide level2">
+<h2>Three ways of estimating survival</h2>
+
+<img data-src="slides_files/figure-revealjs/fitted-trees-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Points: posterior means. Bars: 90% intervals.</p>
+<aside class="notes">
+<p>Complete and separate models use Beta(1,1) probability priors, whereas partial pooling uses the Normal logit group prior with estimated centre and SD. State this difference. It is an illustrative model comparison, not an isolation of pooling under identical marginal priors. All code and priors are in the handout.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="why-estimates-move-by-different-amounts" class="slide level2">
+<h2>Why estimates move by different amounts</h2>
+
+<img data-src="slides_files/figure-revealjs/movement-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Consider information within a tree, its position in the group distribution, and inferred group variation.</p>
+<aside class="notes">
+<p>Debrief. Avoid saying every estimate moves to the pooled proportion or has a narrower interval. Shrinkage depends on assumptions and data. It cannot guarantee smaller estimation error for each group.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="species-differences-in-cndd" class="slide level2">
+<h2>Species differences in CNDD</h2>
+
+<img data-src="slides_files/figure-revealjs/species-cndd-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>Day 2’s common curve becomes a set of species curves. How could rare species borrow information?</p>
+<div class="footer">
+<p>Conceptual simulation inspired by <a href="https://doi.org/10.1126/science.1190772">Comita et al.&nbsp;2010</a> and <a href="https://doi.org/10.1002/ecy.4382">Song &amp; Katabuchi et al.&nbsp;2024</a>.</p>
+</div>
+<aside class="notes">
+<p>55-65 minutes. This is the seeded conceptual example from main.qmd, not fitted species effects for Day 2’s data or a numerical reproduction of either paper. Mother trees and species are different groups. Individual predictors may also differ.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="individual-and-species-questions" class="slide level2">
+<h2>Individual and species questions</h2>
+<p><strong>Individual level:</strong> how does survival vary with conspecific density?</p>
+<p><span class="math display">\operatorname{logit}(p_{ij})=\alpha_j+\beta_j x_{ij}</span></p>
+<p><strong>Species level:</strong> do density coefficients vary with species abundance?</p>
+<p><span class="math display">\beta_j\sim\mathcal{N}(\gamma_0+\gamma_1 a_j,\tau)</span></p>
+<aside class="notes">
+<p>i indexes seedlings and j species here. The response is Bernoulli per seedling, or binomial when counts share the same predictors. a_j is scaled species abundance. The group SD tau and all coefficients require priors in a full analysis. These equations explain structure. They are not another implementation exercise.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="a-species-level-relationship" class="slide level2">
+<h2>A species-level relationship</h2>
+
+<img data-src="slides_files/figure-revealjs/species-abundance-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>What would this relationship imply about species differences?</p>
+<aside class="notes">
+<p>Simulated coefficients, with the generating line shown. Higher coefficients here mean less negative slopes. A logit coefficient is not a fixed probability difference, which also depends on baseline survival and the densities compared. The model asks about an association. It alone does not establish the cause of rarity.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="allometry-and-wood-density" class="slide level2">
+<h2>Allometry and wood density</h2>
 <div class="columns">
 <div class="column" style="width:52%;">
-<div style="font-size: 0.72em;">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb3-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
-<span id="cb3-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; I; <span class="co">// number of species</span></span>
-<span id="cb3-3"><a href="" aria-label="3"></a>  <span class="dt">array</span>[I] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; suv; <span class="co">// number of survivors</span></span>
-<span id="cb3-4"><a href="" aria-label="4"></a>  <span class="dt">array</span>[I] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N; <span class="co">// number of individuals</span></span>
-<span id="cb3-5"><a href="" aria-label="5"></a>  <span class="dt">array</span>[I] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=I&gt; ii; <span class="co">// integer</span></span>
-<span id="cb3-6"><a href="" aria-label="6"></a>}</span>
-<span id="cb3-7"><a href="" aria-label="7"></a></span>
-<span id="cb3-8"><a href="" aria-label="8"></a><span class="kw">parameters</span> {</span>
-<span id="cb3-9"><a href="" aria-label="9"></a>  <span class="dt">real</span> mu;</span>
-<span id="cb3-10"><a href="" aria-label="10"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
-<span id="cb3-11"><a href="" aria-label="11"></a>  <span class="dt">vector</span>[I] z_tilde;</span>
-<span id="cb3-12"><a href="" aria-label="12"></a>}</span>
-<span id="cb3-13"><a href="" aria-label="13"></a></span>
-<span id="cb3-14"><a href="" aria-label="14"></a><span class="kw">transformed parameters</span> {</span>
-<span id="cb3-15"><a href="" aria-label="15"></a>  <span class="dt">vector</span>[I] z;</span>
-<span id="cb3-16"><a href="" aria-label="16"></a>  z = mu + sigma * z_tilde;</span>
-<span id="cb3-17"><a href="" aria-label="17"></a>}</span>
-<span id="cb3-18"><a href="" aria-label="18"></a></span>
-<span id="cb3-19"><a href="" aria-label="19"></a><span class="kw">model</span> {</span>
-<span id="cb3-20"><a href="" aria-label="20"></a>  mu ~ normal(<span class="dv">0</span>, <span class="dv">5</span>);</span>
-<span id="cb3-21"><a href="" aria-label="21"></a>  z_tilde ~ std_normal();</span>
-<span id="cb3-22"><a href="" aria-label="22"></a>  sigma ~ std_normal();</span>
-<span id="cb3-23"><a href="" aria-label="23"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:I)</span>
-<span id="cb3-24"><a href="" aria-label="24"></a>    suv[i] ~ binomial_logit(N[i], z[ii[i]]);</span>
-<span id="cb3-25"><a href="" aria-label="25"></a>}</span>
-<span id="cb3-26"><a href="" aria-label="26"></a></span>
-<span id="cb3-27"><a href="" aria-label="27"></a><span class="kw">generated quantities</span> {</span>
-<span id="cb3-28"><a href="" aria-label="28"></a>  <span class="dt">vector</span>[I] log_lik;</span>
-<span id="cb3-29"><a href="" aria-label="29"></a>  <span class="dt">vector</span>[I] p = inv_logit(z);</span>
-<span id="cb3-30"><a href="" aria-label="30"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:I)</span>
-<span id="cb3-31"><a href="" aria-label="31"></a>    log_lik[i] = binomial_logit_lpmf(suv[i] | N[i], z[ii[i]]);</span>
-<span id="cb3-32"><a href="" aria-label="32"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/allometry-curves-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+</figure>
+</div>
 </div>
 </div>
 </div><div class="column" style="width:48%;">
-<div class="small">
-<ul>
-<li><code>z[i]</code> is <span class="math inline">\(\mathrm{logit}(p_i)\)</span> for tree <span class="math inline">\(i\)</span>.</li>
-<li><code>z = mu + sigma * z_tilde</code> with <code>z_tilde ~ std_normal()</code> is the same model as <span class="math inline">\(z_i \sim \mathcal{N}(\mu, \sigma)\)</span>. Its sampling implications are an extension.</li>
-<li><code>generated quantities</code> computes things we want for every draw: here <span class="math inline">\(p_i\)</span> on the probability scale.</li>
-<li><code>mu</code> and <code>sigma</code> are parameters like any other: they get posterior distributions too.</li>
-</ul>
-</div>
+<p><strong>Individual level:</strong> DBH predicts height.</p>
+<p><strong>Species level:</strong> wood density may predict the allometric exponent.</p>
+<p><span class="math display">h=a\,\mathrm{DBH}^{b}</span></p>
 </div></div>
-</section>
-<section id="exercise-3a-eight-mother-trees-three-models" class="slide level2" data-background-color="#f3e8f5">
-<h2>Exercise 3A: eight mother trees, three models</h2>
-<div class="large">
-<p><code>day3/exercise-student.qmd</code>, Exercise 3A Tasks 1–4 (25 minutes with discussion)</p>
-</div>
-<ul>
-<li><strong>Predict first</strong>: which tree’s estimate will move the most?</li>
-<li>Compare complete pooling, no pooling, and partial pooling.</li>
-<li>What does <span class="math inline">\(\sigma\)</span> tell us about this species?</li>
-<li>Predict the survival rate under a <strong>new</strong> mother tree.</li>
-</ul>
 <aside class="notes">
-<ul>
-<li>complete/no pooling use the Day 1 formula; partial pooling reads supplied Stan draws</li>
-<li>checkpoints after 7/16 min: all three estimates loaded / tree H interpreted</li>
-<li>debrief 3 min: shrinkage depends on n and on sigma</li>
-<li>return to Task 5 at 76 min: a new tree needs sigma</li>
-</ul>
+<p>65-70 minutes: optional second research connection, 5 minutes total for two slides. The data are simulated. Explain the power-law shape visually, without a new transformation or coefficient exercise. Inspiration follows main.qmd’s research example; its unpublished citation status has not been independently established.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -809,546 +705,115 @@ AFEC-X 2026 · 23 October
           overflow: hidden!important;
           display:block!important;
       }</style></aside>
-</section></section>
+</section>
+<section id="the-same-structure-with-a-different-response" class="slide level2">
+<h2>The same structure with a different response</h2>
+
+<img data-src="slides_files/figure-revealjs/wood-density-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>The response changes to log height. Species still share information through a group model.</p>
+<aside class="notes">
+<p>The figure uses day3_vslope, fitted to the existing simulated allometry data. Points summarise species exponents and the line summarises their expected value at each wood density, with 90% intervals. It is not evidence from a real forest. Skip these two slides if delayed. Detailed transformation and implementation are optional.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="computation-and-observations-both-matter" class="slide level2">
+<h2>Computation and observations both matter</h2>
+
+<img data-src="slides_files/figure-revealjs/mother-check-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Does the model reproduce survival counts by mother tree?</p>
+<aside class="notes">
+<p>70-80 minutes. First inspect stored R-hat, bulk/tail ESS, traces, divergences, treedepth and E-BFMI in the result sheet. Then discuss this predictive check. Draws use observed n_j and posterior p_j. A good fit is one part of assessment.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="ecological-reasons-to-share-information" class="slide level2">
+<h2>Ecological reasons to share information</h2>
+<p>Which trees or species belong in a common group distribution?</p>
+<ul>
+<li>Similarity needs an ecological argument.</li>
+<li>Measured group differences can help explain systematic variation.</li>
+<li>Checking by group can reveal patterns hidden in overall summaries.</li>
+</ul>
+<aside class="notes">
+<p>A hierarchical model is not automatically appropriate because a grouping label exists. Discuss shared habitat, census interval and missing predictors.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="your-own-research" class="slide level2">
+<h2>Your own research</h2>
+<p>Name a grouping and a quantity that may vary among its groups.</p>
+<p>What would justify sharing information, and what predicted pattern would you check?</p>
+<aside class="notes">
+<p>80-85 minutes: pairs explain one application in words. Ask two pairs to share. This is reflection rather than another code exercise. Keep 85-90 for questions.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="three-days-of-bayesian-thinking" class="slide level2">
+<h2>Three days of Bayesian thinking</h2>
+<ul>
+<li>A posterior expresses uncertainty conditional on data and assumptions.</li>
+<li>Predictions put that uncertainty on the scale of an ecological question.</li>
+<li>Hierarchical priors share information while allowing groups to differ.</li>
+<li>Computation, model-generated data and ecological context all inform interpretation.</li>
+</ul>
+</section>
 <section>
-<section id="multilevel-regression" class="title-slide slide level1 center">
-<h1>Multilevel regression</h1>
+<section id="optional-reference" class="title-slide slide level1 center" data-visibility="uncounted">
+<h1>Optional reference</h1>
 
 </section>
-<section id="multilevel-model-verbal-model-tree-allometry-example" class="slide level2">
-<h2>Multilevel model (verbal model: tree allometry example)</h2>
-<div class="footer">
-<p>Example inspired by Nguyen &amp; Katabuchi, <em>Journal of Forestry Research</em> (accepted). Wood density is scaled to mean 0 and sd 1.</p>
-</div>
-<div class="small">
-<p><em>H: Dense wood can support taller trees than less dense wood.</em></p>
-<div class="fragment">
-<p>There is a power-law relationship (<span class="math inline">\(y =ax^b\)</span>) between tree diameter (DBH) and tree maximum height, and the power-law exponent varies among species. Those relationships depend on wood density.</p>
-</div>
-<ul>
-<li class="fragment"><p>Tree height <em>y</em> ~ DBH <em>x</em> (individual-level)</p></li>
-<li class="fragment"><p>Slope <em>b</em> ~ wood density (species-level)</p></li>
-</ul>
-<div class="fragment">
-<p>This follows the same structure as the Day 1 NDD question. We use tree height as an example and return to NDD at the end.</p>
-</div>
-</div>
-
-<img data-src="slides_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"></section>
-<section id="our-data-10-species-very-unequal-sample-sizes" class="slide level2">
-<h2>Our data: 10 species, very unequal sample sizes</h2>
-<div class="columns">
-<div class="column" style="width:62%;">
+<section id="a-new-mother-tree" class="slide level2" data-visibility="uncounted">
+<h2>A new mother tree</h2>
 <div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
-</figure>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="" aria-label="1"></a><span class="fu">set.seed</span>(<span class="dv">20261026</span>)</span>
+<span id="cb2-2"><a href="" aria-label="2"></a>draws <span class="ot">&lt;-</span> fit<span class="sc">$</span>draws</span>
+<span id="cb2-3"><a href="" aria-label="3"></a>p_new <span class="ot">&lt;-</span> <span class="fu">plogis</span>(<span class="fu">rnorm</span>(<span class="fu">nrow</span>(draws),draws<span class="sc">$</span>mu,draws<span class="sc">$</span>sigma))</span>
+<span id="cb2-4"><a href="" aria-label="4"></a><span class="fu">quantile</span>(p_new,<span class="fu">c</span>(.<span class="dv">05</span>,.<span class="dv">5</span>,.<span class="dv">95</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</div>
-</div>
-</div><div class="column" style="width:38%;">
-<ul>
-<li class="fragment">Green: a separate regression for each species (no pooling).</li>
-<li class="fragment">Common species: well estimated.</li>
-<li class="fragment">Rare species (3 to 6 trees): the separate lines are driven by noise.</li>
-<li class="fragment">Many species in tropical forests are rare. Excluding them would leave much of the community out of the analysis.</li>
-</ul>
-</div></div>
+<p>This predicts a new tree’s probability, including group variation. A future survivor count would also require a seedling count and binomial sampling.</p>
 </section>
-<section id="step-1-varying-intercepts" class="slide level2">
-<h2>Step 1: varying intercepts</h2>
-<p><span class="math display">\[
-\begin{align*}
-\log h_{ij} &amp;\sim \mathcal{N}(\log \beta_{0j} + \beta_1 x_{ij},\; \sigma)\\
-\log \beta_{0j} &amp;\sim \mathcal{N}(\mu_0, \tau)\\
-\mu_0 &amp;\sim \mathcal{N}(0, 2.5), \quad \tau \sim \text{Half-Cauchy}(0, 1)\\
-\beta_1 &amp;\sim \mathcal{N}(0, 2.5), \quad \sigma \sim \text{Half-Cauchy}(0, 1)
-\end{align*}
-\]</span></p>
-<div class="small">
-<ul>
-<li class="fragment">For tree <span class="math inline">\(i\)</span> of species <span class="math inline">\(j\)</span>, <span class="math inline">\(x_{ij} = \log(\mathrm{DBH}_{ij}/40)\)</span>. As with the mother trees, each species has its own intercept, and the intercepts share a common distribution.</li>
-<li class="fragment"><span class="math inline">\(e^{\mu_0}\)</span> is the height of a 40-cm tree for a <em>typical</em> species. <span class="math inline">\(\tau\)</span> measures how much species differ on the log scale.</li>
-<li class="fragment">Estimated <span class="math inline">\(\tau\)</span> is 0.11 (90% interval 0.07 to 0.18). Species differ by roughly 11% in height at the same DBH. Estimated <span class="math inline">\(\sigma\)</span> is 0.11. Trees within a species differ by about the same amount.</li>
-<li class="fragment"><code>stan/vint.stan</code> uses half-Cauchy priors for the two SDs. Day 2 used half-normal priors. Both prior choices are weakly informative here.</li>
-</ul>
-</div>
-<aside class="notes">
-<ul>
-<li>model file: stan/vint.stan; brms: log(h) ~ log(dbh / 40) + (1 | sp)</li>
-<li>Day 2’s pooled sigma was 0.135: part of it was variation among species</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="step-2-species-level-regression" class="slide level2">
-<h2>Step 2: species-level regression</h2>
-<p><span class="math display">\[
-\log h_{ij} \sim \mathcal{N}(a_j + b_j x_{ij},\; \sigma), \qquad x_{ij}=\log(\mathrm{DBH}_{ij}/40)
-\]</span></p>
-<ul>
-<li class="fragment">Each species has an intercept <span class="math inline">\(a_j\)</span> and an exponent <span class="math inline">\(b_j\)</span>.</li>
-<li class="fragment">Their expected values depend on the wood density of the species:</li>
-</ul>
-<p><span class="math display">\[
-E(a_j \mid \mathrm{wd}_j)=\gamma_{11}+\gamma_{12}\mathrm{wd}_j, \qquad
-E(b_j \mid \mathrm{wd}_j)=\gamma_{21}+\gamma_{22}\mathrm{wd}_j
-\]</span></p>
-<ul>
-<li class="fragment"><code>gamma[2,2]</code> answers: does the exponent increase with wood density?</li>
-<li class="fragment"><code>tau[1]</code>, <code>tau[2]</code>: remaining variation among species; <code>sigma</code>: variation within a species.</li>
-<li class="fragment">Same regression idea as Day 2, now applied to <strong>species coefficients</strong>.</li>
-</ul>
-<aside class="notes">
-<ul>
-<li>a_j = log(beta0_j), b_j = beta1_j; keep these names beside the output table</li>
-<li>covariance, Cholesky and LKJ details are an extension</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="result-does-wood-density-change-the-exponent" class="slide level2">
-<h2>Result: does wood density change the exponent?</h2>
-<div class="columns">
-<div class="column" style="width:58%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-15-1.png" class="quarto-figure quarto-figure-center" width="912"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:42%;">
-<div class="small">
-<ul>
-<li><span class="math inline">\(\gamma_{22}\)</span> = 0.080 (0.045 to 0.119); <span class="math inline">\(P(\gamma_{22} &gt; 0 \mid \text{data})\)</span> = 0.994</li>
-</ul>
-<ul>
-<li class="fragment">Exponent of a typical species with low wood density (−1 SD): 0.58 (0.51 to 0.63); with high wood density (+1 SD): 0.74 (0.68 to 0.79).</li>
-<li class="fragment">Effect on height at 40 cm DBH, <span class="math inline">\(\gamma_{12}\)</span> = 0.033 (-0.034 to 0.100): positive or zero, the data cannot tell.</li>
-<li class="fragment">Rare species are pulled towards the <strong>regression line</strong>, not towards one grand mean: the species with 4 trees moves from an exponent of 0.3 to 0.62.</li>
-</ul>
-</div>
-</div></div>
-<div class="footer">
-<p>Means and 90% intervals are shown. The true simulation values are <span class="math inline">\(\gamma_{22}\)</span> = 0.1 and <span class="math inline">\(\gamma_{12}\)</span> = 0.05.</p>
-</div>
-</section>
-<section id="check-computation-before-interpretation" class="slide level2">
-<h2>Check computation before interpretation</h2>
-<ul>
-<li class="fragment">Check <code>rhat</code>, bulk/tail ESS, trace plots, treedepth and E-BFMI warnings.</li>
-<li class="fragment">A <strong>divergence</strong> means sampling may have missed part of the posterior. Investigate the cause before interpreting the results.</li>
-<li class="fragment">The supplied core hierarchical fits have zero divergences; this is a warning checklist, not a divergent-fit repair exercise.</li>
-<li class="fragment">Then check predictions and group structure against the data. No single number proves that the model is adequate.</li>
-</ul>
-</section>
-<section id="exercise-3b-species-differences-in-tree-allometry" class="slide level2" data-background-color="#f3e8f5">
-<h2>Exercise 3B: species differences in tree allometry</h2>
-<div class="large">
-<p><code>day3/exercise-student.qmd</code>, Exercise 3B (21 minutes including discussion)</p>
-</div>
-<ul>
-<li>Varying intercepts: what do <span class="math inline">\(\mu_0\)</span>, <span class="math inline">\(\tau\)</span>, and <span class="math inline">\(\sigma\)</span> mean for these trees?</li>
-<li>Varying slopes with wood density: check the fit, then answer the ecological question.</li>
-<li>Which species benefit most from partial pooling, and why?</li>
-</ul>
-<aside class="notes">
-<ul>
-<li>stored results for both models; no live fitting in the core</li>
-<li>checkpoints after 6/12 min: tau vs sigma / probability for gamma[2,2]</li>
-<li>debrief 3 min: shrinkage was strong for mother trees, weak for species intercepts, strong for slopes of rare species: it depends on the data</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="a-new-mother-tree-return-to-exercise-3a-task-5" class="slide level2">
-<h2>A new mother tree: return to Exercise 3A Task 5</h2>
-<div class="large">
-<p>Core task: 6 minutes including discussion. Use the supplied mother-tree fit.</p>
-</div>
-<ul>
-<li class="fragment">Predict: is a new-tree interval wider than the complete-pooling interval?</li>
-<li class="fragment">For each draw: <span class="math inline">\(z_{new}\sim\mathcal{N}(\mu,\sigma)\)</span>, then <span class="math inline">\(p_{new}=\mathrm{logit}^{-1}(z_{new})\)</span>.</li>
-<li class="fragment">Summarise the survival probability of the new tree, and explain where the extra uncertainty comes from.</li>
-</ul>
-<aside class="notes">
-<ul>
-<li>4 min pair work + 2 min discussion; distinguish a survival probability from a future survivor count</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section></section>
-<section>
-<section id="putting-it-together" class="title-slide slide level1 center">
-<h1>Putting it together</h1>
-
-</section>
-<section id="a-workflow-for-your-own-data" class="slide level2">
-<h2>A workflow for your own data</h2>
-<div class="small">
-<ol type="1">
-<li class="fragment"><strong>Draw the structure</strong>: What is the response? Which groups are present (species, plots, years)? Which predictors act at each level?</li>
-<li class="fragment"><strong>Start simple</strong>: one group-free model (Day 2), then add varying intercepts, then varying slopes if the question needs them.</li>
-<li class="fragment"><strong>Scale and centre predictors</strong>, so that priors and intercepts have a meaning.</li>
-<li class="fragment"><strong>Priors</strong>: weakly informative, checked with a prior predictive simulation.</li>
-<li class="fragment"><strong>Fit</strong>, then check the <strong>computation</strong>: <code>rhat</code>, ESS, divergences, trace plots.</li>
-<li class="fragment"><strong>Check the model</strong> where it matters: posterior predictive checks <strong>by group</strong>.</li>
-<li class="fragment"><strong>Interpret</strong> distributions on the scale of the data: group-level SDs, predictions for known and new groups.</li>
-<li class="fragment"><strong>Report</strong> the model, the priors, the software versions, and what the checks showed.</li>
-</ol>
-</div>
-<div class="fragment">
-<p>Expect to go around this loop several times.</p>
-</div>
-</section>
-<section id="back-to-ndd-the-same-two-levels" class="slide level2">
-<h2>Back to NDD: the same two levels</h2>
-<ul>
-<li class="fragment"><strong>Tree height</strong>: individual DBH predicts height; species wood density predicts the species exponent.</li>
-<li class="fragment"><strong>Seedling survival</strong>: local conspecific density predicts survival; species abundance could predict the species density effect.</li>
-<li class="fragment">Change the likelihood from normal log height to binomial/Bernoulli survival, and use a logit link.</li>
-<li class="fragment">On your own data: draw the levels, fit a simpler model first, then check before interpreting.</li>
-</ul>
-<div class="footer">
-<p>Comita et al.&nbsp;(2010) <a href="https://doi.org/10.1126/science.1190772">Science</a>; Song &amp; Katabuchi et al.&nbsp;(2024) <a href="https://doi.org/10.1002/ecy.4382">Ecology</a>.</p>
-</div>
-</section>
-<section id="summary" class="slide level2">
-<h2>Summary</h2>
-<div class="small">
-<ul>
-<li><p><em>Why Bayesian estimation is useful</em>.</p></li>
-<li><p><em>Why multilevel models are important</em>.</p></li>
-</ul>
-<ul>
-<li class="fragment"><strong>Bayesian workflow = Likelihood + Prior → Posterior</strong>
-<ul>
-<li class="fragment">One clear pipeline for fitting, checking, and predicting.</li>
-</ul></li>
-<li class="fragment"><strong>Priors = ecological knowledge</strong>
-<ul>
-<li class="fragment">Weakly informative priors stabilize small data sets.</li>
-<li class="fragment">Hierarchical priors share information across species, time, sites, etc.</li>
-</ul></li>
-<li class="fragment"><strong>Multilevel models are the default in ecology</strong>
-<ul>
-<li class="fragment">Ecology is hierarchical (individual → population → community); Bayesian tools handle this naturally.</li>
-</ul></li>
-<li class="fragment"><strong>A fitted model is a claim to be checked</strong>: computation first, then fit, then interpretation.</li>
-</ul>
-</div>
-</section>
-<section id="references" class="slide level2">
+<section id="references" class="slide level2" data-visibility="uncounted">
 <h2>References</h2>
 <ul>
-<li><p>Slides &amp; code: <a href="https://github.com/mattocci27/bayes-workshop-xtbg" class="uri">https://github.com/mattocci27/bayes-workshop-xtbg</a></p></li>
-<li><p><a href="http://www.stat.columbia.edu/~gelman/book/">Gelman, A. et al.&nbsp;Bayesian Data Analysis, Third Edition. (Chapman &amp; Hall/CRC, 2013)</a></p></li>
-<li><p><a href="https://mc-stan.org/docs/stan-users-guide/index.html">Stan User’s Guide</a></p></li>
-<li><p><a href="https://mc-stan.org/docs/functions-reference/index.html">Stan Functions Reference</a></p></li>
-<li><p>Betancourt, M. (2017). <a href="https://betanalpha.github.io/assets/case_studies/divergences_and_bias.html">Diagnosing Biased Inference with Divergences</a></p></li>
-<li><p><a href="https://youtu.be/mX_NpDD7wwg">AIcia Solid Project</a> (in Japanese and Math)</p></li>
+<li><a href="https://doi.org/10.1126/science.1190772">Comita et al.&nbsp;2010, Science</a></li>
+<li><a href="https://doi.org/10.1002/ecy.4382">Song &amp; Katabuchi et al.&nbsp;2024, Ecology</a></li>
+<li><a href="https://mc-stan.org/docs/stan-users-guide/regression.html#hierarchical-logistic-regression">Stan User’s Guide: hierarchical logistic regression</a></li>
+<li><a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html">Stan User’s Guide: predictive checks</a></li>
 </ul>
-</section></section>
-<section>
-<section id="appendix-optional-material" class="title-slide slide level1 center" data-visibility="uncounted">
-<h1>Appendix: optional material</h1>
-
-</section>
-<section id="same-model-different-tools" class="slide level2" data-visibility="uncounted">
-<h2>Same model, different tools</h2>
-<div class="footer">
-<p>Two-stage, e.g., <a href="https://doi.org/10.1111/1365-2745.13497">Song <em>et al.</em> 2021 <em>Journal of Ecology</em></a>, <a href="https://doi.org/10.1002/ecy.3808">Jevon <em>et al.</em> 2022 <em>Ecology</em></a>; simultaneous MLE, e.g., <a href="https://doi.org/10.1126/science.aau1361">Chen <em>et al.</em> 2019 <em>Science</em></a></p>
-</div>
-<div class="small">
-<p><strong>Two-stage</strong>: a regression per species, then a regression of the slopes on wood density.</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="" aria-label="1"></a>fit_gr <span class="ot">&lt;-</span> <span class="fu">lm</span>(slope_coef <span class="sc">~</span> wd, <span class="at">data =</span> slopes_per_species)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<ul>
-<li>Treats a slope estimated from 3 trees like a slope estimated from 40 trees.</li>
-</ul>
-<div class="fragment">
-<p><strong>Simultaneous MLE</strong> (<code>lme4</code>) and <strong>Bayesian</strong> (<code>brms</code>): the same formula.</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="" aria-label="1"></a>lme4<span class="sc">::</span><span class="fu">lmer</span>(<span class="fu">log</span>(h) <span class="sc">~</span> <span class="fu">log</span>(dbh <span class="sc">/</span> <span class="dv">40</span>) <span class="sc">*</span> wd <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">log</span>(dbh <span class="sc">/</span> <span class="dv">40</span>) <span class="sc">|</span> sp), <span class="at">data =</span> allo)</span>
-<span id="cb5-2"><a href="" aria-label="2"></a>brms<span class="sc">::</span><span class="fu">brm</span>(<span class="fu">log</span>(h) <span class="sc">~</span> <span class="fu">log</span>(dbh <span class="sc">/</span> <span class="dv">40</span>) <span class="sc">*</span> wd <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">log</span>(dbh <span class="sc">/</span> <span class="dv">40</span>) <span class="sc">|</span> sp), <span class="at">data =</span> allo)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<ul>
-<li>For these data <code>lmer()</code> gives a similar wood-density effect, but warns about a <em>singular fit</em>: with 10 species it estimates the correlation between intercepts and slopes as exactly 1.</li>
-<li>The Bayesian model returns a distribution for every variance and correlation instead of a boundary value.</li>
-</ul>
-</div>
-<div class="fragment">
-<p><strong>Stan</strong> gives full control over the likelihood, priors, and model structure. Use Stan when the model cannot be expressed with a formula interface.</p>
-</div>
-</div>
-</section>
-<section id="divergent-transitions-a-warning-you-will-meet" class="slide level2" data-visibility="uncounted">
-<h2>Divergent transitions: a warning you will meet</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
-<p><strong>Centered</strong> (intuitive)</p>
-<p><span class="math display">\[
-\theta_j \sim \mathcal{N}(\mu, \tau)
-\]</span></p>
-<p><strong>Non-centered</strong> (same model)</p>
-<p><span class="math display">\[
-\tilde{\theta}_j \sim \mathcal{N}(0, 1), \qquad \theta_j = \mu + \tau \cdot \tilde{\theta}_j
-\]</span></p>
-</div><div class="column" style="width:50%;">
-<div class="small">
-<ul>
-<li class="fragment">In hierarchical models, all <span class="math inline">\(\theta_j\)</span> values are close when <span class="math inline">\(\tau\)</span> is small. The sampler may have difficulty exploring this posterior and produce <strong>divergent transitions</strong>.</li>
-<li class="fragment">Even a few divergences may mean that part of the posterior is missing. Do not ignore them.</li>
-<li class="fragment">Remedies: write the model in the non-centered form, as <code>logistic.stan</code> and <code>vslope.stan</code> do; let the sampler take smaller steps (<code>adapt_delta = 0.95</code>); reconsider the priors.</li>
-<li class="fragment">Checklist for today’s fits: <code>rhat</code>, ESS, <strong>and</strong> divergences.</li>
-</ul>
-</div>
-</div></div>
-<div class="footer">
-<p>Betancourt (2017) <a href="https://betanalpha.github.io/assets/case_studies/divergences_and_bias.html">Diagnosing Biased Inference with Divergences</a></p>
-</div>
-</section>
-<section id="mle-vs.-bayesian-estimation-for-multilevel-models" class="slide level2" data-visibility="uncounted">
-<h2>MLE vs.&nbsp;Bayesian estimation for multilevel models</h2>
-<div class="small">
-<p><strong>MLE</strong> (e.g., <code class="small">lme4</code>): integrate the group-level parameters out, then maximise.</p>
-<p><span class="math inline">\(L(\mu, \sigma) = \prod_i \int_{-\infty}^{\infty} \mathcal{B}(S_i \mid N_i, \mathrm{logit}^{-1}(z_i)) \times \mathcal{N}(z_i \mid \mu, \sigma)\, dz_i\)</span></p>
-<ul>
-<li>Requires numerical integration; this becomes difficult for complex models.</li>
-<li>No prior; variance estimates can be unstable or sit on the boundary with few groups.</li>
-</ul>
-<div class="fragment">
-<p><strong>Bayesian estimation</strong>: sample all parameters jointly.</p>
-<p><span class="math inline">\(P(\mu, \sigma, z_1, \dots, z_8 \mid S, N) \propto \prod_i \mathcal{B}(S_i \mid N_i, \mathrm{logit}^{-1}(z_i)) \times \prod_i \mathcal{N}(z_i \mid \mu, \sigma)\)</span></p>
-<p><span class="math inline">\(\qquad\qquad\qquad\qquad\qquad\quad \times\; \mathcal{N}(\mu \mid 0, 5) \times \text{Half-}\mathcal{N}(\sigma \mid 0, 1)\)</span></p>
-<ul>
-<li>MCMC approximates the whole posterior: every parameter, including each <span class="math inline">\(p_i\)</span> and <span class="math inline">\(\sigma\)</span>, comes with its uncertainty.</li>
-<li>Priors help stabilize estimates, especially with limited data.</li>
-<li>The hierarchical prior is what shares information among groups.</li>
-</ul>
-</div>
-</div>
-<aside class="notes">
-<p>posterior distribution is proportional to the likelihood times the prior</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="extension-covariance-and-priors-for-varying-slopes" class="slide level2" data-visibility="uncounted">
-<h2>Extension: covariance and priors for varying slopes</h2>
-<p><span class="math display">\[
-\begin{align*}
-\log h_{ij} &amp;\sim \mathcal{N}(\log \beta_{0j} + \beta_{1j} x_{ij},\; \sigma)\\
-\begin{bmatrix} \log \beta_{0j} \\ \beta_{1j} \end{bmatrix}
-&amp;\sim \mathrm{MVN}\Biggl(
-\begin{bmatrix} \gamma_{11} + \gamma_{12}\, \mathrm{wd}_j \\ \gamma_{21} + \gamma_{22}\, \mathrm{wd}_j \end{bmatrix},
-\begin{bmatrix} \tau_1^2 &amp; \rho \tau_1 \tau_2 \\ \rho \tau_1 \tau_2 &amp; \tau_2^2 \end{bmatrix}
-\Biggr)
-\end{align*}
-\]</span></p>
-<div class="small">
-<ul>
-<li class="fragment">Now the exponent <span class="math inline">\(\beta_{1j}\)</span> also varies among species.</li>
-<li class="fragment">Species-level regression: the <em>typical</em> intercept and exponent depend on wood density.
-<ul>
-<li class="fragment"><span class="math inline">\(\gamma_{22}\)</span> answers our hypothesis: does the exponent increase with wood density?</li>
-</ul></li>
-<li class="fragment"><span class="math inline">\(\tau_1\)</span> and <span class="math inline">\(\tau_2\)</span> measure variation among species that wood density does not explain. <span class="math inline">\(\rho\)</span> is the correlation between intercepts and slopes.</li>
-<li class="fragment">Priors: <span class="math inline">\(\gamma \sim \mathcal{N}(0, 2.5)\)</span>, <span class="math inline">\(\tau \sim \text{Half-Cauchy}(0, 2.5)\)</span>, correlation matrix <span class="math inline">\(\sim \text{LKJ}(2)\)</span> (mildly favours weak correlations).</li>
-</ul>
-</div>
-<div class="footer">
-<p>Model file: <code>stan/vslope.stan</code> (indices of <span class="math inline">\(\gamma\)</span> as in the Stan code: <code>gamma[2,2]</code> <span class="math inline">\(= \gamma_{22}\)</span>).</p>
-</div>
-<aside class="notes">
-<ul>
-<li>we do not walk through vslope.stan line by line; the Cholesky/LKJ details are in the Stan User’s Guide (hierarchical priors section)</li>
-<li>wd is scaled: mean 0, sd 1</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="extension-reading-the-research-model-code" class="slide level2" data-visibility="uncounted">
-<h2>Extension: reading the research-model code</h2>
-<div class="footer">
-<p>e.g., <a href="https://doi.org/10.1126/science.1190772">Comita <em>et al.</em> 2010 <em>Science</em></a>, <a href="https://doi.org/10.1002/ecy.4382">Song &amp; Katabuchi <em>et al.</em> 2024 <em>Ecology</em></a></p>
-</div>
-<div class="columns">
-<div class="column" style="width:52%;">
-<div style="font-size: 0.62em;">
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb6-1"><a href="" aria-label="1"></a><span class="kw">data</span>{</span>
-<span id="cb6-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; N; <span class="co">// number of samples</span></span>
-<span id="cb6-3"><a href="" aria-label="3"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; J; <span class="co">// number of sp</span></span>
-<span id="cb6-4"><a href="" aria-label="4"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; K; <span class="co">// number of tree-level preditors (i.e, CONS, HETS,...)</span></span>
-<span id="cb6-5"><a href="" aria-label="5"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>&gt; L; <span class="co">// number of sp-level predictors (i.e., interecept, SLA,...)</span></span>
-<span id="cb6-6"><a href="" aria-label="6"></a>  <span class="dt">matrix</span>[N, K] x; <span class="co">// tree-level predictor</span></span>
-<span id="cb6-7"><a href="" aria-label="7"></a>  <span class="dt">matrix</span>[L, J] u; <span class="co">// sp-level predictor</span></span>
-<span id="cb6-8"><a href="" aria-label="8"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; suv; <span class="co">// 1 or 0</span></span>
-<span id="cb6-9"><a href="" aria-label="9"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=J&gt; sp; <span class="co">// integer</span></span>
-<span id="cb6-10"><a href="" aria-label="10"></a>}</span>
-<span id="cb6-11"><a href="" aria-label="11"></a></span>
-<span id="cb6-12"><a href="" aria-label="12"></a><span class="kw">parameters</span>{</span>
-<span id="cb6-13"><a href="" aria-label="13"></a>  <span class="dt">matrix</span>[K, L] gamma;</span>
-<span id="cb6-14"><a href="" aria-label="14"></a>  <span class="dt">matrix</span>[K, J] z;</span>
-<span id="cb6-15"><a href="" aria-label="15"></a>  <span class="dt">cholesky_factor_corr</span>[K] L_Omega;</span>
-<span id="cb6-16"><a href="" aria-label="16"></a>  <span class="dt">vector</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=pi() / <span class="dv">2</span>&gt;[K] tau_unif;</span>
-<span id="cb6-17"><a href="" aria-label="17"></a>}</span>
-<span id="cb6-18"><a href="" aria-label="18"></a></span>
-<span id="cb6-19"><a href="" aria-label="19"></a><span class="kw">transformed parameters</span>{</span>
-<span id="cb6-20"><a href="" aria-label="20"></a>  <span class="dt">matrix</span>[K, J] beta;</span>
-<span id="cb6-21"><a href="" aria-label="21"></a>  <span class="dt">vector</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt;[K] tau;</span>
-<span id="cb6-22"><a href="" aria-label="22"></a>  <span class="cf">for</span> (k <span class="cf">in</span> <span class="dv">1</span>:K) tau[k] = <span class="fl">2.5</span> * tan(tau_unif[k]);</span>
-<span id="cb6-23"><a href="" aria-label="23"></a>  beta = gamma * u + diag_pre_multiply(tau, L_Omega) * z;</span>
-<span id="cb6-24"><a href="" aria-label="24"></a>}</span>
-<span id="cb6-25"><a href="" aria-label="25"></a></span>
-<span id="cb6-26"><a href="" aria-label="26"></a><span class="kw">model</span> {</span>
-<span id="cb6-27"><a href="" aria-label="27"></a>  <span class="dt">vector</span>[N] mu;</span>
-<span id="cb6-28"><a href="" aria-label="28"></a>  to_vector(z) ~ std_normal();</span>
-<span id="cb6-29"><a href="" aria-label="29"></a>  L_Omega ~ lkj_corr_cholesky(<span class="dv">2</span>);</span>
-<span id="cb6-30"><a href="" aria-label="30"></a>  to_vector(gamma) ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
-<span id="cb6-31"><a href="" aria-label="31"></a>  <span class="cf">for</span> (n <span class="cf">in</span> <span class="dv">1</span>:N) {</span>
-<span id="cb6-32"><a href="" aria-label="32"></a>    mu[n] = x[n, ] * beta[, sp[n]];</span>
-<span id="cb6-33"><a href="" aria-label="33"></a>  }</span>
-<span id="cb6-34"><a href="" aria-label="34"></a>  suv ~ bernoulli_logit(mu);</span>
-<span id="cb6-35"><a href="" aria-label="35"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</div><div class="column" style="width:48%;">
-<div class="small">
-<p><em>H: Rare species tend to be rare because they suffer stronger conspecific NDD than common species.</em></p>
-<ul>
-<li><p><span class="math inline">\(s_{i} \sim \mathcal{B}(p_{i})\)</span>: <span class="teal">likelihood</span> (Day 1, Day 2)</p></li>
-<li><p><span class="math inline">\(\mathrm{logit}(p_{i}) = \boldsymbol{x_{i}} \cdot \boldsymbol{\beta_{j}}\)</span>: seedling-level model (Day 2)</p></li>
-<li><p><span class="math inline">\(\boldsymbol{\beta_j} = \boldsymbol{\gamma} \cdot \boldsymbol{u_j} + \mathrm{diag}(\boldsymbol{\tau})\cdot \boldsymbol{L} \cdot \boldsymbol{z_j}\)</span>: species-level model with abundance as predictor (today)</p></li>
-<li><p><span class="math inline">\(\boldsymbol{z}\)</span>, <span class="math inline">\(\boldsymbol{L}\)</span>, <span class="math inline">\(\boldsymbol{\tau}\)</span>, <span class="math inline">\(\boldsymbol{\gamma}\)</span>: <span class="purple">priors</span></p></li>
-</ul>
-<p>This is the Day 1 question. The model uses the allometry structure from Exercise 3B, with a Bernoulli likelihood and species abundance in place of wood density. It retains the course structure: one likelihood and two predictor levels. The matrix parameterisation is an optional extension. This legacy file is for display and does not run.</p>
-</div>
-</div></div>
-</section>
-<section id="eight-schools-problem" class="slide level2" data-visibility="uncounted">
-<h2>Eight schools problem</h2>
-<p>Coaching effects in eight schools: the classic example behind the eight mother trees.</p>
-<div class="footer">
-<p>[1] Rubin, D. B. Estimation in parallel randomized experiments. Journal of Educational Statistics 6, 377–401 (1981).</p>
-<p>[2] Gelman, A. et al.&nbsp;Bayesian Data Analysis, Third Edition. (Chapman &amp; Hall/CRC, 2013).</p>
-</div>
-
-<img data-src="../images/eight_schools.png" class="r-stretch"></section>
-<section id="priors-and-ecology-multilevel-structure-for-group-level-effects" class="slide level2" data-visibility="uncounted">
-<h2>Priors and ecology: multilevel structure for group-level effects</h2>
-<div class="columns">
-<div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-19-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="footer">
-<p><em>i</em> indexes samples (e.g., individuals), and <em>j</em> indexes groups (e.g., species, sites).</p>
-</div>
-</div><div class="column" style="width:60%;">
-<ul>
-<li>Likelihood: <span class="math inline">\(y_i \sim \mathcal{N}(ax_i + b_j, \sigma)\)</span></li>
-<li>If the parameter <span class="math inline">\(b_j\)</span> is similar within each group (e.g., species differences, site differences), it makes sense to model:</li>
-<li>Prior: <span class="math inline">\(b_j \sim \mathcal{N}(\mu_b, \tau)\)</span>
-<ul>
-<li><span class="math inline">\(\mu_b\)</span>: global means across all groups</li>
-<li><span class="math inline">\(\tau\)</span>: variation among groups</li>
-</ul></li>
-</ul>
-</div></div>
-</section>
-<section id="priors-and-ecology-multilevel-structure-for-spatial-autocorrelation" class="slide level2" data-visibility="uncounted">
-<h2>Priors and ecology: multilevel structure for spatial autocorrelation</h2>
-<div class="footer">
-<p>Each observation <em>i</em> is associated with a grid cell (<span class="math inline">\(m,n\)</span>), so <span class="math inline">\(\tilde{r}_i = r_{m,n}\)</span>.</p>
-</div>
-<div class="columns">
-<div class="column" style="width:30%;">
-<p><img data-src="../images/spatial.png"></p>
-</div><div class="column" style="width:70%;">
-<ul>
-<li><p>When the data <span class="math inline">\(y_i\)</span> is similar to the surrounding samples (e.g., temporal / spatial autocorrelation):</p>
-<ul>
-<li>Likelihood: <span class="math inline">\(y_i \sim \mathcal{N}(\mu + \tilde{r_i}, \sigma)\)</span></li>
-<li>Prior (spatial effect): <span class="math inline">\(\tilde{r_i} = r_{m, n} \sim \mathcal{N}(\phi_{m,n}, \tau)\)</span></li>
-<li><span class="math inline">\(\phi_{m,n}\)</span> = average of 8 neighbors around <span class="math inline">\(r_{m,n}\)</span></li>
-</ul></li>
-</ul>
-<p><span class="math display">\[
-\begin{align*}
-\phi_{m,n} = \frac{1}{8} (&amp;
-r_{m-1,n-1} + r_{m-1,n} + r_{m-1,n+1} + \\
-&amp; r_{m,n-1} + r_{m,n+1} + \\
-&amp; r_{m+1,n-1} + r_{m+1,n} + r_{m+1,n+1})
-\end{align*}
-\]</span></p>
-</div></div>
 
 </section></section>
     </div>
@@ -1373,7 +838,6 @@ r_{m-1,n-1} + r_{m-1,n} + r_{m-1,n+1} + \\
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
   <script src="slides_files/libs/revealjs/plugin/zoom/zoom.js"></script>
-  <script src="slides_files/libs/revealjs/plugin/math/math.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>
@@ -1544,27 +1008,9 @@ r_{m-1,n-1} + r_{m-1,n} + r_{m-1,n+1} + \\
 
         maxScale: 1,
 
-        math: {
-          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js',
-          config: 'TeX-AMS_HTML-full',
-          tex2jax: {
-            inlineMath: [['\\(','\\)']],
-            displayMath: [['\\[','\\]']],
-            balanceBraces: true,
-            processEscapes: false,
-            processRefs: true,
-            processEnvironments: true,
-            preview: 'TeX',
-            skipTags: ['script','noscript','style','textarea','pre','code'],
-            ignoreClass: 'tex2jax_ignore',
-            processClass: 'tex2jax_process'
-          },
-        },
-
         // reveal.js plugins
         plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
 
-          RevealMath,
           RevealNotes,
           RevealSearch,
           RevealZoom

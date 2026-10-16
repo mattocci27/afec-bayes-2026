@@ -101,8 +101,24 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-0f0433f7e62300b8124b3919060bd508.css">
-  <link rel="stylesheet" href="../assets/custom.css">
+  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-c23c6b66d12f3bc450971ca9a3a2df29.css">
+  <link rel="stylesheet" href="../assets/course.css">
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
   <link href="slides_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="slides_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -211,636 +227,36 @@
 Bayesian statistics for ecology
 </h2>
 <h3>
-Day 2: Regression and model checking
+Day 2: Seedling survival and CNDD
 </h3>
 <p>
 AFEC-X 2026 · 22 October
 </p>
 <h3>
-🧑🏻‍💻 <span class="author">Masatoshi Katabuchi @ XTBG, CAS</span>
+Masatoshi Katabuchi @ XTBG, CAS
 </h3>
 </div>
 </section>
-<section id="yesterday-and-today" class="slide level2">
-<h2>Yesterday, and today</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
-<h3 id="day-1">Day 1</h3>
-<ul>
-<li><span class="orange">Posterior</span> <span class="math inline">\(\propto\)</span> <span class="teal">likelihood</span> <span class="math inline">\(\times\)</span> <span class="purple">prior</span></li>
-<li>The posterior is a distribution. We summarise its draws.</li>
-<li>One parameter: survival probability <span class="math inline">\(p\)</span></li>
-</ul>
-</div><div class="column" style="width:50%;">
-<h3 id="today">Today</h3>
-<p>By the end of today, you can</p>
-<ul>
-<li class="fragment">read and fit Bayesian <strong>linear</strong> and <strong>logistic</strong> regressions;</li>
-<li class="fragment">report coefficients as <strong>distributions</strong>;</li>
-<li class="fragment">make <strong>predictions</strong> with honest uncertainty;</li>
-<li class="fragment">check <strong>priors</strong>, <strong>computation</strong>, and <strong>model fit</strong>.</li>
-</ul>
-</div></div>
-<div class="fragment">
-<p>Fitting the model is not the end of the analysis.</p>
-</div>
-</section>
-<section id="todays-two-questions" class="slide level2">
-<h2>Today’s two questions</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
-<h3 id="how-does-tree-height-scale-with-stem-diameter">🌳 How does tree height scale with stem diameter?</h3>
-<ul>
-<li>Data: diameter (DBH) and height of 188 trees</li>
-<li>Linear regression</li>
-</ul>
-</div><div class="column" style="width:50%;">
-<h3 id="do-seedlings-survive-less-well-where-conspecifics-are-dense">🌱 Do seedlings survive less well where conspecifics are dense?</h3>
-<ul>
-<li>Data: survivors in 60 seedling quadrats</li>
-<li>Logistic regression</li>
-</ul>
-</div></div>
-<div class="fragment">
-<p>Both data sets are simulated, so we know the truth and can see whether the model recovers it.</p>
-</div>
-<aside class="notes">
-<ul>
-<li>same seedling theme as Day 1, now with a predictor</li>
-<li>allometry data come back on Day 3 with species</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section>
-<section id="bayesian-linear-regression" class="title-slide slide level1 center">
-<h1>Bayesian linear regression</h1>
-
-</section>
-<section id="tree-allometry" class="slide level2">
-<h2>Tree allometry</h2>
-<div class="footer">
-<p>Example inspired by Nguyen &amp; Katabuchi <em>Journal of Forestry Research</em> (accepted)</p>
-</div>
-<p>There is a power-law relationship between tree diameter (DBH) and tree height: <span class="math inline">\(y = ax^b\)</span>.</p>
-
-<img data-src="slides_files/figure-revealjs/unnamed-chunk-1-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><ul>
-<li class="fragment">On the log-log scale the relationship is a straight line: a linear regression.</li>
-<li class="fragment"><span class="math inline">\(b\)</span> is the <strong>scaling exponent</strong>: when DBH increases by 1%, height increases by about <span class="math inline">\(b\)</span>%.</li>
-</ul>
-</section>
-<section id="the-model" class="slide level2">
-<h2>The model</h2>
-<p><span class="math display">\[
-\log h_i \sim \mathcal{N}(\mu_i, \sigma) \qquad \mu_i = \alpha + \beta \log(\mathrm{DBH}_i / 40)
-\]</span></p>
-<div class="columns">
-<div class="column" style="width:58%;">
-<div class="small">
-<ul>
-<li class="fragment"><span class="teal">Likelihood</span>: log height is normally distributed around a line.</li>
-<li class="fragment"><span class="math inline">\(\beta\)</span>: scaling exponent.</li>
-<li class="fragment"><span class="math inline">\(\alpha\)</span> is the log height of a tree with DBH = 40 cm. Therefore, <span class="math inline">\(e^{\alpha}\)</span> is the typical height (m) of a 40-cm tree.
-<ul>
-<li class="fragment">Dividing DBH by 40 gives the intercept a clear meaning. Without this scaling, <span class="math inline">\(\alpha\)</span> would describe a tree with DBH = 1 cm.</li>
-</ul></li>
-<li class="fragment"><span class="math inline">\(\sigma\)</span>: scatter of individual trees around the line (log scale).</li>
-</ul>
-</div>
-</div><div class="column" style="width:42%;">
-<div class="fragment">
-<p><span class="purple">Priors</span></p>
-<p><span class="math display">\[
-\begin{align*}
-\alpha &amp;\sim \mathcal{N}(0, 2.5)\\
-\beta &amp;\sim \mathcal{N}(0, 2.5)\\
-\sigma &amp;\sim \text{Half-}\mathcal{N}(0, 1)
-\end{align*}
-\]</span></p>
-<p>Are these reasonable? How would we know?</p>
-</div>
-</div></div>
-</section>
-<section id="prior-predictive-check-what-trees-do-the-priors-expect" class="slide level2">
-<h2>Prior predictive check: what trees do the priors expect?</h2>
-
-<img data-src="slides_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
-<ul>
-<li class="fragment">Each line is one draw from the prior. The green band shows the heights of real trees (1 to 100 m).</li>
-<li class="fragment">The vague prior gives substantial probability to trees as tall as <span class="math inline">\(10^{50}\)</span> m or as short as <span class="math inline">\(10^{-50}\)</span> m. It is not “uninformative”: most of its probability is on unrealistic heights.</li>
-<li class="fragment">The weakly informative prior is still generous, but it stays within a few orders of magnitude of reality.</li>
-</ul>
-</div>
-<aside class="notes">
-<ul>
-<li>An intercept prior of N(0, 2.5) allows 40-cm tree heights from <span class="math inline">\(e^{-5}\)</span> to <span class="math inline">\(e^5\)</span> m. This range is wide but finite.</li>
-<li>with 188 trees the prior hardly matters here; with 5 trees it does (optional task in Exercise 2A)</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="the-same-model-in-stan" class="slide level2">
-<h2>The same model in Stan</h2>
-<div class="columns">
-<div class="column" style="width:56%;">
-<div style="font-size: 0.9em;">
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
-<span id="cb1-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;           <span class="co">// number of observations</span></span>
-<span id="cb1-3"><a href="" aria-label="3"></a>  <span class="dt">vector</span>[N] x;              <span class="co">// predictor</span></span>
-<span id="cb1-4"><a href="" aria-label="4"></a>  <span class="dt">vector</span>[N] y;              <span class="co">// response</span></span>
-<span id="cb1-5"><a href="" aria-label="5"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; beta_sd;    <span class="co">// prior SD for the slope</span></span>
-<span id="cb1-6"><a href="" aria-label="6"></a>}</span>
-<span id="cb1-7"><a href="" aria-label="7"></a></span>
-<span id="cb1-8"><a href="" aria-label="8"></a><span class="kw">parameters</span> {</span>
-<span id="cb1-9"><a href="" aria-label="9"></a>  <span class="dt">real</span> alpha;               <span class="co">// intercept</span></span>
-<span id="cb1-10"><a href="" aria-label="10"></a>  <span class="dt">real</span> beta;                <span class="co">// slope</span></span>
-<span id="cb1-11"><a href="" aria-label="11"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;      <span class="co">// residual SD</span></span>
-<span id="cb1-12"><a href="" aria-label="12"></a>}</span>
-<span id="cb1-13"><a href="" aria-label="13"></a></span>
-<span id="cb1-14"><a href="" aria-label="14"></a><span class="kw">model</span> {</span>
-<span id="cb1-15"><a href="" aria-label="15"></a>  <span class="co">// likelihood</span></span>
-<span id="cb1-16"><a href="" aria-label="16"></a>  y ~ normal(alpha + beta * x, sigma);</span>
-<span id="cb1-17"><a href="" aria-label="17"></a>  <span class="co">// priors</span></span>
-<span id="cb1-18"><a href="" aria-label="18"></a>  alpha ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
-<span id="cb1-19"><a href="" aria-label="19"></a>  beta ~ normal(<span class="dv">0</span>, beta_sd);</span>
-<span id="cb1-20"><a href="" aria-label="20"></a>  sigma ~ normal(<span class="dv">0</span>, <span class="dv">1</span>);     <span class="co">// half-normal, because sigma &gt; 0</span></span>
-<span id="cb1-21"><a href="" aria-label="21"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div>
-</div><div class="column" style="width:44%;">
-<div class="small">
-<p><span class="math display">\[
-\begin{align*}
-y_i &amp;\sim \mathcal{N}(\alpha + \beta x_i, \sigma)\\
-\alpha &amp;\sim \mathcal{N}(0, 2.5)\\
-\beta &amp;\sim \mathcal{N}(0, \texttt{beta\_sd})\\
-\sigma &amp;\sim \text{Half-}\mathcal{N}(0, 1)
-\end{align*}
-\]</span></p>
-<ul>
-<li><span class="math inline">\(y_i = \log h_i\)</span>, <span class="math inline">\(x_i = \log(\mathrm{DBH}_i / 40)\)</span></li>
-<li>Each line of the <code>model</code> block is one line of the mathematical model.</li>
-<li><code>real&lt;lower=0&gt; sigma</code> together with <code>normal(0, 1)</code> gives the half-normal prior.</li>
-<li><code>beta_sd</code> is passed as data so that we can change the prior without recompiling.</li>
-</ul>
-</div>
-</div></div>
-</section>
-<section id="coefficients-are-distributions" class="slide level2">
-<h2>Coefficients are distributions</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<table class="lightable-material lightable-striped caption-top" style="font-size: 28px; font-family: &quot;Source Sans Pro&quot;, helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">variable</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">mean</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">sd</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">5%</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">95%</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">rhat</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">ess_bulk</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">alpha</td>
-<td style="text-align: right;">2.732</td>
-<td style="text-align: right;">0.010</td>
-<td style="text-align: right;">2.716</td>
-<td style="text-align: right;">2.749</td>
-<td style="text-align: right;">1.002</td>
-<td style="text-align: right;">3706</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">beta</td>
-<td style="text-align: right;">0.649</td>
-<td style="text-align: right;">0.021</td>
-<td style="text-align: right;">0.615</td>
-<td style="text-align: right;">0.683</td>
-<td style="text-align: right;">1.002</td>
-<td style="text-align: right;">3632</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">sigma</td>
-<td style="text-align: right;">0.135</td>
-<td style="text-align: right;">0.007</td>
-<td style="text-align: right;">0.124</td>
-<td style="text-align: right;">0.147</td>
-<td style="text-align: right;">1.001</td>
-<td style="text-align: right;">3704</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="small">
-<ul>
-<li class="fragment">Exponent: 0.65 (90% interval 0.62 to 0.68).</li>
-<li class="fragment">A 40-cm tree is typically <span class="math inline">\(e^{\alpha}\)</span> = 15.4 m tall.</li>
-<li class="fragment">Elastic similarity theory predicts <span class="math inline">\(\beta = 2/3\)</span>. The posterior probability that <span class="math inline">\(\beta &lt; 2/3\)</span> is <span class="math inline">\(P(\beta &lt; 2/3 \mid \text{data})\)</span> = 0.8.</li>
-</ul>
-</div>
-</div><div class="column" style="width:50%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-<div class="footer">
-<p>Elastic similarity: McMahon 1973 <em>Science</em>.</p>
-</div>
-<aside class="notes">
-<ul>
-<li>transform first, then summarise: mean(exp(alpha)), not exp(mean(alpha))</li>
-<li>“the data do not rule out 2/3” is a different statement from “beta is not significantly different from 2/3”</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="posterior-prediction-two-kinds-of-uncertainty" class="slide level2">
-<h2>Posterior prediction: two kinds of uncertainty</h2>
-<div class="columns">
-<div class="column" style="width:55%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:45%;">
-<ul>
-<li class="fragment"><strong>Dark band</strong>: uncertainty about the <em>typical</em> height at each DBH.
-<ul>
-<li class="fragment">For every draw: <span class="math inline">\(\mu = \alpha + \beta x\)</span></li>
-</ul></li>
-<li class="fragment"><strong>Light band</strong>: where we expect a <em>new tree</em> to be.
-<ul>
-<li class="fragment">For every draw: <span class="math inline">\(y^{\text{new}} \sim \mathcal{N}(\mu, \sigma)\)</span></li>
-</ul></li>
-<li class="fragment">More data narrow the dark band. They have little effect on the light band because trees differ from one another.</li>
-<li class="fragment">Same idea as predicting the 50 new seedlings on Day 1.</li>
-</ul>
-</div></div>
-</section>
-<section id="posterior-predictive-check" class="slide level2">
-<h2>Posterior predictive check</h2>
-<p>Does the model generate data like ours?</p>
-<div class="columns">
-<div class="column" style="width:55%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:45%;">
-<div class="small">
-<ul>
-<li class="fragment">Take one posterior draw and simulate a complete new data set from the model. Repeat this process for many draws.</li>
-<li class="fragment">If the model is adequate, the observed data look like one of the simulated data sets.</li>
-<li class="fragment">A check, not a test: we look for <strong>systematic</strong> differences that matter for our question.</li>
-<li class="fragment">Different checks assess different features. We will find a problem with this model later today.</li>
-</ul>
-</div>
-</div></div>
-</section>
-<section id="exercise-2a-tree-allometry" class="slide level2" data-background-color="#f3e8f5">
-<h2>Exercise 2A: tree allometry</h2>
-<div class="large">
-<p><code>day2/exercise-student.qmd</code>, Exercise 2A (24 minutes including discussion)</p>
-</div>
-<ul>
-<li>Fit the regression and interpret <span class="math inline">\(\alpha\)</span>, <span class="math inline">\(\beta\)</span>, <span class="math inline">\(\sigma\)</span> in words.</li>
-<li>Is the exponent smaller than 2/3?</li>
-<li>Predict the height of a tree with DBH = 80 cm: the typical tree, and a new tree.</li>
-<li>Check the model against the data.</li>
-</ul>
-<aside class="notes">
-<ul>
-<li>core: tasks 1-4; changed-input refits require separate instructor approval to run</li>
-<li>checkpoints after 7/15 min: coefficient sentence / two prediction intervals</li>
-<li>debrief 3 min: two kinds of uncertainty; global vs species-level checks</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section></section>
-<section>
-<section id="did-the-computation-work" class="title-slide slide level1 center">
-<h1>Did the computation work?</h1>
-
-</section>
-<section id="chains-should-tell-the-same-story" class="slide level2">
-<h2>Chains should tell the same story</h2>
-
-<img data-src="slides_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><ul>
-<li class="fragment">We run several chains from different starting points.</li>
-<li class="fragment"><strong>Good</strong>: the chains overlap and look like noise (“fuzzy caterpillar”).</li>
-<li class="fragment"><strong>Bad</strong>: chains stay at different values or move slowly. The draws do not describe the posterior.</li>
-</ul>
-</section>
-<section id="two-numbers-to-check-before-you-interpret-anything" class="slide level2">
-<h2>Two numbers to check before you interpret anything</h2>
-<ul>
-<li class="fragment"><code>rhat</code> compares variation between chains with variation within chains. It should be close to 1.
-<ul>
-<li class="fragment"><code>rhat</code> values at or below 1.01 indicate good mixing. Values above 1.01 and below 1.1 are suspicious. Values above 1.1 indicate poor mixing.</li>
-</ul></li>
-<li class="fragment"><code>ess_bulk</code> and <code>ess_tail</code> are effective sample sizes. Draws within a chain are correlated, so the effective sample size can be lower than the draw count.
-<ul>
-<li class="fragment"><code>ess_bulk</code> (means, medians) and <code>ess_tail</code> (interval ends) &gt; 400: good.</li>
-</ul></li>
-<li class="fragment">Stan also warns about <strong>divergent transitions</strong> and <strong>maximum treedepth</strong>. We discuss divergences on Day 3.</li>
-<li class="fragment">No single diagnostic is enough. Check all of them, including the trace plots.</li>
-</ul>
-</section>
-<section id="the-same-two-fits-in-numbers" class="slide level2">
-<h2>The same two fits in numbers</h2>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<table class="lightable-material lightable-striped caption-top" style="font-size: 26px; font-family: &quot;Source Sans Pro&quot;, helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">fit</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">variable</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">mean</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">sd</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">rhat</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">ess_bulk</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">ess_tail</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">OK</td>
-<td style="text-align: left;">alpha</td>
-<td style="text-align: right;">2.73</td>
-<td style="text-align: right;">0.010</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">3706</td>
-<td style="text-align: right;">2491</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">OK</td>
-<td style="text-align: left;">beta</td>
-<td style="text-align: right;">0.65</td>
-<td style="text-align: right;">0.021</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">3632</td>
-<td style="text-align: right;">2345</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">OK</td>
-<td style="text-align: left;">sigma</td>
-<td style="text-align: right;">0.14</td>
-<td style="text-align: right;">0.007</td>
-<td style="text-align: right;">1.00</td>
-<td style="text-align: right;">3704</td>
-<td style="text-align: right;">2772</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">PROBLEM (broken model)</td>
-<td style="text-align: left;">alpha1</td>
-<td style="text-align: right;">55.83</td>
-<td style="text-align: right;">110.715</td>
-<td style="text-align: right;">2.54</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">12</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">PROBLEM (broken model)</td>
-<td style="text-align: left;">alpha2</td>
-<td style="text-align: right;">-53.10</td>
-<td style="text-align: right;">110.715</td>
-<td style="text-align: right;">2.54</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">12</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">PROBLEM (broken model)</td>
-<td style="text-align: left;">beta</td>
-<td style="text-align: right;">0.65</td>
-<td style="text-align: right;">0.020</td>
-<td style="text-align: right;">1.31</td>
-<td style="text-align: right;">11</td>
-<td style="text-align: right;">14</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">PROBLEM (broken model)</td>
-<td style="text-align: left;">sigma</td>
-<td style="text-align: right;">0.13</td>
-<td style="text-align: right;">0.007</td>
-<td style="text-align: right;">1.58</td>
-<td style="text-align: right;">7</td>
-<td style="text-align: right;">48</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="small">
-<ul>
-<li class="fragment">OK fit: <code>rhat</code> = 1.00 and thousands of effective draws for every parameter.</li>
-<li class="fragment"><strong>PROBLEM fit</strong>: <code>rhat</code> is far above 1.01, and the effective sample size is about 5. The means and SDs in these rows are not meaningful.</li>
-<li class="fragment">In the PROBLEM fit almost every iteration also hit the maximum treedepth.</li>
-</ul>
-</div>
-</section>
-<section id="a-warning-is-information-about-the-model" class="slide level2">
-<h2>A warning is information about the model</h2>
+<section id="yesterdays-question-todays-question" class="slide level2">
+<h2>Yesterday’s question, today’s question</h2>
 <div class="columns">
 <div class="column" style="width:45%;">
-<div class="small">
-<p>The broken model has two intercepts:</p>
-<p><span class="math display">\[
-\mu_i = \alpha_1 + \alpha_2 + \beta x_i
-\]</span></p>
-<ul>
-<li class="fragment">The data inform only the <strong>sum</strong> <span class="math inline">\(\alpha_1 + \alpha_2\)</span>.</li>
-<li class="fragment"><span class="math inline">\(\alpha_1 = 100, \alpha_2 = -97.3\)</span> fits exactly as well as <span class="math inline">\(\alpha_1 = 2.7, \alpha_2 = 0\)</span>.</li>
-<li class="fragment">Running the model longer does not help. The <strong>model</strong> must be fixed.</li>
-<li class="fragment">This happens in real analyses: e.g., an intercept plus a dummy variable for every site.</li>
-</ul>
-</div>
+<p><img data-src="../images/seedlings.png" height="380"></p>
 </div><div class="column" style="width:55%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-10-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-</section></section>
-<section>
-<section id="logistic-regression" class="title-slide slide level1 center">
-<h1>Logistic regression</h1>
-
-</section>
-<section id="ndd-comita" class="slide level2">
-<h2>Back to the question from Day 1</h2>
-<div class="columns">
-<div class="column" style="width:28%;">
-<p><img data-src="../images/comita_cover.jpg" height="380"></p>
-</div><div class="column" style="width:72%;">
-<p><em>Rare species tend to be rare because they suffer stronger conspecific negative density dependence (NDD) than common species.</em></p>
-<ul>
-<li class="fragment"><strong>Day 1</strong>: one species, one survival probability <span class="math inline">\(p\)</span>.</li>
-<li class="fragment"><strong>Today</strong>: within one species, does survival decline where conspecifics are dense?</li>
-<li class="fragment"><strong>Day 3</strong>: does it differ among species?</li>
-</ul>
-</div></div>
-<div class="footer">
-<p><a href="https://doi.org/10.1126/science.1190772">Comita <em>et al.</em> 2010 <em>Science</em></a></p>
-</div>
-</section>
-<section id="from-survival-counts-to-a-regression" class="slide level2">
-<h2>From survival counts to a regression</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div class="small">
-<p>In quadrat <span class="math inline">\(i\)</span> we marked <span class="math inline">\(n_i\)</span> seedlings; <span class="math inline">\(s_i\)</span> survived.</p>
-</div>
-<p><span class="math display">\[
-\begin{align*}
-s_i &amp;\sim \mathcal{B}(n_i, p_i)\\
-\mathrm{logit}(p_i) &amp;= \alpha + \beta\, \mathrm{cons}_i\\
-\alpha &amp;\sim \mathcal{N}(0, 2.5)\\
-\beta &amp;\sim \mathcal{N}(0, 2.5)
-\end{align*}
-\]</span></p>
-<div class="small">
-<ul>
-<li class="fragment">Day 1 used one <span class="math inline">\(p\)</span> for all seedlings. On Day 2, <span class="math inline">\(p_i\)</span> depends on conspecific density, scaled to mean 0 and sd 1.</li>
-<li class="fragment">A probability must stay between 0 and 1, so the line is drawn on the <strong>logit</strong> scale: <span class="math inline">\(\mathrm{logit}(p) = \log\frac{p}{1-p}\)</span>.</li>
-<li class="fragment"><span class="math inline">\(\beta &lt; 0\)</span> means NDD.</li>
-</ul>
-</div>
-</div><div class="column" style="width:50%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
+<p><strong>Day 1:</strong> what is the seedling survival probability?</p>
+<p><strong>Day 2:</strong> does that probability change with conspecific density?</p>
+<p>We keep the binomial model and add a predictor.</p>
 </div></div>
 </section>
-<section id="priors-on-the-logit-scale-are-not-intuitive-simulate" class="slide level2">
-<h2>Priors on the logit scale are not intuitive: simulate</h2>
-
-<img data-src="slides_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
+<section id="todays-objectives" class="slide level2">
+<h2>Today’s objectives</h2>
 <ul>
-<li class="fragment">A “vague” <span class="math inline">\(\mathcal{N}(0, 10)\)</span> prior on the logit scale says: survival is almost certainly near 0% or near 100%.</li>
-<li class="fragment"><span class="math inline">\(\mathcal{N}(0, 2.5)\)</span> is weakly informative; <span class="math inline">\(\mathcal{N}(0, 1.5)\)</span> is roughly flat on the probability scale.</li>
-<li class="fragment">Relate each prior to the scale of its variable. If its implications are unclear, simulate from it.</li>
-</ul>
-</div>
-</section>
-<section id="result-interpret-on-the-probability-scale" class="slide level2">
-<h2>Result: interpret on the probability scale</h2>
-<div class="columns">
-<div class="column" style="width:55%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-13-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:45%;">
-<div class="small">
-<ul>
-<li><span class="math inline">\(\beta\)</span> = -0.84 (-1.01 to -0.67); <span class="math inline">\(P(\beta &lt; 0 \mid \text{data})\)</span> = 1</li>
-</ul>
-<ul>
-<li class="fragment">Logit scale: one SD more conspecifics multiplies the <strong>odds</strong> of survival by <span class="math inline">\(e^{\beta}\)</span> = 0.44 (0.36 to 0.51).</li>
-<li class="fragment">Probability scale (compute for every draw, then summarise):
-<ul>
-<li class="fragment">low density (−1 SD): 0.52 (0.48 to 0.56)</li>
-<li class="fragment">high density (+1 SD): 0.17 (0.14 to 0.21)</li>
-<li class="fragment">difference: -0.35 (-0.41 to -0.29)</li>
-</ul></li>
-<li class="fragment">The effect on the probability scale depends on the starting value. State the values you compare.</li>
-</ul>
-</div>
-</div></div>
-<div class="footer">
-<p>Means and 90% intervals are shown. The true values used in the simulation are <span class="math inline">\(\alpha\)</span> = -0.85 and <span class="math inline">\(\beta\)</span> = -0.8.</p>
-</div>
-</section>
-<section id="exercise-2b-diagnose-then-interpret" class="slide level2" data-background-color="#f3e8f5">
-<h2>Exercise 2B: diagnose, then interpret</h2>
-<div class="large">
-<p><code>day2/exercise-student.qmd</code>, Exercise 2B Part 2 (8 minutes including discussion)</p>
-</div>
-<ul>
-<li><strong>Part 1 (whole-class demonstration)</strong>: diagnose the supplied problematic fit.</li>
-<li><strong>Part 2 (stored draws)</strong>: compare survival at low and high density, with intervals.</li>
+<li>Explain the fitted relationship on the probability scale.</li>
+<li>Compare low-density and high-density predictions with intervals.</li>
+<li>Compare model-generated survival data with observations.</li>
 </ul>
 <aside class="notes">
-<ul>
-<li>part 1 uses a stored fit on purpose: the broken model is slow and nobody should wait for it</li>
-<li>Part 1 was a whole-class demonstration at 53-65 min</li>
-<li>Part 2 core: diagnostics + probabilities at cons = -1 and +1 + one sentence</li>
-<li>debrief 2 min: diagnostics first, interpretation second</li>
-</ul>
+<p>Read completed models and results together. Coding is optional. The only participant exercise is at 40-55 minutes.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -853,135 +269,510 @@ s_i &amp;\sim \mathcal{B}(n_i, p_i)\\
           display:block!important;
       }</style></aside>
 </section>
-<section id="a-bayesian-workflow" class="slide level2">
-<h2>A Bayesian workflow</h2>
-<ol type="1">
-<li class="fragment"><strong>Question and model</strong>: What is the data-generating story? Which parameters answer the question?</li>
-<li class="fragment"><strong>Priors</strong>: Relate them to the scale of the variables and run a prior predictive check.</li>
-<li class="fragment"><strong>Fit</strong>.</li>
-<li class="fragment"><strong>Computation check</strong>: Check <code>rhat</code>, ESS, warnings, and trace plots. Stop here if they fail.</li>
-<li class="fragment"><strong>Model check</strong>: posterior predictive checks that matter for the question.</li>
-<li class="fragment"><strong>Interpret</strong>: distributions of parameters and predictions, on the scale of the data.</li>
-</ol>
-<div class="fragment">
-<p>Go back to step 1 whenever a check fails.</p>
+<section id="conspecific-negative-density-dependence" class="slide level2">
+<h2>Conspecific negative density dependence</h2>
+<div class="columns">
+<div class="column" style="width:35%;">
+<p><img data-src="../images/comita_cover.jpg" height="450"></p>
+</div><div class="column" style="width:65%;">
+<p><strong>CNDD:</strong> in today’s example, higher conspecific density goes with lower seedling survival.</p>
+<p>Do species differ in this relationship? Could those differences relate to species abundance?</p>
+<p>Today we read one common survival curve. Tomorrow we consider group differences.</p>
+</div></div>
+<div class="footer">
+<p>Research motivation: <a href="https://doi.org/10.1126/science.1190772">Comita et al.&nbsp;2010, Science</a>.</p>
 </div>
+<aside class="notes">
+<p>The research motivates the question. All numerical analyses today use simulated teaching data, not the paper’s observations or fitted results.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="one-more-check-and-tomorrows-problem" class="slide level2">
-<h2>One more check, and tomorrow’s problem</h2>
+<section id="the-data-and-a-prediction" class="slide level2">
+<h2>The data and a prediction</h2>
+
+<img data-src="slides_files/figure-revealjs/observed-data-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>Which way would you expect the fitted curve to go?</p>
+<aside class="notes">
+<p>60 simulated quadrats. Point size represents the number of seedlings. Distinguish an observed proportion from an unknown survival probability. Pause for a prediction before showing a fitted curve.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-same-binomial-observation-model" class="slide level2">
+<h2>The same binomial observation model</h2>
+<p><span class="math display">s_i \sim \operatorname{Binomial}(n_i,p_i)</span></p>
+<ul>
+<li><span class="math inline">i</span>: a quadrat.</li>
+<li><span class="math inline">n_i</span>: number of seedlings, <span class="math inline">s_i</span>: survivors.</li>
+<li><span class="math inline">p_i</span>: survival probability in that quadrat.</li>
+</ul>
+<p>Now let conspecific density <span class="math inline">x_i</span> predict <span class="math inline">p_i</span>.</p>
+<aside class="notes">
+<p>10-25 minutes: the same count model as Day 1. Within a quadrat assume a common probability and conditional independence. Missing shared conditions can violate these assumptions. We return to this during model checking.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="a-straight-line-and-a-probability-curve" class="slide level2">
+<h2>A straight line and a probability curve</h2>
+
+<img data-src="slides_files/figure-revealjs/link-function-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1248"><p><span class="math display">\operatorname{logit}(p_i)=\alpha+\beta x_i,\qquad
+p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
+<aside class="notes">
+<p>These are illustrative generating values, not posterior estimates. The link keeps probabilities between zero and one. Explain the shapes and the sign of the slope. No derivation, odds-ratio exercise or syntax memorisation. Source: Stan User’s Guide, regression models.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="prior-scale-a-familiar-normal-regression" class="slide level2">
+<h2>Prior scale: a familiar Normal regression</h2>
+<div class="columns">
+<div class="column" style="width:58%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/normal-prior-scale-1.png" class="quarto-figure quarto-figure-center" width="816"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:42%;">
+<p><span class="math display">y_i\sim\mathcal{N}(a x_i+b,\sigma)</span></p>
+<p>For these units and ranges, would a slope of 100 make sense?</p>
+<p>A candidate slope prior:</p>
+<p><span class="math display">a\sim\mathcal{N}(0,2.5)</span></p>
+<p>The second argument is an SD.</p>
+</div></div>
+<aside class="notes">
+<p>Use the same scale intuition as main.qmd, for about 3 minutes within 10-25. This is a continuous-response illustration, not another fitted analysis. Judge the scale from the measurement units and plausible range, without using an observed direction to choose a positive slope prior. A prior with SD 10000 permits much more extreme lines and should not be called assumption-free. Whether SD 2.5 is weakly informative depends on the units. The illustrative blue line and label both use slope 100, correcting the source example’s mismatch.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-same-scale-question-for-cndd" class="slide level2">
+<h2>The same scale question for CNDD</h2>
+<p><span class="math display">\operatorname{logit}(p_i)=\alpha+\beta x_i</span></p>
+<ul>
+<li>Density is measured in standard-deviation units.</li>
+<li>The coefficients describe change on the logit scale.</li>
+<li>Their priors imply survival curves on the probability scale.</li>
+</ul>
+<p>Would those curves give plausible survival probabilities in this habitat?</p>
+<aside class="notes">
+<p>Return explicitly from Normal observations to the binomial survival model. The numerical SD 2.5 has a different meaning across these models. In the saved CNDD fit both alpha and beta independently have Normal(0,2.5) priors. Use this as a short connection. Detailed CNDD prior-curve comparisons are optional. No independent allometry fit or extra exercise is introduced.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-completed-model-in-stan" class="slide level2">
+<h2>The completed model in Stan</h2>
 <div class="columns">
 <div class="column" style="width:55%;">
 <div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-15-1.png" class="quarto-figure quarto-figure-center" width="864"></p>
-</figure>
-</div>
-</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
+<span id="cb1-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb1-3"><a href="" aria-label="3"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n;</span>
+<span id="cb1-4"><a href="" aria-label="4"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; suv;</span>
+<span id="cb1-5"><a href="" aria-label="5"></a>  <span class="dt">vector</span>[N] cons;</span>
+<span id="cb1-6"><a href="" aria-label="6"></a>}</span>
+<span id="cb1-7"><a href="" aria-label="7"></a><span class="kw">parameters</span> {</span>
+<span id="cb1-8"><a href="" aria-label="8"></a>  <span class="dt">real</span> alpha;</span>
+<span id="cb1-9"><a href="" aria-label="9"></a>  <span class="dt">real</span> beta;</span>
+<span id="cb1-10"><a href="" aria-label="10"></a>}</span>
+<span id="cb1-11"><a href="" aria-label="11"></a><span class="kw">model</span> {</span>
+<span id="cb1-12"><a href="" aria-label="12"></a>  suv ~ binomial_logit(n, alpha + beta * cons);</span>
+<span id="cb1-13"><a href="" aria-label="13"></a>  alpha ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb1-14"><a href="" aria-label="14"></a>  beta ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb1-15"><a href="" aria-label="15"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div><div class="column" style="width:45%;">
 <ul>
-<li class="fragment">The 188 trees belong to 10 species.</li>
-<li class="fragment">Our model assumed one line for all trees. The residuals show that some species are consistently taller or shorter than predicted.</li>
-<li class="fragment">Should we fit each species separately? Some species have only 3 or 4 trees.</li>
-<li class="fragment"><strong>Day 3</strong>: hierarchical models learn about each species <em>and</em> about the variation among species.</li>
+<li><strong>Data:</strong> seedlings, survivors and density.</li>
+<li><strong>Unknowns:</strong> intercept and density coefficient.</li>
+<li><strong>Assumptions:</strong> binomial survival, logit relationship and priors.</li>
 </ul>
+<p><code>binomial_logit</code> uses the straight line on the logit scale.</p>
 </div></div>
-</section></section>
-<section>
-<section id="appendix-optional-material" class="title-slide slide level1 center" data-visibility="uncounted">
-<h1>Appendix: optional material</h1>
-
+<aside class="notes">
+<p>25-40 minutes: read this together. Do not ask participants to edit or compile it. The stored fit has the same seeded data, model name and prior specification.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="priors-in-ecology-why-scale-matters" class="slide level2" data-visibility="uncounted">
-<h2>Priors in ecology: Why scale matters</h2>
-<div class="footer">
-<p>We often use weakly informative priors in ecology.</p>
-</div>
-<div class="columns">
-<div class="column" style="width:40%;">
+<section id="did-the-computation-behave-well" class="slide level2">
+<h2>Did the computation behave well?</h2>
+
+<img data-src="slides_files/figure-revealjs/trace-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Do the chains explore the same range without persistent drift?</p>
+<aside class="notes">
+<p>Use the actual saved fit. Summaries on the next slide complement these traces. No diagnostic alone is sufficient. The optional failure example is outside core time.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="computation-diagnostics-together" class="slide level2">
+<h2>Computation diagnostics together</h2>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-16-1.png" class="quarto-figure quarto-figure-center" width="480"></p>
-</figure>
+<table class="table caption-top" style="font-size: 25px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">max_rhat</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">min_bulk_ess</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">min_tail_ess</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">divergent</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">max_treedepth</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">min_ebfmi</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1698.01</td>
+<td style="text-align: right;">2123.25</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.03</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
-</div>
-</div><div class="column" style="width:60%;">
 <ul>
-<li class="fragment">We consider variables <em>x</em> = {-3, …, 3} and <em>y</em> = {-6, …, 4}. We do not yet know whether they are correlated (<em>y = ax + b</em>).</li>
-<li class="fragment">However, given the similar scales of <em>x</em> and <em>y</em>, it’s reasonable to guess that <em>a</em> falls within a narrow range (e.g., <strong>strongly informative prior</strong>: -5 to 5, <strong>weakly informative prior</strong>: <span class="math inline">\(a \sim \mathcal{N}(0,  2.5)\)</span>).</li>
-<li class="fragment">A slope of <em>a</em> = 100 (blue line) clearly does not match the data. A <strong>vague prior</strong> such as <span class="math inline">\(a \sim \mathcal{N}(0, 10^4)\)</span> treats this slope as plausible as <em>a</em> = 2.</li>
+<li>R-hat: do the chains agree?</li>
+<li>ESS: how much sampling information do the draws provide?</li>
+<li>Divergences and other sampler warnings: did sampling struggle?</li>
 </ul>
-</div></div>
+<p>These checks concern computation. We still need to compare the model with ecological data.</p>
+<aside class="notes">
+<p>Also inspect bulk/tail ESS, treedepth and E-BFMI. Explain purposes, not a threshold memorisation task. Current values are computed from the saved fit, never invented.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="count-data-the-same-recipe" class="slide level2" data-visibility="uncounted">
-<h2>Count data: the same recipe</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb2-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
-<span id="cb2-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
-<span id="cb2-3"><a href="" aria-label="3"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; y;</span>
-<span id="cb2-4"><a href="" aria-label="4"></a>}</span>
-<span id="cb2-5"><a href="" aria-label="5"></a></span>
-<span id="cb2-6"><a href="" aria-label="6"></a><span class="kw">parameters</span> {</span>
-<span id="cb2-7"><a href="" aria-label="7"></a>  <span class="dt">real</span> log_lambda;</span>
-<span id="cb2-8"><a href="" aria-label="8"></a>}</span>
-<span id="cb2-9"><a href="" aria-label="9"></a></span>
-<span id="cb2-10"><a href="" aria-label="10"></a><span class="kw">model</span> {</span>
-<span id="cb2-11"><a href="" aria-label="11"></a>  y ~ poisson_log(log_lambda);</span>
-<span id="cb2-12"><a href="" aria-label="12"></a>  log_lambda ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
-<span id="cb2-13"><a href="" aria-label="13"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div><div class="column" style="width:50%;">
-<p><span class="math display">\[
-\begin{align*}
-y_i &amp;\sim \text{Poisson}(\lambda)\\
-\log \lambda &amp;\sim \mathcal{N}(0, 2.5)
-\end{align*}
-\]</span></p>
+<section id="a-distribution-of-survival-curves" class="slide level2">
+<h2>A distribution of survival curves</h2>
+
+<img data-src="slides_files/figure-revealjs/fitted-curve-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>The band describes uncertainty about <span class="math inline">p</span> at each density. Points are observed proportions and can lie away from the band.</p>
+<aside class="notes">
+<p>The line is a posterior median at each x, not MLE or MAP. The 90% band is pointwise. Observed binomial proportions also contain survival-count variation.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="low-density-and-high-density" class="slide level2">
+<h2>Low density and high density</h2>
+
+<img data-src="slides_files/figure-revealjs/density-comparison-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p>Compare probabilities at fixed densities. All predictions use the same posterior draws.</p>
+<aside class="notes">
+<p>Low = one SD below mean density. High = one SD above. Hold the data, model and prior fixed. We are predicting new conditions, not refitting altered observations.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="probability-uncertainty-and-future-survivors" class="slide level2">
+<h2>Probability uncertainty and future survivors</h2>
+
+<img data-src="slides_files/figure-revealjs/new-counts-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Both new groups contain <strong>20 seedlings</strong>. Even a known probability allows different counts.</p>
+<aside class="notes">
+<p>The histogram integrates posterior uncertainty in p and binomial variation given p. Compare with the previous probability intervals. Both groups have the same seedling count, so the contrast changes density only.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="exercise-survival-at-two-densities" class="slide level2" data-background-color="#f3e8f5">
+<h2>Exercise: survival at two densities</h2>
+<p><code>day2/exercise-student.qmd</code> · 15 minutes including explanation</p>
 <ul>
-<li>Counts (e.g., number of seedlings per quadrat): Poisson likelihood with a <strong>log</strong> link.</li>
-<li>Adding a predictor works exactly as in logistic regression: <span class="math inline">\(\log \lambda_i = \alpha + \beta x_i\)</span>.</li>
-<li>Change the likelihood and the link; the workflow stays the same.</li>
+<li>Predict which density has higher survival probability.</li>
+<li>Run the supplied code and read the two probabilities with 90% intervals.</li>
+<li>Explain the result in words.</li>
+<li>Explain why the next survivor count is still uncertain.</li>
 </ul>
-</div></div>
+<aside class="notes">
+<p>40-55 minutes: 10 minutes pair work, 5 minutes debrief. Check progress at minute 5. Use results.html when code access fails. No holes to fill and no refit.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
-<section id="the-same-models-with-brms" class="slide level2" data-visibility="uncounted">
-<h2>The same models with <code>brms</code></h2>
-<div style="font-size: 0.8em;">
+<section id="what-the-comparison-tells-us" class="slide level2">
+<h2>What the comparison tells us</h2>
+<p>Low density: median survival probability <strong>0.52</strong>, 90% interval 0.48 to 0.56.</p>
+<p>High density: <strong>0.17</strong>, 90% interval 0.14 to 0.21.</p>
+<p>What ecological sentence would you report with those values?</p>
+<aside class="notes">
+<p>Debrief. Beta is a logit coefficient. Its value is not a percent reduction. State the compared densities and the model assumptions with the interpretation.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="model-generated-data-and-the-observations" class="slide level2">
+<h2>Model-generated data and the observations</h2>
+<p>For every posterior draw:</p>
+<p><span class="math display">p_i^{(m)}=\operatorname{logit}^{-1}(\alpha^{(m)}+\beta^{(m)}x_i),\qquad
+s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
+<p>We keep the observed <strong>density and seedling count</strong> of each quadrat.</p>
+<p>What patterns should the model reproduce?</p>
+<aside class="notes">
+<p>55-70 minutes: lecturer demonstration and discussion. This is posterior predictive checking. No new inference. Source: Stan User’s Guide, posterior predictive checks.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="does-the-density-pattern-look-compatible" class="slide level2">
+<h2>Does the density pattern look compatible?</h2>
+
+<img data-src="slides_files/figure-revealjs/check-pattern-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Look for systematic differences across density.</p>
+<aside class="notes">
+<p>The orange bars describe replicated proportions at the observed n_i, not uncertainty about p_i alone. A 90% interval does not cover every observation by construction.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="does-the-model-reproduce-the-spread" class="slide level2">
+<h2>Does the model reproduce the spread?</h2>
+
+<img data-src="slides_files/figure-revealjs/check-spread-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>What ecological conditions might create more variation than the model predicts?</p>
+<aside class="notes">
+<p>This checks one feature, complementing the density plot. These data were generated from the simple model, so do not promise a visible mismatch. Rounding the simulated predictor means this is an illustrative check, not an exact calibration experiment. A discrepancy might involve the relationship, unmodelled conditions or dependence.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="interpretation-in-a-real-forest" class="slide level2">
+<h2>Interpretation in a real forest</h2>
+<ul>
+<li>A fitted association depends on the model and measured conditions.</li>
+<li>Light, soil and shared enemies could matter as well as density.</li>
+<li>Ecological knowledge helps decide which comparisons and checks matter.</li>
+</ul>
+<p>What additional information would you want before explaining the mechanism?</p>
+<aside class="notes">
+<p>70-80 minutes. Do not infer a causal effect or the cause of rarity from this simple simulation. The basic model assumes common p and conditional independence within each quadrat. Discuss what unmeasured shared conditions would imply.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="tomorrow-species-may-differ" class="slide level2">
+<h2>Tomorrow: species may differ</h2>
+
+<img data-src="slides_files/figure-revealjs/species-preview-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p>Some species have few seedlings. How can we estimate their relationships?</p>
+<aside class="notes">
+<p>Conceptual simulation, not a species-level fit of today’s data. Do not explain all hierarchical equations now. Day 3 introduces sharing through mother trees first.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="your-research-question" class="slide level2">
+<h2>Your research question</h2>
+<p>Name a response you measure and one predictor you care about.</p>
+<p>What would you predict, and which observed pattern would you ask the model to reproduce?</p>
+<aside class="notes">
+<p>80-85 minutes: pair discussion and two brief contributions. Keep the final five minutes for questions and delay buffer.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section>
+<section id="optional-reference" class="title-slide slide level1 center" data-visibility="uncounted">
+<h1>Optional reference</h1>
+
+</section>
+<section id="optional-cndd-prior-curves" class="slide level2" data-visibility="uncounted">
+<h2>Optional: CNDD prior curves</h2>
+
+<img data-src="slides_files/figure-revealjs/prior-curves-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>Are the predicted survival probabilities plausible for this habitat and census period?</p>
+<aside class="notes">
+<p>The independent alpha and beta priors are Normal(0,2.5), with SD 2.5, as in stan/logit_reg.stan. They allow both signs and some extreme probability curves. A coefficient prior is interpreted relative to the predictor scale. These are prior-predictive probability curves; simulated survivor counts would add binomial variation. Do not label this prior universally weak or ecologically justified.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="probability-differences" class="slide level2" data-visibility="uncounted">
+<h2>Probability differences</h2>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="" aria-label="1"></a><span class="fu">library</span>(brms)</span>
-<span id="cb3-2"><a href="" aria-label="2"></a></span>
-<span id="cb3-3"><a href="" aria-label="3"></a><span class="co"># Tree allometry</span></span>
-<span id="cb3-4"><a href="" aria-label="4"></a><span class="fu">brm</span>(</span>
-<span id="cb3-5"><a href="" aria-label="5"></a>  <span class="fu">log</span>(h) <span class="sc">~</span> <span class="fu">log</span>(dbh <span class="sc">/</span> <span class="dv">40</span>),</span>
-<span id="cb3-6"><a href="" aria-label="6"></a>  <span class="at">family =</span> <span class="fu">gaussian</span>(), <span class="at">data =</span> allo,</span>
-<span id="cb3-7"><a href="" aria-label="7"></a>  <span class="at">prior =</span> <span class="fu">c</span>(</span>
-<span id="cb3-8"><a href="" aria-label="8"></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">2.5</span>), <span class="at">class =</span> <span class="st">"Intercept"</span>),</span>
-<span id="cb3-9"><a href="" aria-label="9"></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">2.5</span>), <span class="at">class =</span> <span class="st">"b"</span>),</span>
-<span id="cb3-10"><a href="" aria-label="10"></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">class =</span> <span class="st">"sigma"</span>)</span>
-<span id="cb3-11"><a href="" aria-label="11"></a>  )</span>
-<span id="cb3-12"><a href="" aria-label="12"></a>)</span>
-<span id="cb3-13"><a href="" aria-label="13"></a></span>
-<span id="cb3-14"><a href="" aria-label="14"></a><span class="co"># Seedling survival</span></span>
-<span id="cb3-15"><a href="" aria-label="15"></a><span class="fu">brm</span>(</span>
-<span id="cb3-16"><a href="" aria-label="16"></a>  suv <span class="sc">|</span> <span class="fu">trials</span>(n) <span class="sc">~</span> cons,</span>
-<span id="cb3-17"><a href="" aria-label="17"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">data =</span> ndd,</span>
-<span id="cb3-18"><a href="" aria-label="18"></a>  <span class="at">prior =</span> <span class="fu">c</span>(</span>
-<span id="cb3-19"><a href="" aria-label="19"></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">2.5</span>), <span class="at">class =</span> <span class="st">"Intercept"</span>),</span>
-<span id="cb3-20"><a href="" aria-label="20"></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">2.5</span>), <span class="at">class =</span> <span class="st">"b"</span>)</span>
-<span id="cb3-21"><a href="" aria-label="21"></a>  )</span>
-<span id="cb3-22"><a href="" aria-label="22"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="" aria-label="1"></a>p_low <span class="ot">&lt;-</span> <span class="fu">plogis</span>(draws<span class="sc">$</span>alpha<span class="sc">-</span>draws<span class="sc">$</span>beta)</span>
+<span id="cb2-2"><a href="" aria-label="2"></a>p_high <span class="ot">&lt;-</span> <span class="fu">plogis</span>(draws<span class="sc">$</span>alpha<span class="sc">+</span>draws<span class="sc">$</span>beta)</span>
+<span id="cb2-3"><a href="" aria-label="3"></a><span class="fu">quantile</span>(p_high<span class="sc">-</span>p_low,<span class="fu">c</span>(.<span class="dv">05</span>,.<span class="dv">5</span>,.<span class="dv">95</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</div>
-<div class="small">
-<p><code>brms</code> writes the Stan code for you. It places the <code>Intercept</code> prior on the intercept after centring predictors, so results can differ slightly from our Stan files when a predictor is far from centred.</p>
-</div>
+<p>Compute the difference for each paired draw. The comparison holds the two densities fixed.</p>
+</section>
+<section id="references" class="slide level2" data-visibility="uncounted">
+<h2>References</h2>
+<ul>
+<li><a href="https://doi.org/10.1126/science.1190772">Comita et al.&nbsp;2010, Science</a></li>
+<li><a href="https://doi.org/10.1002/ecy.4382">Song &amp; Katabuchi et al.&nbsp;2024, Ecology</a></li>
+<li><a href="https://mc-stan.org/docs/stan-users-guide/regression.html">Stan User’s Guide: regression</a></li>
+<li><a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html">Stan User’s Guide: predictive checks</a></li>
+</ul>
 
 </section></section>
     </div>
@@ -1006,7 +797,6 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
   <script src="slides_files/libs/revealjs/plugin/zoom/zoom.js"></script>
-  <script src="slides_files/libs/revealjs/plugin/math/math.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>
@@ -1177,27 +967,9 @@ y_i &amp;\sim \text{Poisson}(\lambda)\\
 
         maxScale: 1,
 
-        math: {
-          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js',
-          config: 'TeX-AMS_HTML-full',
-          tex2jax: {
-            inlineMath: [['\\(','\\)']],
-            displayMath: [['\\[','\\]']],
-            balanceBraces: true,
-            processEscapes: false,
-            processRefs: true,
-            processEnvironments: true,
-            preview: 'TeX',
-            skipTags: ['script','noscript','style','textarea','pre','code'],
-            ignoreClass: 'tex2jax_ignore',
-            processClass: 'tex2jax_process'
-          },
-        },
-
         // reveal.js plugins
         plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
 
-          RevealMath,
           RevealNotes,
           RevealSearch,
           RevealZoom

@@ -61,12 +61,14 @@ font_src <- "/usr/share/fonts/truetype/lato/Lato-Regular.ttf"
 stopifnot(file.copy(font_src, "assets/fonts/Lato-Regular.ttf"))
 # Preserve font attribution from the Debian/Ubuntu font package.
 file.copy("/usr/share/doc/fonts-lato/copyright", "assets/fonts/Lato-COPYRIGHT")
-for (file in c("assets/custom.css", "assets/rladies.scss")) {
+for (file in c("assets/custom.css", "assets/rladies.scss", "assets/course.css", "assets/course.scss")) {
   lines <- readLines(file)
   writeLines(lines[!grepl("^@import.*https?://", lines)], file)
 }
 cat('\n@font-face { font-family: Lato; src: url("fonts/Lato-Regular.ttf"); }\n',
     file = "assets/custom.css", append = TRUE)
+cat('\n@font-face { font-family: Lato; src: url("fonts/Lato-Regular.ttf"); }\n',
+    file = "assets/course.css", append = TRUE)
 for (day in paste0("day", 1:3)) {
   for (name in "slides") {
     file <- file.path(day, paste0(name, ".qmd"))

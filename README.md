@@ -24,32 +24,36 @@ View the accompanying slides [here](https://forest-canopy.github.io/assets/bayes
 # 2026 course: three 90-minute sessions (draft)
 
 AFEC-X 2026: **21–23 October, 19:00–20:30 China time (UTC+8)**, about 30
-participants. The plan assumes R/tidyverse and `lm()`/`glm()` experience,
-English, supplied Stan code, 15 pairs and no homework. Confirm these assumptions
-with the organisers. Core tasks analyse supplied fits; live inference is an
-instructor-coordinated extension. Each 90-minute plan includes debriefs,
-questions and a delay buffer. See [classroom/instructor.md](classroom/instructor.md).
+participants. The agreed plan prioritises Bayesian thinking, figure interpretation
+and connections to ecological research at the level of `main.qmd`. Participants run
+complete supplied R code, with one core exercise per day. Stan editing is optional.
+The design assumes English, some R execution experience, daytime GLM practice,
+15 pairs and no homework. Confirm the remaining assumptions and browser setup with
+the organisers. See [the agreed design](classroom/restructure-proposal.md) and
+[the instructor schedule](classroom/instructor.md).
 
 The 2025 workshop materials (`main.qmd`, `exercise.qmd`) are kept unchanged as source material.
 The restructured course lives in:
 
 | | Slides | Exercises | Theme |
 |---|---|---|---|
-| Day 1 | `day1/slides.qmd` | `day1/exercise.qmd` | Bayesian foundations: likelihood, prior, posterior, first Stan model |
-| Day 2 | `day2/slides.qmd` | `day2/exercise.qmd` | Regression, prediction, model checking, diagnostics |
-| Day 3 | `day3/slides.qmd` | `day3/exercise.qmd` | Hierarchical models and ecological applications |
+| Day 1 | `day1/slides.qmd` | `day1/exercise.qmd` | Bayesian foundations through familiar examples and a prior/data figure comparison |
+| Day 2 | `day2/slides.qmd` | `day2/exercise.qmd` | CNDD: survival probabilities, prediction and model checking |
+| Day 3 | `day3/slides.qmd` | `day3/exercise.qmd` | Mother-tree partial pooling and instructor demonstrations of ecological applications |
 
 Shared resources:
 
 - `stan/`: Stan models (new for 2026: `binomial.stan`, `linear.stan`, `linear_bad.stan`, `logit_reg.stan`)
-- `R/course_data.R`: simulated data sets (seeded); `R/course_utils.R`: `fit_or_load()` and helpers; `R/slides_setup.R`: setup for the slides
+- `R/course_data.R`: seeded simulated data; `R/course_utils.R`: stored-fit helpers;
+  `R/course_visuals.R`: shared figures and strict data/model matching; `R/slides_setup.R`: slide setup
 - `R/precompute_fits.R`: fits every course model once and stores the results in `fits/`
 - `fits/`: seven stored posterior draw/diagnostic files. Core exercises explicitly
   load the matching fit; changing inputs requires new inference.
 - `dayN/results.qmd`: tables, diagnostic figures and predictions for offline discussion.
 - `classroom/readiness.qmd`: 10-minute pre-course browser/R/plotting/offline check.
 - `R/build_classroom_materials.R`: generates solution-free participant QMDs,
-  instructor/participant HTML, result sheets, data exports and a participant ZIP.
+  instructor/participant HTML, result sheets, instructor schedule, data exports and a participant ZIP.
+- `archive/teaching-before-cndd/`: earlier detailed teaching sources, preserved for instructor reference and excluded from the participant ZIP.
 
 ```bash
 # Only after model/data/sampling changes: refit all models in instructor environment.
@@ -81,14 +85,24 @@ changed-input Stan chunks remain disabled. These Make targets never
 run `R/precompute_fits.R` and do not build the solution-free classroom package
 (the separate `R/build_classroom_materials.R` workflow above does that).
 
-Participants open `exercise-student.qmd` and run indicated chunks. Solutions
-are physically removed from this source. `exercise.qmd`/`exercise.html` are
-instructor versions. Distribute the ZIP through your existing course channel
-before class and have students check exercise/result HTMLs offline. The ZIP
-includes all seven fits and seeded CSV/RDS data; cloning alone does not supply
-gitignored fits. Optional changed-input Stan chunks are `eval=FALSE`, with
-explicit live flags. Day 1 has an exact Beta alternative; Days 2/3 label their
-historical approximate comparisons and do not supply changed-input draws.
+Participants open `exercise-student.qmd` and run the indicated completed chunks.
+Solutions are physically removed from this source. `exercise.qmd`/`exercise.html`
+are instructor versions. Distribute the ZIP before class and have students check
+exercise/result HTMLs offline. The ZIP includes the shared figure code, all seven
+fits and seeded CSV/RDS data; cloning alone does not supply gitignored fits.
+
+Core work uses exact updating or supplied posterior draws. CNDD predictions and
+checks generate observations from existing draws without refitting. Day 2 holds
+the fit fixed while comparing density -1 and +1 SD. Day 3 uses separate mother-tree
+data, then connects to species CNDD with conceptual simulations and to wood density
+with the existing simulated-allometry fit. Optional calculations are labelled.
+Participants do not need to install CmdStan, a C++ toolchain or Docker.
+
+The revised course uses derivatives of the existing theme (`assets/course.scss`
+and `assets/course.css`), retaining the palette and slide dimensions while avoiding
+remote font imports. Slides use local KaTeX and figure resources in `slides_files/`, preserving the
+chalkboard plugin. Exercise and result HTMLs embed their resources for offline use.
+The original `main.qmd` theme remains the source reference.
 
 The draft was validated with R 4.5.3, CmdStan 2.38.0, cmdstanr, posterior, bayesplot 1.15.0, ggplot2 4.0.3 and Quarto 1.9.37 in the `mattocci/cmdstan-zsh:4.5.3` container (see `fits/sessionInfo.txt`).
 
@@ -146,3 +160,23 @@ The revised handouts were generated and checked locally on 2026-10-13:
 44 runnable/filled exercise chunks, seven fit/data/diagnostic checks, and a
 fresh participant ZIP extraction passed. Full browser layout and the revised
 Docker image remain unverified. See [validation record](logs/2026-10-13-classroom-materials.md).
+
+
+### Agreed CNDD course alignment: 2026-10-16
+
+The current slides, exercises, instructor schedule and participant package follow
+`classroom/restructure-proposal.md`: one core exercise each day, CNDD on Day 2,
+and mother trees followed by research demonstrations on Day 3. The Day 2 prior-scale
+introduction uses the familiar Normal-regression illustration from `main.qmd`.
+
+Local validation used R 4.6.1 and Quarto 1.10.19: all 28 runnable participant chunks,
+seven stored-fit data/diagnostic checks, a complete render, and a fresh ZIP extraction
+passed. The archive has 2,604 checked manifest entries, solution-free participant
+sources, and local resources for its rendered pages. Representative slide figures,
+equations and code were inspected in the browser and their layout issues corrected.
+See [validation details](logs/2026-10-16-cndd-materials-validation.txt).
+
+The local renv startup reports an out-of-sync project. No dependencies were changed
+or models refitted. A new classroom image, fresh browser RStudio account and 30-user
+load remain separate acceptance work; local package validation does not establish
+the classroom server's readiness.

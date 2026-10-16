@@ -57,6 +57,8 @@ build_classroom_materials <- function(root = here::here(), render = TRUE,
     }
     if (system2("quarto", c("render", "classroom/readiness.qmd")) != 0L)
       stop("Readiness render failed")
+    if (system2("quarto", c("render", "classroom/instructor.md")) != 0L)
+      stop("Instructor schedule render failed")
   }
   if (package) {
     # Resume after a completed render without launching another render. Reject
@@ -67,6 +69,11 @@ build_classroom_materials <- function(root = here::here(), render = TRUE,
     outputs <- sub("\\.qmd$", ".html", inputs)
     if (!all(file.exists(outputs)) || any(file.info(outputs)$mtime < file.info(inputs)$mtime))
       stop("Render current handouts before packaging")
+    shared <- c("R/functions.R", "R/course_data.R", "R/course_utils.R", "R/course_visuals.R")
+    newest_shared <- max(file.info(shared)$mtime)
+    course_html <- outputs[grepl("^day[123]/", outputs)]
+    if (any(file.info(course_html)$mtime < newest_shared))
+      stop("Render course documents after changing shared R code before packaging")
     # Quarto emits a few whitespace-only lines; keep generated Git diffs clean.
     html <- c(outputs, file.path(paste0("day", 1:3), "exercise.html"))
     for (file in html) {
@@ -82,7 +89,7 @@ build_classroom_materials <- function(root = here::here(), render = TRUE,
                  "AlwaysSaveHistory: No", "Encoding: UTF-8"), file.path(stage, "afec-bayes-2026.Rproj"))
     writeLines('Sys.setenv(AFEC_USE_PRECOMPUTED = "TRUE")', file.path(stage, ".Rprofile"))
     for (dir in c("R", "stan", "fits", "data", "classroom")) dir.create(file.path(stage, dir))
-    for (file in c("course_utils.R", "course_data.R", "functions.R"))
+    for (file in c("course_utils.R", "course_data.R", "course_visuals.R", "functions.R"))
       file.copy(file.path("R", file), file.path(stage, "R", file))
     file.copy(list.files("stan", "\\.stan$", full.names = TRUE), file.path(stage, "stan"))
     file.copy(list.files("fits", "\\.(rds|txt)$", full.names = TRUE), file.path(stage, "fits"))

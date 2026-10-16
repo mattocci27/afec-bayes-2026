@@ -1,0 +1,71 @@
+AFEC course materials alignment, 2026-10-16
+
+Scope
+  Day 1: familiar likelihood, fip/PCR/coin explanations; one 12-minute comparison exercise.
+  Day 2: CNDD; one 15-minute probability comparison; Normal regression for prior scale.
+  Day 3: one 15-minute mother-tree comparison; species CNDD and wood density demonstrations.
+  English teaching materials; Japanese instructor schedule and agreed plan.
+  Completed code; exact updating or supplied fits; no new Stan inference.
+  Earlier six QMD sources preserved under archive/teaching-before-cndd/ (not distributed).
+
+Reproduction commands from repository root
+  Rscript R/build_classroom_materials.R
+  RENV_CONFIG_SANDBOX_ENABLED=FALSE Rscript R/check_classroom_materials.R
+  Rscript R/build_classroom_materials.R --package-only
+
+  Full build rendered all three slides, instructor/participant exercises and results,
+  classroom/readiness.qmd and classroom/instructor.md, then replaced the participant ZIP.
+  Quarto needed normal cache write access; sandbox execution could not open its Sass DB.
+  RENV_CONFIG_SANDBOX_ENABLED=FALSE avoided sandbox-specific renv cache locking for checks.
+  No package installation, targets pipeline, model refit, image rebuild or server deployment.
+
+Validation
+  Existing integration script: 7 / 11 / 10 runnable chunks for Days 1 / 2 / 3.
+  Each participant source has exactly one core exercise. No code holes to fill.
+  All seven fits match seeded data, model names, draw structure and metadata.
+  Six healthy fits pass R-hat <= 1.01, bulk/tail ESS > 400, no divergences/treedepth hits,
+  and minimum E-BFMI > 0.3. The legacy bad fit remains labelled and outside the core course.
+  Displayed diagnostic summaries are finite and match the raw-draw calculations.
+  Changed-input and stale-source rejection checks retained with a test manifest fixture.
+  That fixture checks guards, not actual image-built executables.
+
+  Fresh participant ZIP: 2,604 manifest MD5 entries checked.
+  Instructor exercise sources/HTML and solution Divs are absent from the participant ZIP.
+  Current shared R figure code and the Normal prior-scale slide are present.
+  All HTML src/href targets and reachable CSS/font dependencies resolve locally.
+  Unused original themes are preserved in assets; the course uses offline derivatives.
+  A fresh extraction ran all 28 participant chunks with stored-result guards and finite
+  diagnostic summaries. Its here() root was the extracted copy, not the instructor repo.
+  One scratch-check warning concerned a missing terminal newline in a temporary path file,
+  not a course chunk. There were no course diagnostic aggregation warnings after correction.
+
+  Browser review covered representative Normal/Bayes, CNDD probability/prediction/check,
+  mother-tree, group-spread and wood-density layouts, formulas and code.
+  Fixed long code comments, clipped plot-axis labels and crowded group-spread ticks.
+  Slides retain the chalkboard plugin and use local resources in slides_files/.
+  Exercise and result HTMLs embed resources. Keep the ZIP directory layout.
+  git diff --check passed.
+
+Limits
+  The local renv startup reports an out-of-sync project. Required package versions below
+  loaded and the course rendered; no restore or lockfile change was performed.
+  The original saved fits have no generation-time Stan source digest. Data/model metadata
+  matching does not prove exact generation-time source identity. Stan sources were unchanged.
+  No new CmdStan compilation/sampling or performance measurements were needed for core work.
+  Fresh interactive browser RStudio accounts, classroom connectivity, 30-user load and a
+  timed teaching rehearsal remain to be accepted on the classroom server.
+  The Dockerfile copies the new shared helper, but the classroom image was not rebuilt.
+
+Versions
+  Quarto 1.10.19
+- The project is out-of-sync -- use `renv::status()` for details.
+R version 4.6.1 (2026-06-24) 
+rmarkdown 2.32 
+tidyverse 2.0.0 
+posterior 1.7.0 
+bayesplot 1.16.0 
+ggplot2 4.0.3 
+knitr 1.52 
+patchwork 1.3.2 
+here 1.0.2 
+kableExtra 1.4.1 

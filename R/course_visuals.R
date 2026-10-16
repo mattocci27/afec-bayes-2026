@@ -1,0 +1,224 @@
+# Shared figures and summaries for the agreed three-session course.
+# Source after course_data.R and course_utils.R. All inference uses stored fits.
+course_fit <- function(name) {
+  specification <- switch(name,
+    day1_seedling = list("stan/binomial.stan", list(N=5, y=2, a=1, b=1)),
+    day2_ndd = list("stan/logit_reg.stan", ndd_stan_data(make_ndd_data())),
+    day3_trees = list("stan/logistic.stan", tree_stan_data(make_tree_data())),
+    day3_vslope = list("stan/vslope.stan", vslope_stan_data(make_allometry_data())),
+    stop("Unknown course result: ", name))
+  result <- fit_or_load(name, specification[[1]], specification[[2]], use_precomputed=TRUE)
+  if (!isTRUE(all.equal(result$data, specification[[2]], check.attributes=FALSE)) ||
+      !identical(result$meta$stan_file, specification[[1]]))
+    stop("Stored result does not match the course model/data: ", name)
+  result
+}
+
+course_interval <- function(x) {
+  tibble::tibble(mean=mean(x), median=median(x), lower=unname(quantile(x, .05)),
+                 upper=unname(quantile(x, .95)))
+}
+
+course_diagnostics <- function(fit) {
+  s <- posterior::summarise_draws(fit$draws, rhat=posterior::rhat,
+                                ess_bulk=posterior::ess_bulk, ess_tail=posterior::ess_tail)
+  dplyr::bind_cols(tibble::tibble(max_rhat=max(s$rhat, na.rm=TRUE),
+    min_bulk_ess=min(s$ess_bulk, na.rm=TRUE), min_tail_ess=min(s$ess_tail, na.rm=TRUE)),
+    diagnostic_table(fit))
+}
+
+plot_normal_prior_scale <- function() {
+  # The familiar Normal-regression illustration in main.qmd.
+  # Use a consistent slope of 100 in both the line and its label.
+  set.seed(123)
+  x <- rnorm(100)
+  data <- tibble::tibble(x=x,y=rnorm(100,2*x-1,1))
+  ggplot2::ggplot(data,ggplot2::aes(x,y)) +
+    ggplot2::geom_point(size=2.5,alpha=.7) +
+    ggplot2::geom_abline(intercept=2,slope=100,colour="#006DAE",linetype=2,linewidth=1.2) +
+    ggplot2::annotate("text",x=1.25,y=-4.6,label="y = 100x + 2",colour="#006DAE",size=6) +
+    ggplot2::coord_cartesian(xlim=c(-3,3),ylim=c(-6,4)) +
+    ggplot2::labs(x="x (chosen measurement units)",y="y (chosen measurement units)",
+      subtitle="Simulated Normal-response example from main.qmd")
+}
+
+cndd_probabilities <- function(draws, x=c(-1, 1)) {
+  purrr::map_dfr(x, function(value)
+    tibble::tibble(draw=seq_len(nrow(draws)), density=value,
+                  p=plogis(draws$alpha + draws$beta * value)))
+}
+
+cndd_curve <- function(draws, x=seq(-2, 2, length.out=81)) {
+  purrr::map_dfr(x, function(value)
+    dplyr::bind_cols(tibble::tibble(density=value),
+                    course_interval(plogis(draws$alpha + draws$beta * value))))
+}
+
+plot_cndd <- function(draws, data=make_ndd_data()) {
+  curve <- cndd_curve(draws, seq(min(data$cons), max(data$cons), length.out=81))
+  ggplot2::ggplot(curve, ggplot2::aes(density, median)) +
+    ggplot2::geom_ribbon(ggplot2::aes(ymin=lower, ymax=upper), fill="#d95f02", alpha=.22) +
+    ggplot2::geom_line(colour="#d95f02", linewidth=1.2) +
+    ggplot2::geom_point(data=data, ggplot2::aes(cons, suv/n, size=n),
+                        inherit.aes=FALSE, alpha=.65) +
+    ggplot2::scale_y_continuous(limits=c(0,1)) +
+    ggplot2::labs(x="Conspecific density (scaled)", y="Survival probability",
+                  size="Seedlings", subtitle="Line: posterior median of p. Band: 90% interval for p")
+}
+
+plot_cndd_comparison <- function(draws) {
+  p <- cndd_probabilities(draws)
+  summary <- p |> dplyr::group_by(density) |>
+    dplyr::summarise(median=median(p), lower=quantile(p,.05), upper=quantile(p,.95))
+  ggplot2::ggplot(summary, ggplot2::aes(factor(density, labels=c("Low density (-1 SD)",
+                                                                            "High density (+1 SD)")), median)) +
+    ggplot2::geom_pointrange(ggplot2::aes(ymin=lower,ymax=upper), colour="#d95f02", linewidth=.9) +
+    ggplot2::scale_y_continuous(limits=c(0,1)) +
+    ggplot2::labs(x=NULL,y="Survival probability",subtitle="Posterior median and 90% interval")
+}
+
+cndd_predictions <- function(draws, n=20, seed=20261022) {
+  set.seed(seed)
+  cndd_probabilities(draws) |> dplyr::mutate(seedlings=n, survivors=rbinom(dplyr::n(),n,p))
+}
+
+plot_cndd_predictions <- function(predictions) {
+  predictions |> dplyr::mutate(density=factor(density, labels=c("Low density (-1 SD)",
+                                                                           "High density (+1 SD)"))) |>
+    ggplot2::ggplot(ggplot2::aes(survivors)) +
+    ggplot2::geom_bar(fill="#d95f02") +
+    ggplot2::facet_wrap(~density) +
+    ggplot2::labs(x=paste("Survivors out of",unique(predictions$seedlings),"new seedlings"),
+                  y="Draws")
+}
+
+cndd_replicates <- function(draws, data=make_ndd_data(), seed=20261023) {
+  set.seed(seed)
+  # Retain the observed density and seedling count of every quadrat.
+  t(vapply(seq_len(nrow(draws)), function(k)
+    rbinom(nrow(data), data$n, plogis(draws$alpha[k]+draws$beta[k]*data$cons)),
+    numeric(nrow(data))))
+}
+
+plot_cndd_check <- function(replicates, data=make_ndd_data()) {
+  intervals <- t(apply(sweep(replicates,2,data$n,"/"),2,quantile,c(.05,.5,.95)))
+  d <- dplyr::mutate(data, lower=intervals[,1], median=intervals[,2], upper=intervals[,3])
+  ggplot2::ggplot(d,ggplot2::aes(cons)) +
+    ggplot2::geom_linerange(ggplot2::aes(ymin=lower,ymax=upper),colour="#d95f02",alpha=.65) +
+    ggplot2::geom_point(ggplot2::aes(y=median),colour="#d95f02",size=2) +
+    ggplot2::geom_point(ggplot2::aes(y=suv/n),shape=1,size=3) +
+    ggplot2::labs(x="Conspecific density (scaled)",y="Proportion surviving",
+      subtitle="Open: observed. Orange: median and 90% interval for replicated proportions")
+}
+
+plot_cndd_spread_check <- function(replicates,data=make_ndd_data()) {
+  spread <- apply(sweep(replicates,2,data$n,"/"),1,sd)
+  ggplot2::ggplot(tibble::tibble(spread),ggplot2::aes(spread)) +
+    ggplot2::geom_histogram(bins=30,fill="#d95f02",alpha=.65) +
+    ggplot2::geom_vline(xintercept=sd(data$suv/data$n),linewidth=1) +
+    ggplot2::labs(x="SD of survival proportions across quadrats",y="Data sets",
+      subtitle="Line: observed spread. Histogram: model-generated spread")
+}
+
+mother_comparison <- function(fit=course_fit("day3_trees"),seed=20261024) {
+  trees <- make_tree_data()
+  set.seed(seed)
+  total <- sum(trees$suv); N <- sum(trees$n)
+  pooled <- course_interval(rbeta(nrow(fit$draws),1+total,1+N-total))
+  purrr::map_dfr(seq_len(nrow(trees)),function(j) {
+    separate <- course_interval(rbeta(nrow(fit$draws),1+trees$suv[j],1+trees$n[j]-trees$suv[j]))
+    partial <- course_interval(fit$draws[[paste0("p[",j,"]")]])
+    dplyr::bind_rows(Complete=pooled,Separate=separate,Partial=partial,.id="model") |>
+      dplyr::mutate(tree=trees$tree[j],n=trees$n[j],observed=trees$suv[j]/trees$n[j])
+  }) |> dplyr::mutate(model=factor(model,levels=c("Complete","Separate","Partial")))
+}
+
+plot_mother_comparison <- function(comparison=mother_comparison()) {
+  ggplot2::ggplot(comparison,ggplot2::aes(mean,tree,colour=model)) +
+    ggplot2::geom_pointrange(ggplot2::aes(xmin=lower,xmax=upper),position=ggplot2::position_dodge(width=.6)) +
+    ggplot2::scale_colour_manual(values=c(Complete="grey40",Separate="#7570b3",Partial="#d95f02")) +
+    ggplot2::labs(x="Survival probability (posterior mean and 90% interval)",y="Mother tree",colour=NULL)
+}
+
+plot_mother_movement <- function(comparison=mother_comparison()) {
+  d <- comparison |> dplyr::select(tree,n,model,mean) |>
+    tidyr::pivot_wider(names_from=model,values_from=mean)
+  ggplot2::ggplot(d,ggplot2::aes(y=paste0(tree," (n = ",n,")"))) +
+    ggplot2::geom_segment(ggplot2::aes(x=Separate,xend=Partial,yend=paste0(tree," (n = ",n,")")),colour="grey50") +
+    ggplot2::geom_point(ggplot2::aes(x=Separate),shape=1,size=4) +
+    ggplot2::geom_point(ggplot2::aes(x=Partial),colour="#d95f02",size=4) +
+    ggplot2::labs(x="Posterior mean survival probability",y=NULL,
+      subtitle="Open: separate. Orange: partial pooling")
+}
+
+plot_group_spread <- function() {
+  d <- tidyr::crossing(tree=LETTERS[1:8],sigma=c(.1,1,3)) |>
+    dplyr::mutate(p=plogis(sigma*qnorm((match(tree,LETTERS[1:8])-.5)/8)),
+                  spread=factor(sigma,labels=c("Small SD: 0.1","SD: 1","Large SD: 3")))
+  ggplot2::ggplot(d,ggplot2::aes(p,tree)) + ggplot2::geom_point(size=4,colour="#7570b3") +
+    ggplot2::facet_wrap(~spread) +
+    ggplot2::scale_x_continuous(limits=c(0,1),breaks=c(0,.5,1),labels=c("0","0.5","1")) +
+    ggplot2::labs(x="Illustrative mother-tree survival probabilities",y="Mother tree",
+                  subtitle="Fixed logit centre = 0. Only the group SD changes")
+}
+
+mother_replicates <- function(fit=course_fit("day3_trees"),seed=20261025) {
+  set.seed(seed)
+  trees <- make_tree_data()
+  p <- as.matrix(as.data.frame(fit$draws)[,paste0("p[",1:8,"]")])
+  vapply(seq_len(8),function(j) rbinom(nrow(p),trees$n[j],p[,j]),numeric(nrow(p)))
+}
+
+plot_mother_check <- function(fit=course_fit("day3_trees")) {
+  replicates <- mother_replicates(fit)
+  trees <- make_tree_data()
+  intervals <- t(apply(replicates,2,quantile,c(.05,.5,.95)))
+  d <- dplyr::mutate(trees,lower=intervals[,1],median=intervals[,2],upper=intervals[,3])
+  ggplot2::ggplot(d,ggplot2::aes(tree,median)) +
+    ggplot2::geom_pointrange(ggplot2::aes(ymin=lower,ymax=upper),colour="#d95f02") +
+    ggplot2::geom_point(ggplot2::aes(y=suv),shape=1,size=4) +
+    ggplot2::labs(x="Mother tree",y="Survivors",
+      subtitle="Open: observed. Orange: median and 90% interval for replicated counts")
+}
+
+cndd_concept <- function() {
+  # Same seeded conceptual example as main.qmd. These are not fitted results.
+  set.seed(123)
+  abundance <- rnorm(10)
+  slope <- rnorm(10,-.8+.3*abundance,.1)
+  intercept <- rnorm(10,0,.5)
+  species <- tibble::tibble(species=factor(seq_len(10)),abundance,slope,intercept)
+  curves <- tidyr::crossing(species,density=seq(-3,3,length.out=80)) |>
+    dplyr::mutate(p=plogis(intercept+slope*density))
+  list(species=species,curves=curves)
+}
+
+plot_cndd_species <- function(concept=cndd_concept()) {
+  ggplot2::ggplot(concept$curves,ggplot2::aes(density,p,colour=species)) +
+    ggplot2::geom_line(linewidth=1) + ggplot2::guides(colour="none") +
+    ggplot2::labs(x="Conspecific density (scaled)",y="Survival probability",
+                  subtitle="Simulated relationships, for explanation")
+}
+
+plot_cndd_abundance <- function(concept=cndd_concept()) {
+  ggplot2::ggplot(concept$species,ggplot2::aes(abundance,slope,colour=species)) +
+    ggplot2::geom_abline(intercept=-.8,slope=.3,linetype=2,colour="grey40") +
+    ggplot2::geom_point(size=4) + ggplot2::guides(colour="none") +
+    ggplot2::labs(x="Species abundance (scaled)",y="Density coefficient",
+                  subtitle="Simulated coefficients. Dashed: generating relationship")
+}
+
+plot_wood_density <- function(fit=course_fit("day3_vslope")) {
+  data <- make_allometry_data() |> dplyr::distinct(sp,wd)
+  d <- fit$draws
+  points <- purrr::map_dfr(seq_len(nrow(data)),function(j)
+    dplyr::bind_cols(data[j,],course_interval(d[[paste0("beta[2,",j,"]")]])))
+  line <- purrr::map_dfr(seq(min(data$wd),max(data$wd),length.out=51),function(w)
+    dplyr::bind_cols(tibble::tibble(wd=w),course_interval(d[["gamma[2,1]"]]+d[["gamma[2,2]"]]*w)))
+  ggplot2::ggplot(line,ggplot2::aes(wd,median)) +
+    ggplot2::geom_ribbon(ggplot2::aes(ymin=lower,ymax=upper),fill="#d95f02",alpha=.2) +
+    ggplot2::geom_line(colour="#d95f02") +
+    ggplot2::geom_pointrange(data=points,ggplot2::aes(ymin=lower,ymax=upper),colour="#7570b3") +
+    ggplot2::labs(x="Wood density (scaled)",y="Allometric exponent",
+      subtitle="Simulated tree data. Points: species. Line: expected exponent (90% intervals)")
+}

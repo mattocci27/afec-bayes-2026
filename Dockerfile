@@ -48,7 +48,7 @@ COPY .here /opt/afec/template/.here
 COPY day1 /opt/afec/template/day1
 COPY day2 /opt/afec/template/day2
 COPY day3 /opt/afec/template/day3
-COPY R/course_data.R R/course_utils.R R/functions.R R/slides_setup.R R/classroom_materials.R R/build_classroom_materials.R /opt/afec/template/R/
+COPY R/course_data.R R/course_utils.R R/course_visuals.R R/functions.R R/slides_setup.R R/classroom_materials.R R/build_classroom_materials.R /opt/afec/template/R/
 COPY classroom /opt/afec/template/classroom/
 COPY stan/*.stan /opt/afec/template/stan/
 COPY fits /opt/afec/template/fits/

@@ -101,8 +101,24 @@
     code span.vs { color: #20794d; } /* VerbatimString */
     code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-0f0433f7e62300b8124b3919060bd508.css">
-  <link rel="stylesheet" href="../assets/custom.css">
+  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-c23c6b66d12f3bc450971ca9a3a2df29.css">
+  <link rel="stylesheet" href="../assets/course.css">
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
   <link href="slides_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="slides_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
@@ -231,13 +247,13 @@ AFEC-X 2026 · 21 October
 <li>Likelihood</li>
 <li>Bayes’ theorem</li>
 <li>Prior and posterior</li>
-<li>First Stan model</li>
+<li>Completed Stan model and results</li>
 </ul>
 </div><div class="column" style="width:33%;">
 <h3 id="day-2">Day 2</h3>
 <p><strong>Regression and model checking</strong></p>
 <ul>
-<li>Linear and logistic regression</li>
+<li>Seedling survival and CNDD</li>
 <li>Posterior prediction</li>
 <li>Did the model and the computation work?</li>
 </ul>
@@ -246,15 +262,15 @@ AFEC-X 2026 · 21 October
 <p><strong>Hierarchical models</strong></p>
 <ul>
 <li>Partial pooling</li>
-<li>Varying intercepts and slopes</li>
+<li>Mother trees and information sharing</li>
 <li>Workflow for real ecological data</li>
 </ul>
 </div></div>
 <div class="fragment">
 <div class="small">
 <ul>
-<li>Each day: short lectures + two exercises in the browser-based R environment.</li>
-<li>The goal is to <strong>think with and interpret</strong> Bayesian models, not to memorise Stan syntax.</li>
+<li>Each day: short lectures + one exercise in the browser-based R environment.</li>
+<li>The goal is to explain Bayesian ideas, read figures and connect models to ecological questions.</li>
 <li>Core tasks use supplied posterior draws. The instructor may demonstrate live sampling.</li>
 </ul>
 </div>
@@ -282,15 +298,15 @@ AFEC-X 2026 · 21 October
 <div class="column" style="width:40%;">
 <p><img data-src="../images/comita_cover.jpg" height="480"></p>
 </div><div class="column" style="width:60%;">
-<h3 id="negative-density-dependence-ndd">Negative density dependence (NDD)</h3>
+<h3 id="conspecific-negative-density-dependence-cndd">Conspecific negative density dependence (CNDD)</h3>
 <p>“…rare species suffered more from the presence of conspecific neighbors than common species did, suggesting that conspecific density dependence shapes species abundances in diverse communities.”</p>
 <p>- Comita et al.&nbsp;2010 -</p>
 </div></div>
 <div class="fragment">
-<p>NDD can maintain diversity in communities by preventing common species from dominating the community.</p>
+<p>Our question: does conspecific density affect survival differently among species?</p>
 </div>
 <div class="fragment">
-<p><strong>Where we are going</strong>: by Day 3, we can ask this kind of question of our own data.</p>
+<p><strong>Where we are going</strong>: by Day 3, we can describe the model structure behind this question.</p>
 </div>
 <div class="footer">
 <p><a href="https://doi.org/10.1126/science.1190772">Comita <em>et al.</em> 2010 <em>Science</em></a></p>
@@ -312,36 +328,32 @@ AFEC-X 2026 · 21 October
           display:block!important;
       }</style></aside>
 </section>
-<section id="multilevel-model-verbal-model-ndd-example" class="slide level2">
-<h2>Multilevel model (verbal model: NDD example)</h2>
-<div class="footer">
-<p>Example inspired by <a href="https://doi.org/10.1126/science.1190772">Comita <em>et al.</em> 2010 <em>Science</em></a> and <a href="https://doi.org/10.1002/ecy.4382">Song &amp; Katabuchi <em>et al.</em> 2024 <em>Ecology</em></a>. Density and abundance are scaled (mean = 0, sd = 1).</p>
-</div>
-<div class="small">
-<p><em>H: Rare species tend to be rare because they suffer stronger conspecific NDD than common species.</em></p>
-<div class="fragment">
+<section id="todays-question-the-smallest-version" class="slide level2">
+<h2>Today’s question: the smallest version</h2>
+<div class="columns">
+<div class="column" style="width:40%;">
+<p><img data-src="../images/seedlings.png"></p>
+</div><div class="column" style="width:60%;">
+<p>We planted 5 seedlings. One year later, 2 are alive.</p>
 <ul>
-<li>Survival rates <em>p</em> ~ conspecific density <em>x</em> (individual-level, logistic regression).</li>
+<li class="fragment">What is the survival probability <span class="math inline">p</span> of this species?</li>
+<li class="fragment">How sure are we?</li>
+<li class="fragment">Would we be equally sure with 40 survivors out of 100?</li>
 </ul>
-</div>
 <div class="fragment">
+<p>One species, no predictor, one parameter. We start with this simple model of one survival probability. On Day 2, survival probability depends on conspecific density. On Day 3, survival rates vary among mother trees and species.</p>
+</div>
+</div></div>
+</section>
+<section id="todays-objectives" class="slide level2">
+<h2>Today’s objectives</h2>
 <ul>
-<li>Slopes <em>a</em> ~ species abundance (species-level).</li>
+<li>Explain likelihood, prior and posterior using a figure.</li>
+<li>Predict how changing data or the prior changes the posterior.</li>
+<li>Match data, unknowns and assumptions to a completed Stan model.</li>
 </ul>
-</div>
-</div>
-
-<img data-src="slides_files/figure-revealjs/unnamed-chunk-1-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
-<div class="fragment">
-<p>Rare species have few seedlings. We want to estimate <strong>each species’ slope</strong> and how the slopes vary with species abundance. By Day 3, we will fit one hierarchical model to estimate both.</p>
-</div>
-</div>
 <aside class="notes">
-<ul>
-<li>do not explain the model: the point is the shape of the question</li>
-<li>three things we need to get there: a distribution for each parameter (today), regression with a link function (Day 2), a way to share information among species (Day 3)</li>
-<li>that “way to share information” will turn out to be a prior: keep this in mind when priors appear later today</li>
-</ul>
+<p>Ask for explanations in words. Independent implementation is an optional extension.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -354,32 +366,6 @@ AFEC-X 2026 · 21 October
           display:block!important;
       }</style></aside>
 </section>
-<section id="todays-question-the-smallest-version" class="slide level2">
-<h2>Today’s question: the smallest version</h2>
-<div class="columns">
-<div class="column" style="width:40%;">
-<p><img data-src="../images/seedlings.png"></p>
-</div><div class="column" style="width:60%;">
-<p>We planted 5 seedlings. One year later, 2 are alive.</p>
-<ul>
-<li class="fragment">What is the survival probability <span class="math inline">\(p\)</span> of this species?</li>
-<li class="fragment">How sure are we?</li>
-<li class="fragment">Would we be equally sure with 40 survivors out of 100?</li>
-</ul>
-<div class="fragment">
-<p>One species, no predictor, one parameter. We start with this simple model of one survival probability. On Day 2, survival probability depends on conspecific density. On Day 3, survival rates vary among mother trees and species.</p>
-</div>
-</div></div>
-</section>
-<section id="todays-objectives" class="slide level2">
-<h2>Today’s objectives</h2>
-<ul>
-<li class="fragment">explain what <strong>likelihood</strong>, <strong>prior</strong>, and <strong>posterior</strong> mean;</li>
-<li class="fragment">predict how the posterior changes with <strong>more data</strong> or a <strong>different prior</strong>;</li>
-<li class="fragment">summarise a posterior distribution: mean, interval, and statements such as <span class="math inline">\(P(p &gt; 0.5 \mid \text{data})\)</span>;</li>
-<li class="fragment">identify Stan’s three blocks and summarise its supplied posterior draws.</li>
-</ul>
-</section>
 <section>
 <section id="likelihood" class="title-slide slide level1 center">
 <h1>Likelihood</h1>
@@ -387,7 +373,7 @@ AFEC-X 2026 · 21 October
 </section>
 <section id="normal-model-from-parameters-to-data" class="slide level2">
 <h2>Normal model: from parameters to data</h2>
-<p><span class="math display">\[\boxed{f(\text{data}\mid\text{parameters})}\]</span></p>
+<p><span class="math display">\boxed{f(\text{data}\mid\text{parameters})}</span></p>
 <p>Probability density of the data given the parameters.</p>
 <div class="columns">
 <div class="column" style="width:50%;">
@@ -395,15 +381,15 @@ AFEC-X 2026 · 21 October
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center" width="672"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-1-1.png" class="quarto-figure quarto-figure-center" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 </div><div class="column" style="width:50%;">
-<p>Three observations: <span class="math inline">\(x=\{-1.5,\;0,\;1.5\}\)</span>.</p>
+<p>Three observations: <span class="math inline">x=\{-1.5,\;0,\;1.5\}</span>.</p>
 <ul>
-<li class="fragment">Suppose the mean is <span class="math inline">\(\mu=0\)</span> and the standard deviation is <span class="math inline">\(\sigma=1\)</span>.</li>
+<li class="fragment">Suppose the mean is <span class="math inline">\mu=0</span> and the standard deviation is <span class="math inline">\sigma=1</span>.</li>
 <li class="fragment">How high is the curve at each observed value?</li>
 <li class="fragment">For continuous data, this height is a <strong>probability density</strong>.</li>
 </ul>
@@ -438,7 +424,7 @@ AFEC-X 2026 · 21 October
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center" width="672"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-2-1.png" class="quarto-figure quarto-figure-center" width="672"></p>
 </figure>
 </div>
 </div>
@@ -446,13 +432,13 @@ AFEC-X 2026 · 21 October
 </div><div class="column" style="width:50%;">
 <p>Keep the three observations fixed.</p>
 <ul>
-<li class="fragment">Keep <span class="math inline">\(\sigma=1\)</span> and move the mean <span class="math inline">\(\mu\)</span>.</li>
-<li class="fragment">For each <span class="math inline">\(\mu\)</span>, multiply the densities at the three observed values.</li>
-<li class="fragment">This gives the <strong>likelihood</strong> <span class="math inline">\(L(\mu)\)</span>.</li>
+<li class="fragment">Keep <span class="math inline">\sigma=1</span> and move the mean <span class="math inline">\mu</span>.</li>
+<li class="fragment">For each <span class="math inline">\mu</span>, multiply the densities at the three observed values.</li>
+<li class="fragment">This gives the <strong>likelihood</strong> <span class="math inline">L(\mu)</span>.</li>
 </ul>
 <div class="fragment">
 <div class="small">
-<p><span class="math display">\[L(\mu)=f(-1.5\mid\mu,1)\,f(0\mid\mu,1)\,f(1.5\mid\mu,1)\]</span></p>
+<p><span class="math display">L(\mu)=f(-1.5\mid\mu,1)\,f(0\mid\mu,1)\,f(1.5\mid\mu,1)</span></p>
 </div>
 <p>Which mean fits these observations best?</p>
 </div>
@@ -487,7 +473,7 @@ AFEC-X 2026 · 21 October
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center" width="672"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-3-1.png" class="quarto-figure quarto-figure-center" width="672"></p>
 </figure>
 </div>
 </div>
@@ -495,13 +481,13 @@ AFEC-X 2026 · 21 October
 </div><div class="column" style="width:50%;">
 <p>We return to <strong>two survivors out of five</strong>.</p>
 <ul>
-<li class="fragment">Now compare survival probabilities <span class="math inline">\(p\)</span> instead of Normal means <span class="math inline">\(\mu\)</span>.</li>
-<li class="fragment">The likelihood is highest at <span class="math inline">\(p=0.4\)</span>.</li>
+<li class="fragment">Now compare survival probabilities <span class="math inline">p</span> instead of Normal means <span class="math inline">\mu</span>.</li>
+<li class="fragment">The likelihood is highest at <span class="math inline">p=0.4</span>.</li>
 <li class="fragment">This is the <strong>maximum likelihood estimate</strong> (MLE).</li>
 </ul>
 <div class="fragment">
-<p><span class="math display">\[L(p)=P(Y=2\mid p)=\binom{5}{2}p^2(1-p)^3\]</span></p>
-<p><span class="math display">\[\hat{p}_{\mathrm{MLE}}=\frac{2}{5}=0.4\]</span></p>
+<p><span class="math display">L(p)=P(Y=2\mid p)=\binom{5}{2}p^2(1-p)^3</span></p>
+<p><span class="math display">\hat{p}_{\mathrm{MLE}}=\frac{2}{5}=0.4</span></p>
 </div>
 </div></div>
 <aside class="notes">
@@ -531,17 +517,17 @@ AFEC-X 2026 · 21 October
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
 </div><div class="column" style="width:45%;">
 <ul>
-<li class="fragment">Both data sets give the same MLE: <span class="math inline">\(\hat{p} = 0.4\)</span>.</li>
-<li class="fragment">With 2 of 5, values such as <span class="math inline">\(p = 0.2\)</span> or <span class="math inline">\(p = 0.7\)</span> are still very compatible with the data.</li>
+<li class="fragment">Both data sets give the same MLE: <span class="math inline">\hat{p} = 0.4</span>.</li>
+<li class="fragment">With 2 of 5, values such as <span class="math inline">p = 0.2</span> or <span class="math inline">p = 0.7</span> are still very compatible with the data.</li>
 <li class="fragment">A single number hides this uncertainty.</li>
-<li class="fragment">What we really want: <strong>how plausible is each value of <span class="math inline">\(p\)</span>, given the data?</strong> <span class="math display">\[P(p \mid \text{data})\]</span></li>
+<li class="fragment">What we really want: <strong>how plausible is each value of <span class="math inline">p</span>, given the data?</strong> <span class="math display">P(p \mid \text{data})</span></li>
 </ul>
 </div></div>
 <aside class="notes">
@@ -574,16 +560,16 @@ AFEC-X 2026 · 21 October
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
 </figure>
 </div>
 </div>
 </div>
 </div><div class="column" style="width:60%;">
 <p>Probability of A occurring given B has already occurred:</p>
-<p><span class="math display">\[
+<p><span class="math display">
 P(A \mid B) = \frac{P(A \cap B)}{P(B)}
-\]</span></p>
+</span></p>
 <p>e.g.,</p>
 <ul>
 <li class="fragment">P(hangover) = 4%</li>
@@ -613,22 +599,22 @@ P(A \mid B) = \frac{P(A \cap B)}{P(B)}
 </section>
 <section id="bayes-theorem" class="slide level2">
 <h2>Bayes’ Theorem</h2>
-<p><span class="math display">\[
+<p><span class="math display">
 P(B \mid A) = \frac{P(A \cap B)}{P(A)}
-\]</span></p>
-<p><span class="math display">\[
+</span></p>
+<p><span class="math display">
 P(A \mid B) = \frac{P(A \cap B)}{P(B)}
-\]</span></p>
+</span></p>
 <div class="fragment">
-<p><span class="math display">\[
+<p><span class="math display">
 P(A \mid B) \times P(B) =  P(B \mid A) \times P(A)
-\]</span></p>
+</span></p>
 </div>
 <div class="fragment">
 <div class="box">
-<p><span class="math display">\[
+<p><span class="math display">
 P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
-\]</span></p>
+</span></p>
 </div>
 </div>
 <div class="fragment">
@@ -642,7 +628,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <ul>
 <li>Read the first row from left to right: given beer, what is the chance of a hangover?</li>
 <li>This is the forward direction: start with a cause or parameter and predict an outcome or data.</li>
-<li>In a statistical model, the forward quantity is <span class="math inline">\(P(\mathrm{Data} \mid \mathrm{Parameter})\)</span>.</li>
+<li>In a statistical model, the forward quantity is <span class="math inline">P(\mathrm{Data} \mid \mathrm{Parameter})</span>.</li>
 </ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -695,7 +681,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 </section>
 <section id="bayes-theorem-1" class="slide level2">
 <h2>Bayes’ theorem</h2>
-<p><span class="math display">\[
+<p><span class="math display">
 \textcolor{#d95f02}{
   P(\mathrm{Parameter} \mid \mathrm{Data})
 }
@@ -708,22 +694,22 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
   P(\mathrm{Parameter})}
 }
 {P(\mathrm{Data})}
-\]</span></p>
+</span></p>
 <div class="small">
 <ul>
-<li class="fragment"><p><span class="math inline">\(\textcolor{#d95f02}{P(\mathrm{Parameter} \mid \mathrm{Data})}\)</span></p>
+<li class="fragment"><p><span class="math inline">\textcolor{#d95f02}{P(\mathrm{Parameter} \mid \mathrm{Data})}</span></p>
 <ul>
 <li class="fragment"><strong>What we want to estimate (<span class="orange">posterior</span>)</strong>: When we got our data, what were the parameters behind the data (e.g., survival probability, coefficients of regressions)?</li>
 </ul></li>
-<li class="fragment"><p><span class="math inline">\(\textcolor{#1b9e77}{P(\mathrm{Data} \mid \mathrm{Parameter})}\)</span></p>
+<li class="fragment"><p><span class="math inline">\textcolor{#1b9e77}{P(\mathrm{Data} \mid \mathrm{Parameter})}</span></p>
 <ul>
 <li class="fragment">When we know our parameters, what is the probability of getting our data? (i.e., <strong><span class="teal">likelihood</span></strong>)</li>
 </ul></li>
-<li class="fragment"><p><span class="math inline">\(\textcolor{#7570b3}{P(\mathrm{Parameter})}\)</span></p>
+<li class="fragment"><p><span class="math inline">\textcolor{#7570b3}{P(\mathrm{Parameter})}</span></p>
 <ul>
 <li class="fragment">What we assume about the parameter before we see the data (i.e., <strong><span class="purple">prior</span></strong>).</li>
 </ul></li>
-<li class="fragment"><p><span class="math inline">\(P(\mathrm{Data})\)</span></p>
+<li class="fragment"><p><span class="math inline">P(\mathrm{Data})</span></p>
 <ul>
 <li class="fragment">Does not depend on the parameters (i.e., a constant)</li>
 </ul></li>
@@ -738,16 +724,17 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <h2>Forward problem: a positive PCR test</h2>
 <div class="footer">
 <ul>
-<li><span class="math inline">\(P(\text{Positive})\)</span>: 2%; <span class="math inline">\(P(\text{Infected})\)</span>: 0.05%</li>
+<li><span class="math inline">P(\text{Positive})</span>: 2%; <span class="math inline">P(\text{Infected})</span>: 0.05%</li>
 </ul>
 </div>
 <p>If a person is infected, what is the probability that the PCR test is positive?</p>
 <ul>
-<li class="fragment"><span class="math inline">\(P(\text{Positive} \mid \text{Infected}) = 95\%\)</span></li>
+<li class="fragment"><span class="math inline">P(\text{Positive} \mid \text{Infected}) = 95\%</span></li>
 <li class="fragment">This is the <strong>forward problem</strong>: given infection status, predict the test result.</li>
 </ul>
 <aside class="notes">
 <ul>
+<li>These are hypothetical teaching inputs, not current clinical performance estimates.</li>
 <li>Sensitivity is the probability of a positive result among infected people.</li>
 <li>For example, 95 of 100 infected samples may test positive.</li>
 </ul>
@@ -767,13 +754,13 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <h2>Inverse problem: infection after a positive test</h2>
 <div class="footer">
 <ul>
-<li><span class="math inline">\(P(\text{Positive})\)</span>: 2%; <span class="math inline">\(P(\text{Infected})\)</span>: 0.05%</li>
+<li><span class="math inline">P(\text{Positive})</span>: 2%; <span class="math inline">P(\text{Infected})</span>: 0.05%</li>
 </ul>
 </div>
 <p>If the PCR test is positive, how likely is it that the person is infected?</p>
 <ul>
 <li class="fragment">Predict before revealing the calculation.</li>
-<li class="fragment"><span class="math inline">\(P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected})\,P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%\)</span></li>
+<li class="fragment"><span class="math inline">P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected})\,P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%</span></li>
 <li class="fragment">This is the <strong>inverse problem</strong>: use the result to update what we believe about infection.</li>
 </ul>
 <aside class="notes">
@@ -807,7 +794,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
@@ -815,19 +802,15 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 </div><div class="column" style="width:45%;">
 <div class="small">
 <ul>
-<li><span class="teal">Likelihood</span>: 2 survivors out of 5, <span class="math inline">\(y \sim \mathcal{B}(5, p)\)</span></li>
-<li><span class="purple">Prior</span>: before the data, every <span class="math inline">\(p\)</span> between 0 and 1 is equally plausible, <span class="math inline">\(p \sim \text{Beta}(1, 1)\)</span></li>
-<li><span class="orange">Posterior</span>: <span class="math inline">\(\propto p^2(1-p)^3 \times 1\)</span></li>
+<li><span class="teal">Likelihood</span>: 2 survivors out of 5, <span class="math inline">y \sim \mathcal{B}(5, p)</span></li>
+<li><span class="purple">Prior</span>: before the data, every <span class="math inline">p</span> between 0 and 1 is equally plausible, <span class="math inline">p \sim \text{Beta}(1, 1)</span></li>
+<li><span class="orange">Posterior</span>: <span class="math inline">\propto p^2(1-p)^3 \times 1</span></li>
 </ul>
 <ul>
-<li class="fragment">The answer is a <strong>distribution</strong>, not a number.</li>
-<li class="fragment">We summarise it:
-<ul>
-<li class="fragment">mean: 0.43</li>
-<li class="fragment">90% interval: 0.15 to 0.73</li>
-<li class="fragment"><span class="math inline">\(P(p &gt; 0.5 \mid \text{data})\)</span> = 0.34</li>
-</ul></li>
-<li class="fragment">“Given the model and the data, there is a 90% probability that <span class="math inline">\(p\)</span> is between 0.15 and 0.73.”</li>
+<li class="fragment">The posterior describes uncertainty about <span class="math inline">p</span>.</li>
+<li class="fragment">Its mean is about 0.43.</li>
+<li class="fragment">A 90% interval runs from 0.15 to 0.73.</li>
+<li class="fragment">This interval depends on the model, prior and observed data.</li>
 </ul>
 </div>
 </div></div>
@@ -849,96 +832,23 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
           display:block!important;
       }</style></aside>
 </section>
-<section id="four-things-that-are-easy-to-mix-up" class="slide level2">
-<h2>Four things that are easy to mix up</h2>
-<div class="small">
-<table class="caption-top">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>What it is</th>
-<th>Seedlings (2 of 5, prior Beta(8, 2))</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>MLE</strong></td>
-<td>the <span class="math inline">\(p\)</span> that maximises the <span class="teal">likelihood</span></td>
-<td>0.4</td>
-</tr>
-<tr class="even">
-<td><strong>MAP</strong></td>
-<td>the <span class="math inline">\(p\)</span> that maximises the <span class="orange">posterior</span> (its peak)</td>
-<td>0.692</td>
-</tr>
-<tr class="odd">
-<td><strong>Posterior mean</strong></td>
-<td>the average of the <span class="orange">posterior</span></td>
-<td>0.667</td>
-</tr>
-<tr class="even">
-<td><strong>Posterior distribution</strong></td>
-<td>every value of <span class="math inline">\(p\)</span> with its plausibility</td>
-<td>Beta(10, 5)</td>
-</tr>
-</tbody>
-</table>
-</div>
-<ul>
-<li class="fragment">MLE and MAP are single numbers. They say nothing about uncertainty.</li>
-<li class="fragment">With a flat prior, MAP = MLE. The posterior is still a distribution.</li>
-<li class="fragment">In this course we work with the <strong>whole posterior</strong> and summarise it with a mean (or median) and an interval.</li>
-</ul>
-</section>
-<section id="which-prior-simulate-from-it" class="slide level2">
-<h2>Which prior? Simulate from it</h2>
-
-<img data-src="slides_files/figure-revealjs/unnamed-chunk-8-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
-<ul>
-<li class="fragment"><strong>Prior predictive check</strong>: draw <span class="math inline">\(p\)</span> from the prior, simulate data, and ask “could data like these happen?”</li>
-<li class="fragment">A prior is a statement about plausible <em>data</em>, so judge it on the scale of the data.</li>
-<li class="fragment">In ecology we mostly use <strong>weakly informative</strong> priors: they rule out the impossible, and let the data speak.</li>
-</ul>
-</div>
-<aside class="notes">
-<ul>
-<li>informative prior here: earlier censuses suggest about 30% of seedlings survive</li>
-<li>more on priors for regression coefficients on Day 2</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
 <section id="prior-vs.-data-mle-and-bayesian-comparison-coin-toss" class="slide level2">
 <h2>Prior vs.&nbsp;Data: MLE and Bayesian comparison (Coin Toss)</h2>
 <p>As with seedling survival, the number of heads follows a Binomial model. Keep the observed proportion at 0.6 and the prior fixed; change the number of tosses.</p>
 <h3 id="mle">MLE</h3>
 <ul>
-<li class="fragment">A: 3 heads out of 5 tosses → <span class="math inline">\(\hat p_{\mathrm{MLE}} = 3/5 = 0.6\)</span></li>
-<li class="fragment">B: 60 heads out of 100 tosses → <span class="math inline">\(\hat p_{\mathrm{MLE}} = 60/100 = 0.6\)</span></li>
+<li class="fragment">A: 3 heads out of 5 tosses → <span class="math inline">\hat p_{\mathrm{MLE}} = 3/5 = 0.6</span></li>
+<li class="fragment">B: 60 heads out of 100 tosses → <span class="math inline">\hat p_{\mathrm{MLE}} = 60/100 = 0.6</span></li>
 </ul>
 <div class="columns">
 <div class="column" style="width:50%;">
 <h3 id="bayesian">Bayesian</h3>
 <ul>
-<li class="fragment"><span class="math inline">\(\textcolor{#1b9e77}{L_A = \binom{5}{3} p^3 (1-p)^2}\)</span></li>
-<li class="fragment"><span class="math inline">\(\textcolor{#1b9e77}{L_B = \binom{100}{60} p^{60} (1-p)^{40}}\)</span></li>
-<li class="fragment"><span class="math inline">\(\textcolor{#7570b3}{\mathrm{Prior} \propto p^{50} (1-p)^{50}}\)</span>
+<li class="fragment"><span class="math inline">\textcolor{#1b9e77}{L_A = \binom{5}{3} p^3 (1-p)^2}</span></li>
+<li class="fragment"><span class="math inline">\textcolor{#1b9e77}{L_B = \binom{100}{60} p^{60} (1-p)^{40}}</span></li>
+<li class="fragment"><span class="math inline">\textcolor{#7570b3}{\mathrm{Prior} \propto p^{50} (1-p)^{50}}</span>
 <ul>
-<li class="fragment">Beta(51, 51): a <strong>strong prior</strong> concentrated near <span class="math inline">\(p=0.5\)</span>.</li>
+<li class="fragment">Beta(51, 51): a <strong>strong prior</strong> concentrated near <span class="math inline">p=0.5</span>.</li>
 </ul></li>
 </ul>
 </div><div class="column" style="width:50%;">
@@ -946,7 +856,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-9-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
 </figure>
 </div>
 </div>
@@ -971,46 +881,15 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
           display:block!important;
       }</style></aside>
 </section>
-<section id="bayesian-update-with-prior-coin-toss" class="slide level2">
-<h2>Bayesian Update with Prior (Coin Toss)</h2>
-<p><span class="orange">Posterior</span> <span class="math inline">\(\propto\)</span> <span class="teal">Likelihood</span> <span class="math inline">\(\times\)</span> <span class="purple">Prior</span></p>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div class="fragment">
-<p>Coin A: <span class="math inline">\(\textcolor{#d95f02}{Post_A} \propto \textcolor{#1b9e77}{p^3 (1-p)^2} \times \textcolor{#7570b3}{p^{50} (1-p)^{50}}\)</span></p>
-<p>Posterior: Beta(54, 53).</p>
-<p>Posterior peak (<strong>MAP</strong>): <span class="math inline">\(p = 53/105 \approx 0.505\)</span>.</p>
-</div>
-<div class="fragment">
-<ul>
-<li>With only 5 tosses, the posterior stays close to the strong prior near 0.5.</li>
+<section id="bayesian-updating-two-amounts-of-coin-data" class="slide level2">
+<h2>Bayesian updating: two amounts of coin data</h2>
+
+<img data-src="slides_files/figure-revealjs/coin-posteriors-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><ul>
+<li>Same observed proportion, same strong prior. More data change its influence.</li>
+<li>Posterior peaks (MAP): about 0.505 and 0.55. Both MLEs are 0.6.</li>
 </ul>
-</div>
-</div><div class="column" style="width:50%;">
-<div class="fragment">
-<p>Coin B: <span class="math inline">\(\textcolor{#d95f02}{Post_B} \propto \textcolor{#1b9e77}{p^{60} (1-p)^{40}} \times \textcolor{#7570b3}{p^{50} (1-p)^{50}}\)</span></p>
-<p>Posterior: Beta(111, 91).</p>
-<p>Posterior peak (<strong>MAP</strong>): <span class="math inline">\(p = 110/200 = 0.55\)</span>.</p>
-</div>
-<div class="fragment">
-<ul>
-<li>With 100 tosses, the data have more weight. The strong prior still has a substantial influence.</li>
-</ul>
-</div>
-</div></div>
-<div class="small">
-<ul>
-<li class="fragment">Both MLEs are 0.6; both posterior peaks lie between 0.5 and 0.6.</li>
-<li class="fragment">More data reduce the influence of this fixed prior.</li>
-</ul>
-</div>
 <aside class="notes">
-<ul>
-<li>The reported peaks are MAP estimates, not posterior means. The means are 54/107 and 111/202.</li>
-<li>For this prior, MAP = (N * 0.6 + 100 * 0.5) / (N + 100).</li>
-<li>At N = 100, prior and data have equal weight in this MAP calculation; the likelihood does not dominate.</li>
-<li>Return to the seedling example in Exercise 1A: hold one input fixed and predict the effect of changing the other.</li>
-</ul>
+<p>The posteriors are Beta(54,53) and Beta(111,91). MAPs are 53/105 and 110/200. The means differ from the peaks. At 100 tosses the prior still has substantial influence. These are deliberate teaching priors. Do not use them as defaults. No derivation is required. Explain the figure before discussing the numbers.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -1023,23 +902,17 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
           display:block!important;
       }</style></aside>
 </section>
-<section id="exercise-1a-prior-likelihood-by-hand" class="slide level2" data-background-color="#f3e8f5">
-<h2>Exercise 1A: prior × likelihood by hand</h2>
-<div class="large">
-<p><code>day1/exercise-student.qmd</code>, Exercise 1A (15 minutes including discussion)</p>
-</div>
+<section id="exercise-data-and-prior-comparisons" class="slide level2" data-background-color="#f3e8f5">
+<h2>Exercise: data and prior comparisons</h2>
+<p><code>day1/exercise-student.qmd</code> · 12 minutes including explanation</p>
 <ul>
-<li><strong>Predict first</strong>, then run.</li>
-<li>Change the amount of data. Keep the prior fixed.</li>
-<li>Change the prior. Keep the data fixed.</li>
-<li>Write one sentence that interprets the posterior.</li>
+<li>Predict, then compare 2/5 with 40/100 under the same flat prior.</li>
+<li>Keep the data at 2/5 and change the prior to Beta(8,2).</li>
+<li>Write one sentence for each comparison.</li>
 </ul>
+<p>All code is supplied. Explain why a high-survival prior would or would not fit your habitat.</p>
 <aside class="notes">
-<ul>
-<li>walk around; ask pairs to explain the Beta(8, 2) result to each other</li>
-<li>checkpoint after 6 min: everyone has compared 2/5 and 40/100</li>
-<li>debrief 3 min: posterior mean is a compromise; the weight of the data grows with N</li>
-</ul>
+<p>58-70 minutes: 8 minutes of pair work and 4 minutes debrief. Checkpoint at 4 minutes: both partners have predicted the sample-size comparison. If R fails, use day1/results.html. This is the only required operation exercise.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -1057,45 +930,16 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <h1>From formulas to samples</h1>
 
 </section>
-<section id="why-do-we-need-samples" class="slide level2">
-<h2>Why do we need samples?</h2>
-<p><strong>Goal</strong>: describe the posterior distribution of the parameters given the data.</p>
+<section id="stan-and-posterior-samples" class="slide level2">
+<h2>Stan and posterior samples</h2>
 <ul>
-<li class="fragment">For the seedling model we have a formula for the posterior, Beta(3, 4).</li>
-<li class="fragment">For almost every model we actually care about (regressions, hierarchical models), <strong>no formula exists</strong>.</li>
-<li class="fragment">Solution: draw many random samples from the posterior and summarise the samples.</li>
-<li class="fragment"><strong>MCMC</strong> (Markov Chain Monte Carlo) is a family of algorithms that produce such samples using only <span class="teal">likelihood</span> × <span class="purple">prior</span>.</li>
+<li>We described the seedling posterior with a distribution.</li>
+<li>More complex models usually need numerical approximation.</li>
+<li>Stan produces draws that approximate the posterior.</li>
+<li>We read the distribution and check how the computation behaved.</li>
 </ul>
-</section>
-<section id="stan-a-modern-languagesoftware-for-bayesian-modeling" class="slide level2">
-<h2>Stan: A modern language/software for Bayesian modeling</h2>
-<div class="columns">
-<div class="column" style="width:35%;">
-<p><img src="https://raw.githubusercontent.com/stan-dev/logos/master/logo.png" width="140" alt="Stan Logo"></p>
-<p><img data-src="../images/hmc.gif" height="380"></p>
-</div><div class="column" style="width:65%;">
-<div class="small">
-<ul>
-<li class="fragment"><p>🧑🏻‍💻 <strong>Bayesian Modeling</strong></p>
-<ul>
-<li class="fragment">Stan uses the No-U-Turn sampler (NUTS), a variant of Hamiltonian Monte Carlo (HMC). It uses the slope of the posterior to make long, efficient moves, so it works for models with many parameters.</li>
-</ul></li>
-<li class="fragment"><p>⚙️ <strong>Flexible and Scalable</strong></p>
-<ul>
-<li class="fragment">You can use Stan for many types of models, from simple regressions to multi-level models including time-series, spatial, SEM, and more.</li>
-</ul></li>
-<li class="fragment"><p>💻 <strong>Multiplatform</strong></p>
-<ul>
-<li class="fragment">Stan works with R, Python, Julia, and more. In this course, we call Stan from R with <code>cmdstanr</code>.</li>
-</ul></li>
-</ul>
-</div>
-</div></div>
 <aside class="notes">
-<ul>
-<li>we do not need the mechanics of HMC to use Stan well; optional slides are in the appendix</li>
-<li>what we do need: check that the sampler worked (Day 2)</li>
-</ul>
+<p>70-80 minutes is an instructor demonstration. No additional participant task. The MCMC algorithms and HMC animation remain in the appendix.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -1114,38 +958,34 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
-<span id="cb1-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;             <span class="co">// number of seedlings</span></span>
-<span id="cb1-3"><a href="" aria-label="3"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=N&gt; y;    <span class="co">// number of survivors</span></span>
-<span id="cb1-4"><a href="" aria-label="4"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; a;            <span class="co">// prior: p ~ Beta(a, b)</span></span>
+<span id="cb1-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb1-3"><a href="" aria-label="3"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=N&gt; y;</span>
+<span id="cb1-4"><a href="" aria-label="4"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; a;</span>
 <span id="cb1-5"><a href="" aria-label="5"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; b;</span>
 <span id="cb1-6"><a href="" aria-label="6"></a>}</span>
-<span id="cb1-7"><a href="" aria-label="7"></a></span>
-<span id="cb1-8"><a href="" aria-label="8"></a><span class="kw">parameters</span> {</span>
-<span id="cb1-9"><a href="" aria-label="9"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; p;   <span class="co">// survival probability</span></span>
-<span id="cb1-10"><a href="" aria-label="10"></a>}</span>
-<span id="cb1-11"><a href="" aria-label="11"></a></span>
-<span id="cb1-12"><a href="" aria-label="12"></a><span class="kw">model</span> {</span>
-<span id="cb1-13"><a href="" aria-label="13"></a>  <span class="co">// prior</span></span>
-<span id="cb1-14"><a href="" aria-label="14"></a>  p ~ beta(a, b);</span>
-<span id="cb1-15"><a href="" aria-label="15"></a>  <span class="co">// likelihood</span></span>
-<span id="cb1-16"><a href="" aria-label="16"></a>  y ~ binomial(N, p);</span>
-<span id="cb1-17"><a href="" aria-label="17"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-7"><a href="" aria-label="7"></a><span class="kw">parameters</span> {</span>
+<span id="cb1-8"><a href="" aria-label="8"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; p;</span>
+<span id="cb1-9"><a href="" aria-label="9"></a>}</span>
+<span id="cb1-10"><a href="" aria-label="10"></a><span class="kw">model</span> {</span>
+<span id="cb1-11"><a href="" aria-label="11"></a>  p ~ beta(a, b);</span>
+<span id="cb1-12"><a href="" aria-label="12"></a>  y ~ binomial(N, p);</span>
+<span id="cb1-13"><a href="" aria-label="13"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div><div class="column" style="width:50%;">
 <div class="small">
 <ul>
 <li><code>data</code>: what we observed, and the settings of the prior
 <ul>
-<li><span class="math inline">\(N = 5\)</span>, <span class="math inline">\(y = 2\)</span>, <span class="math inline">\(a = 1\)</span>, <span class="math inline">\(b = 1\)</span></li>
+<li><span class="math inline">N = 5</span>, <span class="math inline">y = 2</span>, <span class="math inline">a = 1</span>, <span class="math inline">b = 1</span></li>
 </ul></li>
 <li><code>parameters</code>: what we want to learn
 <ul>
-<li><span class="math inline">\(p\)</span></li>
+<li><span class="math inline">p</span></li>
 </ul></li>
 <li><code>model</code>: <span class="purple">prior</span> and <span class="teal">likelihood</span>
 <ul>
-<li><span class="math inline">\(p \sim \text{Beta}(a, b)\)</span></li>
-<li><span class="math inline">\(y \sim \mathcal{B}(N, p)\)</span></li>
+<li><span class="math inline">p \sim \text{Beta}(a, b)</span></li>
+<li><span class="math inline">y \sim \mathcal{B}(N, p)</span></li>
 </ul></li>
 </ul>
 <div class="fragment">
@@ -1162,12 +1002,8 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="columns">
 <div class="column" style="width:45%;">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="" aria-label="1"></a>fit <span class="ot">&lt;-</span> <span class="fu">fit_or_load</span>(</span>
-<span id="cb2-2"><a href="" aria-label="2"></a>  <span class="st">"day1_seedling"</span>,</span>
-<span id="cb2-3"><a href="" aria-label="3"></a>  <span class="st">"stan/binomial.stan"</span>,</span>
-<span id="cb2-4"><a href="" aria-label="4"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="dv">5</span>, <span class="at">y =</span> <span class="dv">2</span>, <span class="at">a =</span> <span class="dv">1</span>, <span class="at">b =</span> <span class="dv">1</span>), <span class="at">use_precomputed =</span> <span class="cn">TRUE</span></span>
-<span id="cb2-5"><a href="" aria-label="5"></a>)</span>
-<span id="cb2-6"><a href="" aria-label="6"></a>fit<span class="sc">$</span>draws</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="" aria-label="1"></a>fit <span class="ot">&lt;-</span> <span class="fu">course_fit</span>(<span class="st">"day1_seedling"</span>)</span>
+<span id="cb2-2"><a href="" aria-label="2"></a>fit<span class="sc">$</span>draws</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -1212,7 +1048,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-14-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
@@ -1221,8 +1057,8 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <ul>
 <li class="fragment">Posterior mean: <code>mean(draws$p)</code> = 0.43</li>
 <li class="fragment">90% interval: <code>quantile(draws$p, c(0.05, 0.95))</code> = 0.15, 0.72</li>
-<li class="fragment"><span class="math inline">\(P(p &gt; 0.5)\)</span>: <code>mean(draws$p &gt; 0.5)</code> = 0.34</li>
-<li class="fragment">Anything you can compute from <span class="math inline">\(p\)</span>, you compute for every draw.</li>
+<li class="fragment"><span class="math inline">P(p &gt; 0.5)</span>: <code>mean(draws$p &gt; 0.5)</code> = 0.34</li>
+<li class="fragment">Anything you can compute from <span class="math inline">p</span>, you compute for every draw.</li>
 </ul>
 </div>
 </div></div>
@@ -1244,22 +1080,16 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
           display:block!important;
       }</style></aside>
 </section>
-<section id="exercise-1b-your-first-stan-model" class="slide level2" data-background-color="#f3e8f5">
-<h2>Exercise 1B: your first Stan model</h2>
-<div class="large">
-<p><code>day1/exercise-student.qmd</code>, Exercise 1B (15 minutes including discussion)</p>
-</div>
+<section id="a-figure-to-explain-to-your-partner" class="slide level2">
+<h2>A figure to explain to your partner</h2>
+<p>The same 2 survivors out of 5 can give different posterior distributions under different priors.</p>
 <ul>
-<li>Load the supplied seedling fit and summarise the draws.</li>
-<li>Compare with the exact posterior from Exercise 1A.</li>
-<li>Predict the number of survivors among 50 new seedlings.</li>
+<li>What does the likelihood contribute?</li>
+<li>What does the prior contribute?</li>
+<li>Which uncertainty would matter in your own research?</li>
 </ul>
 <aside class="notes">
-<ul>
-<li>core tasks 1-3; changed-input refits are optional and need instructor coordination</li>
-<li>checkpoint after 5 min: everyone has the mean and interval</li>
-<li>debrief 3 min: draws -&gt; any derived quantity</li>
-</ul>
+<p>80-85 minutes: short pair explanation followed by two contributions from the room. Keep 85-90 minutes for questions and delay buffer.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -1276,19 +1106,92 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <h2>Summary of Day 1</h2>
 <ul>
 <li class="fragment"><strong>Likelihood</strong>: how probable are the data for given parameter values.</li>
-<li class="fragment"><strong>Bayes’ theorem</strong> turns this around: <span class="orange">posterior</span> <span class="math inline">\(\propto\)</span> <span class="teal">likelihood</span> <span class="math inline">\(\times\)</span> <span class="purple">prior</span>.</li>
+<li class="fragment"><strong>Bayes’ theorem</strong> turns this around: <span class="orange">posterior</span> <span class="math inline">\propto</span> <span class="teal">likelihood</span> <span class="math inline">\times</span> <span class="purple">prior</span>.</li>
 <li class="fragment">The posterior is a <strong>distribution</strong>. We report means, intervals, and probabilities, not just the peak.</li>
-<li class="fragment">The prior matters when data are few, and fades as data accumulate.</li>
+<li class="fragment">The influence of a fixed prior depends on the information in the data.</li>
 <li class="fragment">When there is no formula, <strong>MCMC</strong> gives draws from the posterior. We compute the quantities of interest from those draws.</li>
 </ul>
 <div class="fragment">
-<p><strong>Day 2</strong>: survival and tree height depend on <em>predictors</em>. We will fit regression models, make predictions, and check how well the models fit the data.</p>
+<p><strong>Day 2</strong>: does survival probability change with conspecific density? We will read a fitted survival curve, make predictions and check the model.</p>
 </div>
 </section></section>
 <section>
 <section id="appendix-optional-material" class="title-slide slide level1 center" data-visibility="uncounted">
 <h1>Appendix: optional material</h1>
 
+</section>
+<section id="four-things-that-are-easy-to-mix-up" class="slide level2" data-visibility="uncounted">
+<h2>Four things that are easy to mix up</h2>
+<div class="small">
+<table class="caption-top">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>What it is</th>
+<th>Seedlings (2 of 5, prior Beta(8, 2))</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>MLE</strong></td>
+<td>the <span class="math inline">p</span> that maximises the <span class="teal">likelihood</span></td>
+<td>0.4</td>
+</tr>
+<tr class="even">
+<td><strong>MAP</strong></td>
+<td>the <span class="math inline">p</span> that maximises the <span class="orange">posterior</span> (its peak)</td>
+<td>0.692</td>
+</tr>
+<tr class="odd">
+<td><strong>Posterior mean</strong></td>
+<td>the average of the <span class="orange">posterior</span></td>
+<td>0.667</td>
+</tr>
+<tr class="even">
+<td><strong>Posterior distribution</strong></td>
+<td>every value of <span class="math inline">p</span> with its plausibility</td>
+<td>Beta(10, 5)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li class="fragment">MLE and MAP are single numbers. They say nothing about uncertainty.</li>
+<li class="fragment">With a flat prior, MAP = MLE. The posterior is still a distribution.</li>
+<li class="fragment">In this course we work with the <strong>whole posterior</strong> and summarise it with a mean (or median) and an interval.</li>
+</ul>
+</section>
+<section id="which-prior-simulate-from-it" class="slide level2" data-visibility="uncounted">
+<h2>Which prior? Simulate from it</h2>
+
+<img data-src="slides_files/figure-revealjs/unnamed-chunk-13-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
+<ul>
+<li class="fragment"><strong>Prior predictive check</strong>: draw <span class="math inline">p</span> from the prior, simulate data, and ask “could data like these happen?”</li>
+<li class="fragment">A prior is a statement about plausible <em>data</em>, so judge it on the scale of the data.</li>
+<li class="fragment">In ecology we mostly use <strong>weakly informative</strong> priors: they put less prior weight on implausible parameter scales.</li>
+</ul>
+</div>
+<aside class="notes">
+<ul>
+<li>informative prior here: earlier censuses suggest about 30% of seedlings survive</li>
+<li>more on priors for regression coefficients on Day 2</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
 <section id="extension-deriving-the-binomial-mle" class="slide level2" data-visibility="uncounted">
 <h2>Extension: deriving the binomial MLE</h2>
@@ -1300,11 +1203,11 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <p><img data-src="../images/seedling.png"></p>
 </div><div class="column" style="width:60%;">
 <ul>
-<li class="fragment"><p><span class="math inline">\(p\)</span>: survival probability; <span class="math inline">\(1-p\)</span>: probability of dying</p></li>
-<li class="fragment"><p><span class="math inline">\(L = {}_5C_2 p^2(1-p)^3\)</span> (Binomial distribution)</p></li>
-<li class="fragment"><p><span class="math inline">\(\mathrm{ln}\;L = \mathrm{ln}\;{}_5C_2 + 2\mathrm{ln}\;p + 3\mathrm{ln}(1-p)\)</span></p></li>
-<li class="fragment"><p><span class="math inline">\(\frac{d}{dp}\mathrm{ln}\;L = \frac{2}{p} - \frac{3}{1-p} = 0\)</span></p></li>
-<li class="fragment"><p>Solve: <span class="math inline">\(p = \frac{2}{5}\)</span></p></li>
+<li class="fragment"><p><span class="math inline">p</span>: survival probability; <span class="math inline">1-p</span>: probability of dying</p></li>
+<li class="fragment"><p><span class="math inline">L = {}_5C_2 p^2(1-p)^3</span> (Binomial distribution)</p></li>
+<li class="fragment"><p><span class="math inline">\mathrm{ln}\;L = \mathrm{ln}\;{}_5C_2 + 2\mathrm{ln}\;p + 3\mathrm{ln}(1-p)</span></p></li>
+<li class="fragment"><p><span class="math inline">\frac{d}{dp}\mathrm{ln}\;L = \frac{2}{p} - \frac{3}{1-p} = 0</span></p></li>
+<li class="fragment"><p>Solve: <span class="math inline">p = \frac{2}{5}</span></p></li>
 </ul>
 </div></div>
 </section>
@@ -1316,18 +1219,18 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-15-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-14-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
 </figure>
 </div>
 </div>
 </div>
 <div class="small">
-<p><span class="math inline">\(f(x \mid \mu, \sigma) = \frac{1}{\sqrt{2\pi\sigma^2}}\mathrm{exp} \bigl[{-\frac{1}{2}\bigl\{\frac{x-\mu}{\sigma}}\bigr\}^2\bigr]\)</span></p>
+<p><span class="math inline">f(x \mid \mu, \sigma) = \frac{1}{\sqrt{2\pi\sigma^2}}\mathrm{exp} \bigl[{-\frac{1}{2}\bigl\{\frac{x-\mu}{\sigma}}\bigr\}^2\bigr]</span></p>
 </div>
 </div><div class="column" style="width:60%;">
 <ul>
-<li class="fragment"><p>For continuous data, <span class="math inline">\(f(\text{data}\mid\text{parameters})\)</span> gives the <strong>probability density</strong> at the observed values.</p></li>
-<li class="fragment"><p>e.g., when your model is <span class="math inline">\(x_i \sim \mathcal{N}(\mu = 0, \sigma = 1)\)</span> (normal distribution with mean 0 and standard deviation 1), what is the probability density at x = 1.96?</p></li>
+<li class="fragment"><p>For continuous data, <span class="math inline">f(\text{data}\mid\text{parameters})</span> gives the <strong>probability density</strong> at the observed values.</p></li>
+<li class="fragment"><p>e.g., when your model is <span class="math inline">x_i \sim \mathcal{N}(\mu = 0, \sigma = 1)</span> (normal distribution with mean 0 and standard deviation 1), what is the probability density at x = 1.96?</p></li>
 </ul>
 <div class="fragment">
 <div class="cell" data-layout-align="center">
@@ -1362,11 +1265,11 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 </section>
 <section id="likelihood-of-several-observations" class="slide level2" data-visibility="uncounted">
 <h2>Likelihood of several observations</h2>
-<p>For independent observations <span class="math inline">\(x=\{-1.5,\;0,\;1.5\}\)</span>, assume a Normal model with mean <span class="math inline">\(\mu\)</span> and standard deviation 1. The likelihood is the joint probability density, viewed as a function of <span class="math inline">\(\mu\)</span>.</p>
+<p>For independent observations <span class="math inline">x=\{-1.5,\;0,\;1.5\}</span>, assume a Normal model with mean <span class="math inline">\mu</span> and standard deviation 1. The likelihood is the joint probability density, viewed as a function of <span class="math inline">\mu</span>.</p>
 <div class="small">
 <ul>
-<li class="fragment"><span class="math inline">\(L(\mu) = f(-1.5 \mid \mu, 1) \times f(0 \mid \mu, 1) \times f(1.5 \mid \mu, 1)\)</span></li>
-<li class="fragment"><span class="math inline">\(\mathrm{ln}\;L(\mu) = \mathrm{ln}\;f(-1.5 \mid \mu, 1) + \mathrm{ln}\;f(0 \mid \mu, 1) +  \mathrm{ln}\;f(1.5 \mid \mu, 1)\)</span></li>
+<li class="fragment"><span class="math inline">L(\mu) = f(-1.5 \mid \mu, 1) \times f(0 \mid \mu, 1) \times f(1.5 \mid \mu, 1)</span></li>
+<li class="fragment"><span class="math inline">\mathrm{ln}\;L(\mu) = \mathrm{ln}\;f(-1.5 \mid \mu, 1) + \mathrm{ln}\;f(0 \mid \mu, 1) +  \mathrm{ln}\;f(1.5 \mid \mu, 1)</span></li>
 </ul>
 </div>
 <div class="fragment">
@@ -1374,7 +1277,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-17-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-16-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
 </figure>
 </div>
 </div>
@@ -1400,12 +1303,12 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <li class="fragment">Calculate the posterior of those values.</li>
 <li class="fragment">Repeat the following steps N times:
 <ul>
-<li class="fragment">Propose a new value of <span class="math inline">\(p_{\text{new}}\)</span> (e.g., <span class="math inline">\(p \pm 0.01\)</span>)</li>
-<li class="fragment">Calculate the posterior at <span class="math inline">\(p_{\text{new}}\)</span>.</li>
-<li class="fragment">If <span class="math inline">\(\text{Post}(p_{\text{new}}) \geq \text{Post}(p_t), \text{ then } p_{t+1} = p_{\text{new}}\)</span>.</li>
-<li class="fragment">Else, accept <span class="math inline">\(p_{\text{new}}\)</span> with probability <span class="math inline">\(\frac{\text{Post}(p_{\text{new}})}{\text{Post}(p_t)}\)</span>.</li>
+<li class="fragment">Propose a new value of <span class="math inline">p_{\text{new}}</span> (e.g., <span class="math inline">p \pm 0.01</span>)</li>
+<li class="fragment">Calculate the posterior at <span class="math inline">p_{\text{new}}</span>.</li>
+<li class="fragment">If <span class="math inline">\text{Post}(p_{\text{new}}) \geq \text{Post}(p_t), \text{ then } p_{t+1} = p_{\text{new}}</span>.</li>
+<li class="fragment">Else, accept <span class="math inline">p_{\text{new}}</span> with probability <span class="math inline">\frac{\text{Post}(p_{\text{new}})}{\text{Post}(p_t)}</span>.</li>
 </ul></li>
-<li class="fragment">After the first steps (grey: <strong>warmup</strong>), the chain visits each value of <span class="math inline">\(p\)</span> in proportion to its posterior probability.</li>
+<li class="fragment">After the first steps (grey: <strong>warmup</strong>), the chain visits each value of <span class="math inline">p</span> in proportion to its posterior probability.</li>
 </ul>
 </div></div>
 <aside class="notes">
@@ -1433,16 +1336,16 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <p><img data-src="../images/traj.gif"></p>
 </div><div class="column" style="width:60%;">
 <ul>
-<li class="fragment"><p><span class="math inline">\(H(\theta, r) = U(\theta) + r^2/2\)</span> (Hamiltonian: potential energy + kinetic energy = constant)</p>
+<li class="fragment"><p><span class="math inline">H(\theta, r) = U(\theta) + r^2/2</span> (Hamiltonian: potential energy + kinetic energy = constant)</p>
 <ul>
-<li class="fragment"><span class="math inline">\(U(\theta) = -\text{log}\; p(\theta \mid \text{data})\)</span></li>
+<li class="fragment"><span class="math inline">U(\theta) = -\text{log}\; p(\theta \mid \text{data})</span></li>
 </ul></li>
-<li class="fragment"><p>Instead of sampling from <span class="math inline">\(p(\theta \mid \text{data})\)</span>, HMC samples from a joint distribution over both <span class="math inline">\(\theta\)</span> and <span class="math inline">\(r\)</span>.</p>
+<li class="fragment"><p>Instead of sampling from <span class="math inline">p(\theta \mid \text{data})</span>, HMC samples from a joint distribution over both <span class="math inline">\theta</span> and <span class="math inline">r</span>.</p>
 <ul>
-<li class="fragment"><span class="math inline">\(p(\theta \mid \text{data}) \propto \int \text{exp}(-H(\theta, r))dr\)</span></li>
+<li class="fragment"><span class="math inline">p(\theta \mid \text{data}) \propto \int \text{exp}(-H(\theta, r))dr</span></li>
 </ul></li>
-<li class="fragment"><p>It’s equivalent to sampling from <span class="math inline">\(p(\theta \mid \text{data}) \propto \text{exp}(-U(\theta))\)</span>.</p></li>
-<li class="fragment"><p>HMC explores very different <span class="math inline">\(\theta\)</span> along the same trajectory (i.e.&nbsp;leapfrog path), which is much more efficient than random sampling.</p></li>
+<li class="fragment"><p>It’s equivalent to sampling from <span class="math inline">p(\theta \mid \text{data}) \propto \text{exp}(-U(\theta))</span>.</p></li>
+<li class="fragment"><p>HMC explores very different <span class="math inline">\theta</span> along the same trajectory (i.e.&nbsp;leapfrog path), which is much more efficient than random sampling.</p></li>
 </ul>
 </div></div>
 </section>
@@ -1456,10 +1359,10 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <ul>
 <li class="fragment"><p>Within each iteration, HMC simulates a trajectory using leapfrog steps.</p>
 <ul>
-<li class="fragment">No-U-Turn Sampler (NUTS) dynamically determines the number of leapfrog steps; we only need to set the maximum (e.g., <code>max_treedepth</code> in <strong>Stan</strong>).</li>
+<li class="fragment">No-U-Turn Sampler (NUTS) adapts trajectory length. <code>max_treedepth</code> limits it; Stan also has other sampler settings.</li>
 </ul></li>
-<li class="fragment"><p>The Hamiltonian stays the same, but momentum <span class="math inline">\(r\)</span> is resampled each iteration.</p></li>
-<li class="fragment"><p>Only the final parameter <span class="math inline">\(\theta\)</span> of each trajectory is kept as a posterior sample.</p></li>
+<li class="fragment"><p>The Hamiltonian stays the same, but momentum <span class="math inline">r</span> is resampled each iteration.</p></li>
+<li class="fragment"><p>Only the final parameter <span class="math inline">\theta</span> of each trajectory is kept as a posterior sample.</p></li>
 </ul>
 </div></div>
 <div class="footer">
@@ -1499,7 +1402,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <tr class="odd">
 <td>Flexible?</td>
 <td>✅ Yes</td>
-<td>❌ No (conjugate priors)</td>
+<td>Depends on available conditional updates</td>
 <td>✅ Yes</td>
 </tr>
 <tr class="even">
@@ -1553,7 +1456,6 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
   <script src="slides_files/libs/revealjs/plugin/zoom/zoom.js"></script>
-  <script src="slides_files/libs/revealjs/plugin/math/math.js"></script>
   <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
 
   <script>
@@ -1724,27 +1626,9 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 
         maxScale: 1,
 
-        math: {
-          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js',
-          config: 'TeX-AMS_HTML-full',
-          tex2jax: {
-            inlineMath: [['\\(','\\)']],
-            displayMath: [['\\[','\\]']],
-            balanceBraces: true,
-            processEscapes: false,
-            processRefs: true,
-            processEnvironments: true,
-            preview: 'TeX',
-            skipTags: ['script','noscript','style','textarea','pre','code'],
-            ignoreClass: 'tex2jax_ignore',
-            processClass: 'tex2jax_process'
-          },
-        },
-
         // reveal.js plugins
         plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
 
-          RevealMath,
           RevealNotes,
           RevealSearch,
           RevealZoom

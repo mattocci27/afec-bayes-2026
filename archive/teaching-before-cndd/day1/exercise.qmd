@@ -1,0 +1,461 @@
+---
+title: "Day 1 exercises: from likelihood to posterior"
+author: "Masatoshi Katabuchi"
+date: "2026-10-21"
+solutions: true
+format:
+  html:
+    theme: coderpro
+    toc: true
+    toc-depth: 2
+    number-sections: false
+    smooth-scroll: true
+    standalone: true
+    embed-resources: true
+    html-math-method: katex
+execute:
+  cache: false
+---
+
+<!--
+Instructor source. Generate the solution-free participant QMD and both HTMLs
+with Rscript R/build_classroom_materials.R. Optional live chunks are eval=FALSE.
+-->
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 4
+)
+```
+
+## Setup
+
+Run this chunk first. Everything is already installed in the course environment.
+
+Open `exercise-student.qmd` and run selected chunks. Work in pairs: one person
+runs the code, the other checks the prediction and writes the interpretation;
+swap roles for Exercise 1B. Fill `___` before running a task chunk.
+
+**Core route:** analyse supplied posterior draws. If RStudio is unavailable,
+open `exercise-student.html` and `results.html` locally and answer the same questions
+using the printed tables and figures. No installation or homework is required.
+
+```{r setup}
+library(tidyverse)
+library(posterior)
+library(bayesplot)
+library(patchwork)
+library(here)
+
+source(here("R/course_utils.R"))
+theme_set(theme_bw())
+```
+
+Two rules for all exercises in this course:
+
+1. **Predict before you run.** Write your guess down (one line is enough), then run the code.
+2. **Interpret in words.** A number without a sentence is not an answer.
+
+Tasks marked **Optional** are for those who finish early.
+
+# Exercise 1A: prior × likelihood by hand
+
+|  |  |
+|---|---|
+| **Purpose** | See how the prior and the amount of data shape the posterior. |
+| **Time** | 15 minutes: 12 minutes pair work + 3 minutes explanation/questions. Tasks 1–3 are core. |
+| **Computation** | R only. No Stan, nothing to wait for. |
+| **Data** | $y$ survivors out of $N$ seedlings. |
+| **Model** | $y \sim \text{Binomial}(N, p)$, prior $p \sim \text{Beta}(a, b)$ |
+
+For this model the posterior has a formula: $p \mid y \sim \text{Beta}(a + y,\; b + N - y)$.
+Two helper functions use this formula:
+
+- `plot_update(y, N, a, b)` draws the prior, the likelihood, and the posterior.
+- `summarise_update(y, N, a, b)` returns the MLE, the posterior mean, and the 90% posterior interval.
+
+How to read a Beta prior: its mean is $a/(a+b)$; in the posterior mean it contributes a weight of $a+b$ pseudo-observations. This is a weighting analogy, not a claim about actual prior seedlings.
+$\text{Beta}(1, 1)$ is flat.
+
+```{r ex1a-start}
+plot_update(y = 2, N = 5, a = 1, b = 1)
+summarise_update(y = 2, N = 5, a = 1, b = 1)
+```
+
+## Task 1: more data, same prior
+
+Keep the prior fixed at $\text{Beta}(1, 1)$ and keep the observed proportion fixed at 0.4.
+Compare 2 of 5, 8 of 20, and 40 of 100.
+
+**Predict first:** which of these will change: the posterior mean, the width of the 90% interval, or both?
+
+```{r ex1a-task1, eval=FALSE}
+bind_rows(
+  summarise_update(y = 2, N = 5),
+  summarise_update(y = ___, N = ___),
+  summarise_update(y = ___, N = ___)
+)
+```
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r ex1a-sol1, fig.width=10, fig.height=3.5}
+bind_rows(
+  summarise_update(y = 2, N = 5),
+  summarise_update(y = 8, N = 20),
+  summarise_update(y = 40, N = 100)
+)
+
+plot_update(2, 5) + plot_update(8, 20) + plot_update(40, 100) +
+  plot_layout(guides = "collect") & theme(legend.position = "bottom")
+```
+
+**Expected observations**
+
+- The 90% interval shrinks from about 0.58 wide (2 of 5) to about 0.16 wide (40 of 100).
+- The posterior mean moves slightly, from 0.43 towards 0.40. With a flat prior the posterior *peak* is exactly the MLE, but the *mean* is $(y + 1)/(N + 2)$.
+
+**Common misunderstanding**: "the flat prior adds no information, so the Bayesian answer equals the MLE".
+The peak equals the MLE. The answer is the whole distribution, and its mean is not 0.4 when $N$ is small.
+:::
+:::
+
+## Task 2: different prior, same data
+
+Now keep the data fixed at 2 of 5 and change the prior.
+
+| Prior | Meaning |
+|---|---|
+| $\text{Beta}(1, 1)$ | flat |
+| $\text{Beta}(2, 2)$ | weakly informative: extreme values are a little less plausible |
+| $\text{Beta}(8, 2)$ | "I am quite sure that most seedlings survive" (prior mean 0.8) |
+
+**Predict first:** sketch (on paper or in your head) the posterior under $\text{Beta}(8, 2)$. Where is its peak: near 0.4, near 0.8, or in between?
+
+```{r ex1a-task2, eval=FALSE}
+plot_update(y = 2, N = 5, a = ___, b = ___)
+summarise_update(y = 2, N = 5, a = ___, b = ___)
+```
+
+Core: compare Beta(1,1) and Beta(8,2) for 2/5, then for 40/100. What changed?
+Try Beta(2,2) if you finish early. After 6 minutes, check that your pair has
+compared 2/5 with 40/100 under the flat prior.
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r ex1a-sol2, fig.width=10, fig.height=6}
+priors <- tribble(~a, ~b, 1, 1, 2, 2, 8, 2)
+
+# 2 of 5
+pmap(priors, \(a, b) summarise_update(2, 5, a, b)) |> list_rbind()
+# 40 of 100
+pmap(priors, \(a, b) summarise_update(40, 100, a, b)) |> list_rbind()
+
+(plot_update(2, 5, 1, 1) + plot_update(2, 5, 2, 2) + plot_update(2, 5, 8, 2)) /
+  (plot_update(40, 100, 1, 1) + plot_update(40, 100, 2, 2) + plot_update(40, 100, 8, 2)) +
+  plot_layout(guides = "collect") & theme(legend.position = "bottom")
+```
+
+**Expected observations**
+
+- With 2 of 5, the $\text{Beta}(8, 2)$ prior pulls the posterior mean to about 0.67: the prior counts as 10 pseudo-seedlings, the data are only 5.
+- With 40 of 100, the three posteriors nearly coincide (means 0.40 to 0.44). The data now outweigh the prior.
+- The posterior mean is always between the prior mean and the observed proportion.
+
+**Discussion point**: a prior is not "cheating". $\text{Beta}(8, 2)$ would be a bad prior for seedlings in a shaded understorey, and we can say *why* it is bad. That is easier to criticise than a hidden assumption.
+:::
+:::
+
+## Task 3: a probability statement
+
+A colleague claims that more than half of the seedlings of this species survive their first year.
+With 2 of 5 survivors and a flat prior, the posterior is $\text{Beta}(3, 4)$.
+
+Compute $P(p > 0.5 \mid \text{data})$ and write one sentence that reports it.
+
+```{r ex1a-task3, eval=FALSE}
+1 - pbeta(___, 3, 4)
+```
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r ex1a-sol3}
+1 - pbeta(0.5, 3, 4)
+```
+
+"Given the model, the flat prior, and 2 survivors out of 5, the probability that the survival probability exceeds 0.5 is about 0.34."
+The claim is less likely than not, but five seedlings cannot rule it out.
+
+**Common misunderstanding**: this is not a p-value. It is a direct probability statement about the parameter, and it depends on the prior.
+:::
+:::
+
+## Optional: prior predictive check
+
+What data does each prior expect *before* we see any seedlings?
+Draw $p$ from the prior, then simulate the number of survivors out of 5.
+
+```{r ex1a-optional}
+set.seed(1)
+p_prior <- rbeta(10000, 8, 2)
+y_prior <- rbinom(10000, size = 5, prob = p_prior)
+table(y_prior) / 10000
+```
+
+Does $\text{Beta}(8, 2)$ expect data that you find plausible for first-year seedlings? Try $\text{Beta}(1, 1)$ and $\text{Beta}(2, 2)$.
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Notes
+
+Under $\text{Beta}(8, 2)$, "all five survive" is the most likely outcome (about 40% of simulations) and "none survive" almost never happens.
+Under $\text{Beta}(1, 1)$ every outcome from 0 to 5 is equally likely.
+Judging a prior on the scale of the data is usually easier than judging it on the scale of the parameter. We use this again on Day 2.
+:::
+:::
+
+# Exercise 1B: your first Stan model
+
+|  |  |
+|---|---|
+| **Purpose** | Connect data → parameters → posterior draws, and compute summaries from draws. |
+| **Time** | 15 minutes: 12 minutes pair work + 3 minutes explanation/questions. Tasks 1–3 are core. |
+| **Computation** | Stored Stan result for core tasks. Optional instructor-coordinated live sampling uses a precompiled model; no shared-server runtime is assumed. |
+| **Data** | 2 survivors out of 5 seedlings. |
+| **Model** | The same model as Exercise 1A, written in Stan. |
+
+The Stan model. Find the data, the parameter, the prior, and the likelihood:
+
+```{r show-stan, echo=FALSE, results="asis"}
+cat("```stan\n", paste(readLines(here("stan/binomial.stan")), collapse = "\n"), "\n```\n", sep = "")
+```
+
+## Task 1: load the fitted model and look at the draws (5 minutes)
+
+```{r ex1b-fit}
+seedling_data <- list(N = 5, y = 2, a = 1, b = 1)
+
+fit <- fit_or_load("day1_seedling", "stan/binomial.stan", data = seedling_data,
+  use_precomputed = TRUE)
+
+fit$source   # "live" or "precomputed"
+draws <- fit$draws
+draws
+```
+
+::: {.callout-note collapse="true"}
+## What does `fit_or_load()` do?
+
+With `use_precomputed = TRUE`, it loads a fitted result and checks its data.
+Live inference calls a matching precompiled model in the classroom:
+
+```{r, eval=FALSE}
+mod <- course_model("stan/binomial.stan")
+fit <- mod$sample(data = seedling_data, seed = 123, chains = 4,
+                  parallel_chains = 1, iter_warmup = 1000, iter_sampling = 1000)
+draws <- posterior::as_draws_df(fit$draws())
+```
+
+Wait for the instructor before live inference. The core uses the stored default
+fit throughout. A changed data/prior fit cannot be replaced by this default fit.
+:::
+
+Each row is one draw from the posterior. `lp__` is the log posterior density (ignore it for now).
+
+1. How many draws are there? Where does this number come from?
+2. Compute the posterior mean and the 90% interval of `p` from the draws.
+3. Compare them with the exact values from Exercise 1A: `summarise_update(2, 5, 1, 1)`.
+
+```{r ex1b-task1, eval=FALSE}
+mean(draws$p)
+quantile(draws$p, probs = c(___, ___))
+```
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r ex1b-sol1}
+nrow(draws) # 4 chains x 1000 sampling iterations
+mean(draws$p)
+quantile(draws$p, probs = c(0.05, 0.95))
+summarise_update(2, 5, 1, 1)
+
+# the same, with the posterior package
+summarise_draws(draws, mean, ~quantile(.x, c(0.05, 0.95)), rhat, ess_bulk)
+```
+
+```{r ex1b-sol1-plot}
+ggplot(draws, aes(p)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 40, alpha = 0.5) +
+  stat_function(fun = dbeta, args = list(3, 4)) +
+  labs(x = "p", y = "Density", subtitle = "Histogram: draws; line: exact posterior Beta(3, 4)")
+```
+
+**Expected observations**: the numbers agree with the exact posterior to about two decimals.
+The small differences are Monte Carlo error: we have a finite number of draws.
+`rhat` and `ess_bulk` tell us whether the draws are good enough. We study them on Day 2; for now, `rhat` close to 1.00 is what we want.
+:::
+:::
+
+## Task 2: a probability statement from draws (2 minutes)
+
+Compute $P(p > 0.5 \mid \text{data})$ from the draws. Compare with your answer in Exercise 1A, Task 3.
+
+```{r ex1b-task2, eval=FALSE}
+mean(draws$p > ___)
+```
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r ex1b-sol2}
+mean(draws$p > 0.5)
+1 - pbeta(0.5, 3, 4)
+```
+
+A probability is just the proportion of draws for which the statement is true.
+This works for any statement and any model, including models with no formula for the posterior.
+:::
+:::
+
+## Task 3: predict new data (5 minutes)
+
+We plan to plant 50 new seedlings. How many will survive?
+
+Each posterior draw of `p` is one plausible value of the survival probability. For each draw, simulate one new experiment.
+
+```{r ex1b-task4}
+set.seed(1)
+y_new <- rbinom(n = nrow(draws), size = 50, prob = draws$p)
+y_plugin <- rbinom(n = nrow(draws), size = 50, prob = 0.4)
+quantile(y_new, c(0.05, 0.95))
+quantile(y_plugin, c(0.05, 0.95))
+```
+
+1. Plot `y_new` and compute its 90% interval.
+2. Compare with `y_plugin`, which pretends that $p$ is exactly 0.4. Which is wider? Why? If time is short, use the supplied intervals and explain in words.
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r ex1b-sol4}
+y_plugin <- rbinom(n = nrow(draws), size = 50, prob = 0.4)
+
+quantile(y_new, c(0.05, 0.95))
+quantile(y_plugin, c(0.05, 0.95))
+
+tibble(
+  survivors = c(y_new, y_plugin),
+  method = rep(c("posterior predictive", "plug-in p = 0.4"), each = nrow(draws))
+) |>
+  ggplot(aes(survivors, fill = method)) +
+  geom_histogram(binwidth = 1, position = "identity", alpha = 0.5) +
+  labs(x = "Survivors out of 50 new seedlings")
+```
+
+**Expected observations**: the posterior predictive distribution is much wider (roughly 7 to 37 survivors) than the plug-in prediction (roughly 14 to 26).
+It carries two sources of uncertainty: we do not know $p$ well (only 5 seedlings), and survival is random even if we knew $p$.
+
+**Common misunderstanding**: the interval for $p$ and the interval for new data are different things. We return to this on Day 2 with regression lines.
+:::
+:::
+
+## Optional live extension: change the data, then the prior (8 extra minutes)
+
+Run only when the instructor schedules your pair. **What stays fixed:** the
+Stan model and sampling settings. Change only the data in (a), and only the prior
+in (b). If live inference is unavailable, compare the exact Beta results below.
+
+The prior settings `a` and `b` are part of the data list, so nothing needs to be recompiled.
+
+**Predict first:** for each case below, will the 90% interval be wider or narrower than in Task 1, and where will the posterior mean be?
+
+- (a) 40 survivors out of 100, flat prior.
+- (b) 2 survivors out of 5, prior $\text{Beta}(8, 2)$.
+
+```{r ex1b-task3, eval=FALSE}
+fit_a <- fit_or_load("day1_seedling", "stan/binomial.stan",
+  data = list(N = ___, y = ___, a = 1, b = 1),
+  use_precomputed = FALSE, fallback = FALSE)
+
+summarise_draws(fit_a$draws, mean, ~quantile(.x, c(0.05, 0.95)))
+```
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and notes
+
+```{r ex1b-sol3, eval=FALSE}
+fit_a <- fit_or_load("day1_seedling", "stan/binomial.stan",
+  data = list(N = 100, y = 40, a = 1, b = 1),
+  use_precomputed = FALSE, fallback = FALSE)
+fit_b <- fit_or_load("day1_seedling", "stan/binomial.stan",
+  data = list(N = 5, y = 2, a = 8, b = 2),
+  use_precomputed = FALSE, fallback = FALSE)
+
+bind_rows(
+  `2/5, Beta(1,1)` = summarise_draws(draws, mean, ~quantile(.x, c(0.05, 0.95))),
+  `40/100, Beta(1,1)` = summarise_draws(fit_a$draws, mean, ~quantile(.x, c(0.05, 0.95))),
+  `2/5, Beta(8,2)` = summarise_draws(fit_b$draws, mean, ~quantile(.x, c(0.05, 0.95))),
+  .id = "case"
+) |>
+  filter(variable == "p")
+```
+
+**Expected observations**: the same pattern as in Exercise 1A. More data gives a narrower posterior; a strong prior moves the posterior when data are few.
+Agreement with the exact answer checks this simple model. Other models still
+need convergence diagnostics and predictive checks.
+
+**Exact comparison without Stan (also in the offline result sheet):**
+
+```{r ex1b-exact-comparison}
+bind_rows(summarise_update(2, 5), summarise_update(40, 100),
+          summarise_update(2, 5, 8, 2))
+```
+
+These are exact Beta summaries for the changed conditions, not reused default Stan draws.
+:::
+:::
+
+## Optional: did the chains agree?
+
+```{r ex1b-optional, fig.height=3}
+mcmc_trace(draws, pars = "p")
+```
+
+The four chains started from different values. Do they explore the same range? What would the plot look like if they did not?
+
+<!-- TODO: add a small "bad trace plot" picture here once the Day 2 diagnostics figures are final. -->
+
+# Wrap-up questions
+
+Answer in one or two sentences each. We discuss them together at the end.
+
+1. In your own words: what is the difference between the likelihood and the posterior?
+2. When does the prior matter a lot, and when does it hardly matter?
+3. You have 2000 posterior draws of a parameter. How do you compute the probability that it is positive?
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Notes for the discussion
+
+1. The likelihood is the probability of the data for a given parameter value. The posterior is the plausibility of each parameter value given the data (and the prior). The likelihood is not a distribution over the parameter.
+2. It matters when data are few or weakly informative. With enough data, reasonable priors give nearly the same posterior.
+3. The proportion of draws that are positive: `mean(draws$theta > 0)`.
+:::
+:::

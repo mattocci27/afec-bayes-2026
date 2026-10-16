@@ -23,11 +23,6 @@ check_exercises <- function() {
   saveRDS(manifest, file.path(bin,"manifest.rds"))
   Sys.setenv(AFEC_CLASSROOM="TRUE", AFEC_STAN_BIN_DIR=bin)
   # This fixture exercises source/data guards, not actual model executables.
-  fills <- list(`ex1a-task1`=c("8","20","40","100"), `ex1a-task2`=c("8","2","8","2"),
-                `ex1a-task3`="0.5", `ex1b-task1`=c("0.05","0.95"), `ex1b-task2`="0.5",
-                `allo-task2`="2/3", `allo-task3`=c("x_new","mu","draws$sigma"),
-                `ndd-task`=c("-1","1"), `newtree`=c("mu","sigma"),
-                `vslope-task`=c("0","-1","1"))
   wrap <- function(real) {
     force(real)
     function(..., use_precomputed) {
@@ -35,6 +30,8 @@ check_exercises <- function() {
       real(..., use_precomputed=TRUE)
     }
   }
+  original_fit_or_load <- fit_or_load
+  on.exit(assign("fit_or_load", original_fit_or_load, envir=globalenv()), add=TRUE)
   for (day in paste0("day",1:3)) {
     lines <- readLines(here(day,"exercise-student.qmd"))
     stopifnot(identical(lines, student_source(readLines(here(day,"exercise.qmd")))))
@@ -46,20 +43,30 @@ check_exercises <- function() {
       j <- i+1L
       while (j <= length(lines) && !grepl("^```[[:space:]]*$",lines[j])) j <- j+1L
       stopifnot(j <= length(lines)); code <- paste(lines[(i+1L):(j-1L)],collapse="\n")
-      if (!grepl("eval[[:space:]]*=[[:space:]]*FALSE",header) || label %in% names(fills)) {
-        for (value in fills[[label]]) code <- sub("___",value,code,fixed=TRUE)
+      if (!grepl("eval[[:space:]]*=[[:space:]]*FALSE",header)) {
         stopifnot(!grepl("___",code,fixed=TRUE))
         invisible(eval(parse(text=code),env)); count <- count+1L
-        if (label == "setup") env$fit_or_load <- wrap(get("fit_or_load",globalenv()))
+        if (label == "setup") assign("fit_or_load",wrap(get("fit_or_load",globalenv())),envir=globalenv())
       }
       i <- j+1L
     }
-    if (day == "day1") stopifnot(mean(env$draws$p)>.4,mean(env$draws$p)<.45,
-      diff(quantile(env$y_new,c(.05,.95)))>diff(quantile(env$y_plugin,c(.05,.95))))
-    if (day == "day2") stopifnot(mean(env$p_low)>mean(env$p_high),
-      diff(quantile(exp(env$y_new),c(.05,.95)))>diff(quantile(exp(env$mu),c(.05,.95))))
-    if (day == "day3") stopifnot(mean(env$sd3$`gamma[2,2]`>0)>.95,length(env$p_new)==4000L)
-    cat(day,":",count,"runnable/filled tasks and safe R chunks passed with classroom guards\n")
+    if (day == "day1") stopifnot(mean(env$draws$p)>.4,mean(env$draws$p)<.45)
+    if (day == "day2") {
+      low <- env$probabilities$p[env$probabilities$density == -1]
+      high <- env$probabilities$p[env$probabilities$density == 1]
+      stopifnot(mean(low)>mean(high),all(env$predictions$seedlings==20),
+        identical(dim(env$replicates),c(4000L,60L)),
+        all(env$replicates>=0),all(sweep(env$replicates,2,env$ndd$n,">")==FALSE))
+    }
+    if (day == "day3") stopifnot(nrow(env$comparison)==24L,length(env$p_new)==4000L,
+      all(env$comparison$lower<=env$comparison$mean),
+      all(env$comparison$mean<=env$comparison$upper))
+    core <- grep("^# Core exercise:",lines,value=TRUE)
+    stopifnot(length(core)==1L)
+    diagnostics <- course_diagnostics(env$fit)
+    stopifnot(all(is.finite(as.matrix(diagnostics))),diagnostics$max_rhat<=1.01,
+              diagnostics$min_bulk_ess>400,diagnostics$divergent==0)
+    cat(day,":",count,"safe chunks and one completed core exercise passed with classroom guards\n")
   }
   changed <- try(fit_or_load("day1_seedling","stan/binomial.stan",
                             list(N=100,y=40,a=1,b=1),use_precomputed=TRUE),silent=TRUE)

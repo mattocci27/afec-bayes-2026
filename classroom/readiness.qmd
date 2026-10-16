@@ -11,8 +11,9 @@ execute:
 
 Complete this **10-minute check before Day 1**, using your assigned browser
 RStudio account. Nobody needs to install R, CmdStan, Docker or a C++ toolchain.
-Teaching assumes basic tidyverse use and previous experience with `lm()`/`glm()`;
-tell the instructor if these are unfamiliar. The teaching materials are in English.
+You will run supplied R code and interpret figures. Daytime GLM practice is expected,
+but advanced tidyverse use and independent Stan programming are not required.
+Tell the instructor about unfamiliar topics. The teaching materials are in English.
 
 1. Open your individual course URL, log in, and open `afec-bayes-2026.Rproj`.
 2. Open `day1/exercise-student.qmd` in the editor and run its setup chunk.
@@ -45,7 +46,7 @@ log out and back in, and check that your note remains.
    19:00–20:30 China time (UTC+8), 21–23 October 2026.
 
 During class, work in pairs and swap the person running code and the person
-interpreting it. Fill `___` before running task chunks. Run only the indicated
+interpreting it. Required code is complete. Predict before running the indicated
 chunks. If access fails, use the local handouts and results with your partner.
 
 Optional local R use is allowed after this same stored-result check passes on an

@@ -13,6 +13,7 @@ library(here)
 source(here("R/functions.R"))
 source(here("R/course_data.R"))
 source(here("R/course_utils.R"))
+source(here("R/course_visuals.R"))
 
 knitr::opts_chunk$set(
   echo       = FALSE,
@@ -47,6 +48,11 @@ theme_set(largefontthm)
 read_fit <- function(name) readRDS(here("fits", paste0(name, ".rds")))
 
 # Print a Stan file as a code block (use in a chunk with results = "asis")
-show_stan <- function(file) {
-  cat("```stan\n", paste(readLines(here(file)), collapse = "\n"), "\n```\n", sep = "")
+show_stan <- function(file, compact = FALSE) {
+  lines <- readLines(here(file))
+  if (compact) {
+    lines <- sub("[[:space:]]*//.*$", "", lines)
+    lines <- lines[nzchar(trimws(lines))]
+  }
+  cat("```stan\n", paste(lines, collapse = "\n"), "\n```\n", sep = "")
 }
