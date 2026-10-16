@@ -32,7 +32,7 @@ Outcomes: explain likelihood/prior/posterior in words; predict how data/prior ch
 alter a posterior.
 Assume basic R execution, daytime GLM practice, English and no homework. Confirm
 language, prior experience and the prepared browser environment with organisers.
-0-8 setup/course question; 8-23 likelihood; 23-43 fip/PCR/Bayes;
+0-8 setup/course question; 8-23 likelihood; 23-43 conditional probability/fip/Bayes;
 43-58 prior/posterior/coins; 58-70 ONE exercise (8 work + 4 debrief);
 70-80 Stan demonstration; 80-85 reflection; 85-90 questions/buffer.
 Core: familiar examples and one figure-comparison exercise. Draw calculations,
@@ -181,7 +181,9 @@ Ask for explanations in words. Independent implementation is an optional extensi
 
 ## Normal model: from parameters to data
 
-$$\boxed{f(\text{data}\mid\text{parameters})}$$
+$$\boxed{f(\text{data}\mid\text{parameters})}
+\qquad
+\text{e.g.}\quad\operatorname{Normal}(x_i\mid\mu,\sigma)$$
 
 Probability density of the data given the parameters.
 
@@ -212,7 +214,6 @@ tibble(x, y) |>
 Three observations: $x=\{-1.5,\;0,\;1.5\}$.
 
 ::: incremental
-- Suppose the mean is $\mu=0$ and the standard deviation is $\sigma=1$.
 - How high is the curve at each observed value?
 - For continuous data, this height is a **probability density**.
 :::
@@ -222,6 +223,7 @@ Three observations: $x=\{-1.5,\;0,\;1.5\}$.
 ::: notes
 - The original Normal examples and data come from main.qmd at commit 3013b7c.
 - The vertical bar means "given": evaluate the data under specified parameter values.
+- f is a probability density function; here we choose the Normal density. The expression on the right evaluates it at one observation x_i, with sigma denoting the standard deviation.
 - The marks on the horizontal axis show the observed data; the dots on the curve show their densities.
 - Assume the three observations are independent and follow the same Normal model.
 - Throughout the course, Normal(mu, sigma) uses the standard deviation as its second argument, as in Stan and dnorm().
@@ -254,22 +256,24 @@ normal_density_plot <- ggplot(normal_comparison, aes(x, density, colour = model,
   theme(legend.position = "top", legend.text = element_text(size = 18),
         axis.title = element_text(size = 22), axis.text = element_text(size = 18))
 normal_likelihood <- tibble(mu = seq(-5, 5, length.out = 501)) |>
-  mutate(log_likelihood = like_fun(mu), likelihood = exp(log_likelihood - max(log_likelihood)))
-normal_likelihood_plot <- ggplot(normal_likelihood, aes(mu, likelihood)) +
+  mutate(log_likelihood = like_fun(mu))
+normal_likelihood_plot <- ggplot(normal_likelihood, aes(mu, log_likelihood)) +
   geom_line(linewidth = 1.5, colour = col_like) +
   geom_vline(xintercept = 0, linetype = 3) +
-  labs(x = expression("Mean " * mu), y = "Likelihood (rescaled)") +
+  labs(x = expression("Mean " * mu), y = expression("Log-likelihood " * log(L(mu)))) +
   theme(axis.title = element_text(size = 22), axis.text = element_text(size = 18))
 normal_density_plot
 ```
 :::
 ::: {.column width="50%"}
-Keep the three observations fixed.
+Keep the observations and $\sigma=1$ fixed.
 
 ::: incremental
-- Keep $\sigma=1$ and move the mean $\mu$.
-- For each $\mu$, multiply the densities at the three observed values.
-- This gives the **likelihood** $L(\mu)$.
+- Choose a mean $\mu$ and multiply the three densities.
+- Change $\mu$: the curve shifts and the product changes.
+- This product as a **function of $\mu$** is the **likelihood** $L(\mu)$.
+:::
+:::
 :::
 
 ::: fragment
@@ -277,15 +281,13 @@ Keep the three observations fixed.
 $$L(\mu)=f(-1.5\mid\mu,1)\,f(0\mid\mu,1)\,f(1.5\mid\mu,1)$$
 :::
 
-Which mean fits these observations best?
-
-Compare $\mu=0$ and $\mu=2$. Explain your prediction to your partner.
-:::
-:::
+Which fits better: $\mu=0$ or $\mu=2$?
 :::
 
 ::: notes
 - This graph compares means 0 and 2, with SD fixed at 1; the observed x values stay in the same places.
+- Each candidate mean gives three density heights and one product. Changing mu changes the heights and their product; the mapping from mu to that product is the likelihood function L(mu).
+- Say: "The observations stay fixed. We change the mean, read the three heights, and multiply them. Each mean gives a different product. We call this product, as a function of the mean, the likelihood."
 - Allow about 30 seconds to predict and a brief pair explanation before the R comparison.
 - The prediction, R comparison and likelihood-curve explanation use about 3 minutes of the existing 8-23 minute likelihood block, not an additional code exercise.
 - Multiplying the densities is justified by the independence assumption.
@@ -331,7 +333,7 @@ like_fun(2)
 :::
 
 ::: fragment
-Which value is larger (less negative)? **Mean = 0 fits these data better.**
+Which value is larger? **Mean = 0 fits these data better.**
 
 Taking logs preserves the ordering: larger likelihood, larger log-likelihood.
 :::
@@ -345,7 +347,7 @@ Taking logs preserves the ordering: larger likelihood, larger log-likelihood.
 - A larger log-likelihood is better here even though both values are negative. No log derivation, derivative or optimisation code is required.
 :::
 
-## From two means to a likelihood curve
+## Log-likelihood as a function of $\mu$
 
 ::: columns
 ::: {.column width="55%"}
@@ -355,18 +357,17 @@ normal_likelihood_plot
 :::
 ::: {.column width="45%"}
 
-- Repeat the same calculation for many values of $\mu$.
-- Keep the observations and $\sigma=1$ fixed throughout.
-- The likelihood is highest at $\mu=0$ for these data.
+With the data and $\sigma=1$ fixed, plot $\log L(\mu)$ as a function of the parameter $\mu$.
 
-This curve compares possible means using the same observations.
+The log-likelihood is highest at $\mu=0$.
 :::
 :::
 
 ::: notes
 - This curve appears after the prediction and numerical comparison, so it does not reveal the answer first.
-- The computation sums log densities, then exponentiates after subtracting the maximum. The displayed likelihood is rescaled to a maximum of one.
-- Rescaling does not change relative likelihoods or the position of the maximum. It does not make this a probability distribution for mu.
+- The horizontal axis is now the parameter mu; the earlier Normal curves used the observed value x on the horizontal axis.
+- The vertical axis shows the sum of the three log densities, with no rescaling: the same log-likelihood calculated in the preceding R comparison.
+- Taking logs preserves the position of the maximum. The log-likelihood is a function of mu for fixed data, not a posterior probability density for mu.
 - Connect to the next slide: for seedling counts we compare p instead of the Normal mean, using a binomial likelihood.
 :::
 
@@ -390,58 +391,26 @@ We return to **two survivors out of five**.
 
 ::: incremental
 - Now compare survival probabilities $p$ instead of Normal means $\mu$.
-- The likelihood is highest at $p=0.4$.
+- The maximum is at $p=0.4$.
 - This is the **maximum likelihood estimate** (MLE).
+:::
+:::
 :::
 
 ::: fragment
-$$L(p)=P(Y=2\mid p)=\binom{5}{2}p^2(1-p)^3$$
+$$L(p)=\operatorname{Binomial}(2\mid5,p)=\binom{5}{2}p^2(1-p)^3
+\qquad \hat{p}_{\mathrm{MLE}}=\frac{2}{5}=0.4$$
 
-$$\hat{p}_{\mathrm{MLE}}=\frac{2}{5}=0.4$$
-:::
-:::
 :::
 
 ::: notes
 - The data stay fixed, just as in the Normal example; now the parameter is a survival probability.
-- For a discrete count, use the probability P(Y=2 | p), rather than a density.
+- Binomial(2 | 5, p) is the probability of observing 2 survivors out of 5 seedlings, given survival probability p. It is a probability mass, rather than a continuous density.
+- The trial count n = 5 is fixed and known; only p is inferred. The conditioning side can include known quantities as well as unknown parameters.
+- Say: "For each survival probability p, calculate the probability of observing two survivors out of five. That gives us the likelihood at that p."
 - Assume five independent seedlings with the same survival probability p.
 - The MLE makes the observed two survivors most likely under this model.
-:::
-
-## What the MLE does not tell us
-
-::: columns
-::: {.column width="55%"}
-```{r, fig.height=6, fig.width=8}
-tibble(p = seq(0, 1, length.out = 501)) |>
-  mutate(
-    `2 of 5` = dbinom(2, 5, p) / max(dbinom(2, 5, p)),
-    `40 of 100` = dbinom(40, 100, p) / max(dbinom(40, 100, p))
-  ) |>
-  pivot_longer(-p, names_to = "Data", values_to = "lik") |>
-  ggplot(aes(p, lik, linetype = Data)) +
-  geom_line(linewidth = 1.5, colour = col_like) +
-  geom_vline(xintercept = 0.4, linetype = 3) +
-  labs(x = "Survival probability p", y = "Likelihood (rescaled)") +
-  theme(legend.position = "top")
-```
-:::
-
-::: {.column width="45%"}
-::: incremental
-- Both data sets give the same MLE: $\hat{p} = 0.4$.
-- With 2 of 5, values such as $p = 0.2$ or $p = 0.7$ are still very compatible with the data.
-- A single number hides this uncertainty.
-- What we really want: **how plausible is each value of $p$, given the data?**
-  $$P(p \mid \text{data})$$
-:::
-:::
-:::
-
-::: notes
-- the likelihood is P(data | p), not P(p | data)
-- to turn it around we need Bayes' theorem
+- The graph uses dbinom(), including the binomial coefficient, with no rescaling. At p = 0 and p = 1, the likelihood is zero.
 :::
 
 # Conditional Probability and Bayes' Theorem
@@ -618,141 +587,219 @@ $$
 
 <img src="../images/bayes_re_2.png" width="100%" style="display: block; margin: auto;"/>
 
-## Forward problem: a positive PCR test
-
-::: footer
-- $P(\text{Positive})$: 2%; $P(\text{Infected})$: 0.05%
-:::
-
-If a person is infected, what is the probability that the PCR test is positive?
-
-::: incremental
-- $P(\text{Positive} \mid \text{Infected}) = 95\%$
-- This is the **forward problem**: given infection status, predict the test result.
-:::
-
-::: notes
-- These are hypothetical teaching inputs, not current clinical performance estimates.
-- Sensitivity is the probability of a positive result among infected people.
-- For example, 95 of 100 infected samples may test positive.
-:::
-
-## Inverse problem: infection after a positive test
-
-::: footer
-- $P(\text{Positive})$: 2%; $P(\text{Infected})$: 0.05%
-:::
-
-If the PCR test is positive, how likely is it that the person is infected?
-
-::: incremental
-- Predict before revealing the calculation.
-- $P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected})\,P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%$
-- This is the **inverse problem**: use the result to update what we believe about infection.
-:::
-
-::: notes
-- 0.95 * 0.0005 / 0.02 = 0.02375
-- The low prevalence matters: most people are not infected before testing.
-- The calculation uses the specified 2% positive rate; it is not derived from sensitivity and prevalence here.
-:::
-
 # Prior and posterior
 
-## Seedlings again: prior × likelihood = posterior
+## Seedlings again: posterior $\propto$ prior × likelihood
+
+```{=html}
+<style>
+#seedlings-again-posterior-propto-prior-likelihood .seedling-explanation {
+  font-size: 0.7em;
+  line-height: 1.18;
+}
+#seedlings-again-posterior-propto-prior-likelihood .seedling-explanation p {
+  margin: 0 0 0.55em;
+}
+#seedlings-again-posterior-propto-prior-likelihood .seedling-interval {
+  background: rgba(217, 95, 2, 0.10);
+  border-left: 4px solid #d95f02;
+  padding: 0.3em 0.45em;
+  margin-bottom: 0.55em;
+}
+#seedlings-again-posterior-propto-prior-likelihood .seedling-interval p {
+  margin: 0;
+}
+</style>
+```
 
 ::: columns
 ::: {.column width="55%"}
 ```{r, fig.height=6, fig.width=8}
-plot_update(2, 5, 1, 1, linewidth = 1.8) +
-  ggtitle(NULL) +
+seedling_interval <- qbeta(c(0.025, 0.975), 3, 4)
+seedling_interval_density <- tibble(
+  p = seq(seedling_interval[1], seedling_interval[2], length.out = 501),
+  density = dbeta(p, 3, 4)
+)
+seedling_densities <- tibble(
+  p = seq(0, 1, length.out = 501),
+  Prior = dbeta(p, 1, 1),
+  Posterior = dbeta(p, 3, 4)
+) |>
+  pivot_longer(-p, names_to = "curve", values_to = "density") |>
+  mutate(curve = factor(curve, levels = c("Prior", "Posterior")))
+ggplot(seedling_densities, aes(p, density, colour = curve, linetype = curve)) +
+  geom_ribbon(
+    data = seedling_interval_density,
+    aes(x = p, ymin = 0, ymax = density),
+    inherit.aes = FALSE, fill = col_post, alpha = 0.15, colour = NA
+  ) +
+  geom_line(linewidth = 1.8) +
+  annotate("text", x = 3/7, y = 0.55, label = "95%",
+           colour = col_post, size = 9, fontface = "bold") +
+  scale_colour_manual(values = c(Prior = col_prior, Posterior = col_post)) +
+  scale_linetype_manual(values = c(Prior = "dashed", Posterior = "solid")) +
+  labs(x = "Survival probability p", y = "Density", colour = NULL, linetype = NULL) +
   theme(legend.position = "top")
 ```
 :::
 
 ::: {.column width="45%"}
-::: small
-- [Likelihood]{.teal}: 2 survivors out of 5, $y \sim \mathcal{B}(5, p)$
-- [Prior]{.purple}: before the data, every $p$ between 0 and 1 is equally plausible, $p \sim \text{Beta}(1, 1)$
-- [Posterior]{.orange}: $\propto p^2(1-p)^3 \times 1$
+::: seedling-explanation
+[**Likelihood:**]{.teal}\
+2 survivors out of 5\
+$y \sim \operatorname{Binomial}(5,p)$
 
-::: incremental
-- The posterior describes uncertainty about $p$.
-- Its mean is about `r round(3/7,2)`.
-- A 90% interval runs from `r round(qbeta(.05,3,4),2)` to `r round(qbeta(.95,3,4),2)`.
-- This interval depends on the model, prior and observed data.
+[**Prior:**]{.purple}\
+All values of $p$ are equally plausible.\
+$p \sim \operatorname{Beta}(1,1)$
+
+[**Posterior:**]{.orange}\
+Posterior $\propto$ Prior $\times$ Likelihood\
+$p\mid y \sim \operatorname{Beta}(3,4)$
+
+[**Posterior mean:**]{.orange} `r round(3/7,2)`
+
+[**Peak:**]{.orange} 0.4 (= MLE)
+
+::: seedling-interval
+[**95% credible interval:**]{.orange} **[`r round(seedling_interval[1],2)`, `r round(seedling_interval[2],2)`]**
 :::
+
 :::
 :::
 :::
 
 ::: notes
 - Beta(1,1) prior + 2 of 5 -> Beta(3, 4) posterior
+- The equal-tailed 95% credible interval uses the 2.5th and 97.5th posterior percentiles.
+- The pale orange region under the posterior contains 95% of its probability; the shading uses the unrounded quantiles, while the text rounds the endpoints to 0.12 and 0.78.
+- The likelihood is omitted from the graph because it has the same shape as the posterior under this uniform prior. The likelihood itself is not a probability density for p.
 - contrast the interval statement with a confidence interval
 - this small table (mean / interval / probability statement) is the reporting pattern for the whole course
 :::
 
-## Prior vs. Data: MLE and Bayesian comparison (Coin Toss)
+## Prior vs. Data: MLE and Bayesian Inference
 
-As with seedling survival, the number of heads follows a Binomial model.
-Keep the observed proportion at 0.6 and the prior fixed; change the number of tosses.
-
-::: incremental
-
-### MLE
-
-- A: 3 heads out of 5 tosses → $\hat p_{\mathrm{MLE}} = 3/5 = 0.6$
-- B: 60 heads out of 100 tosses → $\hat p_{\mathrm{MLE}} = 60/100 = 0.6$
-
-::: columns
-::: {.column width="50%"}
-### Bayesian
-
-- $\textcolor{#1b9e77}{L_A = \binom{5}{3} p^3 (1-p)^2}$
-- $\textcolor{#1b9e77}{L_B = \binom{100}{60} p^{60} (1-p)^{40}}$
-- $\textcolor{#7570b3}{\mathrm{Prior} \propto p^{50} (1-p)^{50}}$
-  - Beta(51, 51): a **strong prior** concentrated near $p=0.5$.
-
+::: {style="font-size: 0.85em; line-height: 1.2;"}
+[**A:**]{style="color: #F8766D;"} 3 heads out of 5 tosses → **MLE = 0.6**\
+[**B:**]{style="color: #00BA38;"} 60 heads out of 100 tosses → **MLE = 0.6**
 :::
 
-::: {.column width="50%"}
-```{r, fig.height=4}
-tibble(x = seq(0, 1, length = 200)) |>
-  mutate(prior = dbeta(x, 51, 51)) |>
-  ggplot(aes(x, prior)) +
-  geom_line(linewidth = 1.5, colour = col_prior) +
-  labs(x = "p", y = "Prior density") +
-  theme(
-    legend.position = "none",
-    axis.text = element_text(size = 28),
-    axis.title = element_text(size = 32))
+```{r, fig.width=13, fig.height=5.1}
+coin_colours <- c("3 of 5" = "#F8766D", "60 of 100" = "#00BA38", Prior = col_prior)
+coin_linetypes <- c("3 of 5" = "solid", "60 of 100" = "dashed", Prior = "dotdash")
+coin_p <- seq(0, 1, length.out = 1001)
+coin_likelihoods <- tibble(
+  p = coin_p,
+  `3 of 5` = dbinom(3, 5, p) / dbinom(3, 5, 0.6),
+  `60 of 100` = dbinom(60, 100, p) / dbinom(60, 100, 0.6)
+) |>
+  pivot_longer(-p, names_to = "Dataset", values_to = "relative_likelihood")
+coin_likelihood_panel <- ggplot(
+  coin_likelihoods, aes(p, relative_likelihood, colour = Dataset, linetype = Dataset)
+) +
+  geom_vline(xintercept = 0.6, linetype = "dotted", colour = "grey65", linewidth = 0.5) +
+  geom_line(linewidth = 1.5) +
+  scale_colour_manual(values = coin_colours) +
+  scale_linetype_manual(values = coin_linetypes) +
+  scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.25),
+                     expand = expansion(mult = 0.03)) +
+  scale_y_continuous(limits = c(0, 1.05), breaks = c(0, 0.5, 1),
+                     expand = expansion(mult = 0)) +
+  labs(title = "Likelihood A vs. B", subtitle = "\n",
+       x = "Probability of heads (p)", y = "Relative likelihood") +
+  theme(legend.position = "none")
+coin_prior_panel <- ggplot(tibble(p = coin_p, density = dbeta(coin_p, 51, 51)),
+                           aes(p, density)) +
+  geom_line(colour = coin_colours[["Prior"]], linetype = coin_linetypes[["Prior"]],
+            linewidth = 1.5) +
+  scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.25),
+                     expand = expansion(mult = 0.03)) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.06))) +
+  labs(title = "Prior: Beta(51, 51)",
+       subtitle = "Same prior for A and B\np ~ Beta(51, 51)",
+       caption = "Strong prior centered at p = 0.5",
+       x = "Probability of heads (p)", y = "Density") +
+  theme(plot.caption = element_text(size = 20, hjust = 0.5))
+coin_panel_theme <- theme(
+  axis.title = element_text(size = 24), axis.text = element_text(size = 22),
+  plot.title = element_text(size = 28), plot.subtitle = element_text(size = 20),
+  plot.margin = margin(8, 16, 8, 8)
+)
+# Put aligned, coloured equations in the subtitle area, outside the plotting panel.
+coin_equation_a <- grid::textGrob(
+  expression(L[A](p)), x = 0, y = 0.75, just = "left",
+  gp = grid::gpar(col = coin_colours[["3 of 5"]], fontsize = 20)
+)
+coin_equation_b <- grid::textGrob(
+  expression(L[B](p)), x = 0, y = 0.28, just = "left",
+  gp = grid::gpar(col = coin_colours[["60 of 100"]], fontsize = 20)
+)
+coin_equation_rhs_x <- grid::unit.pmax(
+  grid::grobWidth(coin_equation_a), grid::grobWidth(coin_equation_b)
+) + grid::unit(2, "pt")
+coin_likelihood_grob <- ggplotGrob(coin_likelihood_panel + coin_panel_theme)
+coin_subtitle_index <- which(coin_likelihood_grob$layout$name == "subtitle")
+coin_likelihood_grob$grobs[[coin_subtitle_index]] <- grid::grobTree(
+  coin_equation_a, coin_equation_b,
+  grid::textGrob(expression({} %prop% p^3 * (1-p)^2),
+                 x = coin_equation_rhs_x, y = 0.75, just = "left",
+                 gp = grid::gpar(fontsize = 20)),
+  grid::textGrob(expression({} %prop% p^60 * (1-p)^40),
+                 x = coin_equation_rhs_x, y = 0.28, just = "left",
+                 gp = grid::gpar(fontsize = 20))
+)
+coin_likelihood_grob$heights[coin_likelihood_grob$layout$t[coin_subtitle_index]] <-
+  grid::unit(58, "pt")
+wrap_ggplot_grob(coin_likelihood_grob) + (coin_prior_panel + coin_panel_theme) +
+  plot_layout(widths = c(1, 1))
 ```
-:::
-
-:::
-:::
 
 ::: notes
 - Allow 3–5 minutes for these two slides, including a prediction before revealing the updates.
 - Ask: will each posterior peak be closer to 0.5 or to 0.6?
 - The observed proportion and prior are identical, so the comparison isolates the amount of data.
+- Both likelihoods use the full Binomial probability, divided by their own value at the MLE p = 0.6. Each peak is one; neither curve is normalised to have area one.
+- The left panel compares likelihood widths. The right panel shows a probability density for the single prior used for both data sets; its vertical scale is independent.
+- Dataset A is salmon and solid, dataset B is green and dashed, and the prior is purple and dotdash on both this slide and the following posterior comparison.
 - This deliberately strong prior illustrates its influence; it is not a default prior for ecological survival.
 :::
 
 ## Bayesian updating: two amounts of coin data
 
-```{r coin-posteriors, fig.width=11, fig.height=4.2}
+```{=html}
+<style>
+#bayesian-updating-two-amounts-of-coin-data .coin-interpretation {
+  font-size: 0.7em;
+  line-height: 1.18;
+}
+#bayesian-updating-two-amounts-of-coin-data .coin-interpretation p {
+  margin: 0 0 0.35em;
+}
+</style>
+```
+
+```{r coin-posteriors, fig.width=11, fig.height=3.7}
 p_grid <- seq(0,1,length.out=501)
 coin <- tibble(p=p_grid, Prior=dbeta(p_grid,51,51),
                `3 of 5`=dbeta(p_grid,54,53), `60 of 100`=dbeta(p_grid,111,91)) |>
   pivot_longer(-p,names_to="Distribution",values_to="density")
 ggplot(coin,aes(p,density,colour=Distribution,linetype=Distribution))+
   geom_line(linewidth=1.2)+labs(x="Probability of heads",y="Density")+
+  scale_colour_manual(values=coin_colours)+
+  scale_linetype_manual(values=coin_linetypes)+
   theme(legend.position="top")
 ```
 
-- Same observed proportion, same strong prior. More data change its influence.
-- Posterior peaks (MAP): about 0.505 and 0.55. Both MLEs are 0.6.
+::: coin-interpretation
+[**Post A (5 tosses):**]{style="color: #F8766D;"}
+The prior has a stronger influence, so the posterior stays close to the prior.
+
+[**Post B (100 tosses):**]{style="color: #00BA38;"}
+The data have more influence, shifting the posterior toward the observed proportion (0.6).
+
+**Take-home message:** **Same MLE (0.6), different posteriors.**
+:::
 
 ::: notes
 The posteriors are Beta(54,53) and Beta(111,91). MAPs are 53/105 and 110/200.
@@ -861,7 +908,7 @@ ggplot(as_tibble(seedling_fit$draws), aes(p)) +
 ::: small
 ::: incremental
 - Posterior mean: `mean(draws$p)` = `r round(mean(seedling_fit$draws$p), 2)`
-- 90% interval: `quantile(draws$p, c(0.05, 0.95))` = `r paste(round(quantile(seedling_fit$draws$p, c(0.05, 0.95)), 2), collapse = ", ")`
+- 95% interval: `quantile(draws$p, c(0.025, 0.975))` = `r paste(round(quantile(seedling_fit$draws$p, c(0.025, 0.975)), 2), collapse = ", ")`
 - $P(p > 0.5)$: `mean(draws$p > 0.5)` = `r round(mean(seedling_fit$draws$p > 0.5), 2)`
 - Anything you can compute from $p$, you compute for every draw.
 :::
@@ -907,6 +954,82 @@ We will read a fitted survival curve, make predictions and check the model.
 :::
 
 # Appendix: optional material {visibility="uncounted"}
+
+## What the MLE does not tell us {visibility="uncounted"}
+
+::: columns
+::: {.column width="55%"}
+```{r, fig.height=6, fig.width=8}
+tibble(p = seq(0, 1, length.out = 501)) |>
+  mutate(
+    `2 of 5` = dbinom(2, 5, p) / max(dbinom(2, 5, p)),
+    `40 of 100` = dbinom(40, 100, p) / max(dbinom(40, 100, p))
+  ) |>
+  pivot_longer(-p, names_to = "Data", values_to = "likelihood") |>
+  ggplot(aes(p, likelihood, linetype = Data)) +
+  geom_line(linewidth = 1.5, colour = col_like) +
+  geom_vline(xintercept = 0.4, linetype = 3) +
+  labs(x = "Survival probability p", y = "Relative likelihood") +
+  theme(legend.position = "top")
+```
+:::
+
+::: {.column width="45%"}
+::: incremental
+- Both data sets give the same MLE: $\hat{p} = 0.4$.
+- With 40 of 100, the likelihood curve is narrower.
+- A single number hides this uncertainty.
+- What we really want: **how plausible is each value of $p$, given the data?**
+  $$P(p \mid \text{data})$$
+:::
+:::
+:::
+
+::: notes
+- Each curve is divided by its own maximum, so both peaks are one. This makes their widths easier to compare without changing either MLE or the likelihood ratios within each data set.
+- Relative likelihood is not a posterior probability density for p; the curves are not normalised to integrate to one.
+- the likelihood is P(data | p), not P(p | data)
+- to turn it around we need Bayes' theorem
+:::
+
+## Forward problem: a positive PCR test {visibility="uncounted"}
+
+::: footer
+- $P(\text{Positive})$: 2%; $P(\text{Infected})$: 0.05%
+:::
+
+If a person is infected, what is the probability that the PCR test is positive?
+
+::: incremental
+- $P(\text{Positive} \mid \text{Infected}) = 95\%$
+- This is the **forward problem**: given infection status, predict the test result.
+:::
+
+::: notes
+- These are hypothetical teaching inputs, not current clinical performance estimates.
+- Sensitivity is the probability of a positive result among infected people.
+- For example, 95 of 100 infected samples may test positive.
+:::
+
+## Inverse problem: infection after a positive test {visibility="uncounted"}
+
+::: footer
+- $P(\text{Positive})$: 2%; $P(\text{Infected})$: 0.05%
+:::
+
+If the PCR test is positive, how likely is it that the person is infected?
+
+::: incremental
+- Predict before revealing the calculation.
+- $P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected})\,P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%$
+- This is the **inverse problem**: use the result to update what we believe about infection.
+:::
+
+::: notes
+- 0.95 * 0.0005 / 0.02 = 0.02375
+- The low prevalence matters: most people are not infected before testing.
+- The calculation uses the specified 2% positive rate; it is not derived from sensitivity and prevalence here.
+:::
 
 ## Four things that are easy to mix up {visibility="uncounted"}
 

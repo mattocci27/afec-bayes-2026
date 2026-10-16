@@ -31,7 +31,7 @@
     ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
       width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
@@ -150,12 +150,12 @@
     }
     .reveal .footnotes ol {
       counter-reset: ol;
-      list-style-type: none;
+      list-style-type: none; 
       margin-left: 0;
     }
     .reveal .footnotes ol li:before {
       counter-increment: ol;
-      content: counter(ol) ". ";
+      content: counter(ol) ". "; 
     }
     .reveal .footnotes ol li > p:first-child {
       display: inline-block;
@@ -197,19 +197,19 @@
     .reveal .slide > img.r-stretch.quarto-figure-center {
       display: block;
       margin-left: auto;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .reveal .slide > img.stretch.quarto-figure-left,
     .reveal .slide > img.r-stretch.quarto-figure-left  {
       display: block;
       margin-left: 0;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .reveal .slide > img.stretch.quarto-figure-right,
     .reveal .slide > img.r-stretch.quarto-figure-right  {
       display: block;
       margin-left: auto;
-      margin-right: 0;
+      margin-right: 0; 
     }
   </style>
   <script src="slides_files/libs/kePrint-0.0.1/kePrint.js"></script>
@@ -372,7 +372,9 @@ AFEC-X 2026 · 21 October
 </section>
 <section id="normal-model-from-parameters-to-data" class="slide level2">
 <h2>Normal model: from parameters to data</h2>
-<p><span class="math display">\boxed{f(\text{data}\mid\text{parameters})}</span></p>
+<p><span class="math display">\boxed{f(\text{data}\mid\text{parameters})}
+\qquad
+\text{e.g.}\quad\operatorname{Normal}(x_i\mid\mu,\sigma)</span></p>
 <p>Probability density of the data given the parameters.</p>
 <div class="columns">
 <div class="column" style="width:50%;">
@@ -388,7 +390,6 @@ AFEC-X 2026 · 21 October
 </div><div class="column" style="width:50%;">
 <p>Three observations: <span class="math inline">x=\{-1.5,\;0,\;1.5\}</span>.</p>
 <ul>
-<li class="fragment">Suppose the mean is <span class="math inline">\mu=0</span> and the standard deviation is <span class="math inline">\sigma=1</span>.</li>
 <li class="fragment">How high is the curve at each observed value?</li>
 <li class="fragment">For continuous data, this height is a <strong>probability density</strong>.</li>
 </ul>
@@ -397,6 +398,7 @@ AFEC-X 2026 · 21 October
 <ul>
 <li>The original Normal examples and data come from main.qmd at commit 3013b7c.</li>
 <li>The vertical bar means “given”: evaluate the data under specified parameter values.</li>
+<li>f is a probability density function; here we choose the Normal density. The expression on the right evaluates it at one observation x_i, with sigma denoting the standard deviation.</li>
 <li>The marks on the horizontal axis show the observed data; the dots on the curve show their densities.</li>
 <li>Assume the three observations are independent and follow the same Normal model.</li>
 <li>Throughout the course, Normal(mu, sigma) uses the standard deviation as its second argument, as in Stan and dnorm().</li>
@@ -429,23 +431,24 @@ AFEC-X 2026 · 21 October
 </div>
 </div>
 </div><div class="column" style="width:50%;">
-<p>Keep the three observations fixed.</p>
+<p>Keep the observations and <span class="math inline">\sigma=1</span> fixed.</p>
 <ul>
-<li class="fragment">Keep <span class="math inline">\sigma=1</span> and move the mean <span class="math inline">\mu</span>.</li>
-<li class="fragment">For each <span class="math inline">\mu</span>, multiply the densities at the three observed values.</li>
-<li class="fragment">This gives the <strong>likelihood</strong> <span class="math inline">L(\mu)</span>.</li>
+<li class="fragment">Choose a mean <span class="math inline">\mu</span> and multiply the three densities.</li>
+<li class="fragment">Change <span class="math inline">\mu</span>: the curve shifts and the product changes.</li>
+<li class="fragment">This product as a <strong>function of <span class="math inline">\mu</span></strong> is the <strong>likelihood</strong> <span class="math inline">L(\mu)</span>.</li>
 </ul>
+</div></div>
 <div class="fragment">
 <div class="small">
 <p><span class="math display">L(\mu)=f(-1.5\mid\mu,1)\,f(0\mid\mu,1)\,f(1.5\mid\mu,1)</span></p>
 </div>
-<p>Which mean fits these observations best?</p>
-<p>Compare <span class="math inline">\mu=0</span> and <span class="math inline">\mu=2</span>. Explain your prediction to your partner.</p>
+<p>Which fits better: <span class="math inline">\mu=0</span> or <span class="math inline">\mu=2</span>?</p>
 </div>
-</div></div>
 <aside class="notes">
 <ul>
 <li>This graph compares means 0 and 2, with SD fixed at 1; the observed x values stay in the same places.</li>
+<li>Each candidate mean gives three density heights and one product. Changing mu changes the heights and their product; the mapping from mu to that product is the likelihood function L(mu).</li>
+<li>Say: “The observations stay fixed. We change the mean, read the three heights, and multiply them. Each mean gives a different product. We call this product, as a function of the mean, the likelihood.”</li>
 <li>Allow about 30 seconds to predict and a brief pair explanation before the R comparison.</li>
 <li>The prediction, R comparison and likelihood-curve explanation use about 3 minutes of the existing 8-23 minute likelihood block, not an additional code exercise.</li>
 <li>Multiplying the densities is justified by the independence assumption.</li>
@@ -497,7 +500,7 @@ AFEC-X 2026 · 21 October
 </div>
 </div></div>
 <div class="fragment">
-<p>Which value is larger (less negative)? <strong>Mean = 0 fits these data better.</strong></p>
+<p>Which value is larger? <strong>Mean = 0 fits these data better.</strong></p>
 <p>Taking logs preserves the ordering: larger likelihood, larger log-likelihood.</p>
 </div>
 <aside class="notes">
@@ -521,8 +524,8 @@ AFEC-X 2026 · 21 October
           display:block!important;
       }</style></aside>
 </section>
-<section id="from-two-means-to-a-likelihood-curve" class="slide level2">
-<h2>From two means to a likelihood curve</h2>
+<section id="log-likelihood-as-a-function-of-mu" class="slide level2">
+<h2>Log-likelihood as a function of <span class="math inline">\mu</span></h2>
 <div class="columns">
 <div class="column" style="width:55%;">
 <div class="cell" data-layout-align="center">
@@ -535,18 +538,15 @@ AFEC-X 2026 · 21 October
 </div>
 </div>
 </div><div class="column" style="width:45%;">
-<ul>
-<li>Repeat the same calculation for many values of <span class="math inline">\mu</span>.</li>
-<li>Keep the observations and <span class="math inline">\sigma=1</span> fixed throughout.</li>
-<li>The likelihood is highest at <span class="math inline">\mu=0</span> for these data.</li>
-</ul>
-<p>This curve compares possible means using the same observations.</p>
+<p>With the data and <span class="math inline">\sigma=1</span> fixed, plot <span class="math inline">\log L(\mu)</span> as a function of the parameter <span class="math inline">\mu</span>.</p>
+<p>The log-likelihood is highest at <span class="math inline">\mu=0</span>.</p>
 </div></div>
 <aside class="notes">
 <ul>
 <li>This curve appears after the prediction and numerical comparison, so it does not reveal the answer first.</li>
-<li>The computation sums log densities, then exponentiates after subtracting the maximum. The displayed likelihood is rescaled to a maximum of one.</li>
-<li>Rescaling does not change relative likelihoods or the position of the maximum. It does not make this a probability distribution for mu.</li>
+<li>The horizontal axis is now the parameter mu; the earlier Normal curves used the observed value x on the horizontal axis.</li>
+<li>The vertical axis shows the sum of the three log densities, with no rescaling: the same log-likelihood calculated in the preceding R comparison.</li>
+<li>Taking logs preserves the position of the maximum. The log-likelihood is a function of mu for fixed data, not a posterior probability density for mu.</li>
 <li>Connect to the next slide: for seedling counts we compare p instead of the Normal mean, using a binomial likelihood.</li>
 </ul>
 <style type="text/css">
@@ -578,58 +578,23 @@ AFEC-X 2026 · 21 October
 <p>We return to <strong>two survivors out of five</strong>.</p>
 <ul>
 <li class="fragment">Now compare survival probabilities <span class="math inline">p</span> instead of Normal means <span class="math inline">\mu</span>.</li>
-<li class="fragment">The likelihood is highest at <span class="math inline">p=0.4</span>.</li>
+<li class="fragment">The maximum is at <span class="math inline">p=0.4</span>.</li>
 <li class="fragment">This is the <strong>maximum likelihood estimate</strong> (MLE).</li>
 </ul>
-<div class="fragment">
-<p><span class="math display">L(p)=P(Y=2\mid p)=\binom{5}{2}p^2(1-p)^3</span></p>
-<p><span class="math display">\hat{p}_{\mathrm{MLE}}=\frac{2}{5}=0.4</span></p>
-</div>
 </div></div>
+<div class="fragment">
+<p><span class="math display">L(p)=\operatorname{Binomial}(2\mid5,p)=\binom{5}{2}p^2(1-p)^3
+\qquad \hat{p}_{\mathrm{MLE}}=\frac{2}{5}=0.4</span></p>
+</div>
 <aside class="notes">
 <ul>
 <li>The data stay fixed, just as in the Normal example; now the parameter is a survival probability.</li>
-<li>For a discrete count, use the probability P(Y=2 | p), rather than a density.</li>
+<li>Binomial(2 | 5, p) is the probability of observing 2 survivors out of 5 seedlings, given survival probability p.&nbsp;It is a probability mass, rather than a continuous density.</li>
+<li>The trial count n = 5 is fixed and known; only p is inferred. The conditioning side can include known quantities as well as unknown parameters.</li>
+<li>Say: “For each survival probability p, calculate the probability of observing two survivors out of five. That gives us the likelihood at that p.”</li>
 <li>Assume five independent seedlings with the same survival probability p.</li>
 <li>The MLE makes the observed two survivors most likely under this model.</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="what-the-mle-does-not-tell-us" class="slide level2">
-<h2>What the MLE does not tell us</h2>
-<div class="columns">
-<div class="column" style="width:55%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:45%;">
-<ul>
-<li class="fragment">Both data sets give the same MLE: <span class="math inline">\hat{p} = 0.4</span>.</li>
-<li class="fragment">With 2 of 5, values such as <span class="math inline">p = 0.2</span> or <span class="math inline">p = 0.7</span> are still very compatible with the data.</li>
-<li class="fragment">A single number hides this uncertainty.</li>
-<li class="fragment">What we really want: <strong>how plausible is each value of <span class="math inline">p</span>, given the data?</strong> <span class="math display">P(p \mid \text{data})</span></li>
-</ul>
-</div></div>
-<aside class="notes">
-<ul>
-<li>the likelihood is P(data | p), not P(p | data)</li>
-<li>to turn it around we need Bayes’ theorem</li>
+<li>The graph uses dbinom(), including the binomial coefficient, with no rescaling. At p = 0 and p = 1, the likelihood is zero.</li>
 </ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -656,7 +621,7 @@ AFEC-X 2026 · 21 October
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-4-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
 </figure>
 </div>
 </div>
@@ -815,104 +780,67 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <section class="slide level2">
 
 
-<img src="../images/bayes_re_2.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
-<section id="forward-problem-a-positive-pcr-test" class="slide level2">
-<h2>Forward problem: a positive PCR test</h2>
-<div class="footer">
-<ul>
-<li><span class="math inline">P(\text{Positive})</span>: 2%; <span class="math inline">P(\text{Infected})</span>: 0.05%</li>
-</ul>
-</div>
-<p>If a person is infected, what is the probability that the PCR test is positive?</p>
-<ul>
-<li class="fragment"><span class="math inline">P(\text{Positive} \mid \text{Infected}) = 95\%</span></li>
-<li class="fragment">This is the <strong>forward problem</strong>: given infection status, predict the test result.</li>
-</ul>
-<aside class="notes">
-<ul>
-<li>These are hypothetical teaching inputs, not current clinical performance estimates.</li>
-<li>Sensitivity is the probability of a positive result among infected people.</li>
-<li>For example, 95 of 100 infected samples may test positive.</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="inverse-problem-infection-after-a-positive-test" class="slide level2">
-<h2>Inverse problem: infection after a positive test</h2>
-<div class="footer">
-<ul>
-<li><span class="math inline">P(\text{Positive})</span>: 2%; <span class="math inline">P(\text{Infected})</span>: 0.05%</li>
-</ul>
-</div>
-<p>If the PCR test is positive, how likely is it that the person is infected?</p>
-<ul>
-<li class="fragment">Predict before revealing the calculation.</li>
-<li class="fragment"><span class="math inline">P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected})\,P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%</span></li>
-<li class="fragment">This is the <strong>inverse problem</strong>: use the result to update what we believe about infection.</li>
-</ul>
-<aside class="notes">
-<ul>
-<li>0.95 * 0.0005 / 0.02 = 0.02375</li>
-<li>The low prevalence matters: most people are not infected before testing.</li>
-<li>The calculation uses the specified 2% positive rate; it is not derived from sensitivity and prevalence here.</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section></section>
+<img src="../images/bayes_re_2.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section></section>
 <section>
 <section id="prior-and-posterior" class="title-slide slide level1 center">
 <h1>Prior and posterior</h1>
 
 </section>
-<section id="seedlings-again-prior-likelihood-posterior" class="slide level2">
-<h2>Seedlings again: prior × likelihood = posterior</h2>
+<section id="seedlings-again-posterior-propto-prior-likelihood" class="slide level2">
+<h2>Seedlings again: posterior <span class="math inline">\propto</span> prior × likelihood</h2>
+<style>
+#seedlings-again-posterior-propto-prior-likelihood .seedling-explanation {
+  font-size: 0.7em;
+  line-height: 1.18;
+}
+#seedlings-again-posterior-propto-prior-likelihood .seedling-explanation p {
+  margin: 0 0 0.55em;
+}
+#seedlings-again-posterior-propto-prior-likelihood .seedling-interval {
+  background: rgba(217, 95, 2, 0.10);
+  border-left: 4px solid #d95f02;
+  padding: 0.3em 0.45em;
+  margin-bottom: 0.55em;
+}
+#seedlings-again-posterior-propto-prior-likelihood .seedling-interval p {
+  margin: 0;
+}
+</style>
 <div class="columns">
 <div class="column" style="width:55%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-5-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
 </div><div class="column" style="width:45%;">
-<div class="small">
-<ul>
-<li><span class="teal">Likelihood</span>: 2 survivors out of 5, <span class="math inline">y \sim \mathcal{B}(5, p)</span></li>
-<li><span class="purple">Prior</span>: before the data, every <span class="math inline">p</span> between 0 and 1 is equally plausible, <span class="math inline">p \sim \text{Beta}(1, 1)</span></li>
-<li><span class="orange">Posterior</span>: <span class="math inline">\propto p^2(1-p)^3 \times 1</span></li>
-</ul>
-<ul>
-<li class="fragment">The posterior describes uncertainty about <span class="math inline">p</span>.</li>
-<li class="fragment">Its mean is about 0.43.</li>
-<li class="fragment">A 90% interval runs from 0.15 to 0.73.</li>
-<li class="fragment">This interval depends on the model, prior and observed data.</li>
-</ul>
+<div class="seedling-explanation">
+<p><span class="teal"><strong>Likelihood:</strong></span><br>
+2 survivors out of 5<br>
+<span class="math inline">y \sim \operatorname{Binomial}(5,p)</span></p>
+<p><span class="purple"><strong>Prior:</strong></span><br>
+All values of <span class="math inline">p</span> are equally plausible.<br>
+<span class="math inline">p \sim \operatorname{Beta}(1,1)</span></p>
+<p><span class="orange"><strong>Posterior:</strong></span><br>
+Posterior <span class="math inline">\propto</span> Prior <span class="math inline">\times</span> Likelihood<br>
+<span class="math inline">p\mid y \sim \operatorname{Beta}(3,4)</span></p>
+<p><span class="orange"><strong>Posterior mean:</strong></span> 0.43</p>
+<p><span class="orange"><strong>Peak:</strong></span> 0.4 (= MLE)</p>
+<div class="seedling-interval">
+<p><span class="orange"><strong>95% credible interval:</strong></span> <strong>[0.12, 0.78]</strong></p>
+</div>
 </div>
 </div></div>
 <aside class="notes">
 <ul>
 <li>Beta(1,1) prior + 2 of 5 -&gt; Beta(3, 4) posterior</li>
+<li>The equal-tailed 95% credible interval uses the 2.5th and 97.5th posterior percentiles.</li>
+<li>The pale orange region under the posterior contains 95% of its probability; the shading uses the unrounded quantiles, while the text rounds the endpoints to 0.12 and 0.78.</li>
+<li>The likelihood is omitted from the graph because it has the same shape as the posterior under this uniform prior. The likelihood itself is not a probability density for p.</li>
 <li>contrast the interval statement with a confidence interval</li>
 <li>this small table (mean / interval / probability statement) is the reporting pattern for the whole course</li>
 </ul>
@@ -928,41 +856,21 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
           display:block!important;
       }</style></aside>
 </section>
-<section id="prior-vs.-data-mle-and-bayesian-comparison-coin-toss" class="slide level2">
-<h2>Prior vs.&nbsp;Data: MLE and Bayesian comparison (Coin Toss)</h2>
-<p>As with seedling survival, the number of heads follows a Binomial model. Keep the observed proportion at 0.6 and the prior fixed; change the number of tosses.</p>
-<h3 id="mle">MLE</h3>
-<ul>
-<li class="fragment">A: 3 heads out of 5 tosses → <span class="math inline">\hat p_{\mathrm{MLE}} = 3/5 = 0.6</span></li>
-<li class="fragment">B: 60 heads out of 100 tosses → <span class="math inline">\hat p_{\mathrm{MLE}} = 60/100 = 0.6</span></li>
-</ul>
-<div class="columns">
-<div class="column" style="width:50%;">
-<h3 id="bayesian">Bayesian</h3>
-<ul>
-<li class="fragment"><span class="math inline">\textcolor{#1b9e77}{L_A = \binom{5}{3} p^3 (1-p)^2}</span></li>
-<li class="fragment"><span class="math inline">\textcolor{#1b9e77}{L_B = \binom{100}{60} p^{60} (1-p)^{40}}</span></li>
-<li class="fragment"><span class="math inline">\textcolor{#7570b3}{\mathrm{Prior} \propto p^{50} (1-p)^{50}}</span>
-<ul>
-<li class="fragment">Beta(51, 51): a <strong>strong prior</strong> concentrated near <span class="math inline">p=0.5</span>.</li>
-</ul></li>
-</ul>
-</div><div class="column" style="width:50%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-7-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
-</figure>
+<section id="prior-vs.-data-mle-and-bayesian-inference" class="slide level2">
+<h2>Prior vs.&nbsp;Data: MLE and Bayesian Inference</h2>
+<div style="font-size: 0.85em; line-height: 1.2;">
+<p><span style="color: #F8766D;"><strong>A:</strong></span> 3 heads out of 5 tosses → <strong>MLE = 0.6</strong><br>
+<span style="color: #00BA38;"><strong>B:</strong></span> 60 heads out of 100 tosses → <strong>MLE = 0.6</strong></p>
 </div>
-</div>
-</div>
-</div></div>
-<aside class="notes">
+
+<img data-src="slides_files/figure-revealjs/unnamed-chunk-6-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1248"><aside class="notes">
 <ul>
 <li>Allow 3–5 minutes for these two slides, including a prediction before revealing the updates.</li>
 <li>Ask: will each posterior peak be closer to 0.5 or to 0.6?</li>
 <li>The observed proportion and prior are identical, so the comparison isolates the amount of data.</li>
+<li>Both likelihoods use the full Binomial probability, divided by their own value at the MLE p = 0.6. Each peak is one; neither curve is normalised to have area one.</li>
+<li>The left panel compares likelihood widths. The right panel shows a probability density for the single prior used for both data sets; its vertical scale is independent.</li>
+<li>Dataset A is salmon and solid, dataset B is green and dashed, and the prior is purple and dotdash on both this slide and the following posterior comparison.</li>
 <li>This deliberately strong prior illustrates its influence; it is not a default prior for ecological survival.</li>
 </ul>
 <style type="text/css">
@@ -979,11 +887,21 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 </section>
 <section id="bayesian-updating-two-amounts-of-coin-data" class="slide level2">
 <h2>Bayesian updating: two amounts of coin data</h2>
+<style>
+#bayesian-updating-two-amounts-of-coin-data .coin-interpretation {
+  font-size: 0.7em;
+  line-height: 1.18;
+}
+#bayesian-updating-two-amounts-of-coin-data .coin-interpretation p {
+  margin: 0 0 0.35em;
+}
+</style>
 
-<img data-src="slides_files/figure-revealjs/coin-posteriors-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><ul>
-<li>Same observed proportion, same strong prior. More data change its influence.</li>
-<li>Posterior peaks (MAP): about 0.505 and 0.55. Both MLEs are 0.6.</li>
-</ul>
+<img data-src="slides_files/figure-revealjs/coin-posteriors-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><div class="coin-interpretation">
+<p><span style="color: #F8766D;"><strong>Post A (5 tosses):</strong></span> The prior has a stronger influence, so the posterior stays close to the prior.</p>
+<p><span style="color: #00BA38;"><strong>Post B (100 tosses):</strong></span> The data have more influence, shifting the posterior toward the observed proportion (0.6).</p>
+<p><strong>Take-home message:</strong> <strong>Same MLE (0.6), different posteriors.</strong></p>
+</div>
 <aside class="notes">
 <p>The posteriors are Beta(54,53) and Beta(111,91). MAPs are 53/105 and 110/200. The means differ from the peaks. At 100 tosses the prior still has substantial influence. These are deliberate teaching priors. Do not use them as defaults. No derivation is required. Explain the figure before discussing the numbers.</p>
 <style type="text/css">
@@ -1144,7 +1062,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
 </figure>
 </div>
 </div>
@@ -1152,7 +1070,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <div class="small">
 <ul>
 <li class="fragment">Posterior mean: <code>mean(draws$p)</code> = 0.43</li>
-<li class="fragment">90% interval: <code>quantile(draws$p, c(0.05, 0.95))</code> = 0.15, 0.72</li>
+<li class="fragment">95% interval: <code>quantile(draws$p, c(0.025, 0.975))</code> = 0.12, 0.76</li>
 <li class="fragment"><span class="math inline">P(p &gt; 0.5)</span>: <code>mean(draws$p &gt; 0.5)</code> = 0.34</li>
 <li class="fragment">Anything you can compute from <span class="math inline">p</span>, you compute for every draw.</li>
 </ul>
@@ -1215,6 +1133,107 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 <section id="appendix-optional-material" class="title-slide slide level1 center" data-visibility="uncounted">
 <h1>Appendix: optional material</h1>
 
+</section>
+<section id="what-the-mle-does-not-tell-us" class="slide level2" data-visibility="uncounted">
+<h2>What the MLE does not tell us</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:45%;">
+<ul>
+<li class="fragment">Both data sets give the same MLE: <span class="math inline">\hat{p} = 0.4</span>.</li>
+<li class="fragment">With 40 of 100, the likelihood curve is narrower.</li>
+<li class="fragment">A single number hides this uncertainty.</li>
+<li class="fragment">What we really want: <strong>how plausible is each value of <span class="math inline">p</span>, given the data?</strong> <span class="math display">P(p \mid \text{data})</span></li>
+</ul>
+</div></div>
+<aside class="notes">
+<ul>
+<li>Each curve is divided by its own maximum, so both peaks are one. This makes their widths easier to compare without changing either MLE or the likelihood ratios within each data set.</li>
+<li>Relative likelihood is not a posterior probability density for p; the curves are not normalised to integrate to one.</li>
+<li>the likelihood is P(data | p), not P(p | data)</li>
+<li>to turn it around we need Bayes’ theorem</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="forward-problem-a-positive-pcr-test" class="slide level2" data-visibility="uncounted">
+<h2>Forward problem: a positive PCR test</h2>
+<div class="footer">
+<ul>
+<li><span class="math inline">P(\text{Positive})</span>: 2%; <span class="math inline">P(\text{Infected})</span>: 0.05%</li>
+</ul>
+</div>
+<p>If a person is infected, what is the probability that the PCR test is positive?</p>
+<ul>
+<li class="fragment"><span class="math inline">P(\text{Positive} \mid \text{Infected}) = 95\%</span></li>
+<li class="fragment">This is the <strong>forward problem</strong>: given infection status, predict the test result.</li>
+</ul>
+<aside class="notes">
+<ul>
+<li>These are hypothetical teaching inputs, not current clinical performance estimates.</li>
+<li>Sensitivity is the probability of a positive result among infected people.</li>
+<li>For example, 95 of 100 infected samples may test positive.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="inverse-problem-infection-after-a-positive-test" class="slide level2" data-visibility="uncounted">
+<h2>Inverse problem: infection after a positive test</h2>
+<div class="footer">
+<ul>
+<li><span class="math inline">P(\text{Positive})</span>: 2%; <span class="math inline">P(\text{Infected})</span>: 0.05%</li>
+</ul>
+</div>
+<p>If the PCR test is positive, how likely is it that the person is infected?</p>
+<ul>
+<li class="fragment">Predict before revealing the calculation.</li>
+<li class="fragment"><span class="math inline">P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected})\,P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%</span></li>
+<li class="fragment">This is the <strong>inverse problem</strong>: use the result to update what we believe about infection.</li>
+</ul>
+<aside class="notes">
+<ul>
+<li>0.95 * 0.0005 / 0.02 = 0.02375</li>
+<li>The low prevalence matters: most people are not infected before testing.</li>
+<li>The calculation uses the specified 2% positive rate; it is not derived from sensitivity and prevalence here.</li>
+</ul>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
 <section id="four-things-that-are-easy-to-mix-up" class="slide level2" data-visibility="uncounted">
 <h2>Four things that are easy to mix up</h2>
@@ -1547,7 +1566,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
   <script src="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
   <script src="slides_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="slides_files/libs/revealjs/plugin/quarto-support/support.js"></script>
-
+  
 
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
@@ -1569,7 +1588,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
 'smaller': false,
-
+ 
         // Display controls in the bottom right corner
         controls: true,
 
@@ -1731,7 +1750,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
         ]
       });
     </script>
-
+    
     <script>
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
@@ -1777,7 +1796,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
         });
         const isCodeAnnotation = (el) => {
           for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {
+            if (clz.startsWith('code-annotation-')) {                     
               return true;
             }
           }
@@ -1797,11 +1816,11 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
             button.setAttribute("data-bs-toggle", "tooltip");
             button.setAttribute("data-bs-placement", "left");
             button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button,
-              { trigger: "manual",
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
                 customClass: "code-copy-button-tooltip",
                 offset: [0, -8]});
-            tooltip.show();
+            tooltip.show();    
           }
           setTimeout(function() {
             if (tooltip) {
@@ -1880,7 +1899,7 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
           }
             config['offset'] = [0,0];
             config['maxWidth'] = 700;
-          window.tippy(el, config);
+          window.tippy(el, config); 
         }
         const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
         for (var i=0; i<noterefs.length; i++) {
@@ -1939,6 +1958,6 @@ P(A \mid B) = \frac{P(B \mid A) \times P(A)}{P(B)}
       </script>
     <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
     <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
-
+    
 
 </body></html>
