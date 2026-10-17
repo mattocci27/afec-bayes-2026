@@ -22,6 +22,19 @@ student_source <- function(lines) {
   output
 }
 
+# Source generation also runs independently of saved fits and rendering.
+generate_student_sources <- function(days = paste0("day", 1:3)) {
+  if (!length(days) || any(!days %in% paste0("day", 1:3)))
+    stop("Choose day1, day2 or day3")
+  for (day in days) {
+    participant <- file.path(day, "exercise-student.qmd")
+    lines <- student_source(readLines(file.path(day, "exercise.qmd")))
+    if (!file.exists(participant) || !identical(readLines(participant), lines))
+      writeLines(lines, participant)
+  }
+  invisible(TRUE)
+}
+
 build_classroom_materials <- function(root = here::here(), render = TRUE,
                                       render_slides = TRUE, package = TRUE) {
   root <- normalizePath(root, mustWork = TRUE)
@@ -30,12 +43,7 @@ build_classroom_materials <- function(root = here::here(), render = TRUE,
   on.exit(if (is.na(old_mode)) Sys.unsetenv("AFEC_USE_PRECOMPUTED")
           else Sys.setenv(AFEC_USE_PRECOMPUTED = old_mode), add = TRUE)
   Sys.setenv(AFEC_USE_PRECOMPUTED = "TRUE")
-  for (day in paste0("day", 1:3)) {
-    participant <- file.path(day, "exercise-student.qmd")
-    lines <- student_source(readLines(file.path(day, "exercise.qmd")))
-    if (!file.exists(participant) || !identical(readLines(participant), lines))
-      writeLines(lines, participant)
-  }
+  generate_student_sources()
   env <- new.env(parent = globalenv())
   for (file in c("R/functions.R", "R/course_data.R", "docker/check-fits.R"))
     sys.source(file, env)
@@ -48,6 +56,7 @@ build_classroom_materials <- function(root = here::here(), render = TRUE,
     if (!nzchar(Sys.which("quarto"))) stop("Quarto is required to render handouts")
     for (day in paste0("day", 1:3)) {
       docs <- c("exercise.qmd", "exercise-student.qmd", "results.qmd")
+      if (day == "day1") docs <- c(docs, "instructor-notes.qmd")
       if (render_slides) docs <- c("slides.qmd", docs)
       for (doc in docs) {
         input <- file.path(day, doc)

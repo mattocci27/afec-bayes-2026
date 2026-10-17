@@ -96,14 +96,14 @@ source(here::here("R/slides_setup.R"))
 ::: small
 - Each day: short lectures + one exercise in the browser-based R environment.
 - The goal is to explain Bayesian ideas, read figures and connect models to ecological questions.
-- Core tasks use supplied posterior draws.
+- Day 1: calculate a posterior directly. Days 2–3: use supplied posterior draws.
   The instructor may demonstrate live sampling.
 :::
 :::
 
 ::: notes
 - 3 x 90 minutes
-- nobody needs to install anything; work in pairs and swap driver/reader roles
+- Nobody needs to install anything. Start individually; nearby discussion and help are optional.
 :::
 
 ## {#where-we-are-going}
@@ -288,7 +288,7 @@ Which fits better: $\mu=0$ or $\mu=2$?
 - This graph compares means 0 and 2, with SD fixed at 1; the observed x values stay in the same places.
 - Each candidate mean gives three density heights and one product. Changing mu changes the heights and their product; the mapping from mu to that product is the likelihood function L(mu).
 - Say: "The observations stay fixed. We change the mean, read the three heights, and multiply them. Each mean gives a different product. We call this product, as a function of the mean, the likelihood."
-- Allow about 30 seconds to predict and a brief pair explanation before the R comparison.
+- Allow about 30 seconds for individual prediction; invite a brief explanation before the R comparison.
 - The prediction, R comparison and likelihood-curve explanation use about 3 minutes of the existing 8-23 minute likelihood block, not an additional code exercise.
 - Multiplying the densities is justified by the independence assumption.
 :::
@@ -341,7 +341,7 @@ Taking logs preserves the ordering: larger likelihood, larger log-likelihood.
 ::: notes
 - Restore the explicit dnorm calculation from main.qmd, with short lines for readability.
 - Ask what stays fixed and which argument changes. Participants may read the code and explain their prediction; running it is optional.
-- Reveal the two values only after the pair explanation: about -5.007 and -11.007.
+- Reveal the two values only after participants have explained their predictions: about -5.007 and -11.007.
 - These are log-likelihoods, not probabilities or posterior probabilities of the two means.
 - The dnorm terms are densities. Independence makes their product the joint likelihood; taking logs turns the product into a sum.
 - A larger log-likelihood is better here even though both values are negative. No log derivation, derivative or optimisation code is required.
@@ -810,20 +810,23 @@ No derivation is required. Explain the figure before discussing the numbers.
 
 `day1/exercise-student.qmd`
 
-- Find the prior, likelihood and their product in the supplied R code.
-- Predict what happens when 2/5 becomes 40/100; change only the two counts.
-- Use your plot to explain what the observed proportion alone cannot tell us.
+- Choose a small survey and a larger survey, both with survival proportion 0.4.
+- Predict the difference, then calculate a posterior for each survey.
+- Compare the plots and explain the uncertainty in survival probability.
 
 The prior stays flat. Changing the prior is an optional extension.
 
 ::: notes
-58-70 minutes: 8 minutes of pair work and 4 minutes debrief.
+58-70 minutes: 8 minutes of individual work and 4 minutes debrief.
+Participants may consult someone nearby; do not organise fixed pairs.
 The coin slides illustrated strong-prior influence. Here participants transfer
-that binomial structure to seedlings, identify the updating calculation and
-change the inputs themselves. Do not repeat the coin explanation or reveal
+that binomial structure to seedlings and design their own comparison, keeping
+the observed proportion and prior fixed. Do not repeat the coin explanation or reveal
 the sample-size answer before their prediction.
-Checkpoint at 4 minutes: both partners have identified the prior and likelihood
-and predicted the sample-size comparison. If R fails, use day1/results.html.
+Checkpoint at 4 minutes: participants have chosen two valid surveys with proportion
+0.4 and predicted the width comparison. If R fails, use day1/results.html.
+Say: "Compare the horizontal widths, not the heights." Slide plots show density;
+the exercise plots probability per grid point. Keep this distinction oral.
 Skip the optional prior change if needed. This is the only required operation exercise.
 :::
 
@@ -925,17 +928,18 @@ ggplot(as_tibble(seedling_fit$draws), aes(p)) +
 - the summary numbers differ slightly from the exact ones: Monte Carlo error
 :::
 
-## A figure to explain to your partner
+## Explain your survey comparison
 
-The same 2 survivors out of 5 can give different posterior distributions
-under different priors.
+Use the two posterior plots you made in the exercise.
 
-- What does the likelihood contribute?
-- What does the prior contribute?
-- Which uncertainty would matter in your own research?
+- How did the posterior width change between your two surveys?
+- What does that tell you about uncertainty in the survival probability?
 
 ::: notes
-80-85 minutes: short pair explanation followed by two contributions from the room.
+80-85 minutes: participants first explain their own result in words. Invite two
+brief contributions from the room; nearby discussion is optional.
+Use the participant's plots, or the 4/10 and 20/50 examples in day1/results.html
+if code access failed. No new prior comparison or additional exercise is required.
 Keep 85-90 minutes for questions and delay buffer.
 :::
 

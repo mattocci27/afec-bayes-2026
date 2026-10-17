@@ -31,7 +31,7 @@
     ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
       width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
@@ -150,12 +150,12 @@
     }
     .reveal .footnotes ol {
       counter-reset: ol;
-      list-style-type: none; 
+      list-style-type: none;
       margin-left: 0;
     }
     .reveal .footnotes ol li:before {
       counter-increment: ol;
-      content: counter(ol) ". "; 
+      content: counter(ol) ". ";
     }
     .reveal .footnotes ol li > p:first-child {
       display: inline-block;
@@ -197,19 +197,19 @@
     .reveal .slide > img.r-stretch.quarto-figure-center {
       display: block;
       margin-left: auto;
-      margin-right: auto; 
+      margin-right: auto;
     }
     .reveal .slide > img.stretch.quarto-figure-left,
     .reveal .slide > img.r-stretch.quarto-figure-left  {
       display: block;
       margin-left: 0;
-      margin-right: auto; 
+      margin-right: auto;
     }
     .reveal .slide > img.stretch.quarto-figure-right,
     .reveal .slide > img.r-stretch.quarto-figure-right  {
       display: block;
       margin-left: auto;
-      margin-right: 0; 
+      margin-right: 0;
     }
   </style>
   <script src="slides_files/libs/kePrint-0.0.1/kePrint.js"></script>
@@ -271,14 +271,14 @@ AFEC-X 2026 · 21 October
 <ul>
 <li>Each day: short lectures + one exercise in the browser-based R environment.</li>
 <li>The goal is to explain Bayesian ideas, read figures and connect models to ecological questions.</li>
-<li>Core tasks use supplied posterior draws. The instructor may demonstrate live sampling.</li>
+<li>Day 1: calculate a posterior directly. Days 2–3: use supplied posterior draws. The instructor may demonstrate live sampling.</li>
 </ul>
 </div>
 </div>
 <aside class="notes">
 <ul>
 <li>3 x 90 minutes</li>
-<li>nobody needs to install anything; work in pairs and swap driver/reader roles</li>
+<li>Nobody needs to install anything. Start individually; nearby discussion and help are optional.</li>
 </ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -449,7 +449,7 @@ AFEC-X 2026 · 21 October
 <li>This graph compares means 0 and 2, with SD fixed at 1; the observed x values stay in the same places.</li>
 <li>Each candidate mean gives three density heights and one product. Changing mu changes the heights and their product; the mapping from mu to that product is the likelihood function L(mu).</li>
 <li>Say: “The observations stay fixed. We change the mean, read the three heights, and multiply them. Each mean gives a different product. We call this product, as a function of the mean, the likelihood.”</li>
-<li>Allow about 30 seconds to predict and a brief pair explanation before the R comparison.</li>
+<li>Allow about 30 seconds for individual prediction; invite a brief explanation before the R comparison.</li>
 <li>The prediction, R comparison and likelihood-curve explanation use about 3 minutes of the existing 8-23 minute likelihood block, not an additional code exercise.</li>
 <li>Multiplying the densities is justified by the independence assumption.</li>
 </ul>
@@ -507,7 +507,7 @@ AFEC-X 2026 · 21 October
 <ul>
 <li>Restore the explicit dnorm calculation from main.qmd, with short lines for readability.</li>
 <li>Ask what stays fixed and which argument changes. Participants may read the code and explain their prediction; running it is optional.</li>
-<li>Reveal the two values only after the pair explanation: about -5.007 and -11.007.</li>
+<li>Reveal the two values only after participants have explained their predictions: about -5.007 and -11.007.</li>
 <li>These are log-likelihoods, not probabilities or posterior probabilities of the two means.</li>
 <li>The dnorm terms are densities. Independence makes their product the joint likelihood; taking logs turns the product into a sum.</li>
 <li>A larger log-likelihood is better here even though both values are negative. No log derivation, derivative or optimisation code is required.</li>
@@ -919,13 +919,13 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
 <h2>Exercise: calculate a seedling posterior</h2>
 <p><code>day1/exercise-student.qmd</code></p>
 <ul>
-<li>Find the prior, likelihood and their product in the supplied R code.</li>
-<li>Predict what happens when 2/5 becomes 40/100; change only the two counts.</li>
-<li>Use your plot to explain what the observed proportion alone cannot tell us.</li>
+<li>Choose a small survey and a larger survey, both with survival proportion 0.4.</li>
+<li>Predict the difference, then calculate a posterior for each survey.</li>
+<li>Compare the plots and explain the uncertainty in survival probability.</li>
 </ul>
 <p>The prior stays flat. Changing the prior is an optional extension.</p>
 <aside class="notes">
-<p>58-70 minutes: 8 minutes of pair work and 4 minutes debrief. The coin slides illustrated strong-prior influence. Here participants transfer that binomial structure to seedlings, identify the updating calculation and change the inputs themselves. Do not repeat the coin explanation or reveal the sample-size answer before their prediction. Checkpoint at 4 minutes: both partners have identified the prior and likelihood and predicted the sample-size comparison. If R fails, use day1/results.html. Skip the optional prior change if needed. This is the only required operation exercise.</p>
+<p>58-70 minutes: 8 minutes of individual work and 4 minutes debrief. Participants may consult someone nearby; do not organise fixed pairs. The coin slides illustrated strong-prior influence. Here participants transfer that binomial structure to seedlings and design their own comparison, keeping the observed proportion and prior fixed. Do not repeat the coin explanation or reveal the sample-size answer before their prediction. Checkpoint at 4 minutes: participants have chosen two valid surveys with proportion 0.4 and predicted the width comparison. If R fails, use day1/results.html. Say: “Compare the horizontal widths, not the heights.” Slide plots show density; the exercise plots probability per grid point. Keep this distinction oral. Skip the optional prior change if needed. This is the only required operation exercise.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -1093,16 +1093,15 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
           display:block!important;
       }</style></aside>
 </section>
-<section id="a-figure-to-explain-to-your-partner" class="slide level2">
-<h2>A figure to explain to your partner</h2>
-<p>The same 2 survivors out of 5 can give different posterior distributions under different priors.</p>
+<section id="explain-your-survey-comparison" class="slide level2">
+<h2>Explain your survey comparison</h2>
+<p>Use the two posterior plots you made in the exercise.</p>
 <ul>
-<li>What does the likelihood contribute?</li>
-<li>What does the prior contribute?</li>
-<li>Which uncertainty would matter in your own research?</li>
+<li>How did the posterior width change between your two surveys?</li>
+<li>What does that tell you about uncertainty in the survival probability?</li>
 </ul>
 <aside class="notes">
-<p>80-85 minutes: short pair explanation followed by two contributions from the room. Keep 85-90 minutes for questions and delay buffer.</p>
+<p>80-85 minutes: participants first explain their own result in words. Invite two brief contributions from the room; nearby discussion is optional. Use the participant’s plots, or the 4/10 and 20/50 examples in day1/results.html if code access failed. No new prior comparison or additional exercise is required. Keep 85-90 minutes for questions and delay buffer.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -1565,7 +1564,7 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
   <script src="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
   <script src="slides_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="slides_files/libs/revealjs/plugin/quarto-support/support.js"></script>
-  
+
 
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
@@ -1587,7 +1586,7 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
 'smaller': false,
- 
+
         // Display controls in the bottom right corner
         controls: true,
 
@@ -1749,7 +1748,7 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
         ]
       });
     </script>
-    
+
     <script>
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
@@ -1795,7 +1794,7 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
         });
         const isCodeAnnotation = (el) => {
           for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {                     
+            if (clz.startsWith('code-annotation-')) {
               return true;
             }
           }
@@ -1815,11 +1814,11 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
             button.setAttribute("data-bs-toggle", "tooltip");
             button.setAttribute("data-bs-placement", "left");
             button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button, 
-              { trigger: "manual", 
+            tooltip = new bootstrap.Tooltip(button,
+              { trigger: "manual",
                 customClass: "code-copy-button-tooltip",
                 offset: [0, -8]});
-            tooltip.show();    
+            tooltip.show();
           }
           setTimeout(function() {
             if (tooltip) {
@@ -1898,7 +1897,7 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
           }
             config['offset'] = [0,0];
             config['maxWidth'] = 700;
-          window.tippy(el, config); 
+          window.tippy(el, config);
         }
         const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
         for (var i=0; i<noterefs.length; i++) {
@@ -1957,6 +1956,6 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
       </script>
     <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
     <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
-    
+
 
 </body></html>

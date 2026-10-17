@@ -54,20 +54,26 @@ check_exercises <- function() {
       stopifnot(!any(grepl("source\\(|course_fit\\(|plot_update\\(", lines)))
       exact <- dbeta(env$p, 3, 4); exact <- exact / sum(exact)
       stopifnot(max(abs(env$posterior - exact)) < 1e-12)
-      # Run the actual participant edit in a separate environment.
+      # Run two possible participant-chosen surveys using the supplied chunk.
       first <- match("```{r core-data-comparison, fig.height=3.4}", lines)
       last <- first + match("```", lines[(first + 1L):length(lines)])
-      code <- lines[(first + 1L):(last - 1L)]
-      code[code == "y <- 2"] <- "y <- 40"
-      code[code == "N <- 5"] <- "N <- 100"
-      larger <- new.env(parent=globalenv())
-      eval(parse(text=code), larger)
-      exact <- dbeta(larger$p, 41, 61); exact <- exact / sum(exact)
-      stopifnot(max(abs(larger$posterior - exact)) < 1e-12,
-                larger$y/larger$N == env$y/env$N,
-                identical(larger$p, env$p),
-                sum(larger$posterior * (larger$p - sum(larger$p * larger$posterior))^2) <
-                sum(env$posterior * (env$p - sum(env$p * env$posterior))^2))
+      starter <- lines[(first + 1L):(last - 1L)]
+      variances <- numeric(2)
+      for (k in 1:2) {
+        N <- c(10, 50)[k]; y <- 0.4 * N
+        code <- starter
+        code[code == "y <- 2"] <- paste("y <-", y)
+        code[code == "N <- 5"] <- paste("N <-", N)
+        chosen <- new.env(parent=globalenv())
+        eval(parse(text=code), chosen)
+        exact <- dbeta(chosen$p, y + 1, N - y + 1)
+        exact <- exact / sum(exact)
+        stopifnot(max(abs(chosen$posterior - exact)) < 1e-12,
+                  chosen$y/chosen$N == 0.4, identical(chosen$p, env$p))
+        variances[k] <- sum(chosen$posterior *
+          (chosen$p - sum(chosen$p * chosen$posterior))^2)
+      }
+      stopifnot(variances[2] < variances[1])
     }
     if (day == "day2") {
       low <- env$probabilities$p[env$probabilities$density == -1]

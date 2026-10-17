@@ -1,31 +1,47 @@
-# Render the 2026 AFEC instructor materials from the project root.
+# Build the 2026 AFEC materials from the project root.
 PROJECT_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 QUARTO ?= quarto
+RSCRIPT ?= Rscript
 
-.PHONY: help day1 day2 day3 slides
+.PHONY: help day1 day2 day3 slides materials
 
 help:
 	@printf '%s\n' \
 	  'Targets:' \
-	  '  make day1   Render Day 1 slides and instructor exercise' \
-	  '  make day2   Render Day 2 slides and instructor exercise' \
-	  '  make day3   Render Day 3 slides and instructor exercise' \
+	  '  make day1   Build Day 1 slides, exercises and result sheet' \
+	  '  make day2   Build Day 2 slides, exercises and result sheet' \
+	  '  make day3   Build Day 3 slides, exercises and result sheet' \
 	  '  make slides Render all three slide decks' \
+	  '  make materials Build all materials and the participant ZIP' \
 	  '  make help   Show this help'
 
-day1:
+day1: day1/exercise-student.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day1/slides.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day1/exercise.qmd
+	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day1/exercise-student.qmd
+	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day1/results.qmd
+	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day1/instructor-notes.qmd
 
-day2:
+day2: day2/exercise-student.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day2/slides.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day2/exercise.qmd
+	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day2/exercise-student.qmd
+	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day2/results.qmd
 
-day3:
+day3: day3/exercise-student.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day3/slides.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day3/exercise.qmd
+	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day3/exercise-student.qmd
+	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day3/results.qmd
 
 slides:
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day1/slides.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day2/slides.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day3/slides.qmd
+
+# Regenerate the solution-free source before rendering each day's handout.
+day%/exercise-student.qmd: day%/exercise.qmd R/classroom_materials.R R/generate_student_sources.R
+	@cd "$(PROJECT_ROOT)" && $(RSCRIPT) R/generate_student_sources.R day$*
+
+materials:
+	@cd "$(PROJECT_ROOT)" && $(RSCRIPT) R/build_classroom_materials.R

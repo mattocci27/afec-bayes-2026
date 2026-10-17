@@ -1,0 +1,225 @@
+---
+title: "Day 1: instructor notes and demonstrations"
+author: "Masatoshi Katabuchi"
+format:
+  html:
+    theme: coderpro
+    toc: true
+    embed-resources: true
+    html-math-method: katex
+execute:
+  cache: false
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(message=FALSE, warning=FALSE, fig.align="center",
+                      fig.width=8, fig.height=4.5, comment="#>")
+```
+
+For the instructor. Use with [the exercise](exercise.html) and
+[the offline result sheet](results.html). These notes are excluded from the
+participant ZIP.
+
+# Core exercise: purpose and model
+
+Participants design a small and a larger survey with the same observed survival
+proportion (0.4), predict a sample-size effect and explain posterior uncertainty. This uses the same binomial
+structure as the coin slides, now for seedling survival with a flat prior.
+The exercise assumes conditional independence and a common survival probability:
+$y \sim \operatorname{Binomial}(N,p)$, $p \sim \operatorname{Beta}(1,1)$.
+Hold that model, prior, grid and horizontal axis fixed in the comparison.
+The lecture supplies a comparison; participants now construct their own.
+
+Assume participants can run supplied R code and edit two assignments; do not
+require function writing or a derivation of the Beta posterior. Allow about
+8 minutes for reading, prediction, editing and discussion, then 4 for explanation.
+If time is short, omit the optional prior comparison below.
+
+`prior <- dbeta(...)` supplies the prior; `likelihood <- dbinom(...)` evaluates
+the likelihood with the counts fixed and p varying; multiplication and
+normalisation produce the grid posterior. The plotting lines only display it.
+
+Accept any two valid integer-count surveys with different N and y/N = 0.4.
+For example, 4/10 and 20/50 give Beta(5,7) and Beta(21,31) continuous posteriors;
+the larger survey gives the narrower posterior. These are examples, not assigned
+counts. Ask participants to check that their own two proportions are both 0.4.
+If stuck, suggest choosing two different multiples of 5 for N, then y = 0.4 N.
+N between 10 and 200 is convenient for the supplied 101-point grid.
+
+Participants copy the calculation into a new code chunk for the second survey,
+changing only y and N. Keep both plots visible. If copying a labelled Quarto
+chunk, give it a unique label or remove its label to avoid duplicate-label errors.
+Before class, rehearse creating the second chunk, changing the counts and rendering
+both figures in a fresh participant copy.
+
+Example interpretation: “The two observed survival proportions are equal, but the
+larger survey gives less uncertainty about the survival probability.” Posterior
+means need not be identical. A narrower distribution does not mean that survival
+itself has become less variable or that the model assumptions have been verified.
+
+The lecture plots continuous density; the exercise plots probability per grid
+point. Say only: “Compare the horizontal widths, not the heights.”
+Both exercise plots have the same horizontal axis and grid. Vertical scales adjust to avoid
+clipping when counts change; compare horizontal width, not raw displayed height.
+The y-axis is probability per grid point, not continuous density. A much larger N
+may require a finer grid to resolve the posterior width; use the modest survey
+sizes above during class rather than making grid resolution another core task.
+
+`dbeta()` gives the prior density at each candidate p, and `dbinom()` evaluates
+the probability of the observed count for each candidate. Multiplying these
+values and normalising their sum produces a discrete grid approximation.
+The plotted heights are probabilities assigned to grid points, not continuous
+densities. Beta(1,1) gives equal prior weight across the grid.
+
+If browser R access fails, use the example 4/10 and 20/50 figures in `results.html`.
+Participants can still predict, compare and explain. Start individually; nearby
+help and discussion are optional. No fixed pairs or role changes are required,
+and no homework is required.
+
+# Optional extension: change the prior
+
+After the core task, suggest returning to `y <- 2` and `N <- 5` and replacing
+only the prior line with the following. Ask participants to predict the shift,
+rerun the whole chunk, then discuss what ecological evidence could support it.
+Keep the grid and horizontal axis fixed.
+
+```{r optional-prior, eval=FALSE}
+prior <- dbeta(p, shape1 = 8, shape2 = 2)
+```
+
+The continuous posterior is Beta(10,5), with mean 10/15, compared with 3/7 under
+the flat prior. The posterior shifts towards higher survival probabilities.
+These priors are teaching contrasts, not general recommendations; a high-survival
+prior needs evidence from a comparable habitat and census period.
+
+
+# Instructor demonstration: Stan reads the same model
+
+This demonstration returns to the starter 2/5 data, rather than participants' own
+chosen counts. Follow the mapping from data to
+unknown survival probability and assumptions. Running these chunks is optional.
+
+```{r setup}
+library(tidyverse)
+library(posterior)
+library(bayesplot)
+library(patchwork)
+library(here)
+source(here("R/functions.R"))
+source(here("R/course_data.R"))
+source(here("R/course_utils.R"))
+source(here("R/course_visuals.R"))
+theme_set(theme_bw(base_size=14))
+```
+
+```{r demo-stan, echo=FALSE, results="asis"}
+cat("```stan\n", paste(readLines(here("stan/binomial.stan")), collapse="\n"), "\n```\n", sep="")
+```
+
+```{r demo-draws}
+fit <- course_fit("day1_seedling")
+draws <- fit$draws
+fit$source
+plot_update(2, 5, 1, 1) +
+  geom_histogram(data=as_tibble(draws), aes(x=p, y=after_stat(density)),
+                 inherit.aes=FALSE, bins=30, fill="grey40", alpha=.2)
+```
+
+The histogram approximates the exact posterior curve. Stan returns samples from
+a distribution. It does not return only a best value. The saved result uses the
+same 2/5 data and Beta(1,1) prior as our first plot.
+
+## The same model in brms
+
+brms writes Stan code from an R formula. Here we keep exactly the same model:
+
+$$y\sim\operatorname{Binomial}(5,p),\qquad p\sim\operatorname{Beta}(1,1).$$
+
+Read this as an alternative way to specify the model within the same demonstration,
+not an additional exercise. These chunks are not run when building the handout.
+The saved Stan result above remains the classroom fallback; it is not a brms fit.
+
+```{r demo-brms-model, eval=FALSE}
+library(brms)
+seedlings <- data.frame(y=2L, N=5L)
+seedling_formula <- bf(y | trials(N) ~ 0 + Intercept)
+seedling_family <- binomial(link="identity")
+seedling_prior <- set_prior("beta(1, 1)", class="b", lb=0, ub=1)
+```
+
+| Part of the model | Stan | brms |
+|---|---|---|
+| Observed counts | `N=5`, `y=2` | One row of `seedlings`; `trials(N)` supplies the number of seedlings |
+| Unknown probability | `p`, bounded between 0 and 1 | `0 + Intercept` gives one coefficient, bounded by `lb=0, ub=1` |
+| Observation model | `y ~ binomial(N, p)` | `binomial(link="identity")` makes that coefficient equal to $p$ |
+| Prior | `p ~ beta(1, 1)` | The Beta prior on this coefficient, `class="b"` |
+
+`0 + Intercept` treats the intercept as an ordinary coefficient so that the bounded
+prior applies to it. With the identity link, this coefficient is the probability
+itself. This bounded, intercept-only example matches our Stan model. The usual
+logit link instead models log-odds; a Normal prior there would give a different
+prior on $p$. Day 2 uses that logit formulation for a density-dependent probability.
+
+**Optional instructor execution:** run the following only in a prepared environment
+with brms, CmdStan and a working C++ toolchain. It compiles a new model and runs new
+inference; participants do not need to run it or install anything. Prepare the result
+before class rather than waiting for compilation during the demonstration.
+
+```{r demo-brms-fit, eval=FALSE}
+fit_brms <- brm(
+  formula=seedling_formula, data=seedlings,
+  family=seedling_family, prior=seedling_prior,
+  backend="cmdstanr", seed=20261021,
+  chains=4, cores=2, iter=2000, warmup=1000, refresh=0
+)
+brms_draws <- posterior::as_draws_df(fit_brms)
+p_brms <- brms_draws$b_Intercept  # identity link: this is p, not logit(p)
+mean(p_brms)
+quantile(p_brms, c(0.05, 0.95))
+
+plot_update(2, 5, 1, 1) +
+  geom_histogram(data=data.frame(p=p_brms), aes(x=p, y=after_stat(density)),
+                 inherit.aes=FALSE, bins=30, fill="grey40", alpha=.2)
+```
+
+The target posterior is again Beta(3,4): mean $3/7$ and the same exact interval as
+the first plot. The brms and handwritten Stan histograms should approximate the
+same distribution; individual draws and summaries need not match exactly.
+Before using a new fit, inspect chain traces, R-hat, bulk/tail ESS, divergences,
+treedepth and E-BFMI together. Model checking is still needed beyond computation.
+
+For an optional look at the generated Stan code, without compilation or sampling:
+
+```{r demo-brms-stancode, eval=FALSE}
+cat(make_stancode(seedling_formula, data=seedlings,
+                  family=seedling_family, prior=seedling_prior))
+```
+
+References: brms documentation on [formulas](https://paulbuerkner.com/brms/reference/brmsformula.html),
+[bounded priors](https://paulbuerkner.com/brms/reference/set_prior.html),
+and [supported links](https://paulbuerkner.com/brms/reference/brmsfamily.html).
+
+# Optional extension: a numerical summary
+
+Do this after the core exercise or after class. The data and model stay fixed.
+
+```{r optional-summary}
+draws <- course_fit("day1_seedling")$draws
+summarise_update(2, 5, 1, 1)
+mean(draws$p)
+quantile(draws$p, c(0.05, 0.95))
+mean(draws$p > 0.5)
+```
+
+Interpret the interval in words. What does the last line estimate?
+
+::: {.callout-tip collapse="true"}
+## Solution and instructor notes
+
+The interval describes uncertainty about the survival probability, conditional on
+the model, prior and data. The final line approximates the posterior probability
+that $p>0.5$. Small differences between the exact Beta calculations and saved
+Stan draws reflect Monte Carlo approximation. These summaries are optional today.
+
+:::
+

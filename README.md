@@ -28,7 +28,7 @@ participants. The agreed plan prioritises Bayesian thinking, figure interpretati
 and connections to ecological research at the level of `main.qmd`. Participants run
 complete supplied R code, with one core exercise per day. Stan editing is optional.
 The design assumes English, some R execution experience, daytime GLM practice,
-15 pairs and no homework. Confirm the remaining assumptions and browser setup with
+individual work with optional nearby discussion, and no homework. Confirm the remaining assumptions and browser setup with
 the organisers. See [the agreed design](classroom/restructure-proposal.md) and
 [the instructor schedule](classroom/instructor.md).
 
@@ -70,26 +70,28 @@ Rscript R/build_classroom_materials.R --package-only
 Rscript R/check_classroom_materials.R
 ```
 
-### Direct Quarto renders
+### Make targets
 
-From this project directory, `make day1`, `make day2`, or `make day3` renders
-the day's slides and instructor exercise to `dayN/slides.html` and
-`dayN/exercise.html`. `make slides` renders all three slide decks, and `make`
-(or `make help`) lists the targets. From another directory, you can use
-`make -C` with the project path, for example `make -C /path/to/afec-bayes-2026 day1`.
+`make day1`, `make day2`, and `make day3` regenerate that day's
+`exercise-student.qmd` from `exercise.qmd`, then render the slides, instructor
+exercise, participant handout and result sheet. Day 1 also renders the separate
+instructor notes. Edit `exercise.qmd`; the generated participant source is overwritten.
 
-These renders execute the chunks needed for figures and summaries. The slides
-read their saved fits from `fits/`; core exercise inference tasks load supplied
-fits, while other core chunks do summaries or lightweight simulation. Optional
-changed-input Stan chunks remain disabled. These Make targets never
-run `R/precompute_fits.R` and do not build the solution-free classroom package
-(the separate `R/build_classroom_materials.R` workflow above does that).
+`make materials` builds all materials and `dist/afec-classroom-materials.zip`
+using the existing build script. `make slides` renders only the slides;
+`make` (or `make help`) lists the targets. From another directory, use
+`make -C /path/to/afec-bayes-2026 day1`.
+
+These targets use existing fits and never run `R/precompute_fits.R`.
+The daily targets do not refresh the ZIP; use `make materials` to distribute
+updated materials. A direct `quarto render day1/exercise.qmd` renders only that
+file and does not regenerate the participant source.
 
 Participants open `exercise-student.qmd` and run the indicated completed chunks.
 Day 1 uses tidyverse/ggplot2 for plotting: participants read the explicit prior–likelihood multiplication,
-edit survival counts and compare posterior widths. Its participant QMD needs no
-external R files or saved fits; the optional Stan/brms demonstrations stay in
-the instructor exercise.
+choose two survey sizes with the same observed survival proportion and compare posterior widths. Its participant QMD needs no
+external R files or saved fits; the detailed explanations, solutions and optional Stan/brms demonstrations are in
+`day1/instructor-notes.qmd` (excluded from the participant ZIP).
 The standalone Day 1 grid calculations and count edits were also checked with
 R 4.6.1; the revised handouts were rendered with Quarto 1.10.19.
 Solutions are physically removed from this source. `exercise.qmd`/`exercise.html`
