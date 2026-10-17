@@ -247,7 +247,7 @@ AFEC-X 2026 · 21 October
 <li>Likelihood</li>
 <li>Bayes’ theorem</li>
 <li>Prior and posterior</li>
-<li>Completed Stan model and results</li>
+<li>Posterior samples and summaries</li>
 </ul>
 </div><div class="column" style="width:33%;">
 <h3 id="day-2">Day 2</h3>
@@ -925,7 +925,123 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
 </ul>
 <p>The prior stays flat. Changing the prior is an optional extension.</p>
 <aside class="notes">
-<p>58-70 minutes: 8 minutes of individual work and 4 minutes debrief. Participants may consult someone nearby; do not organise fixed pairs. The coin slides illustrated strong-prior influence. Here participants transfer that binomial structure to seedlings and design their own comparison, keeping the observed proportion and prior fixed. Do not repeat the coin explanation or reveal the sample-size answer before their prediction. Checkpoint at 4 minutes: participants have chosen two valid surveys with proportion 0.4 and predicted the width comparison. If R fails, use day1/results.html. Say: “Compare the horizontal widths, not the heights.” Slide plots show density; the exercise plots probability per grid point. Keep this distinction oral. Skip the optional prior change if needed. This is the only required operation exercise.</p>
+<p>58-70 minutes: 8 minutes of individual work and 4 minutes debrief. Participants may consult someone nearby; do not organise fixed pairs. The coin slides illustrated strong-prior influence. Here participants transfer that binomial structure to seedlings and design their own comparison, keeping the observed proportion and prior fixed. Do not repeat the coin explanation or reveal the sample-size answer before their prediction. Checkpoint at 4 minutes: participants have chosen two valid surveys with proportion 0.4 and predicted the width comparison. If R fails, use day1/results.html. Say: “Compare the horizontal widths, not the heights.” Slide plots show density; the exercise plots probability per grid point. Keep this distinction oral. During the debrief, invite two brief explanations of the survey comparisons. Then connect the calculated posterior curve to the stored draws on the next slide. Skip the optional prior change if needed. This is the only required operation exercise.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="many-values-one-posterior-distribution" class="slide level2">
+<h2>Many values, one posterior distribution</h2>
+<p>Back to 2 survivors out of 5, with the same Beta(1,1) prior.</p>
+<div class="columns">
+<div class="column" style="width:30%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="lightable-material lightable-striped caption-top" style="font-size: 24px; font-family: &quot;Source Sans Pro&quot;, helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.616</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.607</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0.607</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0.246</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>… 4000 values of <span class="math inline">p</span></p>
+</div><div class="column" style="width:70%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/seedling-draw-histogram-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+<div class="fragment">
+<p>Together, the values describe uncertainty about the survival probability.</p>
+</div>
+<aside class="notes">
+<p>70-80 minutes: a short instructor demonstration following the exercise debrief. Say: “You calculated a posterior curve. Stan can represent the same distribution with many values of p; tomorrow we will use results saved in this form.” Use stored Stan results. First recall the exact Beta(3,4) posterior from the seedling example. Say: “Each number is a possible value of the unknown survival probability p. These are 4000 values of p, not observations of 4000 seedlings.” Point from the few values to the histogram and its match to the exact curve. Stan produces draws for this same model; we are loading results prepared earlier. Do not introduce chains, iteration bookkeeping, Stan syntax or MCMC mechanics. Before class, check stored R-hat, ESS, divergences, treedepth, E-BFMI and traces; the histogram’s agreement alone does not establish reliable computation.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="summarise-the-values" class="slide level2">
+<h2>Summarise the values</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<h3 id="posterior-mean">Posterior mean</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="" aria-label="1"></a><span class="fu">mean</span>(draws<span class="sc">$</span>p)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>0.43</strong></p>
+</div><div class="column" style="width:50%;">
+<h3 id="credible-interval">95% credible interval</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="" aria-label="1"></a><span class="fu">quantile</span>(draws<span class="sc">$</span>p, <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><strong>[0.12, 0.76]</strong></p>
+</div></div>
+<p>The mean summarises location; the interval summarises uncertainty about <span class="math inline">p</span>.</p>
+<aside class="notes">
+<p>The object draws is assigned from fit$draws on the preceding slide; all displayed results are computed from that same object. Read the two summaries in words. The interval contains the middle 95% of the posterior draws and approximates the model-conditional credible interval for p.&nbsp;It is not an interval for future survival counts. Small differences from the exact Beta summaries are Monte Carlo error. Do not ask participants to run new inference or learn additional functions here. If time is short, show the histogram and state the summaries orally.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="summary-of-day-1" class="slide level2">
+<h2>Summary of Day 1</h2>
+<ul>
+<li class="fragment"><strong>Likelihood</strong>: how probable are the data for given parameter values.</li>
+<li class="fragment"><strong>Bayes’ theorem</strong> turns this around: <span class="orange">posterior</span> <span class="math inline">\propto</span> <span class="teal">likelihood</span> <span class="math inline">\times</span> <span class="purple">prior</span>.</li>
+<li class="fragment">The posterior is a <strong>distribution</strong>. We summarise it with a mean and an interval.</li>
+<li class="fragment">The influence of a fixed prior depends on the information in the data.</li>
+<li class="fragment">Posterior draws let us calculate means and intervals.</li>
+</ul>
+<div class="fragment">
+<p><strong>Day 2</strong>: does survival probability change with conspecific density? We will read a fitted survival curve, make predictions and check the model.</p>
+</div>
+<aside class="notes">
+<p>80-85 minutes: recap the two Day 1 learning outcomes and connect to Day 2. The survey comparisons were already discussed during the exercise debrief; do not repeat the exercise here. Keep 85-90 minutes for questions and delay buffer.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -939,50 +1055,28 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
       }</style></aside>
 </section></section>
 <section>
-<section id="from-formulas-to-samples" class="title-slide slide level1 center">
-<h1>From formulas to samples</h1>
+<section id="appendix-optional-material" class="title-slide slide level1 center" data-visibility="uncounted">
+<h1>Appendix: optional material</h1>
 
 </section>
-<section id="stan-and-posterior-samples" class="slide level2">
-<h2>Stan and posterior samples</h2>
-<ul>
-<li>We described the seedling posterior with a distribution.</li>
-<li>More complex models usually need numerical approximation.</li>
-<li>Stan produces draws that approximate the posterior.</li>
-<li>We read the distribution and check how the computation behaved.</li>
-</ul>
-<aside class="notes">
-<p>70-80 minutes is an instructor demonstration. No additional participant task. The MCMC algorithms and HMC animation remain in the appendix.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="a-stan-model-data-parameters-model" class="slide level2">
+<section id="a-stan-model-data-parameters-model" class="slide level2" data-visibility="uncounted">
 <h2>A Stan model = data + parameters + model</h2>
 <div class="columns">
 <div class="column" style="width:50%;">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb5-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
-<span id="cb5-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
-<span id="cb5-3"><a href="" aria-label="3"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=N&gt; y;</span>
-<span id="cb5-4"><a href="" aria-label="4"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; a;</span>
-<span id="cb5-5"><a href="" aria-label="5"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; b;</span>
-<span id="cb5-6"><a href="" aria-label="6"></a>}</span>
-<span id="cb5-7"><a href="" aria-label="7"></a><span class="kw">parameters</span> {</span>
-<span id="cb5-8"><a href="" aria-label="8"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; p;</span>
-<span id="cb5-9"><a href="" aria-label="9"></a>}</span>
-<span id="cb5-10"><a href="" aria-label="10"></a><span class="kw">model</span> {</span>
-<span id="cb5-11"><a href="" aria-label="11"></a>  p ~ beta(a, b);</span>
-<span id="cb5-12"><a href="" aria-label="12"></a>  y ~ binomial(N, p);</span>
-<span id="cb5-13"><a href="" aria-label="13"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb7-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
+<span id="cb7-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb7-3"><a href="" aria-label="3"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=N&gt; y;</span>
+<span id="cb7-4"><a href="" aria-label="4"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; a;</span>
+<span id="cb7-5"><a href="" aria-label="5"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; b;</span>
+<span id="cb7-6"><a href="" aria-label="6"></a>}</span>
+<span id="cb7-7"><a href="" aria-label="7"></a><span class="kw">parameters</span> {</span>
+<span id="cb7-8"><a href="" aria-label="8"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; p;</span>
+<span id="cb7-9"><a href="" aria-label="9"></a>}</span>
+<span id="cb7-10"><a href="" aria-label="10"></a><span class="kw">model</span> {</span>
+<span id="cb7-11"><a href="" aria-label="11"></a>  p ~ beta(a, b);</span>
+<span id="cb7-12"><a href="" aria-label="12"></a>  y ~ binomial(N, p);</span>
+<span id="cb7-13"><a href="" aria-label="13"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div><div class="column" style="width:50%;">
 <div class="small">
@@ -1010,13 +1104,12 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
 </div>
 </div></div>
 </section>
-<section id="the-output-is-a-table-of-draws" class="slide level2">
-<h2>The output is a table of draws</h2>
-<div class="columns">
-<div class="column" style="width:45%;">
+<section id="extra-columns-in-the-stan-output" class="slide level2" data-visibility="uncounted">
+<h2>Extra columns in the Stan output</h2>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="" aria-label="1"></a>fit <span class="ot">&lt;-</span> <span class="fu">course_fit</span>(<span class="st">"day1_seedling"</span>)</span>
-<span id="cb6-2"><a href="" aria-label="2"></a>fit<span class="sc">$</span>draws</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="" aria-label="1"></a>fit <span class="ot">&lt;-</span> <span class="fu">course_fit</span>(<span class="st">"day1_seedling"</span>)</span>
+<span id="cb8-2"><a href="" aria-label="2"></a>draws <span class="ot">&lt;-</span> fit<span class="sc">$</span>draws</span>
+<span id="cb8-3"><a href="" aria-label="3"></a>draws</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -1053,34 +1146,30 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
 </table>
 </div>
 </div>
-<div class="small">
-<p>… 4000 rows</p>
-</div>
-</div><div class="column" style="width:55%;">
+<p><code>.chain</code> and <code>.iteration</code> record where each draw came from. We use this information when checking the computation.</p>
+<aside class="notes">
+<p>Optional only. Chain and iteration identifiers are bookkeeping, not additional seedling observations or ecological parameters. Discuss their diagnostic use when needed; do not introduce this table in the Day 1 core demonstration.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="posterior-probabilities-from-draws" class="slide level2" data-visibility="uncounted">
+<h2>Posterior probabilities from draws</h2>
+<p>What is the posterior probability that <span class="math inline">p &gt; 0.5</span>?</p>
 <div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-11-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
-</figure>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="" aria-label="1"></a><span class="fu">mean</span>(draws<span class="sc">$</span>p <span class="sc">&gt;</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</div>
-</div>
-<div class="small">
-<ul>
-<li class="fragment">Posterior mean: <code>mean(draws$p)</code> = 0.43</li>
-<li class="fragment">95% interval: <code>quantile(draws$p, c(0.025, 0.975))</code> = 0.12, 0.76</li>
-<li class="fragment"><span class="math inline">P(p &gt; 0.5)</span>: <code>mean(draws$p &gt; 0.5)</code> = 0.34</li>
-<li class="fragment">Anything you can compute from <span class="math inline">p</span>, you compute for every draw.</li>
-</ul>
-</div>
-</div></div>
+<p><strong>0.34</strong> of the draws are above 0.5.</p>
 <aside class="notes">
-<ul>
-<li>core: fit_or_load(…, use_precomputed = TRUE) reads the supplied Stan result</li>
-<li>optional live example uses the matching precompiled executable; no classroom compilation</li>
-<li>the summary numbers differ slightly from the exact ones: Monte Carlo error</li>
-</ul>
+<p>Optional: this estimates a probability about the unknown parameter, conditional on the model and data. It is not the probability that the next seedling survives. The numerical result is computed from the same stored draws as the main slides.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -1092,45 +1181,6 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
           overflow: hidden!important;
           display:block!important;
       }</style></aside>
-</section>
-<section id="explain-your-survey-comparison" class="slide level2">
-<h2>Explain your survey comparison</h2>
-<p>Use the two posterior plots you made in the exercise.</p>
-<ul>
-<li>How did the posterior width change between your two surveys?</li>
-<li>What does that tell you about uncertainty in the survival probability?</li>
-</ul>
-<aside class="notes">
-<p>80-85 minutes: participants first explain their own result in words. Invite two brief contributions from the room; nearby discussion is optional. Use the participant’s plots, or the 4/10 and 20/50 examples in day1/results.html if code access failed. No new prior comparison or additional exercise is required. Keep 85-90 minutes for questions and delay buffer.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="summary-of-day-1" class="slide level2">
-<h2>Summary of Day 1</h2>
-<ul>
-<li class="fragment"><strong>Likelihood</strong>: how probable are the data for given parameter values.</li>
-<li class="fragment"><strong>Bayes’ theorem</strong> turns this around: <span class="orange">posterior</span> <span class="math inline">\propto</span> <span class="teal">likelihood</span> <span class="math inline">\times</span> <span class="purple">prior</span>.</li>
-<li class="fragment">The posterior is a <strong>distribution</strong>. We report means, intervals, and probabilities, not just the peak.</li>
-<li class="fragment">The influence of a fixed prior depends on the information in the data.</li>
-<li class="fragment">When there is no formula, <strong>MCMC</strong> gives draws from the posterior. We compute the quantities of interest from those draws.</li>
-</ul>
-<div class="fragment">
-<p><strong>Day 2</strong>: does survival probability change with conspecific density? We will read a fitted survival curve, make predictions and check the model.</p>
-</div>
-</section></section>
-<section>
-<section id="appendix-optional-material" class="title-slide slide level1 center" data-visibility="uncounted">
-<h1>Appendix: optional material</h1>
-
 </section>
 <section id="what-the-mle-does-not-tell-us" class="slide level2" data-visibility="uncounted">
 <h2>What the MLE does not tell us</h2>
@@ -1347,7 +1397,7 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
 </ul>
 <div class="fragment">
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="" aria-label="1"></a><span class="fu">dnorm</span>(<span class="fl">1.96</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="" aria-label="1"></a><span class="fu">dnorm</span>(<span class="fl">1.96</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  [1] 0.05844094</code></pre>
 </div>

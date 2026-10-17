@@ -93,7 +93,26 @@ These priors are teaching contrasts, not general recommendations; a high-surviva
 prior needs evidence from a comparable habitat and census period.
 
 
-# Instructor demonstration: Stan reads the same model
+# Main demonstration: posterior draws and summaries
+
+Share a few participants' survey comparisons during the exercise debrief, then
+continue directly to the two demonstration slides. After the summaries, move to
+the Day 1 recap; do not return to the exercise for a separate reflection.
+These draws prepare participants to use the stored results on Day 2.
+
+Return to the starter 2/5 data and
+Beta(1,1) prior. Show a few values of p and the histogram of the stored Stan draws
+against the exact Beta(3,4) density. Explain that these are possible values of the
+unknown probability, not additional seedling observations.
+
+Then show only the mean and equal-tailed 95% credible interval. The slide code
+assigns `draws <- fit$draws` and computes both results from that same object.
+No new inference is required. Stan syntax, chain/iteration bookkeeping and
+posterior threshold probabilities are optional appendix material.
+Check the stored computation diagnostics before class; an attractive histogram
+is not sufficient validation.
+
+# Optional demonstration: Stan reads the same model
 
 This demonstration returns to the starter 2/5 data, rather than participants' own
 chosen counts. Follow the mapping from data to

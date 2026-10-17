@@ -75,9 +75,17 @@ We keep the binomial model and add a predictor.
 
 ## Today's objectives
 
-- Explain the fitted relationship on the probability scale.
-- Compare low-density and high-density predictions with intervals.
-- Compare model-generated survival data with observations.
+**Understand the model**
+
+- Explain how the model links conspecific density to seedling survival.
+
+**Interpret the results**
+
+- Describe what the results tell us about survival, and how uncertain they are.
+
+**Check the results**
+
+- Explain why we check both the calculation and the model's fit to the data.
 
 ::: notes
 Read completed models and results together. Coding is optional.
@@ -114,7 +122,7 @@ teaching data, not the paper's observations or fitted results.
 
 ```{r observed-data, fig.width=11, fig.height=4.7}
 ggplot(ndd,aes(cons,suv/n,size=n))+geom_point(alpha=.7)+
-  labs(x="Conspecific density (scaled)",y="Observed proportion surviving",size="Seedlings")
+  labs(x="Conspecific density (scaled)",y="Observed survival\nproportion",size="Seedlings")
 ```
 
 Which way would you expect the fitted curve to go?
@@ -149,7 +157,7 @@ link_data <- tibble(x=seq(-3,3,length.out=101)) |>
 p1 <- ggplot(link_data,aes(x,z))+geom_line(linewidth=1.4,colour=col_like)+
   labs(x="Density (scaled)",y="logit(p)")
 p2 <- ggplot(link_data,aes(x,p))+geom_line(linewidth=1.4,colour=col_like)+
-  ylim(0,1)+labs(x="Density (scaled)",y="Survival probability")
+  ylim(0,1)+labs(x="Density (scaled)",y="Survival\nprobability")
 p1+p2
 ```
 
@@ -168,7 +176,7 @@ Source: Stan User's Guide, regression models.
 ::: columns
 ::: {.column width="58%"}
 ```{r normal-prior-scale, fig.width=8.5, fig.height=5}
-plot_normal_prior_scale()
+plot_normal_prior_scale() + labs(x="x", y="y")
 ```
 :::
 ::: {.column width="42%"}

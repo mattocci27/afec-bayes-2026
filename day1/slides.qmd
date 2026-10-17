@@ -34,7 +34,8 @@ Assume basic R execution, daytime GLM practice, English and no homework. Confirm
 language, prior experience and the prepared browser environment with organisers.
 0-8 setup/course question; 8-23 likelihood; 23-43 conditional probability/fip/Bayes;
 43-58 prior/posterior/coins; 58-70 ONE exercise (8 work + 4 debrief);
-70-80 Stan demonstration; 80-85 reflection; 85-90 questions/buffer.
+70-80 short posterior-draw demonstration; 80-85 summary/Day 2 bridge;
+85-90 questions/buffer.
 Core: familiar examples and one figure-comparison exercise. Draw calculations,
 MLE differentiation, detailed estimators and MH/HMC are optional.
 If delayed, shorten Stan demonstration. Keep exercise debrief and questions.
@@ -68,7 +69,7 @@ source(here::here("R/slides_setup.R"))
 - Likelihood
 - Bayes' theorem
 - Prior and posterior
-- Completed Stan model and results
+- Posterior samples and summaries
 :::
 
 ::: {.column width="33%"}
@@ -827,24 +828,124 @@ Checkpoint at 4 minutes: participants have chosen two valid surveys with proport
 0.4 and predicted the width comparison. If R fails, use day1/results.html.
 Say: "Compare the horizontal widths, not the heights." Slide plots show density;
 the exercise plots probability per grid point. Keep this distinction oral.
+During the debrief, invite two brief explanations of the survey comparisons.
+Then connect the calculated posterior curve to the stored draws on the next slide.
 Skip the optional prior change if needed. This is the only required operation exercise.
 :::
 
-# From formulas to samples
+## Many values, one posterior distribution
 
-## Stan and posterior samples
+Back to 2 survivors out of 5, with the same Beta(1,1) prior.
 
-- We described the seedling posterior with a distribution.
-- More complex models usually need numerical approximation.
-- Stan produces draws that approximate the posterior.
-- We read the distribution and check how the computation behaved.
+```{r seedling-draws, include=FALSE}
+fit <- course_fit("day1_seedling")
+draws <- fit$draws
+seedling_draw_mean <- mean(draws$p)
+seedling_draw_interval <- quantile(draws$p, c(0.025, 0.975))
+```
 
-::: notes
-70-80 minutes is an instructor demonstration. No additional participant task.
-The MCMC algorithms and HMC animation remain in the appendix.
+::: columns
+::: {.column width="30%"}
+```{r seedling-values}
+tibble(p = round(head(draws$p, 4), 3)) |>
+  kable(format = "html") |>
+  kable_material(c("striped"), full_width = FALSE, font_size = 24)
+```
+
+... `r ndraws(draws)` values of $p$
 :::
 
-## A Stan model = data + parameters + model
+::: {.column width="70%"}
+```{r seedling-draw-histogram, fig.height=3.7, fig.width=8}
+ggplot(as_tibble(draws), aes(p)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 40,
+                 fill = col_post, alpha = 0.5) +
+  stat_function(fun = dbeta, args = list(3, 4), linewidth = 1.2) +
+  labs(x = "Survival probability p", y = "Density",
+       subtitle = "Orange: Stan draws; black curve: exact posterior")
+```
+:::
+:::
+
+::: fragment
+Together, the values describe uncertainty about the survival probability.
+:::
+
+::: notes
+70-80 minutes: a short instructor demonstration following the exercise debrief.
+Say: “You calculated a posterior curve. Stan can represent the same distribution
+with many values of p; tomorrow we will use results saved in this form.”
+Use stored Stan results. First recall the exact Beta(3,4) posterior from the seedling example. Say:
+“Each number is a possible value of the unknown survival probability p.
+These are 4000 values of p, not observations of 4000 seedlings.”
+Point from the few values to the histogram and its match to the exact curve.
+Stan produces draws for this same model; we are loading results prepared earlier.
+Do not introduce chains, iteration bookkeeping, Stan syntax or MCMC mechanics.
+Before class, check stored R-hat, ESS, divergences, treedepth, E-BFMI and traces;
+the histogram's agreement alone does not establish reliable computation.
+:::
+
+## Summarise the values
+
+::: columns
+::: {.column width="50%"}
+### Posterior mean
+
+```{r, echo=TRUE, eval=FALSE}
+mean(draws$p)
+```
+
+**`r round(seedling_draw_mean, 2)`**
+:::
+
+::: {.column width="50%"}
+### 95% credible interval
+
+```{r, echo=TRUE, eval=FALSE}
+quantile(draws$p, c(0.025, 0.975))
+```
+
+**[`r paste(round(seedling_draw_interval, 2), collapse = ", ")`]**
+:::
+:::
+
+The mean summarises location; the interval summarises uncertainty about $p$.
+
+::: notes
+The object draws is assigned from fit$draws on the preceding slide; all displayed
+results are computed from that same object. Read the two summaries in words.
+The interval contains the middle 95% of the posterior draws and approximates the
+model-conditional credible interval for p. It is not an interval for future
+survival counts. Small differences from the exact Beta summaries are Monte Carlo error.
+Do not ask participants to run new inference or learn additional functions here.
+If time is short, show the histogram and state the summaries orally.
+:::
+
+## Summary of Day 1
+
+::: incremental
+- **Likelihood**: how probable are the data for given parameter values.
+- **Bayes' theorem** turns this around: [posterior]{.orange} $\propto$ [likelihood]{.teal} $\times$ [prior]{.purple}.
+- The posterior is a **distribution**.
+  We summarise it with a mean and an interval.
+- The influence of a fixed prior depends on the information in the data.
+- Posterior draws let us calculate means and intervals.
+:::
+
+::: fragment
+**Day 2**: does survival probability change with conspecific density?
+We will read a fitted survival curve, make predictions and check the model.
+:::
+
+::: notes
+80-85 minutes: recap the two Day 1 learning outcomes and connect to Day 2.
+The survey comparisons were already discussed during the exercise debrief;
+do not repeat the exercise here. Keep 85-90 minutes for questions and delay buffer.
+:::
+
+# Appendix: optional material {visibility="uncounted"}
+
+## A Stan model = data + parameters + model {visibility="uncounted"}
 
 ::: columns
 ::: {.column width="50%"}
@@ -874,22 +975,17 @@ We pass the prior settings as data, so you can change the prior from R without t
 :::
 :::
 
-## The output is a table of draws
 
-::: columns
-::: {.column width="45%"}
-```{r}
-seedling_fit <- course_fit("day1_seedling")
-```
+## Extra columns in the Stan output {visibility="uncounted"}
 
 ```{r, echo=TRUE, eval=FALSE}
 fit <- course_fit("day1_seedling")
-fit$draws
+draws <- fit$draws
+draws
 ```
 
-```{r}
-seedling_fit$draws |>
-  as_tibble() |>
+```{r seedling-extra-columns}
+as_tibble(draws) |>
   select(.chain, .iteration, p) |>
   mutate(p = round(p, 3)) |>
   head(4) |>
@@ -897,70 +993,31 @@ seedling_fit$draws |>
   kable_material(c("striped"), full_width = FALSE, font_size = 24)
 ```
 
-::: small
-... `r ndraws(seedling_fit$draws)` rows
-:::
+`.chain` and `.iteration` record where each draw came from.
+We use this information when checking the computation.
+
+::: notes
+Optional only. Chain and iteration identifiers are bookkeeping, not additional
+seedling observations or ecological parameters. Discuss their diagnostic use
+when needed; do not introduce this table in the Day 1 core demonstration.
 :::
 
-::: {.column width="55%"}
-```{r, fig.height=4, fig.width=8}
-ggplot(as_tibble(seedling_fit$draws), aes(p)) +
-  geom_histogram(aes(y = after_stat(density)), bins = 40, fill = col_post, alpha = 0.5) +
-  stat_function(fun = dbeta, args = list(3, 4), linewidth = 1.2) +
-  labs(x = "Survival probability p", y = "Density",
-    subtitle = "Stan draws and the exact Beta(3, 4) posterior")
+## Posterior probabilities from draws {visibility="uncounted"}
+
+What is the posterior probability that $p > 0.5$?
+
+```{r, echo=TRUE, eval=FALSE}
+mean(draws$p > 0.5)
 ```
 
-::: small
-::: incremental
-- Posterior mean: `mean(draws$p)` = `r round(mean(seedling_fit$draws$p), 2)`
-- 95% interval: `quantile(draws$p, c(0.025, 0.975))` = `r paste(round(quantile(seedling_fit$draws$p, c(0.025, 0.975)), 2), collapse = ", ")`
-- $P(p > 0.5)$: `mean(draws$p > 0.5)` = `r round(mean(seedling_fit$draws$p > 0.5), 2)`
-- Anything you can compute from $p$, you compute for every draw.
-:::
-:::
-:::
-:::
+**`r round(mean(draws$p > 0.5), 2)`** of the draws are above 0.5.
 
 ::: notes
-- core: fit_or_load(..., use_precomputed = TRUE) reads the supplied Stan result
-- optional live example uses the matching precompiled executable; no classroom compilation
-- the summary numbers differ slightly from the exact ones: Monte Carlo error
+Optional: this estimates a probability about the unknown parameter, conditional
+on the model and data. It is not the probability that the next seedling survives.
+The numerical result is computed from the same stored draws as the main slides.
 :::
 
-## Explain your survey comparison
-
-Use the two posterior plots you made in the exercise.
-
-- How did the posterior width change between your two surveys?
-- What does that tell you about uncertainty in the survival probability?
-
-::: notes
-80-85 minutes: participants first explain their own result in words. Invite two
-brief contributions from the room; nearby discussion is optional.
-Use the participant's plots, or the 4/10 and 20/50 examples in day1/results.html
-if code access failed. No new prior comparison or additional exercise is required.
-Keep 85-90 minutes for questions and delay buffer.
-:::
-
-## Summary of Day 1
-
-::: incremental
-- **Likelihood**: how probable are the data for given parameter values.
-- **Bayes' theorem** turns this around: [posterior]{.orange} $\propto$ [likelihood]{.teal} $\times$ [prior]{.purple}.
-- The posterior is a **distribution**.
-  We report means, intervals, and probabilities, not just the peak.
-- The influence of a fixed prior depends on the information in the data.
-- When there is no formula, **MCMC** gives draws from the posterior.
-  We compute the quantities of interest from those draws.
-:::
-
-::: fragment
-**Day 2**: does survival probability change with conspecific density?
-We will read a fitted survival curve, make predictions and check the model.
-:::
-
-# Appendix: optional material {visibility="uncounted"}
 
 ## What the MLE does not tell us {visibility="uncounted"}
 
