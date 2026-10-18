@@ -38,7 +38,7 @@ plot_cndd(draws,ndd)
 plot_cndd_comparison(draws)
 probabilities <- cndd_probabilities(draws)
 knitr::kable(probabilities |> group_by(density) |>
-  summarise(median=median(p),lower=quantile(p,.05),upper=quantile(p,.95)),digits=3)
+  summarise(median=median(p),lower=quantile(p,.025),upper=quantile(p,.975)),digits=3)
 ```
 
 Density -1 is one SD below the mean, and +1 is one SD above. The fit, prior and

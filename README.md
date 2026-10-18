@@ -27,8 +27,11 @@ AFEC-X 2026: **21–23 October, 19:00–20:30 China time (UTC+8)**, about 30
 participants. The agreed plan prioritises Bayesian thinking, figure interpretation
 and connections to ecological research at the level of `main.qmd`. Participants run
 complete supplied R code, with one core exercise per day. Stan editing is optional.
-The design assumes English, some R execution experience, daytime GLM practice,
-individual work with optional nearby discussion, and no homework. Confirm the remaining assumptions and browser setup with
+The design assumes English, individual work with optional nearby discussion, and
+no homework. It does not assume previous R or GLM experience. The 15 October
+schedule places these evening sessions on the first three days of the daytime
+R/statistics workshop (seven teaching hours per day); its daily syllabus is unknown.
+Every core exercise can be completed using supplied figures, with code execution optional. Confirm the remaining assumptions and browser setup with
 the organisers. See [the agreed design](classroom/restructure-proposal.md) and
 [the instructor schedule](classroom/instructor.md).
 
@@ -50,7 +53,7 @@ Shared resources:
 - `fits/`: seven stored posterior draw/diagnostic files. Core exercises explicitly
   load the matching fit; changing inputs requires new inference.
 - `dayN/results.qmd`: tables, diagnostic figures and predictions for offline discussion.
-- `classroom/readiness.qmd`: 10-minute pre-course browser/R/plotting/offline check.
+- `classroom/readiness.qmd`: 5–10-minute reading-copy check, with optional browser/R check.
 - `R/build_classroom_materials.R`: generates solution-free participant QMDs,
   instructor/participant HTML, result sheets, instructor schedule, data exports and a participant ZIP.
 - `archive/teaching-before-cndd/`: earlier detailed teaching sources, preserved for instructor reference and excluded from the participant ZIP.
@@ -99,7 +102,12 @@ are instructor versions. Distribute the ZIP before class and have students check
 exercise/result HTMLs offline. The ZIP includes the shared figure code, all seven
 fits and seeded CSV/RDS data; cloning alone does not supply gitignored fits.
 
-Core work uses exact updating or supplied posterior draws. CNDD predictions and
+Student setup and package requirements: [classroom/PACKAGES.md](classroom/PACKAGES.md).
+Core work uses Day 1 exact calculations and Day 2–3 supplied posterior draws;
+all tasks also have a figure-reading route. No student compilation or sampling is
+required. Day 2 brms fitting is optional instructor reference or prepared learners'
+exploration, excluded from rendering with `eval=FALSE`. It is not homework.
+CNDD predictions and
 checks generate observations from existing draws without refitting. Day 2 holds
 the fit fixed while comparing density -1 and +1 SD. Day 3 uses separate mother-tree
 data, then connects to species CNDD with conceptual simulations and to wood density
@@ -113,6 +121,22 @@ chalkboard plugin. Exercise and result HTMLs embed their resources for offline u
 The original `main.qmd` theme remains the source reference.
 
 The draft was validated with R 4.5.3, CmdStan 2.38.0, cmdstanr, posterior, bayesplot 1.15.0, ggplot2 4.0.3 and Quarto 1.9.37 in the `mattocci/cmdstan-zsh:4.5.3` container (see `fits/sessionInfo.txt`).
+
+### Teaching scope and validation (2026-10-18)
+
+Prioritise predictions, uncertainty, ecological interpretation and model checking
+after the full daytime R/statistics programme. Day 2's core exercise is a 15-minute
+comparison using supplied results. Detailed sampler diagnostics and fitting syntax
+are reference material; the instructor still validates all diagnostics.
+
+Validation commands: `RENV_CONFIG_SANDBOX_ENABLED=FALSE Rscript R/check_classroom_materials.R`
+and `Rscript R/build_classroom_materials.R` (R 4.6.1, Quarto 1.10.19).
+The optional brms example retains `0 + Intercept + cons` to match the handwritten
+Stan coefficient priors. New brms compilation/sampling has not been verified here:
+the local brms cache is missing, CmdStan is not configured and Docker is stopped.
+Any optional demonstration requires separate instructor validation and a result
+prepared in advance. It is not a student readiness requirement. No browser automation
+surface was available for visual layout inspection in this validation environment.
 
 ## Optional local R environment
 

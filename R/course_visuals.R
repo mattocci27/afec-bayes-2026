@@ -15,8 +15,8 @@ course_fit <- function(name) {
 }
 
 course_interval <- function(x) {
-  tibble::tibble(mean=mean(x), median=median(x), lower=unname(quantile(x, .05)),
-                 upper=unname(quantile(x, .95)))
+  tibble::tibble(mean=mean(x), median=median(x), lower=unname(quantile(x, .025)),
+                 upper=unname(quantile(x, .975)))
 }
 
 course_diagnostics <- function(fit) {
@@ -63,18 +63,18 @@ plot_cndd <- function(draws, data=make_ndd_data()) {
                         inherit.aes=FALSE, alpha=.65) +
     ggplot2::scale_y_continuous(limits=c(0,1)) +
     ggplot2::labs(x="Conspecific density (scaled)", y="Survival probability",
-                  size="Seedlings", subtitle="Line: posterior median of p. Band: 90% interval for p")
+                  size="Seedlings", subtitle="Line: posterior median of p. Band: 95% interval for p")
 }
 
 plot_cndd_comparison <- function(draws) {
   p <- cndd_probabilities(draws)
   summary <- p |> dplyr::group_by(density) |>
-    dplyr::summarise(median=median(p), lower=quantile(p,.05), upper=quantile(p,.95))
+    dplyr::summarise(median=median(p), lower=quantile(p,.025), upper=quantile(p,.975))
   ggplot2::ggplot(summary, ggplot2::aes(factor(density, labels=c("Low density (-1 SD)",
                                                                             "High density (+1 SD)")), median)) +
     ggplot2::geom_pointrange(ggplot2::aes(ymin=lower,ymax=upper), colour="#d95f02", linewidth=.9) +
     ggplot2::scale_y_continuous(limits=c(0,1)) +
-    ggplot2::labs(x=NULL,y="Survival probability",subtitle="Posterior median and 90% interval")
+    ggplot2::labs(x=NULL,y="Survival probability",subtitle="Posterior median and 95% interval")
 }
 
 cndd_predictions <- function(draws, n=20, seed=20261022) {
@@ -101,14 +101,14 @@ cndd_replicates <- function(draws, data=make_ndd_data(), seed=20261023) {
 }
 
 plot_cndd_check <- function(replicates, data=make_ndd_data()) {
-  intervals <- t(apply(sweep(replicates,2,data$n,"/"),2,quantile,c(.05,.5,.95)))
+  intervals <- t(apply(sweep(replicates,2,data$n,"/"),2,quantile,c(.025,.5,.975)))
   d <- dplyr::mutate(data, lower=intervals[,1], median=intervals[,2], upper=intervals[,3])
   ggplot2::ggplot(d,ggplot2::aes(cons)) +
     ggplot2::geom_linerange(ggplot2::aes(ymin=lower,ymax=upper),colour="#d95f02",alpha=.65) +
     ggplot2::geom_point(ggplot2::aes(y=median),colour="#d95f02",size=2) +
     ggplot2::geom_point(ggplot2::aes(y=suv/n),shape=1,size=3) +
     ggplot2::labs(x="Conspecific density (scaled)",y="Proportion surviving",
-      subtitle="Open: observed. Orange: median and 90% interval for replicated proportions")
+      subtitle="Open: observed. Orange: median and 95% interval for replicated proportions")
 }
 
 plot_cndd_spread_check <- function(replicates,data=make_ndd_data()) {
@@ -137,7 +137,7 @@ plot_mother_comparison <- function(comparison=mother_comparison()) {
   ggplot2::ggplot(comparison,ggplot2::aes(mean,tree,colour=model)) +
     ggplot2::geom_pointrange(ggplot2::aes(xmin=lower,xmax=upper),position=ggplot2::position_dodge(width=.6)) +
     ggplot2::scale_colour_manual(values=c(Complete="grey40",Separate="#7570b3",Partial="#d95f02")) +
-    ggplot2::labs(x="Survival probability (posterior mean and 90% interval)",y="Mother tree",colour=NULL)
+    ggplot2::labs(x="Survival probability (posterior mean and 95% interval)",y="Mother tree",colour=NULL)
 }
 
 plot_mother_movement <- function(comparison=mother_comparison()) {
@@ -162,6 +162,63 @@ plot_group_spread <- function() {
                   subtitle="Fixed logit centre = 0. Only the group SD changes")
 }
 
+
+# Main-style group illustration. These are hypothetical distributions, not
+# posteriors from the mother-tree fit. Keep the same standardized centres and
+# within-curve logit SD in every panel so only between-tree SD changes.
+plot_group_curves <- function() {
+  within_sd <- .2
+  centres <- tidyr::crossing(tree=LETTERS[1:8],sigma=c(.1,1,3)) |>
+    dplyr::mutate(centre=sigma*qnorm((match(tree,LETTERS[1:8])-.5)/8))
+  d <- tidyr::crossing(centres,logit_p=seq(-7,7,length.out=4001)) |>
+    dplyr::mutate(p=plogis(logit_p),
+      # Change of variables: dz/dp = 1 / (p * (1-p)).
+      density=dnorm(logit_p,centre,within_sd)/(p*(1-p))) |>
+    dplyr::group_by(sigma,tree) |>
+    dplyr::mutate(relative_density=density/max(density)) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(spread=factor(sigma,levels=c(.1,1,3),
+                               labels=c("sigma == 0.1","sigma == 1","sigma == 3")))
+  ggplot2::ggplot(d,ggplot2::aes(p,relative_density,colour=tree)) +
+    ggplot2::geom_line(linewidth=.8) +
+    ggplot2::facet_wrap(~spread,ncol=1,labeller=ggplot2::label_parsed) +
+    ggplot2::scale_colour_brewer(palette="Dark2",guide="none") +
+    ggplot2::scale_x_continuous(limits=c(0,1),breaks=c(0,.25,.5,.75,1),
+                              expand=ggplot2::expansion(mult=.01)) +
+    ggplot2::scale_y_continuous(breaks=c(0,1)) +
+    ggplot2::labs(x="Survival probability, p",y="Relative density",
+      subtitle="Illustrative mother-tree curves; group logit centre = 0",
+      caption="Eight colours: eight mother trees. Curves scaled to peak 1 (not fitted).") +
+    ggplot2::theme(axis.title=ggplot2::element_text(size=20),
+      axis.text=ggplot2::element_text(size=16),
+      strip.text=ggplot2::element_text(size=18),
+      plot.subtitle=ggplot2::element_text(size=18),
+      plot.caption=ggplot2::element_text(size=14))
+}
+
+plot_group_sd_priors <- function() {
+  d <- tibble::tibble(sigma=seq(0,10,length.out=2001)) |>
+    dplyr::mutate(`Half-Normal(0, 1)`=2*dnorm(sigma,0,1),
+                  `Half-Cauchy(0, 1)`=2*dcauchy(sigma,0,1),
+                  `Half-Normal(0, 10)`=2*dnorm(sigma,0,10)) |>
+    tidyr::pivot_longer(-sigma,names_to="prior",values_to="density") |>
+    dplyr::mutate(prior=factor(prior,levels=c("Half-Normal(0, 1)",
+      "Half-Cauchy(0, 1)","Half-Normal(0, 10)")))
+  ggplot2::ggplot(d,ggplot2::aes(sigma,density,colour=prior)) +
+    ggplot2::geom_line(linewidth=1.2) +
+    ggplot2::facet_wrap(~prior,nrow=1) +
+    ggplot2::scale_colour_manual(values=c("Half-Normal(0, 1)"="#d95f02",
+      "Half-Cauchy(0, 1)"="#7570b3","Half-Normal(0, 10)"="grey40"),guide="none") +
+    ggplot2::scale_x_continuous(limits=c(0,10),breaks=c(0,5,10),
+                              expand=ggplot2::expansion(mult=.01)) +
+    ggplot2::scale_y_continuous(limits=c(0,.85),breaks=c(0,.4,.8)) +
+    ggplot2::labs(x=expression(sigma~"(group SD on the logit scale)"),y="Prior density") +
+    ggplot2::theme(axis.title=ggplot2::element_text(size=22),
+      axis.text=ggplot2::element_text(size=20),
+      strip.text=ggplot2::element_text(size=18),
+      panel.spacing.x=grid::unit(1.4,"lines"))
+}
+
 mother_replicates <- function(fit=course_fit("day3_trees"),seed=20261025) {
   set.seed(seed)
   trees <- make_tree_data()
@@ -172,13 +229,13 @@ mother_replicates <- function(fit=course_fit("day3_trees"),seed=20261025) {
 plot_mother_check <- function(fit=course_fit("day3_trees")) {
   replicates <- mother_replicates(fit)
   trees <- make_tree_data()
-  intervals <- t(apply(replicates,2,quantile,c(.05,.5,.95)))
+  intervals <- t(apply(replicates,2,quantile,c(.025,.5,.975)))
   d <- dplyr::mutate(trees,lower=intervals[,1],median=intervals[,2],upper=intervals[,3])
   ggplot2::ggplot(d,ggplot2::aes(tree,median)) +
     ggplot2::geom_pointrange(ggplot2::aes(ymin=lower,ymax=upper),colour="#d95f02") +
     ggplot2::geom_point(ggplot2::aes(y=suv),shape=1,size=4) +
     ggplot2::labs(x="Mother tree",y="Survivors",
-      subtitle="Open: observed. Orange: median and 90% interval for replicated counts")
+      subtitle="Open: observed. Orange: median and 95% interval for replicated counts")
 }
 
 cndd_concept <- function() {
@@ -220,5 +277,5 @@ plot_wood_density <- function(fit=course_fit("day3_vslope")) {
     ggplot2::geom_line(colour="#d95f02") +
     ggplot2::geom_pointrange(data=points,ggplot2::aes(ymin=lower,ymax=upper),colour="#7570b3") +
     ggplot2::labs(x="Wood density (scaled)",y="Allometric exponent",
-      subtitle="Simulated tree data. Points: species. Line: expected exponent (90% intervals)")
+      subtitle="Simulated tree data. Points: species. Line: expected exponent (95% intervals)")
 }

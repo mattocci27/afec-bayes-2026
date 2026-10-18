@@ -22,14 +22,22 @@ knitr::opts_chunk$set(message=FALSE, warning=FALSE, fig.align="center",
 
 ## Before you begin
 
-Work in pairs. One person runs the supplied code, the other reads the figure and
-writes the interpretation. Swap roles during the exercise. Predict before running
-each comparison. All required code is complete.
+Work individually, with nearby discussion if useful. Predict before running each
+comparison. All code is supplied; you do not need to write R or Stan code.
 
 Use the prepared browser R environment. If access fails, open this HTML and
 [the result sheet](results.html) locally and answer the same questions.
 There is one core exercise today. Demonstrations and optional extensions are labelled.
-No installation, independent Stan programming or homework is required.
+No installation or homework is required in the prepared browser environment.
+For optional local use, read [Required packages and setup](../classroom/PACKAGES.md)
+before class. No new model fitting is required for the core exercise.
+
+By the end, you should be able to compare predicted survival probabilities and
+their uncertainty, and explain why a model should be checked against observations.
+The core exercise takes **15 minutes**: predict 2, read/compare 6, write an
+interpretation 2, discuss 5. You may run the complete code or use the figures and
+[result sheet](results.html); both routes answer the same questions. R and GLM
+experience are not prerequisites. The instructor explains the model and checks.
 
 ```{r setup}
 library(tidyverse)
@@ -48,8 +56,8 @@ theme_set(theme_bw(base_size=14))
 
 | | |
 |---|---|
-| **Purpose** | Interpret the density relationship and its uncertainty on the probability scale. |
-| **Computation** | Analyse the supplied `day2_ndd` fit. No new inference or compilation. |
+| **Purpose** | Compare survival probabilities and uncertainty, and explain the ecological result. |
+| **Computation** | Supplied posterior draws. Run the completed code or read the supplied figures; no new inference. |
 | **Data** | Seedlings and survivors in 60 simulated quadrats, with scaled conspecific density. |
 
 CNDD means conspecific negative density dependence. Today we ask whether seedling
@@ -68,7 +76,7 @@ ggplot(ndd, aes(cons, suv/n, size=n)) + geom_point(alpha=.65) +
 Which density would you expect to have higher survival probability? Write a prediction.
 Each point is a quadrat. Different quadrats can contain different numbers of seedlings.
 
-## 2. Read the curve and intervals
+## 2. Read the model and curve
 
 The model is the Day 1 binomial model with a density predictor:
 
@@ -82,10 +90,22 @@ coefficients have independent Normal priors with mean 0 and **SD** 2.5.
 The model assumes a common probability within each quadrat and conditionally
 independent survival given that probability.
 
+The instructor will explain this model. You do not need to memorise the logit
+formula or learn model-fitting syntax. Load the supplied result below, or use the
+curve already displayed in this reading copy.
+
 ```{r core-fit}
 fit <- course_fit("day2_ndd")
 draws <- fit$draws
 fit$source
+```
+
+`precomputed` means that these draws were generated before class. Loading them
+is not running a new fit. They match the data, model and priors described above.
+
+### Compare the two densities
+
+```{r core-curve}
 plot_cndd(draws, ndd)
 ```
 
@@ -96,7 +116,7 @@ prediction density changes.
 ```{r core-probabilities}
 probabilities <- cndd_probabilities(draws)
 probability_summary <- probabilities |> group_by(density) |>
-  summarise(median=median(p), lower=quantile(p,.05), upper=quantile(p,.95))
+  summarise(median=median(p), lower=quantile(p,.025), upper=quantile(p,.975))
 probability_summary
 plot_cndd_comparison(draws)
 ```
@@ -105,7 +125,7 @@ plot_cndd_comparison(draws)
 
 Complete this sentence with values and intervals from the table:
 
-> Predicted survival probability is ___ (90% interval ___ to ___) at low density,
+> Predicted survival probability is ___ (95% interval ___ to ___) at low density,
 > compared with ___ (___ to ___) at high density, under this model.
 
 Does knowing a survival probability also determine the exact number of survivors
@@ -120,9 +140,9 @@ lo <- plogis(draws$alpha-draws$beta)
 hi <- plogis(draws$alpha+draws$beta)
 ```
 
-Predicted survival is `r round(median(lo),2)` (`r round(quantile(lo,.05),2)` to
-`r round(quantile(lo,.95),2)`) at low density, and `r round(median(hi),2)`
-(`r round(quantile(hi,.05),2)` to `r round(quantile(hi,.95),2)`) at high density.
+Predicted survival is `r round(median(lo),2)` (`r round(quantile(lo,.025),2)` to
+`r round(quantile(lo,.975),2)`) at low density, and `r round(median(hi),2)`
+(`r round(quantile(hi,.025),2)` to `r round(quantile(hi,.975),2)`) at high density.
 These intervals describe uncertainty about each probability. Future survivor counts
 also vary randomly given the probability and the number of seedlings.
 
@@ -136,9 +156,61 @@ are rare. Species differences enter the conceptual research example on Day 3.
 :::
 :::
 
-# Instructor demonstrations
+# Instructor demonstrations: prediction and model checking
 
-These are discussions during the lecture, not additional participant exercises.
+The core exercise is complete. Read the following figures with the instructor;
+you do not need to run more code.
+
+## Predict new seedling groups
+
+Keep the same fit and compare new groups of **20 seedlings** at the two densities.
+The code draws a probability from the posterior and then generates a binomial count.
+
+```{r demo-prediction}
+predictions <- cndd_predictions(draws, n=20, seed=20261022)
+plot_cndd_predictions(predictions)
+```
+
+The probability interval and the distribution of future survivor counts answer
+different questions. Counts can vary even if we know the probability precisely.
+
+## Check the model against observations
+
+Keep each observed quadrat's density and seedling count fixed. Generate new
+survivor counts using posterior draws. Compare the density pattern and the
+range of replicated survival proportions with the observations.
+
+```{r demo-check}
+replicates <- cndd_replicates(draws, ndd, seed=20261023)
+plot_cndd_check(replicates, ndd)
+```
+
+Write one compatible feature and one pattern that would concern you. What would
+a systematic mismatch suggest? This is simulation from the existing posterior,
+not another model fit.
+Because these data were generated from this model, we do not require a visible
+failure. A compatible plot alone does not establish ecological adequacy.
+Light, soils, shared enemies and species differences may matter in a real study.
+
+::: {.content-visible when-meta="solutions"}
+::: {.callout-tip collapse="true"}
+## Solution and instructor notes
+
+The orange intervals in the first check are intervals for replicated proportions,
+including binomial variation at each observed $n_i$. They differ from the interval
+for $p_i$ in the fitted-curve plot. Some observed points can lie outside 95% intervals.
+Do not count all such points as model failures. Look for systematic patterns.
+
+A discrepancy could involve the density relationship, missing conditions or
+dependence among seedlings. It is not a uniquely identified diagnosis of a single
+ecological mechanism. The SD summary is optional reference material below.
+
+:::
+:::
+
+# Optional reference and lecture illustration
+
+The core exercise is complete. These sections support the lecture; skip them if time is short.
 
 ## Prior scale: the Normal regression illustration
 
@@ -155,15 +227,18 @@ uses SD 2.5 in the units of $y$ per unit $x$. In CNDD the coefficients are on th
 logit scale. The same numerical SD does not imply the same ecological change.
 In both models, judge the implied predictions in the units of the question.
 
-## Computation and model code
+## Computation checks: instructor reference
 
 ```{r demo-diagnostics}
 course_diagnostics(fit)
 bayesplot::mcmc_trace(draws, pars=c("alpha","beta"))
 ```
 
-Read R-hat, bulk/tail ESS, divergences, treedepth and E-BFMI together with the traces.
-Good computation diagnostics do not show whether the ecological model is adequate.
+The instructor checks traces, R-hat, bulk/tail ESS, divergences, treedepth and
+E-BFMI together. Students only need to distinguish two questions: did computation
+work, and does the model describe the observations? Memorising thresholds or
+repairing a sampler is not required. Healthy diagnostics do not establish ecological
+adequacy. The handwritten Stan model below is reference material, not a coding task.
 
 ::: {.callout-note collapse="true"}
 ## Completed Stan model
@@ -174,51 +249,78 @@ cat("```stan\n",paste(readLines(here("stan/logit_reg.stan")),collapse="\n"),"\n`
 
 :::
 
-## New seedling groups
+# Optional demonstration: fit the same model with brms
 
-Keep the same fit and compare new groups of **20 seedlings** at the two densities.
-The code draws a probability from the posterior and then generates a binomial count.
+**Purpose:** connect the ecological model to one complete fitting command.
+**Who/time:** instructor demonstration, up to 3 minutes only if the core discussion
+is complete. Use a result prepared before class; omit rather than wait for compilation.
+Students with a validated environment may try this later by choice. It is not homework
+or a prerequisite for any task. No student installation is required.
 
-```{r demo-prediction}
-predictions <- cndd_predictions(draws, n=20, seed=20261022)
-plot_cndd_predictions(predictions)
+`brms` translates an R formula into Stan; `cmdstanr` runs CmdStan.
+`0 + Intercept + cons` gives an intercept at cons = 0 and a slope, both with
+independent Normal(0, 2.5) priors. This matches `stan/logit_reg.stan`; the usual
+centred-intercept specification need not impose the same intercept prior.
+The saved core fit is handwritten Stan, not a brms object.
+
+**Starter and instructions:** run setup and core-data above, then this complete
+chunk only in a prepared environment. Keep the data, formula and priors fixed.
+Compilation and sampling are new computation; elapsed time is machine-dependent
+and has not been measured for the classroom server. This chunk is not executed
+when rendering the handout. Do not use Run All to start an optional fit.
+
+```{r optional-brms, eval=FALSE}
+library(brms)
+elapsed <- system.time({
+  fit_brms <- brm(
+    suv | trials(n) ~ 0 + Intercept + cons,
+    data=ndd, family=binomial(link="logit"),
+    prior=set_prior("normal(0, 2.5)", class="b"),
+    backend="cmdstanr", seed=20261022,
+    chains=4, cores=1, iter=2000, warmup=1000, refresh=500
+  )
+})
+elapsed
+# Preserve chain/iteration identifiers when adapting names for course plots.
+brms_draws <- posterior::subset_draws(
+  posterior::as_draws_df(fit_brms), variable=c("b_Intercept", "b_cons"))
+names(brms_draws)[names(brms_draws) == "b_Intercept"] <- "alpha"
+names(brms_draws)[names(brms_draws) == "b_cons"] <- "beta"
+brms_result <- list(draws=brms_draws, data=ndd_stan_data(ndd), source="live-brms",
+            diagnostics=fit_brms$fit$diagnostic_summary())
+course_diagnostics(brms_result)
+bayesplot::mcmc_trace(brms_draws, pars=c("alpha", "beta"))
+plot_cndd_comparison(brms_draws)
 ```
 
-The probability interval and the distribution of future survivor counts answer
-different questions. Counts can vary even if we know the probability precisely.
-
-## Model checking
-
-Keep each observed quadrat's density and seedling count fixed. Generate new
-survivor counts using posterior draws. Compare both the density pattern and the
-spread of survival proportions with the observations.
-
-```{r demo-check}
-replicates <- cndd_replicates(draws, ndd, seed=20261023)
-plot_cndd_check(replicates, ndd)
-plot_cndd_spread_check(replicates, ndd)
-```
-
-Which parts look compatible? What would a systematic mismatch suggest?
-Because these data were generated from this model, we do not require a visible
-failure. A compatible plot alone does not establish ecological adequacy.
-Light, soils, shared enemies and species differences may matter in a real study.
+**Compare:** expect the same broad density relationship and similar probability
+intervals as the supplied fit, with Monte Carlo variation. Report the source as
+`live-brms`; loading the saved result is `precomputed`. Check actual live diagnostics
+before interpreting a new fit. An error or a problematic fit does not invalidate
+your completed core exercise; stop and return to the supplied figures.
 
 ::: {.content-visible when-meta="solutions"}
 ::: {.callout-tip collapse="true"}
 ## Solution and instructor notes
 
-The orange intervals in the first check are intervals for replicated proportions,
-including binomial variation at each observed $n_i$. They differ from the interval
-for $p_i$ in the fitted-curve plot. Some observed points can lie outside 90% intervals.
-Do not count all such points as model failures. Look for systematic patterns.
-
-The spread statistic checks one feature. A discrepancy could involve the density
-relationship, missing conditions or dependence among seedlings. It is not a uniquely
-identified diagnosis of a single ecological mechanism.
+The likelihood, seed data and independent coefficient priors match the core model;
+individual draws need not match. `b_Intercept` maps to `alpha`, `b_cons` to `beta`.
+Keep chain identifiers for diagnostics. Inspect parameter-level R-hat and ESS,
+traces and chain-level sampler diagnostics. Never report healthy stored diagnostics
+as diagnostics for a problematic live run. Validate compilation, sampling and
+plotting in a fresh instructor account before showing this optional demonstration.
 
 :::
 :::
+
+## Optional reference: variation across quadrats
+
+```{r optional-spread}
+plot_cndd_spread_check(replicates, ndd)
+```
+
+This compares one SD of observed survival proportions with SDs of replicated data.
+It is not a posterior distribution for the observed SD. Skip if time is short.
 
 # Optional extension: a probability difference
 
@@ -247,3 +349,8 @@ endpoints. Its units are probability points, not an odds ratio.
 
 What would you check before using this analysis on your own data?
 Tomorrow we ask how mother trees and species can differ while sharing information.
+
+
+Model specification references: [brms formulas](https://paulbuerkner.com/brms/reference/brmsformula.html),
+[brm and its backend](https://paulbuerkner.com/brms/reference/brm.html), and
+[Stan diagnostic guidance](https://mc-stan.org/learn-stan/diagnostics-warnings.html).

@@ -58,25 +58,45 @@ comparison <- mother_comparison(fit,seed=20261024)
 
 - Day 1: uncertainty about a survival probability.
 - Day 2: survival probability changes with conspecific density.
-- Today: mother trees and species can differ while sharing information.
+- Today: estimate each group using its own data and data from other groups.
 
 ::: notes
 We first leave out the density predictor and use a separate data set to make the
 idea of information sharing easier to see. We return to species CNDD later.
 :::
 
+## Today's progression
+
+1. **Survival probabilities:** estimate differences among eight mother trees.
+   We start without a density effect.
+2. **Regression relationships:** extend the same idea to differences in intercepts and slopes among species.
+
+A **hierarchical model** uses data from all groups to estimate each group's parameters.
+
+::: notes
+First use the mother-tree binomial model with no density predictor to focus on
+information sharing. Later extend the hierarchy to regression coefficients.
+This is a progression in model structure, not a claim that the first model falls
+outside the regression framework. Mother-tree data are different from Day 2's
+quadrats. Species CNDD is a conceptual illustration; the allometry example uses
+its own simulated data and saved hierarchical regression fit.
+:::
+
 ## Today's objectives
 
-- Explain complete pooling, separate estimation and partial pooling using a figure.
-- Explain why some estimates respond more to shared information.
-- Describe where information sharing could help in your own research.
+**Understanding Bayesian hierarchical models**
 
-## Eight mother trees
+- Explain how data from other groups can help estimate each group's survival.
+- Compare survival estimates and their uncertainty with and without information sharing.
+- Explain how the same idea extends to species-specific regression relationships.
+
+## Eight mother trees: one overall survival rate?
 
 ::: columns
 ::: {.column width="42%"}
 ```{r tree-data}
-trees |> select(tree,n,suv) |> knitr::kable(format="html") |>
+trees |> select(tree,n,suv) |>
+  knitr::kable(format="html",col.names=c("Tree","Seedlings","Survivors")) |>
   kableExtra::kable_styling(font_size=27)
 ```
 :::
@@ -84,39 +104,81 @@ trees |> select(tree,n,suv) |> knitr::kable(format="html") |>
 
 We followed seedlings under eight mother trees of one species.
 
-What survival probability would you report for each mother tree?
+What if we combine all seedlings into one group?
 
-Would a hypothetical 0/2 or 2/2 justify complete certainty about survival?
-:::
-:::
-
-::: notes
-These are simulated mother-tree data, different from Day 2's quadrats. The 0/2
-and 2/2 counts are hypothetical questions, not rows of this table.
-Focus on n and survivors. Hide p_true until after interpretation.
-:::
-
-## Separate observed proportions
-
-```{r observed-trees, fig.width=11, fig.height=4.6}
-ggplot(trees,aes(tree,suv/n,size=n))+geom_point(shape=21,fill="white",stroke=1.2)+
-  ylim(0,1)+labs(x="Mother tree",y="Observed proportion surviving",size="Seedlings")
+```{r pooled-proportion, echo=TRUE}
+sum(trees$suv) / sum(trees$n)
 ```
 
-Which differences could reflect sampling variation?
+One overall observed survival proportion: **`r round(sum(trees$suv)/sum(trees$n),3)`**.
+:::
+:::
 
 ::: notes
-10-25 minutes. These are observed proportions, equal to separate binomial MLEs.
-The posterior comparison later uses means with explicitly stated priors.
+Start with the concrete calculation from main.qmd. These are the same seeded
+simulated mother-tree data, different from Day 2's quadrats. The result is a
+pooled observed proportion, also the common-probability binomial MLE; it is not
+a posterior mean. Ask what differences among trees this one number hides.
+Do not introduce the hypothetical 0/2 and 2/2 cases here.
+:::
+
+## Eight mother trees: estimate each tree separately?
+
+::: columns
+::: {.column width="48%"}
+```{r separate-proportions}
+trees |> transmute(Tree=tree,Seedlings=n,Survivors=suv,Proportion=round(suv/n,2)) |>
+  knitr::kable(format="html") |>
+  kableExtra::kable_styling(font_size=25)
+```
+:::
+::: {.column width="52%"}
+
+For each mother tree:
+
+Survival proportion = survivors / seedlings.
+
+The proportions range from **`r round(min(trees$suv/trees$n),2)`** to **`r round(max(trees$suv/trees$n),2)`**.
+
+Do these differences reflect real tree differences, sampling variation, or both?
+:::
+:::
+
+::: notes
+Calculate the proportions before naming the models. They are separate binomial
+MLEs, not the separate posterior means shown after the exercise. Different
+observed proportions alone do not establish different underlying probabilities.
+:::
+
+## One common probability, or different probabilities?
+
+```{r observed-trees, fig.width=11, fig.height=4.2}
+ggplot(trees,aes(tree,suv/n,size=n)) +
+  geom_hline(yintercept=sum(trees$suv)/sum(trees$n),linetype="dashed",colour="grey40") +
+  geom_point(shape=21,fill="white",stroke=1.2) +
+  ylim(0,1) +
+  labs(x="Mother tree",y="Observed survival\nproportion",size="Seedlings",
+       subtitle="Points: tree-specific proportions. Dashed line: pooled proportion.")
+```
+
+Can data from other trees help us estimate each tree's survival probability?
+
+::: notes
+10-25 minutes. Each point is one mother tree; point size is its seedling count.
+The dashed line is the pooled observed proportion, not a fitted regression line.
+Neither all differences being real nor all trees being identical follows from
+this plot. Use this question to motivate the two extreme models and their
+hierarchical alternative. Hide generating probabilities and fitted comparisons
+until participants have made their predictions in the exercise.
 :::
 
 ## Complete pooling
 
 ::: columns
-::: {.column width="50%"}
-![](../images/pool.png){height=340}
+::: {.column width="68%"}
+![](../images/pool.png){width=100% style="height: auto;"}
 :::
-::: {.column width="50%"}
+::: {.column width="32%"}
 
 $$s_j\sim\operatorname{Binomial}(n_j,p)$$
 
@@ -134,10 +196,10 @@ An uncertainty interval for a common p does not represent between-tree variation
 ## Separate estimation
 
 ::: columns
-::: {.column width="50%"}
-![](../images/separate.png){height=340}
+::: {.column width="68%"}
+![](../images/separate.png){width=100% style="height: auto;"}
 :::
-::: {.column width="50%"}
+::: {.column width="32%"}
 
 $$s_j\sim\operatorname{Binomial}(n_j,p_j)$$
 
@@ -155,10 +217,10 @@ does not update the probability for tree B. Small data can give wide intervals.
 ## Information sharing through a prior
 
 ::: columns
-::: {.column width="50%"}
-![](../images/multilevel.png){height=340}
+::: {.column width="68%"}
+![](../images/multilevel.png){width=100% style="height: auto;"}
 :::
-::: {.column width="50%"}
+::: {.column width="32%"}
 
 $$s_j\sim\operatorname{Binomial}(n_j,p_j)$$
 $$\operatorname{logit}(p_j)\sim\mathcal{N}(\mu,\sigma)$$
@@ -173,40 +235,63 @@ The model estimates mu and sigma from all eight trees, with hyperpriors.
 The Normal second argument is SD, on the logit scale.
 :::
 
-## The group variation matters
+## How much can mother trees differ?
 
-```{r group-variation, fig.width=13, fig.height=4.7}
-plot_group_spread()
+::: columns
+::: {.column width="65%"}
+```{r group-variation, fig.width=8.8, fig.height=5.2, out.width="100%", dev.args=list(bg="white")}
+plot_group_curves() +
+  labs(subtitle="Same logit centre; only sigma changes",
+       caption="Eight colours: eight trees. Illustrative curves, not fitted.") +
+  theme(plot.margin=margin(5.5,22,5.5,5.5))
+```
+:::
+::: {.column width="35%"}
+```{r group-sd-prior, fig.width=4.6, fig.height=3.6, out.width="100%", dev.args=list(bg="white")}
+sigma_examples <- tibble(sigma=c(.1,1,3))
+tibble(sigma=seq(0,3.5,length.out=701)) |>
+  mutate(density=2*dnorm(sigma, mean=0, sd=1)) |>
+  ggplot(aes(sigma,density)) +
+  geom_vline(data=sigma_examples, aes(xintercept=sigma),
+             linetype="dashed", colour="grey55", linewidth=.6) +
+  geom_line(colour="#d95f02", linewidth=1.2) +
+  geom_point(data=sigma_examples,
+             aes(y=2*dnorm(sigma, mean=0, sd=1)),
+             colour="#d95f02", size=3) +
+  scale_x_continuous(limits=c(0,3.5), breaks=c(.1,1,3),
+                     expand=expansion(mult=.04)) +
+  scale_y_continuous(limits=c(0,.85), breaks=c(0,.4,.8)) +
+  labs(title="Prior for sigma", subtitle="Half-Normal(0, 1)",
+       x=expression(sigma), y="Prior density") +
+  theme(axis.title=element_text(size=20), axis.text=element_text(size=18),
+        plot.title=element_text(size=23), plot.subtitle=element_text(size=19))
 ```
 
-Greater inferred variation generally allows less sharing among mother trees.
+$\sigma$ describes differences among trees.
+We estimate $\sigma$ from the data, with a prior.
 
-::: notes
-This illustration fixes mu=0 and changes sigma. It uses fixed Normal quantiles
-and shows probabilities, not a density transformed without a Jacobian.
-These hypothetical values are not the fitted rates of our trees.
+:::
 :::
 
-## The completed model and its assumptions
-
-Selected lines from `stan/logistic.stan`:
-
-```stan
-mu ~ normal(0, 5);
-sigma ~ std_normal();  // sigma is constrained to be positive
-z_tilde ~ std_normal();
-z = mu + sigma * z_tilde;
-// For every mother tree i:
-suv[i] ~ binomial_logit(N[i], z[ii[i]]);
-```
-
-Data: seedlings and survivors. Unknowns: tree effects, group centre and group SD.
-
 ::: notes
-These lines come from stan/logistic.stan, shown together for reading. z is a
-transformed parameter and sigma has lower bound zero. Read the complete file
-in the handout. No independent coding or non-centred parameterisation lesson.
-Priors: mu Normal(0,5), sigma half-Normal(0,1). z_tilde is standard Normal.
+25-40 minutes. Read both figures together: the three dashed lines in the prior
+plot mark sigma = 0.1, 1 and 3, the values used for the three panels on the left.
+The prior is a distribution over sigma, not a fourth mother-tree curve or a
+posterior. A sigma value and a prior distribution for sigma are different things.
+The model estimates sigma with a half-Normal(0,1) prior; it is not fixed at 1.
+
+The left panels are hypothetical illustrations, not fitted mother-tree posteriors.
+Fix the group logit centre at mu=0 and use the same eight standard Normal quantiles.
+Only sigma changes. Each coloured curve has illustrative within-tree logit SD 0.2;
+this extra width is a visual aid, not another level in the fitted model.
+Use the Jacobian 1/[p(1-p)] to convert logit densities to the probability scale,
+then scale each curve to peak 1. Relative density areas cannot be compared.
+Probability-scale modes need not equal plogis of the group logit centres.
+Greater inferred group variation generally permits less sharing for comparable data;
+these panels do not themselves show fitted shrinkage.
+The actual model estimates mu with Normal(0,5) prior; mu=0 is fixed only here.
+Keep alternative priors in the optional reference. Do not replace the saved model's
+half-Normal prior with main.qmd's older half-Cauchy prior.
 :::
 
 ## Which estimates might move?
@@ -243,7 +328,7 @@ have chosen trees and a reason. Use results.html if needed. No other core exerci
 plot_mother_comparison(comparison)
 ```
 
-Points: posterior means. Bars: 90% intervals.
+Points: posterior means. Bars: 95% intervals.
 
 ::: notes
 Complete and separate models use Beta(1,1) probability priors, whereas partial
@@ -264,6 +349,41 @@ Consider information within a tree, its position in the group distribution, and 
 Debrief. Avoid saying every estimate moves to the pooled proportion or has a
 narrower interval. Shrinkage depends on assumptions and data. It cannot guarantee
 smaller estimation error for each group.
+:::
+
+## In a simulation, we can check against the truth
+
+```{r tree-truth-comparison, fig.width=8, fig.height=4.4, dev.args=list(bg="white")}
+tree_truth <- trees |>
+  transmute(tree,p_true,observed=suv/n) |>
+  left_join(comparison |> filter(model=="Partial") |> select(tree,partial=mean),by="tree") |>
+  pivot_longer(c(observed,partial),names_to="Estimate",values_to="estimate") |>
+  mutate(Estimate=factor(Estimate,levels=c("observed","partial"),
+                         labels=c("Observed","Partial-pooling mean")))
+ggplot(tree_truth,aes(p_true,estimate,colour=Estimate)) +
+  geom_abline(slope=1,intercept=0,linetype="dashed",colour="grey40") +
+  geom_line(aes(group=tree),colour="grey65",linewidth=.7) +
+  geom_point(size=3) +
+  scale_colour_manual(values=c("grey40","#d95f02")) +
+  coord_equal(xlim=c(.15,.55),ylim=c(.15,.55)) +
+  labs(x="True probability\n(rounded)",y="Survival\nestimate",colour=NULL) +
+  theme(legend.position="bottom")
+```
+
+Here we know the generating probabilities; in real data, we do not.
+
+::: notes
+Optional within the exercise debrief: shorten or omit if time is tight. This
+restores main.qmd's truth comparison after participants have interpreted their
+results. Each connected pair represents one mother tree. Points on the dashed
+1:1 line would match the generating probability. Generating probabilities in
+make_tree_data() are stored rounded to two decimals, so treat this as a visual
+illustration, not an exact error calculation. Grey points are observed proportions
+(MLEs); orange points are posterior means from the actual saved partial-pooling
+fit. They differ in both estimation method and model assumptions. Some estimates
+can move away from their generating values; do not claim universal improvement
+or that this one simulation establishes general performance. The model estimates
+its group distribution from all trees under the specified hyperpriors.
 :::
 
 ## Species differences in CNDD
@@ -356,7 +476,7 @@ The response changes to log height. Species still share information through a gr
 ::: notes
 The figure uses day3_vslope, fitted to the existing simulated allometry data.
 Points summarise species exponents and the line summarises their expected value
-at each wood density, with 90% intervals. It is not evidence from a real forest.
+at each wood density, with 95% intervals. It is not evidence from a real forest.
 Skip these two slides if delayed. Detailed transformation and implementation are optional.
 :::
 
@@ -407,13 +527,51 @@ This is reflection rather than another code exercise. Keep 85-90 for questions.
 
 # Optional reference {visibility="uncounted"}
 
+## Alternative priors for group variation {visibility="uncounted"}
+
+```{r group-sd-priors, fig.width=13, fig.height=4.2, dev.args=list(bg="white")}
+plot_group_sd_priors()
+```
+
+The fitted model uses Half-Normal(0,1). The others are optional comparisons.
+
+::: notes
+This changes the prior distribution for sigma, rather than fixing sigma at a
+particular value. All curves share the same axes and are normalized by twice
+the symmetric density for sigma >= 0. Wider and heavier-tailed priors have mass
+beyond the displayed range. No refit was performed for these comparison curves.
+Skip this slide in the core explanation.
+:::
+
+## The completed model and its assumptions {visibility="uncounted"}
+
+Selected lines from `stan/logistic.stan`:
+
+```stan
+mu ~ normal(0, 5);
+sigma ~ std_normal();  // sigma is constrained to be positive
+z_tilde ~ std_normal();
+z = mu + sigma * z_tilde;
+// For every mother tree i:
+suv[i] ~ binomial_logit(N[i], z[ii[i]]);
+```
+
+Data: seedlings and survivors. Unknowns: tree effects, group centre and group SD.
+
+::: notes
+These lines come from stan/logistic.stan, shown together for reading. z is a
+transformed parameter and sigma has lower bound zero. Read the complete file
+in the handout. No independent coding or non-centred parameterisation lesson.
+Priors: mu Normal(0,5), sigma half-Normal(0,1). z_tilde is standard Normal.
+:::
+
 ## A new mother tree {visibility="uncounted"}
 
 ```{r echo=TRUE, eval=FALSE}
 set.seed(20261026)
 draws <- fit$draws
 p_new <- plogis(rnorm(nrow(draws),draws$mu,draws$sigma))
-quantile(p_new,c(.05,.5,.95))
+quantile(p_new,c(.025,.5,.975))
 ```
 
 This predicts a new tree's probability, including group variation. A future

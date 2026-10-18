@@ -20,6 +20,16 @@ knitr::opts_chunk$set(message=FALSE, warning=FALSE, fig.align="center",
                       fig.width=8, fig.height=4.5, comment="#>")
 ```
 
+## Before you begin
+
+No prior R or GLM experience is required. The instructor will explain the example.
+You may run the supplied code and change only the two counts, or use
+[the two-survey result sheet](results.html) to compare the prepared figures.
+Both routes complete the same exercise: predict, compare uncertainty, and explain
+what you see. Allow **12 minutes**, including discussion. No installation,
+independent programming or homework is required. For optional local code execution,
+see [packages and setup](../classroom/PACKAGES.md).
+
 ```{r participant-setup}
 library(tidyverse)
 theme_set(theme_bw(base_size = 14))
@@ -50,7 +60,8 @@ tibble(p = p, posterior = posterior) |>
 
 1. Choose a small survey and a larger survey, both with an observed survival proportion of 0.4. Write down the number surveyed (`N`) and the number surviving (`y`) for each.
 2. Before running the code, predict which survey will give a narrower posterior.
-3. Use your counts in the code above. Copy the code into a new chunk for the second survey so that both plots remain visible. Keep the prior and grid unchanged.
+3. If running R, use your counts in the code above. Copy the code into a new chunk for the second survey so that both plots remain visible. Keep the prior and grid unchanged.
+   If reading the result sheet, use its prepared 4/10 and 20/50 surveys instead.
 4. Compare the two plots. Does the result agree with your prediction? Explain what the curve widths tell you about uncertainty in the survival probability.
 
 ::: {.content-visible when-meta="solutions"}

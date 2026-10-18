@@ -194,7 +194,7 @@ fit_brms <- brm(
 brms_draws <- posterior::as_draws_df(fit_brms)
 p_brms <- brms_draws$b_Intercept  # identity link: this is p, not logit(p)
 mean(p_brms)
-quantile(p_brms, c(0.05, 0.95))
+quantile(p_brms, c(0.025, 0.975))
 
 plot_update(2, 5, 1, 1) +
   geom_histogram(data=data.frame(p=p_brms), aes(x=p, y=after_stat(density)),
@@ -226,7 +226,7 @@ Do this after the core exercise or after class. The data and model stay fixed.
 draws <- course_fit("day1_seedling")$draws
 summarise_update(2, 5, 1, 1)
 mean(draws$p)
-quantile(draws$p, c(0.05, 0.95))
+quantile(draws$p, c(0.025, 0.975))
 mean(draws$p > 0.5)
 ```
 

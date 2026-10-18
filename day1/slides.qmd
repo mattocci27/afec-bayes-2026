@@ -30,8 +30,9 @@ execute:
 DAY 1 SESSION PLAN (90 min). Agreed direction: classroom/restructure-proposal.md.
 Outcomes: explain likelihood/prior/posterior in words; predict how data/prior changes
 alter a posterior.
-Assume basic R execution, daytime GLM practice, English and no homework. Confirm
-language, prior experience and the prepared browser environment with organisers.
+Assume English and no homework; do not assume R or GLM experience. The daytime
+R/statistics workshop starts on the same day. Figures are a complete route through
+the exercise; supplied code is optional. Confirm language and browser access.
 0-8 setup/course question; 8-23 likelihood; 23-43 conditional probability/fip/Bayes;
 43-58 prior/posterior/coins; 58-70 ONE exercise (8 work + 4 debrief);
 70-80 short posterior-draw demonstration; 80-85 summary/Day 2 bridge;
@@ -169,8 +170,10 @@ On Day 3, survival rates vary among mother trees and species.
 
 ## Today's objectives
 
-- Explain likelihood, prior and posterior using a figure.
-- Predict how changing data or the prior changes the posterior.
+**Understanding Bayesian thinking**
+
+- Explain how the prior and likelihood combine to give the posterior.
+- Describe how the data and prior affect the estimate and its uncertainty.
 
 ::: notes
 Ask for explanations in words. Independent implementation is an optional extension.

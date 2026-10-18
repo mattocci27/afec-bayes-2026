@@ -31,7 +31,7 @@
     ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
       width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
@@ -150,12 +150,12 @@
     }
     .reveal .footnotes ol {
       counter-reset: ol;
-      list-style-type: none; 
+      list-style-type: none;
       margin-left: 0;
     }
     .reveal .footnotes ol li:before {
       counter-increment: ol;
-      content: counter(ol) ". "; 
+      content: counter(ol) ". ";
     }
     .reveal .footnotes ol li > p:first-child {
       display: inline-block;
@@ -197,19 +197,19 @@
     .reveal .slide > img.r-stretch.quarto-figure-center {
       display: block;
       margin-left: auto;
-      margin-right: auto; 
+      margin-right: auto;
     }
     .reveal .slide > img.stretch.quarto-figure-left,
     .reveal .slide > img.r-stretch.quarto-figure-left  {
       display: block;
       margin-left: 0;
-      margin-right: auto; 
+      margin-right: auto;
     }
     .reveal .slide > img.stretch.quarto-figure-right,
     .reveal .slide > img.r-stretch.quarto-figure-right  {
       display: block;
       margin-left: auto;
-      margin-right: 0; 
+      margin-right: 0;
     }
   </style>
   <script src="slides_files/libs/kePrint-0.0.1/kePrint.js"></script>
@@ -242,7 +242,7 @@ Masatoshi Katabuchi @ XTBG, CAS
 <ul>
 <li>Day 1: uncertainty about a survival probability.</li>
 <li>Day 2: survival probability changes with conspecific density.</li>
-<li>Today: mother trees and species can differ while sharing information.</li>
+<li>Today: estimate each group using its own data and data from other groups.</li>
 </ul>
 <aside class="notes">
 <p>We first leave out the density predictor and use a separate data set to make the idea of information sharing easier to see. We return to species CNDD later.</p>
@@ -258,16 +258,38 @@ Masatoshi Katabuchi @ XTBG, CAS
           display:block!important;
       }</style></aside>
 </section>
+<section id="todays-progression" class="slide level2">
+<h2>Today’s progression</h2>
+<ol type="1">
+<li><strong>Survival probabilities:</strong> estimate differences among eight mother trees. We start without a density effect.</li>
+<li><strong>Regression relationships:</strong> extend the same idea to differences in intercepts and slopes among species.</li>
+</ol>
+<p>A <strong>hierarchical model</strong> uses data from all groups to estimate each group’s parameters.</p>
+<aside class="notes">
+<p>First use the mother-tree binomial model with no density predictor to focus on information sharing. Later extend the hierarchy to regression coefficients. This is a progression in model structure, not a claim that the first model falls outside the regression framework. Mother-tree data are different from Day 2’s quadrats. Species CNDD is a conceptual illustration; the allometry example uses its own simulated data and saved hierarchical regression fit.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
 <section id="todays-objectives" class="slide level2">
 <h2>Today’s objectives</h2>
+<p><strong>Understanding Bayesian hierarchical models</strong></p>
 <ul>
-<li>Explain complete pooling, separate estimation and partial pooling using a figure.</li>
-<li>Explain why some estimates respond more to shared information.</li>
-<li>Describe where information sharing could help in your own research.</li>
+<li>Explain how data from other groups can help estimate each group’s survival.</li>
+<li>Compare survival estimates and their uncertainty with and without information sharing.</li>
+<li>Explain how the same idea extends to species-specific regression relationships.</li>
 </ul>
 </section>
-<section id="eight-mother-trees" class="slide level2">
-<h2>Eight mother trees</h2>
+<section id="eight-mother-trees-one-overall-survival-rate" class="slide level2">
+<h2>Eight mother trees: one overall survival rate?</h2>
 <div class="columns">
 <div class="column" style="width:42%;">
 <div class="cell" data-layout-align="center">
@@ -275,9 +297,9 @@ Masatoshi Katabuchi @ XTBG, CAS
 <table class="table caption-top" style="font-size: 27px; margin-left: auto; margin-right: auto;">
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">tree</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">n</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">suv</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Tree</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Seedlings</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Survivors</th>
 </tr>
 </thead>
 <tbody>
@@ -327,11 +349,17 @@ Masatoshi Katabuchi @ XTBG, CAS
 </div>
 </div><div class="column" style="width:58%;">
 <p>We followed seedlings under eight mother trees of one species.</p>
-<p>What survival probability would you report for each mother tree?</p>
-<p>Would a hypothetical 0/2 or 2/2 justify complete certainty about survival?</p>
+<p>What if we combine all seedlings into one group?</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="" aria-label="1"></a><span class="fu">sum</span>(trees<span class="sc">$</span>suv) <span class="sc">/</span> <span class="fu">sum</span>(trees<span class="sc">$</span>n)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] 0.2840467</code></pre>
+</div>
+</div>
+<p>One overall observed survival proportion: <strong>0.284</strong>.</p>
 </div></div>
 <aside class="notes">
-<p>These are simulated mother-tree data, different from Day 2’s quadrats. The 0/2 and 2/2 counts are hypothetical questions, not rows of this table. Focus on n and survivors. Hide p_true until after interpretation.</p>
+<p>Start with the concrete calculation from main.qmd. These are the same seeded simulated mother-tree data, different from Day 2’s quadrats. The result is a pooled observed proportion, also the common-probability binomial MLE; it is not a posterior mean. Ask what differences among trees this one number hides. Do not introduce the hypothetical 0/2 and 2/2 cases here.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -344,12 +372,100 @@ Masatoshi Katabuchi @ XTBG, CAS
           display:block!important;
       }</style></aside>
 </section>
-<section id="separate-observed-proportions" class="slide level2">
-<h2>Separate observed proportions</h2>
-
-<img data-src="slides_files/figure-revealjs/observed-trees-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>Which differences could reflect sampling variation?</p>
+<section id="eight-mother-trees-estimate-each-tree-separately" class="slide level2">
+<h2>Eight mother trees: estimate each tree separately?</h2>
+<div class="columns">
+<div class="column" style="width:48%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="table caption-top" style="font-size: 25px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Tree</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Seedlings</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Survivors</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">A</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0.22</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">B</td>
+<td style="text-align: right;">45</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">0.40</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.19</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">D</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.28</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">E</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0.24</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">F</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0.31</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">0.24</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">H</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0.50</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:52%;">
+<p>For each mother tree:</p>
+<p>Survival proportion = survivors / seedlings.</p>
+<p>The proportions range from <strong>0.19</strong> to <strong>0.5</strong>.</p>
+<p>Do these differences reflect real tree differences, sampling variation, or both?</p>
+</div></div>
 <aside class="notes">
-<p>10-25 minutes. These are observed proportions, equal to separate binomial MLEs. The posterior comparison later uses means with explicitly stated priors.</p>
+<p>Calculate the proportions before naming the models. They are separate binomial MLEs, not the separate posterior means shown after the exercise. Different observed proportions alone do not establish different underlying probabilities.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="one-common-probability-or-different-probabilities" class="slide level2">
+<h2>One common probability, or different probabilities?</h2>
+
+<img data-src="slides_files/figure-revealjs/observed-trees-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>Can data from other trees help us estimate each tree’s survival probability?</p>
+<aside class="notes">
+<p>10-25 minutes. Each point is one mother tree; point size is its seedling count. The dashed line is the pooled observed proportion, not a fitted regression line. Neither all differences being real nor all trees being identical follows from this plot. Use this question to motivate the two extreme models and their hierarchical alternative. Hide generating probabilities and fitted comparisons until participants have made their predictions in the exercise.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -365,9 +481,9 @@ Masatoshi Katabuchi @ XTBG, CAS
 <section id="complete-pooling" class="slide level2">
 <h2>Complete pooling</h2>
 <div class="columns">
-<div class="column" style="width:50%;">
-<p><img data-src="../images/pool.png" height="340"></p>
-</div><div class="column" style="width:50%;">
+<div class="column" style="width:68%;">
+<p><img data-src="../images/pool.png" style="height: auto;;width:100.0%"></p>
+</div><div class="column" style="width:32%;">
 <p><span class="math display">s_j\sim\operatorname{Binomial}(n_j,p)</span></p>
 <p>Every mother tree shares the same <span class="math inline">p</span>.</p>
 <p>What ecological difference does this assumption leave out?</p>
@@ -389,9 +505,9 @@ Masatoshi Katabuchi @ XTBG, CAS
 <section id="separate-estimation" class="slide level2">
 <h2>Separate estimation</h2>
 <div class="columns">
-<div class="column" style="width:50%;">
-<p><img data-src="../images/separate.png" height="340"></p>
-</div><div class="column" style="width:50%;">
+<div class="column" style="width:68%;">
+<p><img data-src="../images/separate.png" style="height: auto;;width:100.0%"></p>
+</div><div class="column" style="width:32%;">
 <p><span class="math display">s_j\sim\operatorname{Binomial}(n_j,p_j)</span></p>
 <p>Each mother tree has its own independent <span class="math inline">p_j</span>.</p>
 <p>How much can a tree with few seedlings tell us on its own?</p>
@@ -413,9 +529,9 @@ Masatoshi Katabuchi @ XTBG, CAS
 <section id="information-sharing-through-a-prior" class="slide level2">
 <h2>Information sharing through a prior</h2>
 <div class="columns">
-<div class="column" style="width:50%;">
-<p><img data-src="../images/multilevel.png" height="340"></p>
-</div><div class="column" style="width:50%;">
+<div class="column" style="width:68%;">
+<p><img data-src="../images/multilevel.png" style="height: auto;;width:100.0%"></p>
+</div><div class="column" style="width:32%;">
 <p><span class="math display">s_j\sim\operatorname{Binomial}(n_j,p_j)</span> <span class="math display">\operatorname{logit}(p_j)\sim\mathcal{N}(\mu,\sigma)</span></p>
 <p>Each mother tree can differ. Their shared distribution describes the commonality.</p>
 </div></div>
@@ -433,36 +549,34 @@ Masatoshi Katabuchi @ XTBG, CAS
           display:block!important;
       }</style></aside>
 </section>
-<section id="the-group-variation-matters" class="slide level2">
-<h2>The group variation matters</h2>
-
-<img data-src="slides_files/figure-revealjs/group-variation-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1248"><p>Greater inferred variation generally allows less sharing among mother trees.</p>
+<section id="how-much-can-mother-trees-differ" class="slide level2">
+<h2>How much can mother trees differ?</h2>
+<div class="columns">
+<div class="column" style="width:65%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/group-variation-1.png" class="quarto-figure quarto-figure-center" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:35%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/group-sd-prior-1.png" class="quarto-figure quarto-figure-center" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><span class="math inline">\sigma</span> describes differences among trees. We estimate <span class="math inline">\sigma</span> from the data, with a prior.</p>
+</div></div>
 <aside class="notes">
-<p>This illustration fixes mu=0 and changes sigma. It uses fixed Normal quantiles and shows probabilities, not a density transformed without a Jacobian. These hypothetical values are not the fitted rates of our trees.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="the-completed-model-and-its-assumptions" class="slide level2">
-<h2>The completed model and its assumptions</h2>
-<p>Selected lines from <code>stan/logistic.stan</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="" aria-label="1"></a>mu ~ normal(<span class="dv">0</span>, <span class="dv">5</span>);</span>
-<span id="cb1-2"><a href="" aria-label="2"></a>sigma ~ std_normal();  <span class="co">// sigma is constrained to be positive</span></span>
-<span id="cb1-3"><a href="" aria-label="3"></a>z_tilde ~ std_normal();</span>
-<span id="cb1-4"><a href="" aria-label="4"></a>z = mu + sigma * z_tilde;</span>
-<span id="cb1-5"><a href="" aria-label="5"></a><span class="co">// For every mother tree i:</span></span>
-<span id="cb1-6"><a href="" aria-label="6"></a>suv[i] ~ binomial_logit(N[i], z[ii[i]]);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Data: seedlings and survivors. Unknowns: tree effects, group centre and group SD.</p>
-<aside class="notes">
-<p>These lines come from stan/logistic.stan, shown together for reading. z is a transformed parameter and sigma has lower bound zero. Read the complete file in the handout. No independent coding or non-centred parameterisation lesson. Priors: mu Normal(0,5), sigma half-Normal(0,1). z_tilde is standard Normal.</p>
+<p>25-40 minutes. Read both figures together: the three dashed lines in the prior plot mark sigma = 0.1, 1 and 3, the values used for the three panels on the left. The prior is a distribution over sigma, not a fourth mother-tree curve or a posterior. A sigma value and a prior distribution for sigma are different things. The model estimates sigma with a half-Normal(0,1) prior; it is not fixed at 1.</p>
+<p>The left panels are hypothetical illustrations, not fitted mother-tree posteriors. Fix the group logit centre at mu=0 and use the same eight standard Normal quantiles. Only sigma changes. Each coloured curve has illustrative within-tree logit SD 0.2; this extra width is a visual aid, not another level in the fitted model. Use the Jacobian 1/[p(1-p)] to convert logit densities to the probability scale, then scale each curve to peak 1. Relative density areas cannot be compared. Probability-scale modes need not equal plogis of the group logit centres. Greater inferred group variation generally permits less sharing for comparable data; these panels do not themselves show fitted shrinkage. The actual model estimates mu with Normal(0,5) prior; mu=0 is fixed only here. Keep alternative priors in the optional reference. Do not replace the saved model’s half-Normal prior with main.qmd’s older half-Cauchy prior.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -582,7 +696,7 @@ Masatoshi Katabuchi @ XTBG, CAS
 <section id="three-ways-of-estimating-survival" class="slide level2">
 <h2>Three ways of estimating survival</h2>
 
-<img data-src="slides_files/figure-revealjs/fitted-trees-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Points: posterior means. Bars: 90% intervals.</p>
+<img data-src="slides_files/figure-revealjs/fitted-trees-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Points: posterior means. Bars: 95% intervals.</p>
 <aside class="notes">
 <p>Complete and separate models use Beta(1,1) probability priors, whereas partial pooling uses the Normal logit group prior with estimated centre and SD. State this difference. It is an illustrative model comparison, not an isolation of pooling under identical marginal priors. All code and priors are in the handout.</p>
 <style type="text/css">
@@ -603,6 +717,24 @@ Masatoshi Katabuchi @ XTBG, CAS
 <img data-src="slides_files/figure-revealjs/movement-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Consider information within a tree, its position in the group distribution, and inferred group variation.</p>
 <aside class="notes">
 <p>Debrief. Avoid saying every estimate moves to the pooled proportion or has a narrower interval. Shrinkage depends on assumptions and data. It cannot guarantee smaller estimation error for each group.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="in-a-simulation-we-can-check-against-the-truth" class="slide level2">
+<h2>In a simulation, we can check against the truth</h2>
+
+<img data-src="slides_files/figure-revealjs/tree-truth-comparison-1.png" class="quarto-figure quarto-figure-center r-stretch" width="768"><p>Here we know the generating probabilities; in real data, we do not.</p>
+<aside class="notes">
+<p>Optional within the exercise debrief: shorten or omit if time is tight. This restores main.qmd’s truth comparison after participants have interpreted their results. Each connected pair represents one mother tree. Points on the dashed 1:1 line would match the generating probability. Generating probabilities in make_tree_data() are stored rounded to two decimals, so treat this as a visual illustration, not an exact error calculation. Grey points are observed proportions (MLEs); orange points are posterior means from the actual saved partial-pooling fit. They differ in both estimation method and model assumptions. Some estimates can move away from their generating values; do not claim universal improvement or that this one simulation establishes general performance. The model estimates its group distribution from all trees under the specified hyperpriors.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -711,7 +843,7 @@ Masatoshi Katabuchi @ XTBG, CAS
 
 <img data-src="slides_files/figure-revealjs/wood-density-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>The response changes to log height. Species still share information through a group model.</p>
 <aside class="notes">
-<p>The figure uses day3_vslope, fitted to the existing simulated allometry data. Points summarise species exponents and the line summarises their expected value at each wood density, with 90% intervals. It is not evidence from a real forest. Skip these two slides if delayed. Detailed transformation and implementation are optional.</p>
+<p>The figure uses day3_vslope, fitted to the existing simulated allometry data. Points summarise species exponents and the line summarises their expected value at each wood density, with 95% intervals. It is not evidence from a real forest. Skip these two slides if delayed. Detailed transformation and implementation are optional.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -796,13 +928,55 @@ Masatoshi Katabuchi @ XTBG, CAS
 <h1>Optional reference</h1>
 
 </section>
+<section id="alternative-priors-for-group-variation" class="slide level2" data-visibility="uncounted">
+<h2>Alternative priors for group variation</h2>
+
+<img data-src="slides_files/figure-revealjs/group-sd-priors-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1248"><p>The fitted model uses Half-Normal(0,1). The others are optional comparisons.</p>
+<aside class="notes">
+<p>This changes the prior distribution for sigma, rather than fixing sigma at a particular value. All curves share the same axes and are normalized by twice the symmetric density for sigma &gt;= 0. Wider and heavier-tailed priors have mass beyond the displayed range. No refit was performed for these comparison curves. Skip this slide in the core explanation.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-completed-model-and-its-assumptions" class="slide level2" data-visibility="uncounted">
+<h2>The completed model and its assumptions</h2>
+<p>Selected lines from <code>stan/logistic.stan</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb3-1"><a href="" aria-label="1"></a>mu ~ normal(<span class="dv">0</span>, <span class="dv">5</span>);</span>
+<span id="cb3-2"><a href="" aria-label="2"></a>sigma ~ std_normal();  <span class="co">// sigma is constrained to be positive</span></span>
+<span id="cb3-3"><a href="" aria-label="3"></a>z_tilde ~ std_normal();</span>
+<span id="cb3-4"><a href="" aria-label="4"></a>z = mu + sigma * z_tilde;</span>
+<span id="cb3-5"><a href="" aria-label="5"></a><span class="co">// For every mother tree i:</span></span>
+<span id="cb3-6"><a href="" aria-label="6"></a>suv[i] ~ binomial_logit(N[i], z[ii[i]]);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Data: seedlings and survivors. Unknowns: tree effects, group centre and group SD.</p>
+<aside class="notes">
+<p>These lines come from stan/logistic.stan, shown together for reading. z is a transformed parameter and sigma has lower bound zero. Read the complete file in the handout. No independent coding or non-centred parameterisation lesson. Priors: mu Normal(0,5), sigma half-Normal(0,1). z_tilde is standard Normal.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
 <section id="a-new-mother-tree" class="slide level2" data-visibility="uncounted">
 <h2>A new mother tree</h2>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="" aria-label="1"></a><span class="fu">set.seed</span>(<span class="dv">20261026</span>)</span>
-<span id="cb2-2"><a href="" aria-label="2"></a>draws <span class="ot">&lt;-</span> fit<span class="sc">$</span>draws</span>
-<span id="cb2-3"><a href="" aria-label="3"></a>p_new <span class="ot">&lt;-</span> <span class="fu">plogis</span>(<span class="fu">rnorm</span>(<span class="fu">nrow</span>(draws),draws<span class="sc">$</span>mu,draws<span class="sc">$</span>sigma))</span>
-<span id="cb2-4"><a href="" aria-label="4"></a><span class="fu">quantile</span>(p_new,<span class="fu">c</span>(.<span class="dv">05</span>,.<span class="dv">5</span>,.<span class="dv">95</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="" aria-label="1"></a><span class="fu">set.seed</span>(<span class="dv">20261026</span>)</span>
+<span id="cb4-2"><a href="" aria-label="2"></a>draws <span class="ot">&lt;-</span> fit<span class="sc">$</span>draws</span>
+<span id="cb4-3"><a href="" aria-label="3"></a>p_new <span class="ot">&lt;-</span> <span class="fu">plogis</span>(<span class="fu">rnorm</span>(<span class="fu">nrow</span>(draws),draws<span class="sc">$</span>mu,draws<span class="sc">$</span>sigma))</span>
+<span id="cb4-4"><a href="" aria-label="4"></a><span class="fu">quantile</span>(p_new,<span class="fu">c</span>(.<span class="dv">025</span>,.<span class="dv">5</span>,.<span class="dv">975</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>This predicts a new tree’s probability, including group variation. A future survivor count would also require a seedling count and binomial sampling.</p>
 </section>
@@ -833,7 +1007,7 @@ Masatoshi Katabuchi @ XTBG, CAS
   <script src="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
   <script src="slides_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="slides_files/libs/revealjs/plugin/quarto-support/support.js"></script>
-  
+
 
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
@@ -855,7 +1029,7 @@ Masatoshi Katabuchi @ XTBG, CAS
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
 'smaller': false,
- 
+
         // Display controls in the bottom right corner
         controls: true,
 
@@ -1017,7 +1191,7 @@ Masatoshi Katabuchi @ XTBG, CAS
         ]
       });
     </script>
-    
+
     <script>
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
@@ -1063,7 +1237,7 @@ Masatoshi Katabuchi @ XTBG, CAS
         });
         const isCodeAnnotation = (el) => {
           for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {                     
+            if (clz.startsWith('code-annotation-')) {
               return true;
             }
           }
@@ -1083,11 +1257,11 @@ Masatoshi Katabuchi @ XTBG, CAS
             button.setAttribute("data-bs-toggle", "tooltip");
             button.setAttribute("data-bs-placement", "left");
             button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button, 
-              { trigger: "manual", 
+            tooltip = new bootstrap.Tooltip(button,
+              { trigger: "manual",
                 customClass: "code-copy-button-tooltip",
                 offset: [0, -8]});
-            tooltip.show();    
+            tooltip.show();
           }
           setTimeout(function() {
             if (tooltip) {
@@ -1166,7 +1340,7 @@ Masatoshi Katabuchi @ XTBG, CAS
           }
             config['offset'] = [0,0];
             config['maxWidth'] = 700;
-          window.tippy(el, config); 
+          window.tippy(el, config);
         }
         const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
         for (var i=0; i<noterefs.length; i++) {
@@ -1225,6 +1399,6 @@ Masatoshi Katabuchi @ XTBG, CAS
       </script>
     <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
     <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
-    
+
 
 </body></html>

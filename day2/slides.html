@@ -250,20 +250,14 @@ Masatoshi Katabuchi @ XTBG, CAS
 </section>
 <section id="todays-objectives" class="slide level2">
 <h2>Today’s objectives</h2>
-<p><strong>Understand the model</strong></p>
+<p><strong>Understanding Bayesian regression</strong></p>
 <ul>
-<li>Explain how the model links conspecific density to seedling survival.</li>
-</ul>
-<p><strong>Interpret the results</strong></p>
-<ul>
-<li>Describe what the results tell us about survival, and how uncertain they are.</li>
-</ul>
-<p><strong>Check the results</strong></p>
-<ul>
-<li>Explain why we check both the calculation and the model’s fit to the data.</li>
+<li>Explain how the model links density to survival probability.</li>
+<li>Interpret predicted survival probabilities and their uncertainty.</li>
+<li>Explain why we check both the sampling and the model’s fit to observations.</li>
 </ul>
 <aside class="notes">
-<p>Read completed models and results together. Coding is optional. The only participant exercise is at 40-55 minutes.</p>
+<p>Read completed models and results together. Coding is optional. The participant exercise is at 40-55 minutes: predict, compare figures and explain.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -603,7 +597,25 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
 </div></div>
 <p>Four possible curves for the <strong>same survival relationship</strong>.</p>
 <aside class="notes">
-<p>Each table row supplies both coefficients for one curve. The displayed coefficients are rounded, but curves use their full precision. Rows are selected actual paired draws at four spaced beta ranks between its 10th and 90th percentiles, not independently chosen alpha and beta values. All curves use the same grey: these are alternative draws for the same relationship. The later species preview uses different colours for different species. The next slide summarises ALL stored draws; these four do not define the band.</p>
+<p>Each table row supplies both coefficients for one curve. The displayed coefficients are rounded, but curves use their full precision. Rows are selected actual paired draws at four spaced beta ranks between its 10th and 90th percentiles, not independently chosen alpha and beta values. All curves use the same grey: these are alternative draws for the same relationship. The later species preview uses different colours for different species. The next slide shows 100 draws before summarising ALL stored draws as a band. These four illustrative draws do not define the band.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="posterior-draws-100-survival-curves" class="slide level2">
+<h2>100 posterior draws, 100 survival curves</h2>
+
+<img data-src="slides_files/figure-revealjs/many-survival-curves-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Each curve comes from one posterior draw.</p>
+<aside class="notes">
+<p>These are 100 randomly selected actual paired draws without replacement from the same stored posterior, with a fixed seed. Each pair supplies a whole curve for the same survival relationship. Grey lines show uncertainty, not species differences or simulated survivor counts. Keep the density range and probability limits the same as the four-curve figure. At any fixed density, the spread of curves shows uncertainty about p.&nbsp;The next slide uses ALL stored draws to calculate pointwise 2.5th/97.5th percentiles and the median; the visible 100-curve envelope is not that interval.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -619,9 +631,10 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
 <section id="all-draws-give-a-band-of-survival-curves" class="slide level2">
 <h2>All draws give a band of survival curves</h2>
 
-<img data-src="slides_files/figure-revealjs/fitted-curve-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>The band shows uncertainty about <strong>survival probability</strong> at each density.</p>
+<img data-src="slides_files/figure-revealjs/fitted-curve-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Each point represents one quadrat.</p>
+<p>The band shows uncertainty about <strong>survival probability</strong> at each density.</p>
 <aside class="notes">
-<p>At each x, transform every paired draw into p, then calculate the median and 5th/95th percentiles. The line is not MLE or MAP and need not equal a single drawn curve. The band is pointwise, not a simultaneous band for the whole function. The observed proportions include binomial variation, so this is not an interval that must contain the observations. Leave numerical low/high comparisons to the exercise.</p>
+<p>At each x, transform every paired draw into p, then calculate the median and 2.5th/97.5th percentiles. The line is not MLE or MAP and need not equal a single drawn curve. The band is pointwise, not a simultaneous band for the whole function. The observed proportions include binomial variation, so this is not an interval that must contain the observations. Leave numerical low/high comparisons to the exercise.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -638,13 +651,13 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
 <h2>Exercise: survival at two densities</h2>
 <p><code>day2/exercise-student.qmd</code></p>
 <ul>
-<li>Use the saved draws to compare <span class="math inline">x=-1</span> and <span class="math inline">x=1</span>.</li>
-<li>Read the two survival probabilities and their 90% intervals.</li>
-<li>Explain the comparison in ecological terms.</li>
-<li>Does a probability tell us the next survivor count exactly?</li>
+<li>Predict which density has higher survival.</li>
+<li>Compare supplied probabilities at <span class="math inline">x=-1</span> and <span class="math inline">x=1</span>, with 95% intervals.</li>
+<li>Explain what the probabilities and intervals mean.</li>
+<li>Run supplied code or read the figures: both routes complete the task.</li>
 </ul>
 <aside class="notes">
-<p>40-55 minutes: 10 minutes individual work and 5 minutes debrief. Nearby help is optional. Low means one SD below mean density, high means one SD above; hold the fit fixed. Check progress at minute 5. Use results.html when code access fails. The exercise’s initial prediction recalls the observed trend; its main task is to read and report the two probabilities with uncertainty before the lecturer shows them. No holes to fill and no refit. Discuss future counts as a prediction before the next demo.</p>
+<p>40-55 minutes: prediction 2, figure comparison 6, written interpretation 2, debrief 5. No new inference or software installation. Nearby help is optional. If R access or operation takes more than two minutes, continue with results.html and the same questions. Low/high density are -1/+1 SD; hold the fitted data, model, priors and draws fixed. Computation diagnostics and model checking are explained by the instructor; students need to understand their purpose, not memorise syntax or thresholds.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -662,7 +675,7 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
 
 <img data-src="slides_files/figure-revealjs/density-comparison-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p>Predicted survival: <strong>0.52</strong> at low density; <strong>0.17</strong> at high density. Report both with their intervals.</p>
 <aside class="notes">
-<p>Debrief after participants have read their own tables. Low density is x=-1 and high is x=1, with the same fit and pointwise 90% intervals. The saved posterior medians are 0.52 and 0.17; intervals are 0.48 to 0.56 and 0.14 to 0.21, respectively. State that the fitted model predicts lower survival at high density, conditional on its assumptions. Beta is a logit coefficient, not a percent reduction. This simulated association does not establish a causal mechanism.</p>
+<p>Debrief after participants have read their own tables. Low density is x=-1 and high is x=1, with the same fit and pointwise 95% intervals. The saved posterior medians are 0.52 and 0.17; intervals are 0.47 to 0.57 and 0.13 to 0.22, respectively. State that the fitted model predicts lower survival at high density, conditional on its assumptions. Beta is a logit coefficient, not a percent reduction. This simulated association does not establish a causal mechanism.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -681,7 +694,7 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
 
 <img data-src="slides_files/figure-revealjs/new-counts-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Both groups contain 20 seedlings. Density is the only condition that changes.</p>
 <aside class="notes">
-<p>55-70 minutes begins with the bridge from probability estimates to generated data. For each posterior pair, calculate p at each density and generate a Binomial(20,p) count. This incorporates uncertainty about p AND variation in counts given p. The saved fit is unchanged. Explain the two sources of uncertainty orally. Now ask whether this same simulation can reproduce our observed quadrats.</p>
+<p>55-70 minutes: discussion begins with the bridge from probability estimates to generated data. For each posterior pair, calculate p at each density and generate a Binomial(20,p) count. This incorporates uncertainty about p AND variation in counts given p. The saved fit is unchanged. Explain the two sources of uncertainty orally. Now ask whether this same simulation can reproduce our observed quadrats.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -719,27 +732,12 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
 <section id="does-the-density-pattern-look-compatible" class="slide level2">
 <h2>Does the density pattern look compatible?</h2>
 
-<img data-src="slides_files/figure-revealjs/check-pattern-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Are observations systematically above or below the model-generated intervals?</p>
+<img data-src="slides_files/figure-revealjs/check-pattern-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><ul>
+<li>Does the model reproduce the change in survival across densities?</li>
+<li>Are observations consistently higher or lower than predicted in part of the density range?</li>
+</ul>
 <aside class="notes">
-<p>The intervals concern replicated proportions at observed n_i, not uncertainty about p_i alone. Some points can lie outside a 90% interval without indicating a systematic failure; do not count every outside point as a model failure. Look across the density range for a pattern the model misses.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="does-the-model-reproduce-the-spread" class="slide level2">
-<h2>Does the model reproduce the spread?</h2>
-
-<img data-src="slides_files/figure-revealjs/check-spread-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>What ecological conditions might create more variation than the model predicts?</p>
-<aside class="notes">
-<p>This checks one feature, complementing the density plot. These data were generated from the simple model, so do not promise a visible mismatch. Rounding the simulated predictor makes this an illustrative check, not an exact calibration experiment. A discrepancy might involve the relationship, unmodelled conditions or dependence. Next consider what those possibilities mean in a real forest.</p>
+<p>The intervals concern replicated proportions at observed n_i, not uncertainty about p_i alone. Some points can lie outside a 95% interval without indicating a systematic failure; do not count every outside point as a model failure. Look across the density range for a pattern the model misses. These data were generated from the simple model, so do not promise a visible mismatch. Similar patterns do not prove that the model is correct. Ask what omitted conditions, such as light or soil, might matter before moving to the real-forest discussion. The SD-based comparison is an optional reference, not part of this introduction.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -907,6 +905,25 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
 s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
 <p>Keep the observed <span class="math inline">x_i</span> and <span class="math inline">n_i</span> for every quadrat.</p>
 </section>
+<section id="optional-compare-variation-using-sd" class="slide level2" data-visibility="uncounted">
+<h2>Optional: compare variation using SD</h2>
+<p>Summarise variation across quadrats with one number: the <strong>standard deviation (SD)</strong>.</p>
+
+<img data-src="slides_files/figure-revealjs/check-spread-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>Is the observed SD within the range the model typically produces?</p>
+<aside class="notes">
+<p>Optional extension after explaining SD. The black line is ONE SD calculated from the observed survival proportions across quadrats, not the observed data themselves. For each replicated data set, calculate the same SD across the same quadrats; the orange histogram collects those simulated SDs. This compares one feature of the data and complements the main density-pattern check. It is not a posterior for the observed SD. These data were generated from the simple model; do not promise a mismatch or claim that agreement proves the model correct. Rounding the simulated predictor makes this illustrative, not an exact calibration experiment.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
 <section id="optional-cndd-prior-curves" class="slide level2" data-visibility="uncounted">
 <h2>Optional: CNDD prior curves</h2>
 
@@ -930,7 +947,7 @@ s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="" aria-label="1"></a>p_low <span class="ot">&lt;-</span> <span class="fu">plogis</span>(draws<span class="sc">$</span>alpha<span class="sc">-</span>draws<span class="sc">$</span>beta)</span>
 <span id="cb2-2"><a href="" aria-label="2"></a>p_high <span class="ot">&lt;-</span> <span class="fu">plogis</span>(draws<span class="sc">$</span>alpha<span class="sc">+</span>draws<span class="sc">$</span>beta)</span>
-<span id="cb2-3"><a href="" aria-label="3"></a><span class="fu">quantile</span>(p_high<span class="sc">-</span>p_low,<span class="fu">c</span>(.<span class="dv">05</span>,.<span class="dv">5</span>,.<span class="dv">95</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-3"><a href="" aria-label="3"></a><span class="fu">quantile</span>(p_high<span class="sc">-</span>p_low,<span class="fu">c</span>(.<span class="dv">025</span>,.<span class="dv">5</span>,.<span class="dv">975</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Compute the difference for each paired draw. The comparison holds the two densities fixed.</p>
 </section>

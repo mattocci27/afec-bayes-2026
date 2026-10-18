@@ -167,7 +167,7 @@ summarise_update <- function(y, N, a = 1, b = 1) {
     prior = sprintf("Beta(%g, %g)", a, b),
     mle = y / N,
     post_mean = (a + y) / (a + b + N),
-    q5 = qbeta(0.05, a + y, b + N - y),
-    q95 = qbeta(0.95, a + y, b + N - y)
+    q2_5 = qbeta(0.025, a + y, b + N - y),
+    q97_5 = qbeta(0.975, a + y, b + N - y)
   )
 }

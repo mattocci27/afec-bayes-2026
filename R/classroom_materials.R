@@ -103,7 +103,7 @@ build_classroom_materials <- function(root = here::here(), render = TRUE,
     file.copy(list.files("stan", "\\.stan$", full.names = TRUE), file.path(stage, "stan"))
     file.copy(list.files("fits", "\\.(rds|txt)$", full.names = TRUE), file.path(stage, "fits"))
     file.copy(list.files("data", full.names = TRUE), file.path(stage, "data"))
-    file.copy(c("classroom/readiness.qmd", "classroom/readiness.html"), file.path(stage, "classroom"))
+    file.copy(c("classroom/readiness.qmd", "classroom/readiness.html", "classroom/PACKAGES.md"), file.path(stage, "classroom"))
     for (dir in c("images", "assets")) file.copy(dir, stage, recursive = TRUE)
     for (day in paste0("day", 1:3)) {
       dir.create(file.path(stage, day))

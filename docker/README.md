@@ -79,6 +79,13 @@ as a misleading comparison. When authorized by the instructor, use
 `use_precomputed=FALSE, fallback=FALSE` for comparison tasks, retaining the model,
 seed, chain count and iterations. Keep heavy/problematic fits precomputed.
 
+Day 2 core work uses stored results; all core tasks also have a figure-reading
+route. Its brms fitting chunk is optional reference with `eval=FALSE`. It does not
+use the image's handwritten-Stan executables. Any instructor demonstration requires
+separate validation of compilation, sampling, diagnostics and plotting in advance;
+existing executable checks do not validate it. Students are not required to test
+compilation or fitting before class. See [student setup](../classroom/PACKAGES.md).
+
 Defaults are `parallel_chains=1`, `threads_per_chain=1`, one BLAS/OpenMP/
 RcppParallel thread, and R `mc.cores=1`, `Ncpus=1`. The precompiled models support
 threading but are run with one thread per chain. These defaults are **not hard

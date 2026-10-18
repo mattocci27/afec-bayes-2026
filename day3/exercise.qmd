@@ -22,9 +22,9 @@ knitr::opts_chunk$set(message=FALSE, warning=FALSE, fig.align="center",
 
 ## Before you begin
 
-Work in pairs. One person runs the supplied code, the other reads the figure and
-writes the interpretation. Swap roles during the exercise. Predict before running
-each comparison. All required code is complete.
+Work individually, with nearby discussion if useful. Predict before each
+comparison. No R or GLM experience is required. You may run the supplied code or
+read the figures and result sheet; both routes answer the same questions.
 
 Use the prepared browser R environment. If access fails, open this HTML and
 [the result sheet](results.html) locally and answer the same questions.
@@ -81,7 +81,7 @@ plot_mother_comparison(comparison)
 plot_mother_movement(comparison)
 ```
 
-Points are posterior means and bars are 90% intervals. The complete and separate
+Points are posterior means and bars are 95% intervals. The complete and separate
 models use the Day 1 flat Beta(1,1) prior on each probability. The partial model uses
 Normal group effects on the logit scale, with their centre and SD estimated from
 all trees. Thus the prior specifications also differ across these comparisons.
