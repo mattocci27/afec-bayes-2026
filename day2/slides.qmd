@@ -30,12 +30,13 @@ execute:
 DAY 2 SESSION PLAN: 90 minutes. Agreed CNDD example.
 Outcomes: read a survival curve and uncertainty at low/high density; distinguish
 uncertainty about p from future binomial counts; compare observations with replicated
-data. Match data, parameters, likelihood and priors in completed code.
-0-10 review/question; 10-25 binomial/logit/Normal scale illustration; 25-40 saved results/computation/prediction;
-40-55 ONE exercise (10 work + 5 debrief); 55-70 model-check demo;
+data. Understand the model, interpret results and distinguish sampling checks
+from checks against observations.
+0-10 review/question; 10-25 binomial/logit/Normal scale illustration; 25-40 model recap/MCMC/sampling checks/draw-to-curve bridge;
+40-55 ONE exercise (10 work + 5 debrief); 55-70 future counts and model-check demo;
 70-80 interpretation/species bridge; 80-85 research reflection; 85-90 questions/buffer.
 All core results are stored. No independent Stan writing or new inference.
-If delayed, shorten code and species preview. Preserve the exercise debrief and checking.
+If delayed, shorten MCMC mechanics and species preview; Stan code is optional. Preserve the exercise debrief and checking.
 -->
 
 ```{r setup, include=FALSE}
@@ -221,158 +222,273 @@ Use this as a short connection. Detailed CNDD prior-curve comparisons are option
 No independent allometry fit or extra exercise is introduced.
 :::
 
-## The completed model in Stan
+## Our model: what are we estimating?
 
 ::: columns
 ::: {.column width="55%"}
-```{r stan-model, results="asis"}
-show_stan("stan/logit_reg.stan", compact=TRUE)
-```
+$$s_i \sim \operatorname{Binomial}(n_i,p_i)$$
+
+$$\operatorname{logit}(p_i)=\alpha+\beta x_i$$
+
+$$\alpha,\beta\;\overset{\mathrm{ind}}{\sim}\;\mathcal{N}(0,2.5)$$
+
+::: small
+The Normal priors use SD 2.5.
+:::
 :::
 ::: {.column width="45%"}
 
-- **Data:** seedlings, survivors and density.
-- **Unknowns:** intercept and density coefficient.
-- **Assumptions:** binomial survival, logit relationship and priors.
+**Observed:** seedlings, survivors and density in each quadrat.
 
-`binomial_logit` uses the straight line on the logit scale.
+**Unknown:** $\alpha$ and $\beta$, which determine the survival curve.
+
+Which coefficient pairs are plausible after seeing the data?
 :::
 :::
 
 ::: notes
-25-40 minutes: read this together. Do not ask participants to edit or compile it.
-The stored fit has the same seeded data, model name and prior specification.
+25-40 minutes: model recap, MCMC introduction, sampling checks and curve interpretation.
+Alpha is log-odds at reference density x=0; beta changes log-odds per one SD of density.
+Neither coefficient is itself a probability or a percentage reduction.
+The likelihood assumes common p and conditional independence within each quadrat.
+The two Normal priors are independent and match stan/logit_reg.stan and the stored fit.
 :::
 
-## Did the computation behave well?
+## How do we get values of $\alpha$ and $\beta$?
 
-```{r trace, fig.width=12, fig.height=4.3}
+::: columns
+::: {.column width="35%"}
+**Day 1:** values of $p$.
+
+**Today:** pairs $(\alpha,\beta)$.
+
+**MCMC** explores the posterior by moving through parameter values.
+:::
+::: {.column width="65%"}
+```{r posterior-exploration, fig.width=8, fig.height=4.1}
+ndd_draw_table <- as_tibble(draws)
+chain_excerpt <- ndd_draw_table |>
+  filter(.chain == first(.chain)) |> slice_head(n=25)
+ggplot(ndd_draw_table, aes(alpha,beta)) +
+  geom_point(colour="grey65", alpha=.15, size=1) +
+  geom_path(data=chain_excerpt, colour=col_post, linewidth=.8) +
+  geom_point(data=chain_excerpt, colour=col_post, size=1.8) +
+  labs(x=expression(alpha), y=expression(beta),
+       subtitle="Grey: saved pairs. Orange: part of one chain.")
+```
+:::
+:::
+
+We run several chains to help check the exploration.
+
+::: notes
+MCMC means Markov chain Monte Carlo. Stan uses an HMC-based MCMC sampler.
+Each saved draw contains both coefficients: consecutive draws can be correlated.
+The grey cloud is the actual stored joint posterior, not a schematic or new fit.
+The orange path joins 25 consecutive post-warmup draws from one chain; it does not
+show initialization or warmup and is not an optimization trajectory.
+Ask why we might want several chains before moving to their traces.
+No acceptance-rule or HMC derivation is required.
+Source: https://mc-stan.org/docs/reference-manual/mcmc.html
+:::
+
+## Can we use these draws?
+
+```{r trace, fig.width=12, fig.height=3.9}
 bayesplot::mcmc_trace(draws,pars=c("alpha","beta"))
 ```
 
-Do the chains explore the same range without persistent drift?
+- Do the coloured chains explore the same range?
+- Is there a lasting drift or separation?
 
 ::: notes
-Use the actual saved fit. Summaries on the next slide complement these traces.
-No diagnostic alone is sufficient. The optional failure example is outside core time.
+First identify the horizontal axis (saved sampling step), vertical axis (coefficient
+value), and colours (chains). These are the actual post-warmup stored draws.
+Look for persistent drift or between-chain offsets, rather than interpreting any
+single jump. Overlap is encouraging but does not establish convergence by itself.
+Numerical diagnostics complement this plot on the next slide.
+Source: https://mc-stan.org/learn-stan/diagnostics-warnings.html
 :::
 
-## Computation diagnostics together
+## Read the sampling checks together
 
 ```{r diagnostic-numbers}
-course_diagnostics(fit) |> mutate(across(where(is.numeric),~round(.x,2))) |>
-  knitr::kable(format="html") |>
-  kableExtra::kable_styling(font_size=25)
+sampling_checks <- course_diagnostics(fit)
+tibble(
+  Check=c("R-hat (maximum)","ESS (minimum bulk / tail)","Divergences"),
+  Result=c(sprintf("%.3f",sampling_checks$max_rhat),
+           sprintf("%.0f / %.0f",sampling_checks$min_bulk_ess,
+                   sampling_checks$min_tail_ess),
+           as.character(sampling_checks$divergent)),
+  Question=c("Do chains agree?","Enough sampling information?","Did sampling struggle?")
+) |> knitr::kable(format="html") |>
+  kableExtra::kable_styling(font_size=27)
 ```
 
-- R-hat: do the chains agree?
-- ESS: how much sampling information do the draws provide?
-- Divergences and other sampler warnings: did sampling struggle?
-
-These checks concern computation. We still need to compare the model with ecological data.
+These check the **sampling**. We still need to check the model against observations.
 
 ::: notes
-Also inspect bulk/tail ESS, treedepth and E-BFMI. Explain purposes, not a threshold
-memorisation task. Current values are computed from the saved fit, never invented.
+Use these actual values with the traces; no single diagnostic is sufficient.
+R-hat compares within- and between-chain behavior. ESS accounts for dependence
+among draws; bulk and tail ESS address different aspects of the distribution.
+Divergences after warmup require investigation rather than being assumed harmless.
+Do not turn this into a threshold-memorisation task. Before class, also inspect
+parameter-level diagnostics, treedepth, E-BFMI and accuracy for quantities of interest.
+The full stored-fit summary is in the appendix and the result sheet.
+Source: https://mc-stan.org/learn-stan/diagnostics-warnings.html
 :::
 
-## A distribution of survival curves
+## One coefficient pair gives one survival curve
 
-```{r fitted-curve, fig.width=12, fig.height=4.6}
-plot_cndd(draws,ndd)
+$$p(x)=\operatorname{logit}^{-1}(\alpha+\beta x)$$
+
+```{r curve-pairs-setup, include=FALSE}
+# Four actual paired draws, chosen across beta's central range for illustration.
+curve_indices <- order(draws$beta)[round(seq(.1,.9,length.out=4)*(nrow(draws)-1))+1L]
+curve_pairs <- as_tibble(draws)[curve_indices,c("alpha","beta")] |>
+  mutate(Draw=LETTERS[1:4],.before=1)
+curve_examples <- curve_pairs |>
+  crossing(density=seq(min(ndd$cons),max(ndd$cons),length.out=101)) |>
+  mutate(p=plogis(alpha+beta*density))
 ```
 
-The band describes uncertainty about $p$ at each density.
-Points are observed proportions and can lie away from the band.
-
-::: notes
-The line is a posterior median at each x, not MLE or MAP. The 90% band is pointwise.
-Observed binomial proportions also contain survival-count variation.
+::: columns
+::: {.column width="30%"}
+```{r curve-pairs-table}
+curve_pairs |> mutate(across(c(alpha,beta),~round(.x,3))) |>
+  knitr::kable(format="html",col.names=c("Draw","α","β")) |>
+  kableExtra::kable_styling(font_size=23,full_width=FALSE)
+```
+:::
+::: {.column width="70%"}
+```{r paired-curves, fig.width=8, fig.height=3.9}
+ggplot(curve_examples,aes(density,p,group=Draw)) +
+  geom_line(linewidth=1.2,colour="grey40") +
+  scale_y_continuous(limits=c(0,1)) +
+  labs(x="Conspecific density (scaled)",y="Survival\nprobability")
+```
+:::
 :::
 
-## Low density and high density
-
-```{r density-comparison, fig.width=10, fig.height=4.3}
-plot_cndd_comparison(draws)
-```
-
-Compare probabilities at fixed densities. All predictions use the same posterior draws.
+Four possible curves for the **same survival relationship**.
 
 ::: notes
-Low = one SD below mean density. High = one SD above. Hold the data, model and prior
-fixed. We are predicting new conditions, not refitting altered observations.
+Each table row supplies both coefficients for one curve. The displayed
+coefficients are rounded, but curves use their full precision. Rows are selected
+actual paired draws at four spaced beta ranks between its 10th and 90th
+percentiles, not independently chosen alpha and beta values. All curves use the
+same grey: these are alternative draws for the same relationship. The later
+species preview uses different colours for different species.
+The next slide summarises ALL stored draws; these four do not define the band.
 :::
 
-## Probability uncertainty and future survivors
+## All draws give a band of survival curves
 
-```{r new-counts, fig.width=12, fig.height=4.2}
-plot_cndd_predictions(cndd_predictions(draws,n=20,seed=20261022))
+```{r fitted-curve, fig.width=12, fig.height=4.3}
+plot_cndd(draws,ndd) +
+  labs(y="Survival\nprobability",
+       subtitle="Line: posterior median. Band: 90% pointwise interval for p.")
 ```
 
-Both new groups contain **20 seedlings**. Even a known probability allows different counts.
+The band shows uncertainty about **survival probability** at each density.
 
 ::: notes
-The histogram integrates posterior uncertainty in p and binomial variation given p.
-Compare with the previous probability intervals. Both groups have the same seedling
-count, so the contrast changes density only.
+At each x, transform every paired draw into p, then calculate the median and
+5th/95th percentiles. The line is not MLE or MAP and need not equal a single drawn
+curve. The band is pointwise, not a simultaneous band for the whole function.
+The observed proportions include binomial variation, so this is not an interval
+that must contain the observations. Leave numerical low/high comparisons to the exercise.
 :::
 
 ## Exercise: survival at two densities {background-color="#f3e8f5"}
 
 `day2/exercise-student.qmd`
 
-- Predict which density has higher survival probability.
-- Run the supplied code and read the two probabilities with 90% intervals.
-- Explain the result in words.
-- Explain why the next survivor count is still uncertain.
+- Use the saved draws to compare $x=-1$ and $x=1$.
+- Read the two survival probabilities and their 90% intervals.
+- Explain the comparison in ecological terms.
+- Does a probability tell us the next survivor count exactly?
 
 ::: notes
-40-55 minutes: 10 minutes pair work, 5 minutes debrief. Check progress at minute 5.
-Use results.html when code access fails. No holes to fill and no refit.
+40-55 minutes: 10 minutes individual work and 5 minutes debrief. Nearby help is optional.
+Low means one SD below mean density, high means one SD above; hold the fit fixed.
+Check progress at minute 5. Use results.html when code access fails.
+The exercise's initial prediction recalls the observed trend; its main task is to
+read and report the two probabilities with uncertainty before the lecturer shows them.
+No holes to fill and no refit. Discuss future counts as a prediction before the next demo.
 :::
 
-## What the comparison tells us
+## Read your low-density and high-density comparison
 
-Low density: median survival probability **`r round(median(low),2)`**,
-90% interval `r round(quantile(low,.05),2)` to `r round(quantile(low,.95),2)`.
+```{r density-comparison, fig.width=10, fig.height=3.8}
+plot_cndd_comparison(draws) + labs(y="Survival\nprobability")
+```
 
-High density: **`r round(median(high),2)`**,
-90% interval `r round(quantile(high,.05),2)` to `r round(quantile(high,.95),2)`.
-
-What ecological sentence would you report with those values?
+Predicted survival: **`r round(median(low),2)`** at low density;
+**`r round(median(high),2)`** at high density. Report both with their intervals.
 
 ::: notes
-Debrief. Beta is a logit coefficient. Its value is not a percent reduction.
-State the compared densities and the model assumptions with the interpretation.
+Debrief after participants have read their own tables. Low density is x=-1 and high
+is x=1, with the same fit and pointwise 90% intervals. The saved posterior medians are
+`r round(median(low),2)` and `r round(median(high),2)`; intervals are
+`r paste(round(quantile(low,c(.05,.95)),2),collapse=" to ")` and
+`r paste(round(quantile(high,c(.05,.95)),2),collapse=" to ")`, respectively.
+State that the fitted model predicts lower survival at high density, conditional
+on its assumptions. Beta is a logit coefficient, not a percent reduction.
+This simulated association does not establish a causal mechanism.
 :::
 
-## Model-generated data and the observations
+## A probability still allows different survivor counts
 
-For every posterior draw:
+**Next question:** how many of 20 new seedlings might survive?
 
-$$p_i^{(m)}=\operatorname{logit}^{-1}(\alpha^{(m)}+\beta^{(m)}x_i),\qquad
-s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).$$
+```{r new-counts, fig.width=12, fig.height=3.8}
+plot_cndd_predictions(cndd_predictions(draws,n=20,seed=20261022)) +
+  labs(y="Simulated\ngroups")
+```
 
-We keep the observed **density and seedling count** of each quadrat.
-
-What patterns should the model reproduce?
+Both groups contain 20 seedlings. Density is the only condition that changes.
 
 ::: notes
-55-70 minutes: lecturer demonstration and discussion. This is posterior predictive
-checking. No new inference. Source: Stan User's Guide, posterior predictive checks.
+55-70 minutes begins with the bridge from probability estimates to generated data.
+For each posterior pair, calculate p at each density and generate a Binomial(20,p)
+count. This incorporates uncertainty about p AND variation in counts given p.
+The saved fit is unchanged. Explain the two sources of uncertainty orally.
+Now ask whether this same simulation can reproduce our observed quadrats.
+:::
+
+## Could the model reproduce these observations?
+
+1. Keep each quadrat's **observed density and seedling count**.
+2. Use a posterior curve to calculate its survival probability.
+3. Simulate survivors and compare the patterns with the observations.
+
+Repeat across posterior draws: **posterior predictive checking**.
+
+::: notes
+Use one paired draw for ALL quadrats in a replicated data set, then repeat with
+other draws. Replicated survivor counts include binomial variation at the observed n_i.
+This uses the same generating logic as the 20-seedling prediction, now at the
+original conditions. It checks the data model, not whether the sampler mixed.
+No new inference is run. The equations are available in the appendix.
+Source: https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html
 :::
 
 ## Does the density pattern look compatible?
 
-```{r check-pattern, fig.width=12, fig.height=4.7}
-plot_cndd_check(replicates,ndd)
+```{r check-pattern, fig.width=12, fig.height=4.4}
+plot_cndd_check(replicates,ndd) +
+  labs(y="Survival\nproportion",
+       subtitle="Open: observed. Orange: 90% predictive intervals.")
 ```
 
-Look for systematic differences across density.
+Are observations systematically above or below the model-generated intervals?
 
 ::: notes
-The orange bars describe replicated proportions at the observed n_i, not uncertainty
-about p_i alone. A 90% interval does not cover every observation by construction.
+The intervals concern replicated proportions at observed n_i, not uncertainty
+about p_i alone. Some points can lie outside a 90% interval without indicating a
+systematic failure; do not count every outside point as a model failure.
+Look across the density range for a pattern the model misses.
 :::
 
 ## Does the model reproduce the spread?
@@ -386,8 +502,9 @@ What ecological conditions might create more variation than the model predicts?
 ::: notes
 This checks one feature, complementing the density plot. These data were generated
 from the simple model, so do not promise a visible mismatch. Rounding the simulated
-predictor means this is an illustrative check, not an exact calibration experiment.
+predictor makes this an illustrative check, not an exact calibration experiment.
 A discrepancy might involve the relationship, unmodelled conditions or dependence.
+Next consider what those possibilities mean in a real forest.
 :::
 
 ## Interpretation in a real forest
@@ -424,11 +541,57 @@ Name a response you measure and one predictor you care about.
 What would you predict, and which observed pattern would you ask the model to reproduce?
 
 ::: notes
-80-85 minutes: pair discussion and two brief contributions. Keep the final five
+80-85 minutes: individual reflection, optional nearby discussion and two brief contributions. Keep the final five
 minutes for questions and delay buffer.
 :::
 
 # Optional reference {visibility="uncounted"}
+
+## The completed model in Stan {visibility="uncounted"}
+
+::: columns
+::: {.column width="55%"}
+```{r stan-model, results="asis"}
+show_stan("stan/logit_reg.stan", compact=TRUE)
+```
+:::
+::: {.column width="45%"}
+
+- **Data:** seedlings, survivors and density.
+- **Unknowns:** intercept and density coefficient.
+- **Assumptions:** binomial survival, logit relationship and priors.
+
+`binomial_logit` uses the straight line on the logit scale.
+:::
+:::
+
+::: notes
+Optional reference for the model recap. Do not ask participants to edit or compile it.
+The stored fit has the same seeded data, model name and prior specification.
+:::
+
+
+## Full computation diagnostics {visibility="uncounted"}
+
+```{r full-diagnostic-numbers}
+course_diagnostics(fit) |>
+  mutate(across(where(is.numeric),~signif(.x,4))) |>
+  pivot_longer(everything(),names_to="Diagnostic",values_to="Value") |>
+  knitr::kable(format="html") |>
+  kableExtra::kable_styling(font_size=25)
+```
+
+Read these with traces and the precision needed for the reported predictions.
+
+## Posterior predictive calculation {visibility="uncounted"}
+
+For every paired posterior draw:
+
+$$p_i^{(m)}=\operatorname{logit}^{-1}(\alpha^{(m)}+\beta^{(m)}x_i),\qquad
+s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).$$
+
+Keep the observed $x_i$ and $n_i$ for every quadrat.
+
 
 ## Optional: CNDD prior curves {visibility="uncounted"}
 
@@ -466,5 +629,7 @@ Compute the difference for each paired draw. The comparison holds the two densit
 
 - [Comita et al. 2010, Science](https://doi.org/10.1126/science.1190772)
 - [Song & Katabuchi et al. 2024, Ecology](https://doi.org/10.1002/ecy.4382)
+- [Stan Reference Manual: MCMC](https://mc-stan.org/docs/reference-manual/mcmc.html)
+- [Stan: diagnostics and warnings](https://mc-stan.org/learn-stan/diagnostics-warnings.html)
 - [Stan User's Guide: regression](https://mc-stan.org/docs/stan-users-guide/regression.html)
 - [Stan User's Guide: predictive checks](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html)

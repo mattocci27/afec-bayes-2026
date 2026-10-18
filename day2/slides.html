@@ -420,37 +420,23 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
           display:block!important;
       }</style></aside>
 </section>
-<section id="the-completed-model-in-stan" class="slide level2">
-<h2>The completed model in Stan</h2>
+<section id="our-model-what-are-we-estimating" class="slide level2">
+<h2>Our model: what are we estimating?</h2>
 <div class="columns">
 <div class="column" style="width:55%;">
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
-<span id="cb1-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
-<span id="cb1-3"><a href="" aria-label="3"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n;</span>
-<span id="cb1-4"><a href="" aria-label="4"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; suv;</span>
-<span id="cb1-5"><a href="" aria-label="5"></a>  <span class="dt">vector</span>[N] cons;</span>
-<span id="cb1-6"><a href="" aria-label="6"></a>}</span>
-<span id="cb1-7"><a href="" aria-label="7"></a><span class="kw">parameters</span> {</span>
-<span id="cb1-8"><a href="" aria-label="8"></a>  <span class="dt">real</span> alpha;</span>
-<span id="cb1-9"><a href="" aria-label="9"></a>  <span class="dt">real</span> beta;</span>
-<span id="cb1-10"><a href="" aria-label="10"></a>}</span>
-<span id="cb1-11"><a href="" aria-label="11"></a><span class="kw">model</span> {</span>
-<span id="cb1-12"><a href="" aria-label="12"></a>  suv ~ binomial_logit(n, alpha + beta * cons);</span>
-<span id="cb1-13"><a href="" aria-label="13"></a>  alpha ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
-<span id="cb1-14"><a href="" aria-label="14"></a>  beta ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
-<span id="cb1-15"><a href="" aria-label="15"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><span class="math display">s_i \sim \operatorname{Binomial}(n_i,p_i)</span></p>
+<p><span class="math display">\operatorname{logit}(p_i)=\alpha+\beta x_i</span></p>
+<p><span class="math display">\alpha,\beta\;\overset{\mathrm{ind}}{\sim}\;\mathcal{N}(0,2.5)</span></p>
+<div class="small">
+<p>The Normal priors use SD 2.5.</p>
 </div>
 </div><div class="column" style="width:45%;">
-<ul>
-<li><strong>Data:</strong> seedlings, survivors and density.</li>
-<li><strong>Unknowns:</strong> intercept and density coefficient.</li>
-<li><strong>Assumptions:</strong> binomial survival, logit relationship and priors.</li>
-</ul>
-<p><code>binomial_logit</code> uses the straight line on the logit scale.</p>
+<p><strong>Observed:</strong> seedlings, survivors and density in each quadrat.</p>
+<p><strong>Unknown:</strong> <span class="math inline">\alpha</span> and <span class="math inline">\beta</span>, which determine the survival curve.</p>
+<p>Which coefficient pairs are plausible after seeing the data?</p>
 </div></div>
 <aside class="notes">
-<p>25-40 minutes: read this together. Do not ask participants to edit or compile it. The stored fit has the same seeded data, model name and prior specification.</p>
+<p>25-40 minutes: model recap, MCMC introduction, sampling checks and curve interpretation. Alpha is log-odds at reference density x=0; beta changes log-odds per one SD of density. Neither coefficient is itself a probability or a percentage reduction. The likelihood assumes common p and conditional independence within each quadrat. The two Normal priors are independent and match stan/logit_reg.stan and the stored fit.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -463,60 +449,95 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
           display:block!important;
       }</style></aside>
 </section>
-<section id="did-the-computation-behave-well" class="slide level2">
-<h2>Did the computation behave well?</h2>
-
-<img data-src="slides_files/figure-revealjs/trace-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Do the chains explore the same range without persistent drift?</p>
-<aside class="notes">
-<p>Use the actual saved fit. Summaries on the next slide complement these traces. No diagnostic alone is sufficient. The optional failure example is outside core time.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="computation-diagnostics-together" class="slide level2">
-<h2>Computation diagnostics together</h2>
+<section id="how-do-we-get-values-of-alpha-and-beta" class="slide level2">
+<h2>How do we get values of <span class="math inline">\alpha</span> and <span class="math inline">\beta</span>?</h2>
+<div class="columns">
+<div class="column" style="width:35%;">
+<p><strong>Day 1:</strong> values of <span class="math inline">p</span>.</p>
+<p><strong>Today:</strong> pairs <span class="math inline">(\alpha,\beta)</span>.</p>
+<p><strong>MCMC</strong> explores the posterior by moving through parameter values.</p>
+</div><div class="column" style="width:65%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<table class="table caption-top" style="font-size: 25px; margin-left: auto; margin-right: auto;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/posterior-exploration-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+<p>We run several chains to help check the exploration.</p>
+<aside class="notes">
+<p>MCMC means Markov chain Monte Carlo. Stan uses an HMC-based MCMC sampler. Each saved draw contains both coefficients: consecutive draws can be correlated. The grey cloud is the actual stored joint posterior, not a schematic or new fit. The orange path joins 25 consecutive post-warmup draws from one chain; it does not show initialization or warmup and is not an optimization trajectory. Ask why we might want several chains before moving to their traces. No acceptance-rule or HMC derivation is required. Source: https://mc-stan.org/docs/reference-manual/mcmc.html</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="can-we-use-these-draws" class="slide level2">
+<h2>Can we use these draws?</h2>
+
+<img data-src="slides_files/figure-revealjs/trace-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><ul>
+<li>Do the coloured chains explore the same range?</li>
+<li>Is there a lasting drift or separation?</li>
+</ul>
+<aside class="notes">
+<p>First identify the horizontal axis (saved sampling step), vertical axis (coefficient value), and colours (chains). These are the actual post-warmup stored draws. Look for persistent drift or between-chain offsets, rather than interpreting any single jump. Overlap is encouraging but does not establish convergence by itself. Numerical diagnostics complement this plot on the next slide. Source: https://mc-stan.org/learn-stan/diagnostics-warnings.html</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="read-the-sampling-checks-together" class="slide level2">
+<h2>Read the sampling checks together</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="table caption-top" style="font-size: 27px; margin-left: auto; margin-right: auto;">
 <thead>
 <tr class="header">
-<th style="text-align: right;" data-quarto-table-cell-role="th">max_rhat</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">min_bulk_ess</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">min_tail_ess</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">divergent</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">max_treedepth</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">min_ebfmi</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Check</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Result</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">Question</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">1698.01</td>
-<td style="text-align: right;">2123.25</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1.03</td>
+<td style="text-align: left;">R-hat (maximum)</td>
+<td style="text-align: left;">1.001</td>
+<td style="text-align: left;">Do chains agree?</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ESS (minimum bulk / tail)</td>
+<td style="text-align: left;">1698 / 2123</td>
+<td style="text-align: left;">Enough sampling information?</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Divergences</td>
+<td style="text-align: left;">0</td>
+<td style="text-align: left;">Did sampling struggle?</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<ul>
-<li>R-hat: do the chains agree?</li>
-<li>ESS: how much sampling information do the draws provide?</li>
-<li>Divergences and other sampler warnings: did sampling struggle?</li>
-</ul>
-<p>These checks concern computation. We still need to compare the model with ecological data.</p>
+<p>These check the <strong>sampling</strong>. We still need to check the model against observations.</p>
 <aside class="notes">
-<p>Also inspect bulk/tail ESS, treedepth and E-BFMI. Explain purposes, not a threshold memorisation task. Current values are computed from the saved fit, never invented.</p>
+<p>Use these actual values with the traces; no single diagnostic is sufficient. R-hat compares within- and between-chain behavior. ESS accounts for dependence among draws; bulk and tail ESS address different aspects of the distribution. Divergences after warmup require investigation rather than being assumed harmless. Do not turn this into a threshold-memorisation task. Before class, also inspect parameter-level diagnostics, treedepth, E-BFMI and accuracy for quantities of interest. The full stored-fit summary is in the appendix and the result sheet. Source: https://mc-stan.org/learn-stan/diagnostics-warnings.html</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -529,12 +550,60 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
           display:block!important;
       }</style></aside>
 </section>
-<section id="a-distribution-of-survival-curves" class="slide level2">
-<h2>A distribution of survival curves</h2>
-
-<img data-src="slides_files/figure-revealjs/fitted-curve-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>The band describes uncertainty about <span class="math inline">p</span> at each density. Points are observed proportions and can lie away from the band.</p>
+<section id="one-coefficient-pair-gives-one-survival-curve" class="slide level2">
+<h2>One coefficient pair gives one survival curve</h2>
+<p><span class="math display">p(x)=\operatorname{logit}^{-1}(\alpha+\beta x)</span></p>
+<div class="columns">
+<div class="column" style="width:30%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="table caption-top" style="font-size: 23px; width: auto !important; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Draw</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">α</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">β</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">A</td>
+<td style="text-align: right;">-0.736</td>
+<td style="text-align: right;">-0.973</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">B</td>
+<td style="text-align: right;">-0.849</td>
+<td style="text-align: right;">-0.872</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C</td>
+<td style="text-align: right;">-0.718</td>
+<td style="text-align: right;">-0.799</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">D</td>
+<td style="text-align: right;">-0.744</td>
+<td style="text-align: right;">-0.703</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:70%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/paired-curves-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+<p>Four possible curves for the <strong>same survival relationship</strong>.</p>
 <aside class="notes">
-<p>The line is a posterior median at each x, not MLE or MAP. The 90% band is pointwise. Observed binomial proportions also contain survival-count variation.</p>
+<p>Each table row supplies both coefficients for one curve. The displayed coefficients are rounded, but curves use their full precision. Rows are selected actual paired draws at four spaced beta ranks between its 10th and 90th percentiles, not independently chosen alpha and beta values. All curves use the same grey: these are alternative draws for the same relationship. The later species preview uses different colours for different species. The next slide summarises ALL stored draws; these four do not define the band.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -547,30 +616,12 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
           display:block!important;
       }</style></aside>
 </section>
-<section id="low-density-and-high-density" class="slide level2">
-<h2>Low density and high density</h2>
+<section id="all-draws-give-a-band-of-survival-curves" class="slide level2">
+<h2>All draws give a band of survival curves</h2>
 
-<img data-src="slides_files/figure-revealjs/density-comparison-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p>Compare probabilities at fixed densities. All predictions use the same posterior draws.</p>
+<img data-src="slides_files/figure-revealjs/fitted-curve-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>The band shows uncertainty about <strong>survival probability</strong> at each density.</p>
 <aside class="notes">
-<p>Low = one SD below mean density. High = one SD above. Hold the data, model and prior fixed. We are predicting new conditions, not refitting altered observations.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="probability-uncertainty-and-future-survivors" class="slide level2">
-<h2>Probability uncertainty and future survivors</h2>
-
-<img data-src="slides_files/figure-revealjs/new-counts-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Both new groups contain <strong>20 seedlings</strong>. Even a known probability allows different counts.</p>
-<aside class="notes">
-<p>The histogram integrates posterior uncertainty in p and binomial variation given p. Compare with the previous probability intervals. Both groups have the same seedling count, so the contrast changes density only.</p>
+<p>At each x, transform every paired draw into p, then calculate the median and 5th/95th percentiles. The line is not MLE or MAP and need not equal a single drawn curve. The band is pointwise, not a simultaneous band for the whole function. The observed proportions include binomial variation, so this is not an interval that must contain the observations. Leave numerical low/high comparisons to the exercise.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -587,13 +638,13 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
 <h2>Exercise: survival at two densities</h2>
 <p><code>day2/exercise-student.qmd</code></p>
 <ul>
-<li>Predict which density has higher survival probability.</li>
-<li>Run the supplied code and read the two probabilities with 90% intervals.</li>
-<li>Explain the result in words.</li>
-<li>Explain why the next survivor count is still uncertain.</li>
+<li>Use the saved draws to compare <span class="math inline">x=-1</span> and <span class="math inline">x=1</span>.</li>
+<li>Read the two survival probabilities and their 90% intervals.</li>
+<li>Explain the comparison in ecological terms.</li>
+<li>Does a probability tell us the next survivor count exactly?</li>
 </ul>
 <aside class="notes">
-<p>40-55 minutes: 10 minutes pair work, 5 minutes debrief. Check progress at minute 5. Use results.html when code access fails. No holes to fill and no refit.</p>
+<p>40-55 minutes: 10 minutes individual work and 5 minutes debrief. Nearby help is optional. Low means one SD below mean density, high means one SD above; hold the fit fixed. Check progress at minute 5. Use results.html when code access fails. The exercise’s initial prediction recalls the observed trend; its main task is to read and report the two probabilities with uncertainty before the lecturer shows them. No holes to fill and no refit. Discuss future counts as a prediction before the next demo.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -606,13 +657,12 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
           display:block!important;
       }</style></aside>
 </section>
-<section id="what-the-comparison-tells-us" class="slide level2">
-<h2>What the comparison tells us</h2>
-<p>Low density: median survival probability <strong>0.52</strong>, 90% interval 0.48 to 0.56.</p>
-<p>High density: <strong>0.17</strong>, 90% interval 0.14 to 0.21.</p>
-<p>What ecological sentence would you report with those values?</p>
+<section id="read-your-low-density-and-high-density-comparison" class="slide level2">
+<h2>Read your low-density and high-density comparison</h2>
+
+<img data-src="slides_files/figure-revealjs/density-comparison-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p>Predicted survival: <strong>0.52</strong> at low density; <strong>0.17</strong> at high density. Report both with their intervals.</p>
 <aside class="notes">
-<p>Debrief. Beta is a logit coefficient. Its value is not a percent reduction. State the compared densities and the model assumptions with the interpretation.</p>
+<p>Debrief after participants have read their own tables. Low density is x=-1 and high is x=1, with the same fit and pointwise 90% intervals. The saved posterior medians are 0.52 and 0.17; intervals are 0.48 to 0.56 and 0.14 to 0.21, respectively. State that the fitted model predicts lower survival at high density, conditional on its assumptions. Beta is a logit coefficient, not a percent reduction. This simulated association does not establish a causal mechanism.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -625,15 +675,35 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
           display:block!important;
       }</style></aside>
 </section>
-<section id="model-generated-data-and-the-observations" class="slide level2">
-<h2>Model-generated data and the observations</h2>
-<p>For every posterior draw:</p>
-<p><span class="math display">p_i^{(m)}=\operatorname{logit}^{-1}(\alpha^{(m)}+\beta^{(m)}x_i),\qquad
-s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
-<p>We keep the observed <strong>density and seedling count</strong> of each quadrat.</p>
-<p>What patterns should the model reproduce?</p>
+<section id="a-probability-still-allows-different-survivor-counts" class="slide level2">
+<h2>A probability still allows different survivor counts</h2>
+<p><strong>Next question:</strong> how many of 20 new seedlings might survive?</p>
+
+<img data-src="slides_files/figure-revealjs/new-counts-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Both groups contain 20 seedlings. Density is the only condition that changes.</p>
 <aside class="notes">
-<p>55-70 minutes: lecturer demonstration and discussion. This is posterior predictive checking. No new inference. Source: Stan User’s Guide, posterior predictive checks.</p>
+<p>55-70 minutes begins with the bridge from probability estimates to generated data. For each posterior pair, calculate p at each density and generate a Binomial(20,p) count. This incorporates uncertainty about p AND variation in counts given p. The saved fit is unchanged. Explain the two sources of uncertainty orally. Now ask whether this same simulation can reproduce our observed quadrats.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="could-the-model-reproduce-these-observations" class="slide level2">
+<h2>Could the model reproduce these observations?</h2>
+<ol type="1">
+<li>Keep each quadrat’s <strong>observed density and seedling count</strong>.</li>
+<li>Use a posterior curve to calculate its survival probability.</li>
+<li>Simulate survivors and compare the patterns with the observations.</li>
+</ol>
+<p>Repeat across posterior draws: <strong>posterior predictive checking</strong>.</p>
+<aside class="notes">
+<p>Use one paired draw for ALL quadrats in a replicated data set, then repeat with other draws. Replicated survivor counts include binomial variation at the observed n_i. This uses the same generating logic as the 20-seedling prediction, now at the original conditions. It checks the data model, not whether the sampler mixed. No new inference is run. The equations are available in the appendix. Source: https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -649,9 +719,9 @@ s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
 <section id="does-the-density-pattern-look-compatible" class="slide level2">
 <h2>Does the density pattern look compatible?</h2>
 
-<img data-src="slides_files/figure-revealjs/check-pattern-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Look for systematic differences across density.</p>
+<img data-src="slides_files/figure-revealjs/check-pattern-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Are observations systematically above or below the model-generated intervals?</p>
 <aside class="notes">
-<p>The orange bars describe replicated proportions at the observed n_i, not uncertainty about p_i alone. A 90% interval does not cover every observation by construction.</p>
+<p>The intervals concern replicated proportions at observed n_i, not uncertainty about p_i alone. Some points can lie outside a 90% interval without indicating a systematic failure; do not count every outside point as a model failure. Look across the density range for a pattern the model misses.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -669,7 +739,7 @@ s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
 
 <img data-src="slides_files/figure-revealjs/check-spread-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>What ecological conditions might create more variation than the model predicts?</p>
 <aside class="notes">
-<p>This checks one feature, complementing the density plot. These data were generated from the simple model, so do not promise a visible mismatch. Rounding the simulated predictor means this is an illustrative check, not an exact calibration experiment. A discrepancy might involve the relationship, unmodelled conditions or dependence.</p>
+<p>This checks one feature, complementing the density plot. These data were generated from the simple model, so do not promise a visible mismatch. Rounding the simulated predictor makes this an illustrative check, not an exact calibration experiment. A discrepancy might involve the relationship, unmodelled conditions or dependence. Next consider what those possibilities mean in a real forest.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -727,7 +797,7 @@ s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
 <p>Name a response you measure and one predictor you care about.</p>
 <p>What would you predict, and which observed pattern would you ask the model to reproduce?</p>
 <aside class="notes">
-<p>80-85 minutes: pair discussion and two brief contributions. Keep the final five minutes for questions and delay buffer.</p>
+<p>80-85 minutes: individual reflection, optional nearby discussion and two brief contributions. Keep the final five minutes for questions and delay buffer.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -744,6 +814,98 @@ s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
 <section id="optional-reference" class="title-slide slide level1 center" data-visibility="uncounted">
 <h1>Optional reference</h1>
 
+</section>
+<section id="the-completed-model-in-stan" class="slide level2" data-visibility="uncounted">
+<h2>The completed model in Stan</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
+<span id="cb1-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb1-3"><a href="" aria-label="3"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n;</span>
+<span id="cb1-4"><a href="" aria-label="4"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; suv;</span>
+<span id="cb1-5"><a href="" aria-label="5"></a>  <span class="dt">vector</span>[N] cons;</span>
+<span id="cb1-6"><a href="" aria-label="6"></a>}</span>
+<span id="cb1-7"><a href="" aria-label="7"></a><span class="kw">parameters</span> {</span>
+<span id="cb1-8"><a href="" aria-label="8"></a>  <span class="dt">real</span> alpha;</span>
+<span id="cb1-9"><a href="" aria-label="9"></a>  <span class="dt">real</span> beta;</span>
+<span id="cb1-10"><a href="" aria-label="10"></a>}</span>
+<span id="cb1-11"><a href="" aria-label="11"></a><span class="kw">model</span> {</span>
+<span id="cb1-12"><a href="" aria-label="12"></a>  suv ~ binomial_logit(n, alpha + beta * cons);</span>
+<span id="cb1-13"><a href="" aria-label="13"></a>  alpha ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb1-14"><a href="" aria-label="14"></a>  beta ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb1-15"><a href="" aria-label="15"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div><div class="column" style="width:45%;">
+<ul>
+<li><strong>Data:</strong> seedlings, survivors and density.</li>
+<li><strong>Unknowns:</strong> intercept and density coefficient.</li>
+<li><strong>Assumptions:</strong> binomial survival, logit relationship and priors.</li>
+</ul>
+<p><code>binomial_logit</code> uses the straight line on the logit scale.</p>
+</div></div>
+<aside class="notes">
+<p>Optional reference for the model recap. Do not ask participants to edit or compile it. The stored fit has the same seeded data, model name and prior specification.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="full-computation-diagnostics" class="slide level2" data-visibility="uncounted">
+<h2>Full computation diagnostics</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="table caption-top" style="font-size: 25px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Diagnostic</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">max_rhat</td>
+<td style="text-align: right;">1.001</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">min_bulk_ess</td>
+<td style="text-align: right;">1698.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">min_tail_ess</td>
+<td style="text-align: right;">2123.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">divergent</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">max_treedepth</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">min_ebfmi</td>
+<td style="text-align: right;">1.030</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Read these with traces and the precision needed for the reported predictions.</p>
+</section>
+<section id="posterior-predictive-calculation" class="slide level2" data-visibility="uncounted">
+<h2>Posterior predictive calculation</h2>
+<p>For every paired posterior draw:</p>
+<p><span class="math display">p_i^{(m)}=\operatorname{logit}^{-1}(\alpha^{(m)}+\beta^{(m)}x_i),\qquad
+s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
+<p>Keep the observed <span class="math inline">x_i</span> and <span class="math inline">n_i</span> for every quadrat.</p>
 </section>
 <section id="optional-cndd-prior-curves" class="slide level2" data-visibility="uncounted">
 <h2>Optional: CNDD prior curves</h2>
@@ -777,6 +939,8 @@ s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
 <ul>
 <li><a href="https://doi.org/10.1126/science.1190772">Comita et al.&nbsp;2010, Science</a></li>
 <li><a href="https://doi.org/10.1002/ecy.4382">Song &amp; Katabuchi et al.&nbsp;2024, Ecology</a></li>
+<li><a href="https://mc-stan.org/docs/reference-manual/mcmc.html">Stan Reference Manual: MCMC</a></li>
+<li><a href="https://mc-stan.org/learn-stan/diagnostics-warnings.html">Stan: diagnostics and warnings</a></li>
 <li><a href="https://mc-stan.org/docs/stan-users-guide/regression.html">Stan User’s Guide: regression</a></li>
 <li><a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html">Stan User’s Guide: predictive checks</a></li>
 </ul>
