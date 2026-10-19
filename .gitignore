@@ -4,6 +4,7 @@
 !*.*
 !Dockerfile
 !Makefile
+.DS_Store
 
 *.key
 *.rds
