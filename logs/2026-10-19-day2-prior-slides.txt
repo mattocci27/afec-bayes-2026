@@ -78,3 +78,68 @@ Alternative-layout follow-up:
 - Same R/Quarto versions and render command as above; all 49 processing steps
   passed. Inspected the final new slide in Zen: no text/legend clipping or
   overlap. Speaker notes identify this as an alternative, not repeated teaching.
+
+Subsequent instructor edits:
+- Deleted the original full-width survival slide and the prior-implied-curve
+  slide as requested; the side-by-side version is now slide 8 (26 counted).
+- Retained the instructor's latest 55%/45% columns and left survival graph.
+  Replaced the right prose with the requested Normal(0,10^8) and
+  Normal(0,2.5^2) equations and a smaller prior comparison marking beta=-100.
+- Both second arguments are variances: SD 10000 versus 2.5. To show the local
+  weighting clearly, the plot uses beta in [-120,20] and each density divided
+  by its own peak. Axis and caption disclose this normalization and zoom;
+  notes distinguish the proper diffuse Normal from a literal flat prior.
+  At -100 relative densities are exp(-0.00005) and exp(-800), respectively.
+- Same software and command as above. All 47 rendering steps passed; final
+  slide inspected in Zen for readable equations, legends and beta=-100 marker.
+
+Prior-figure readability follow-up:
+- Y-axis renamed "Relative density". Added a teal dotted vertical line and
+  label at beta=-0.8; retained the orange dashed beta=-100 marker.
+- Very diffuse prior: blue (#006DAE), dotted. Weakly informative prior:
+  purple (#562457), solid. Legend reflects both colour and line type.
+- Same render command and software versions; all 47 steps passed. Inspected
+  the final generated PNG: axis title, both markers, curves and legend readable.
+
+Sequence follow-up:
+- Moved the prior-scale slide after "What are we estimating?" and before the
+  MCMC introduction. Kept the instructor's current title "Prior scales matter".
+  New sequence: 8 model, 9 estimation/prior-posterior, 10 prior scales, 11 MCMC.
+- Updated speaker-note transitions. Same render command passed all 47 steps;
+  verified the corresponding section order in the generated HTML.
+
+MCMC simplification follow-up:
+- Kept only the two instructor-specified sentences on the simulation slide.
+  Removed visible explanatory captions, mechanism bullets and HMC/NUTS note;
+  oral explanation and technical qualifications remain in speaker notes.
+- Preserved the original mh_trace.gif and mh_post.gif image references and
+  files. Increased displayed height from 320 to 460 pixels, in equal columns.
+- Same versions and render command; all 47 processing steps passed. Browser
+  inspection confirmed the two sentences fit and both animations load together.
+
+Failed-exploration teaching-flow follow-up:
+- Slide 13 notes introduce the possibility of difficult sampling in more
+  complex models or models with formulation problems.
+- Slide 14 keeps the actual failed-fit trace with the same viridis colours.
+  Visible text is a short introduction and the two agreed caution sentences.
+  Tree-height and duplicate-intercept details remain in notes for oral context.
+  Notes explicitly distinguish sampler failure from ecological model adequacy.
+- Moved the former slide 15 equation/remedy slide to Optional reference,
+  uncounted. The main sequence returns directly from failure traces to the
+  CNDD coefficient-pair survival curves. No model/data/fits changed.
+- The render launched before the user interruption produced complete updated
+  day2/slides.html. Verified closing HTML, new visible wording, appendix
+  placement and the immediate return to the CNDD curve section.
+- Final live browser inspection unavailable: two attempts returned
+  "Sky Computer Use native pipe startup failed". The trace figure and plotting
+  layout are unchanged from the previously inspected viridis version.
+
+Draw-count follow-up:
+- Slide 15 now displays the first 10 saved paired draws, 10 table rows and
+  10 survival curves; compact table padding preserves space for the equation.
+- Slide 16 now shows 1000 paired draws sampled without replacement with the
+  existing seed 20261024. Line alpha .04 avoids an opaque mass of 1000 lines.
+  Updated titles, takeaway and notes; following all-draw interval is unchanged.
+- Same render command passed all 47 steps. Inspected both regenerated PNGs
+  and verified the 10 HTML table rows plus continuation row. Live browser
+  layout check still unavailable (native pipe startup failure).

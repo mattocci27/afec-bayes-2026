@@ -7,6 +7,7 @@ source(here("R/classroom_materials.R"))
 source(here("R/functions.R"))
 source(here("R/course_data.R"))
 source(here("R/course_utils.R"))
+source(here("R/course_visuals.R"))
 source(here("docker/check-fits.R"))
 check_course_fits(here())
 
@@ -76,23 +77,47 @@ check_exercises <- function() {
       stopifnot(variances[2] < variances[1])
     }
     if (day == "day2") {
-      low <- env$probabilities$p[env$probabilities$density == -1]
-      high <- env$probabilities$p[env$probabilities$density == 1]
-      stopifnot(mean(low)>mean(high),all(env$predictions$seedlings==20),
-        identical(dim(env$replicates),c(4000L,60L)),
-        all(env$replicates>=0),all(sweep(env$replicates,2,env$ndd$n,">")==FALSE))
+      # The independent, explicit R workflow must match the canonical draw-to-curve
+      # transformation, keep chains, and reject mismatched saved data.
+      stopifnot(!any(grepl("source\\(|course_fit\\(|plot_cndd\\(|cndd_", lines)),
+                posterior::nchains(env$coef_draws)==4L,
+                nrow(env$coefficient_table)==2L,
+                all(c("2.5%","97.5%") %in% names(env$coefficient_table)),
+                nrow(env$sampler_table)==4L)
+      stopifnot(identical(env$sampler_diagnostics, env$fit$diagnostics),
+                all(grepl("eval=FALSE", lines[grepl("^```\\{r fit-(brms|stan)", lines)])))
+      stan_start <- match("```stan", lines)
+      stan_end <- stan_start + match("```", lines[(stan_start+1L):length(lines)])
+      stopifnot(identical(lines[(stan_start+1L):(stan_end-1L)],
+                          readLines(here("stan", "logit_reg.stan"))))
+      canonical <- cndd_curve(env$coef_draws, x=env$curve_summary$cons)
+      stopifnot(isTRUE(all.equal(as.matrix(env$curve_summary[,c("median","lower","upper")]),
+                                as.matrix(canonical[,c("median","lower","upper")]),
+                                check.attributes=FALSE)),
+                all(diff(env$curve_summary$median)<0))
+      layers <- ggplot2::ggplot_build(env$regression_plot)$data
+      stopifnot(nrow(layers[[1]])==nrow(env$curve_summary),
+                nrow(layers[[3]])==nrow(env$ndd))
+      stopifnot(env$fit$meta$stan_file == "stan/logit_reg.stan",
+                nrow(env$ndd) == env$fit$data$N,
+                identical(as.integer(env$ndd$n), env$fit$data$n),
+                identical(as.integer(env$ndd$suv), env$fit$data$suv),
+                isTRUE(all.equal(env$ndd$cons, env$fit$data$cons)))
     }
     if (day == "day3") stopifnot(nrow(env$comparison)==24L,length(env$p_new)==4000L,
       all(env$comparison$lower<=env$comparison$mean),
       all(env$comparison$mean<=env$comparison$upper))
-    core <- grep("^# Core exercise:",lines,value=TRUE)
+    core <- grep(if (day == "day2") "^# Seedling survival regression$" else "^# Core exercise:",
+                 lines,value=TRUE)
     stopifnot(length(core)==1L)
     if (day != "day1") {
       diagnostics <- course_diagnostics(env$fit)
       stopifnot(all(is.finite(as.matrix(diagnostics))),diagnostics$max_rhat<=1.01,
                 diagnostics$min_bulk_ess>400,diagnostics$divergent==0)
     }
-    cat(day,":",count,"safe chunks and one completed core exercise passed with classroom guards\n")
+    cat(day,":",count,"safe chunks and",
+        if (day == "day2") "one guided walkthrough" else "one completed core exercise",
+        "passed with classroom guards\n")
   }
   changed <- try(fit_or_load("day1_seedling","stan/binomial.stan",
                             list(N=100,y=40,a=1,b=1),use_precomputed=TRUE),silent=TRUE)

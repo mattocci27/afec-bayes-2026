@@ -1,0 +1,92 @@
+Day 2 core scope simplification — 2026-10-20
+
+At the instructor's request, moved both posterior predictive checking slides
+into uncounted Optional reference. Deleted Interpretation in a real forest.
+The core ends with the regression exercise, a brief Day 3 species preview,
+and a research question about response, predictor and coefficient meaning.
+There are 20 counted slides. No required lesson follows the exercise.
+
+Retained one sentence in the exercise/result sheet: sampling diagnostics
+concern computation and do not establish ecological model appropriateness.
+Removed instructions promising a PPC lesson after the exercise. Updated
+objectives, optional-reference notes, instructor schedule, package guide,
+README and the current-scope note in the course proposal. The exercise stays
+20 minutes including its debrief; freed time is questions/pace buffer, not
+additional lecture. Analysis code, data and fitted models are unchanged.
+
+Validation: local R 4.6.1 / Quarto 1.10.19. make day2 and instructor.md render
+passed; package-only rebuild passed. Checked the rendered main/optional IDs,
+absence of the forest slide, and final three main slides (exercise, species
+preview, research question). Arc visual inspection confirmed the 19/20 and
+20/20 navigation and the final research prompt fits. All four current Day 2
+student QMD/HTML/slide/result files match the refreshed ZIP byte-for-byte.
+git diff --check passed. No new inference or dependency installation.
+The pre-existing renv out-of-sync notice remains. Classroom environment
+and participant completion times were not newly validated.
+
+Follow-up: deleted Your research question and the corresponding handout/
+result-sheet prompts. Core now ends with the exercise and brief Day 3 preview
+(19 counted slides). Updated schedule/README/current proposal note; remaining
+time is exercise questions and pace buffer. make day2, instructor render and
+package-only refresh passed. Checked slide IDs and latest ZIP bytes. No
+analysis changes or added replacement content.
+
+Follow-up: rewrote Day 2 as a root-exercise-style guided code walkthrough.
+Student copy now follows model/data, Summary, sampling diagnostics, traces,
+survival probabilities and regression plot. Removed all Time/minute labels,
+Goals/Purpose/Questions, response blanks, separate discussion tasks and optional
+visual-change assignment. Interpretation is explained directly beside outputs.
+The data/model matching guard still executes but is hidden from rendered HTML;
+analysis remains visible standard R code with no course-specific wrappers.
+Renamed the slide entry to R walkthrough and removed its visible time/task
+wording. Aligned instructor guide, result sheet, README and proposal note.
+Updated validation to allow the hidden guard and walkthrough heading rather
+than enforcing a worksheet title. All 21 participant chunks (Day 2: 8), seven
+fit checks and draw-to-curve/data-guard checks passed. make day2 and instructor/
+result-sheet renders passed. Arc Summary view showed code, output, column
+meanings and direct interpretation without questions or time labels.
+Package-only refresh and fresh ZIP execution passed; latest Day 2 files match
+the archive. git diff --check passed. No model/data/refit/dependency changes.
+
+Day 2 live fitting sections (2026-10-20)
+- Added visible brms and complete handwritten Stan code before Data and posterior draws.
+- result_source selects brms / stan / precomputed. Summaries, sampler diagnostics,
+  traces and paired-draw probability curves all use the selected result.
+- Both fitting chunks eval=FALSE: rendering never compiles or samples them.
+- brms uses 0 + Intercept + cons, independent normal(0, 2.5) b priors,
+  matching Stan's alpha/beta priors at cons=0.
+- Actual brmsfit stores an S4 fit even with cmdstanr backend; use public
+  brms::nuts_params() for chain diagnostics, not $fit$diagnostic_summary().
+- Live verification: R 4.6.1, brms 2.23.0, cmdstanr 0.9.0.9000,
+  CmdStan 2.37.0, posterior 1.7.0; existing local environment, no installs.
+- Executed exact student fitting chunks in /tmp fixture; canonical fits untouched.
+  brms 7.429s, Stan 6.988s (measured environment/cache, not classroom guarantee).
+  Each 4 chains x 1000 post-warmup draws; Rhat <1.01, bulk/tail ESS >400,
+  zero divergences; all three routes completed tables/traces/81-density curves.
+- Commands: Rscript /tmp/afec-live-validate.R; Rscript R/check_classroom_materials.R;
+  quarto render day2/exercise.qmd; quarto render day2/exercise-student.qmd;
+  quarto render day2/results.qmd; quarto render classroom/instructor.md;
+  Rscript R/build_classroom_materials.R --package-only.
+  R commands used RENV_CONFIG_SANDBOX_ENABLED=FALSE.
+- Integration: Day1 3, Day2 9, Day3 10 runnable chunks passed; model listing
+  matches stan/logit_reg.stan; saved-data mismatch guard retained.
+- Browser QA: student brms/Stan code, section order and source selection readable
+  without horizontal overflow. Classroom server concurrency remains unvalidated.
+
+Simplified Day 2 code following instructor feedback (2026-10-20)
+- Removed show_col_types=FALSE; both live fitting seeds now 42.
+- Formula now bf(suv | trials(n) ~ cons, center=FALSE). Verified generated
+  Stan has uncentered intercept and independent normal(0, 2.5) b priors.
+  Dataset cons mean is -0.1908333, so ordinary default centering would change
+  the specified intercept prior relative to handwritten Stan.
+- Replaced result_source/if with three independent chunks: draws-brms,
+  draws-stan (both eval=FALSE), draws-precomputed (render default).
+- brms loading is two expressions: draw conversion/renaming and per-chain
+  divergence counts. Removed E-BFMI hand calculation from student code.
+- Removed hidden runtime saved-data guard from handout; source/data matching
+  now checked in integration validation, avoiding any hidden source selection.
+- All three routes rerun end to end with actual seed-42 live fits; four chains,
+  4000 post-warmup draws, Rhat<1.01, bulk/tail ESS>400, zero divergences.
+- Integration passed Day1 3, Day2 8, Day3 10 chunks; source-model listing matches.
+- Student HTML rendered and browser checked. Instructor docs updated to
+  select one chunk; new fitting still requires prepared classroom environment.

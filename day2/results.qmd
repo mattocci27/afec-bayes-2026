@@ -14,59 +14,113 @@ execute:
   cache: false
 ---
 
-Use this sheet with [the exercise](exercise-student.html). Predict before reading the results, then explain in words. These figures use exact updating or supplied fits, with no new Stan inference.
+# Read and check the fitted survival regression
+
+Use this sheet with [the R walkthrough](exercise-student.html). It shows the
+same outputs when R access is unavailable. The regression
+was fitted before class: these results do not require new inference.
 
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(posterior)
+library(bayesplot)
 library(here)
-source(here("R/functions.R"))
-source(here("R/course_data.R"))
-source(here("R/course_utils.R"))
-source(here("R/course_visuals.R"))
-knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE,fig.width=8,fig.height=4.5)
 theme_set(theme_bw(base_size=14))
-```
 
-## The core comparison: low and high density
-
-```{r core-results}
-fit <- course_fit("day2_ndd")
+ndd <- read_csv(here("data", "ndd.csv"))
+fit <- readRDS(here("fits", "day2_ndd.rds"))
 draws <- fit$draws
-ndd <- make_ndd_data()
-plot_cndd(draws,ndd)
-plot_cndd_comparison(draws)
-probabilities <- cndd_probabilities(draws)
-knitr::kable(probabilities |> group_by(density) |>
-  summarise(median=median(p),lower=quantile(p,.025),upper=quantile(p,.975)),digits=3)
+sampler_diagnostics <- fit$diagnostics
+coef_draws <- posterior::subset_draws(draws, variable=c("alpha", "beta"))
+stopifnot(
+  fit$meta$stan_file == "stan/logit_reg.stan",
+  nrow(ndd) == fit$data$N,
+  all(ndd$n == fit$data$n), all(ndd$suv == fit$data$suv),
+  isTRUE(all.equal(ndd$cons, fit$data$cons))
+)
+knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE,fig.width=8,fig.height=4.5)
 ```
 
-Density -1 is one SD below the mean, and +1 is one SD above. The fit, prior and
-draws stay fixed. The probability and its interval describe uncertainty about
-survival at the specified density. They do not fix a future survivor count.
+## 1. Coefficient table
 
-## Prior scale illustration
-
-```{r normal-scale}
-plot_normal_prior_scale()
+```{r coefficient-table}
+coefficient_table <- posterior::summarise_draws(
+  coef_draws,
+  mean=mean, sd=sd,
+  ~quantile(.x, probs=c(0.025, 0.975))
+)
+knitr::kable(coefficient_table, digits=3)
 ```
 
-This Normal-response illustration follows `main.qmd`. A slope prior depends on
-the units of x and y. CNDD instead has logit-scale coefficients, so the same
-numerical prior SD has a different interpretation. This illustration is not a second fit.
+`mean` is the posterior mean; `sd` is posterior uncertainty; `2.5%` and
+`97.5%` bound the 95% credible interval. Alpha and beta are on the logit scale.
+The beta row is negative and its interval excludes zero: survival decreases
+with density under this model.
 
-## Instructor demonstrations
+## 2. Sampling diagnostics
 
-```{r demonstrations}
-knitr::kable(course_diagnostics(fit),digits=2)
-bayesplot::mcmc_trace(draws,pars=c("alpha","beta"))
-plot_cndd_predictions(cndd_predictions(draws,n=20,seed=20261022))
-replicates <- cndd_replicates(draws,ndd,seed=20261023)
-plot_cndd_check(replicates,ndd)
-plot_cndd_spread_check(replicates,ndd)
+```{r sampling-diagnostics}
+sampling_table <- posterior::summarise_draws(
+  coef_draws,
+  rhat=posterior::rhat,
+  ess_bulk=posterior::ess_bulk,
+  ess_tail=posterior::ess_tail
+)
+knitr::kable(sampling_table, digits=3)
+
+# One row per chain, recorded when the model was fitted.
+sampler_table <- as_tibble(sampler_diagnostics) |>
+  mutate(chain=row_number(), .before=1)
+knitr::kable(sampler_table, digits=3)
 ```
 
-The count prediction fixes both new groups at 20 seedlings. The model check instead
-retains each original quadrat's density and seedling count. It compares the observed
-pattern and spread with model-generated data. These are simulated teaching data,
-so compatible checks do not establish a real ecological mechanism.
+R-hat near 1, sufficient bulk/tail ESS and no divergences are encouraging.
+Read them together with the traces. ESS is not the seedling sample size; zero
+divergences alone does not establish reliable sampling or an adequate model.
+
+## 3. Trace plots
+
+```{r trace-plots}
+bayesplot::mcmc_trace(coef_draws, pars=c("alpha", "beta"))
+```
+
+Colours identify chains. They cover similar ranges without persistent drift or
+separation, supporting the encouraging numerical diagnostics.
+
+## 4. Survival regression
+
+```{r curve-probabilities}
+density_grid <- tibble(
+  cons=seq(min(ndd$cons), max(ndd$cons), length.out=81)
+)
+curve_draws <- as_tibble(coef_draws) |>
+  select(.draw, alpha, beta) |>
+  crossing(density_grid) |>
+  mutate(p=plogis(alpha + beta * cons))
+
+curve_summary <- curve_draws |>
+  group_by(cons) |>
+  summarise(
+    median=median(p),
+    lower=quantile(p, 0.025), upper=quantile(p, 0.975),
+    .groups="drop"
+  )
+```
+
+```{r regression-plot}
+regression_plot <- ggplot(curve_summary, aes(x=cons)) +
+  geom_ribbon(aes(ymin=lower, ymax=upper), fill="#d95f02", alpha=0.2) +
+  geom_line(aes(y=median), colour="#d95f02", linewidth=1) +
+  geom_point(data=ndd, aes(y=suv/n), alpha=0.6) +
+  scale_y_continuous(limits=c(0, 1)) +
+  labs(x="Conspecific density (scaled)", y="Survival probability")
+regression_plot
+```
+
+Line: posterior median. Ribbon: 95% credible interval for survival probability.
+Points: observed proportions. The curve shows lower survival at higher density;
+the data, model, priors and draws stay fixed. The ribbon does not describe all
+variation in future survivor counts. Making it darker changes only transparency.
+
+Sampling diagnostics tell us about computation; they do not establish that the
+ecological model is appropriate.

@@ -1,0 +1,82 @@
+Day 2 regression exercise revision — 2026-10-19
+
+Goal: replace the long low/high-density handout with one visible R workflow:
+coefficient table -> diagnostics -> trace plots -> survival regression.
+The root exercise.qmd summary/diagnostic sections were reference material;
+the root materials were not changed. Its automatic diagnostic classifications
+and E-BFMI quality scale were not copied.
+
+Student workflow: read_csv(data/ndd.csv), readRDS(fits/day2_ndd.rds),
+subset_draws(), summarise_draws() with explicit 2.5/97.5% quantiles,
+per-coefficient R-hat/bulk/tail ESS plus stored chain diagnostics,
+mcmc_trace(), plogis(alpha + beta * cons), quantile(), geom_ribbon(),
+geom_line(), geom_point(). No course-specific helpers or source() in the
+student file. Keep chain identifiers and alpha/beta pairing. The saved
+result is a list of draws/diagnostics, not a live brms/CmdStan fitting object.
+
+Time: 20 minutes (prepare 2, table 3, diagnostics 3, traces 2, curve 5,
+debrief 5). All code supplied; no new inference or student toolchain setup.
+One optional transparency change leaves data/prior/model/draws fixed.
+Long prediction/PPC/Normal-prior demonstrations and optional brms fitting
+are absent from the student source. Solutions and the brms command remain
+in the instructor source; PPC stays in the lecture after the exercise.
+Slide objectives, exercise instructions, two debrief tables and 40-60/60-70
+minute schedule were aligned. Table font size 34; ESS rounded to integers.
+Guides and offline result sheet updated; proposal marks the old plan as
+superseded. No model, simulated-data specification or fitted RDS changed.
+
+Files: day2/exercise.qmd (authoring source), generated exercise-student.qmd
+and HTMLs, day2/results.qmd/html, day2/slides.qmd/html,
+R/check_classroom_materials.R, classroom/instructor.md/html,
+classroom/PACKAGES.md, classroom/restructure-proposal.md, README.md.
+Preserved the Day 2 slide/prior edits already present at task start.
+
+Validation environment: local R 4.6.1, Quarto 1.10.19, posterior 1.7.0,
+bayesplot 1.16.0. Existing renv out-of-sync notice remains; no installation.
+Commands:
+  RENV_CONFIG_SANDBOX_ENABLED=FALSE Rscript R/check_classroom_materials.R
+  RENV_CONFIG_SANDBOX_ENABLED=FALSE make day2
+  RENV_CONFIG_SANDBOX_ENABLED=FALSE quarto render classroom/instructor.md
+  RENV_CONFIG_SANDBOX_ENABLED=FALSE Rscript R/build_classroom_materials.R
+  RENV_CONFIG_SANDBOX_ENABLED=FALSE Rscript /tmp/afec-day2-fresh-copy.R
+  git diff --check
+
+Checks passed: 21 runnable participant chunks across all days (Day 2: 8),
+seven stored-fit checks, four retained chains, explicit credible-interval
+columns, rejection of changed observations, and direct curve calculations
+matching the existing canonical helper. Plot layers contain the full density
+grid and 60 observed quadrats. Student-source solution stripping passed.
+Final full render/package passed. The first package-only attempt correctly
+rejected older Day 1/3 HTML relative to shared R files; the full rebuild used
+stored fits only. Day 1/3 source content was not changed. Unrelated generated
+slide whitespace-only diffs were removed after verifying normalised equality.
+
+Fresh ZIP test: extracted to a new temporary directory, checked Day 2 QMD/HTML
+hashes against current files, rejected solution/helper leakage, and executed
+all 8 student chunks using only the extracted CSV/RDS and standard libraries.
+Checked four chains, 81 prediction densities and ordered credible intervals.
+This is a local package test, not a fresh classroom RStudio-account test.
+
+Visual QA: Arc showed the updated coefficient/debrief and diagnostic slides,
+and the student coefficient/code/glossary section. Inspected the student's
+embedded trace and regression images. Code and tables fit; plotted intervals
+and median match the lecture. Full every-slide browser audit not performed.
+The participant ZIP is current. Classroom server/account/connectivity/load
+and timing with novices remain separate acceptance work. Twenty minutes is
+an estimate, not a measured student completion time. Shorten code explanation
+if needed, preserving table/trace/graph interpretation and model checking.
+
+No new fitting, commit or push. Existing prior-slide log was not overwritten.
+
+Follow-up: removed redundant recap/new-group prediction from the main flow.
+Exercise debrief stays on the exercise page. Main slide 18 is the exercise,
+19 directly introduces PPC at the observed quadrats, 20 compares observations
+with predictions, 21 discusses ecological interpretation (23 counted slides).
+Coefficient/diagnostic recap and new 20-seedling count prediction now appear
+only in uncounted Optional reference. Updated handout return instructions,
+offline result sheet, instructor notes and 60-70 minute schedule accordingly.
+No analysis code changed. make day2 and instructor render passed; checked
+main/optional slide IDs and immediate exercise-to-PPC order. Arc visual QA
+confirmed slides 18/19 fit and next-slide navigation goes directly to PPC.
+Rebuilt ZIP with --package-only; latest Day 2 QMD/HTML bytes match archive.
+git diff --check passed. No model refit or new sampling.

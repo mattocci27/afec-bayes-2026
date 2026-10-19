@@ -41,7 +41,7 @@ The restructured course lives in:
 | | Slides | Exercises | Theme |
 |---|---|---|---|
 | Day 1 | `day1/slides.qmd` | `day1/exercise.qmd` | Bayesian foundations and an explicit R update: change sample size and interpret uncertainty |
-| Day 2 | `day2/slides.qmd` | `day2/exercise.qmd` | CNDD: survival probabilities, prediction and model checking |
+| Day 2 | `day2/slides.qmd` | `day2/exercise.qmd` | CNDD: regression tables, sampling diagnostics and survival curves |
 | Day 3 | `day3/slides.qmd` | `day3/exercise.qmd` | Mother-tree partial pooling and instructor demonstrations of ecological applications |
 
 Shared resources:
@@ -105,11 +105,13 @@ fits and seeded CSV/RDS data; cloning alone does not supply gitignored fits.
 Student setup and package requirements: [classroom/PACKAGES.md](classroom/PACKAGES.md).
 Core work uses Day 1 exact calculations and Day 2–3 supplied posterior draws;
 all tasks also have a figure-reading route. No student compilation or sampling is
-required. Day 2 brms fitting is optional instructor reference or prepared learners'
-exploration, excluded from rendering with `eval=FALSE`. It is not homework.
+required. Day 2 includes visible brms and handwritten Stan fitting sections before the
+prepared-result analysis. The instructor can choose live fitting or saved results
+by running one of three short result-loading chunks. Fitting chunks have `eval=FALSE` when rendering.
 CNDD predictions and
 checks generate observations from existing draws without refitting. Day 2 holds
-the fit fixed while comparing density -1 and +1 SD. Day 3 uses separate mother-tree
+the fit fixed while reading its table/diagnostics and plotting the survival curve;
+low/high-density interpretation is part of reading that graph. Day 3 uses separate mother-tree
 data, then connects to species CNDD with conceptual simulations and to wood density
 with the existing simulated-allometry fit. Optional calculations are labelled.
 Participants do not need to install CmdStan, a C++ toolchain or Docker.
@@ -125,18 +127,23 @@ The draft was validated with R 4.5.3, CmdStan 2.38.0, cmdstanr, posterior, bayes
 ### Teaching scope and validation (2026-10-18)
 
 Prioritise predictions, uncertainty, ecological interpretation and model checking
-after the full daytime R/statistics programme. Day 2's core exercise is a 15-minute
-comparison using supplied results. Detailed sampler diagnostics and fitting syntax
-are reference material; the instructor still validates all diagnostics.
+after the full daytime R/statistics programme. Day 2 uses an instructor-led R
+walkthrough with live or supplied results: read coefficient means/SDs/95% credible intervals,
+inspect sampling diagnostics and traces, and draw the survival regression.
+The student source uses explicit standard R functions rather than course-specific
+wrappers. Detailed sampler repair remains instructor reference;
+posterior predictive checking is optional instructor reference.
+The core finishes with the regression walkthrough and a brief Day 3 preview.
+The student handout follows code, output and interpretation; it has no timed
+tasks, separate questions or written-answer prompts.
 
 Validation commands: `RENV_CONFIG_SANDBOX_ENABLED=FALSE Rscript R/check_classroom_materials.R`
 and `Rscript R/build_classroom_materials.R` (R 4.6.1, Quarto 1.10.19).
-The optional brms example retains `0 + Intercept + cons` to match the handwritten
-Stan coefficient priors. New brms compilation/sampling has not been verified here:
-the local brms cache is missing, CmdStan is not configured and Docker is stopped.
-Any optional demonstration requires separate instructor validation and a result
-prepared in advance. It is not a student readiness requirement. No browser automation
-surface was available for visual layout inspection in this validation environment.
+The brms example uses `bf(suv | trials(n) ~ cons, center=FALSE)` to match the
+handwritten Stan coefficient priors at cons=0. Both fitting routes and their shared summary/diagnostic/plot
+workflow are checked separately from rendering; the prepared result remains the
+default. Classroom server capacity and simultaneous compilation still require
+validation in the actual teaching environment.
 
 ## Optional local R environment
 

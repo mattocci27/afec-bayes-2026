@@ -31,7 +31,7 @@
     ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
       width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
@@ -150,12 +150,12 @@
     }
     .reveal .footnotes ol {
       counter-reset: ol;
-      list-style-type: none; 
+      list-style-type: none;
       margin-left: 0;
     }
     .reveal .footnotes ol li:before {
       counter-increment: ol;
-      content: counter(ol) ". "; 
+      content: counter(ol) ". ";
     }
     .reveal .footnotes ol li > p:first-child {
       display: inline-block;
@@ -197,19 +197,19 @@
     .reveal .slide > img.r-stretch.quarto-figure-center {
       display: block;
       margin-left: auto;
-      margin-right: auto; 
+      margin-right: auto;
     }
     .reveal .slide > img.stretch.quarto-figure-left,
     .reveal .slide > img.r-stretch.quarto-figure-left  {
       display: block;
       margin-left: 0;
-      margin-right: auto; 
+      margin-right: auto;
     }
     .reveal .slide > img.stretch.quarto-figure-right,
     .reveal .slide > img.r-stretch.quarto-figure-right  {
       display: block;
       margin-left: auto;
-      margin-right: 0; 
+      margin-right: 0;
     }
   </style>
   <script src="slides_files/libs/kePrint-0.0.1/kePrint.js"></script>
@@ -252,12 +252,12 @@ Masatoshi Katabuchi @ XTBG, CAS
 <h2>Today’s objectives</h2>
 <p><strong>Understanding Bayesian regression</strong></p>
 <ul>
-<li>Explain how the model links density to survival probability.</li>
-<li>Interpret predicted survival probabilities and their uncertainty.</li>
-<li>Explain why we check both the sampling and the model’s fit to observations.</li>
+<li>Read coefficient estimates and their credible intervals.</li>
+<li>Check sampling with numerical diagnostics and trace plots.</li>
+<li>Draw and interpret the fitted survival curve and its credible interval.</li>
 </ul>
 <aside class="notes">
-<p>Read completed models and results together. Coding is optional. The participant exercise is at 40-55 minutes: predict, compare figures and explain.</p>
+<p>Read completed models and results together. Coding is optional. Use the handout for an instructor-led R walkthrough. Show code, output and interpretation together. Participants can follow the rendered copy or run the complete code alongside the explanation.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -325,7 +325,7 @@ Masatoshi Katabuchi @ XTBG, CAS
 </ul>
 <p>Now let conspecific density <span class="math inline">x_i</span> predict <span class="math inline">p_i</span>.</p>
 <aside class="notes">
-<p>10-25 minutes: the same count model as Day 1. Within a quadrat assume a common probability and conditional independence. Missing shared conditions can violate these assumptions. We return to this during model checking.</p>
+<p>10-25 minutes: the same count model as Day 1. Within a quadrat assume a common probability and conditional independence. Missing shared conditions can violate these assumptions. A model-checking example is available in Optional reference.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -349,46 +349,6 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
 </div>
 <aside class="notes">
 <p>These are illustrative generating values, not posterior estimates. The link keeps probabilities between zero and one. Explain the shapes and the sign of the slope. No derivation, odds-ratio exercise or syntax memorisation. Here log is the natural logarithm (0&lt;p&lt;1); z can be any real number. The superscript -1 denotes the inverse function, not a reciprocal. Source: Stan User’s Guide, regression models.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="flat-prior-side-by-side" class="slide level2">
-<h2>Why not use a flat prior?</h2>
-<div class="columns">
-<div class="column" style="width:55%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/flat-prior-survival-side-by-side-1.png" class="quarto-figure quarto-figure-center" alt="The same observed quadrat survival proportions and illustrative slopes as the preceding slide: a green gradual decline for beta=-0.8 and an orange dashed near-step for beta=-100. Point area represents seedling count." width="844"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="small">
-<p><strong>Points:</strong> observed proportions.<br>
-<strong>Curves:</strong> illustrative, not fitted.</p>
-</div>
-</div><div class="column" style="width:45%;">
-<ul>
-<li>Uninformative priors (e.g.&nbsp;<span class="math inline">\beta \sim N(0, 10^8)</span>) treat almost all slopes equally.</li>
-<li>It’s reasonable to use Weakly-informative priors (e.g.&nbsp;<span class="math inline">\beta \sim N(0, 2.5^2)</span>)</li>
-</ul>
-</div></div>
-<aside class="notes">
-<p>Allow about 2 minutes, continuing directly from slide 7. These are illustrative curves, not fits. Keep alpha=logit(0.3), x in [-3,3] SD units, the binomial observation model and the link fixed. The green curve is exactly slide 7’s alpha and beta. The dashed orange curve changes only beta to -100. At x=0 both curves have p=0.3. Negative scaled density means below-average density, not a negative number of neighbours. The large logit slope becomes a near-step on the probability scale: the 99%-to-1% transition spans (qlogis(.99)-qlogis(.01))/100 = 0.0919024 SD of density. It is the abrupt transition across such a small density change that we judge implausible for this teaching setting, not merely that p approaches 0 or 1. Some ecological thresholds may be sharp; this is a contextual judgment, not a universal prohibition on steep slopes or a conclusion estimated from these data. Ask the before-data question first: would such an almost all-or-none change across a tiny density difference be ecologically credible in this setting? Then use the grey observations to show the additional evidence from the data.</p>
-<p>The points reuse ndd=make_ndd_data() from the preceding data slide: all 60 simulated quadrats, with observed survival proportions suv/n.&nbsp;Point AREA is proportional to n (5-20 seedlings); larger samples give more precise proportions at a fixed underlying p.&nbsp;No jitter, filtering or new data were introduced. Individual proportions fluctuate under the binomial model; points need not lie on a probability curve. The two curves are not posterior estimates or fitted alternatives. The green curve reuses the illustrative generating values; do not claim its visual agreement is independent validation of the model.</p>
-<p>For these observations the extreme curve also receives a much smaller binomial likelihood: it predicts near-certain survival for many quadrats with deaths and near-zero survival for many quadrats with survivors. These are count likelihoods, not unweighted distances from the plotted proportions. The likelihood and prior make distinct contributions. The observed mismatch is evidence from these data; it is not the justification for choosing a prior after looking at the same data. A flat prior leaves the likelihood to do the penalizing here. Weakly informative priors can express the separate ecological judgment before observing outcomes, which is especially useful when data are sparse. Continue with the full model recap and the independent coefficient priors on the following slides.</p>
-<p>Flat on beta means constant prior density: equal-width intervals around -0.8 and -100 receive the same weight, holding alpha fixed. It does not mean that survival probabilities are uniform. Do not confuse density with a point probability. A flat prior on the entire real line is improper, but that is not the teaching argument here. Bounded flat priors can be proper, and flat priors can be appropriate in some settings. The point is that flatness does not automatically encode sensible predictions. Next ask how to retain uncertainty while giving extreme effects less prior weight.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -527,11 +487,65 @@ likelihood</p>
 </div>
 </div>
 </div>
-<div class="posterior-takeaway">
+<aside class="notes">
+<p>Alpha and beta are the unknown coefficients. Alpha is log-odds at reference density x=0; beta changes log-odds per one SD of density. Neither coefficient is itself a probability or a percentage reduction. Here Normal(0,2.5^2) uses a variance as its second argument: SD is 2.5. The two independent priors are unchanged and match stan/logit_reg.stan and the stored fit, whose normal(0,2.5) syntax uses an SD. Do not square the Stan SD. Read left to right: the priors describe uncertainty before seeing data; the observed data update them to the joint posterior for alpha and beta. Data enter the update through the likelihood from the preceding model slide. Independence is a prior assumption, not a claim that the posterior coefficients are independent. Day 1 calculated a posterior over a grid of p values; today we approximate the posterior for pairs using simulated draws. Do not imply simulation finds true parameters or that a grid is impossible for this two-parameter model. After motivating the prior scales on the next slide, introduce the sampling idea.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="flat-prior-side-by-side" class="slide level2">
+<h2>Prior scales matter</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/flat-prior-survival-side-by-side-1.png" class="quarto-figure quarto-figure-center" alt="The same observed quadrat survival proportions and illustrative slopes as the earlier link-function example: a green gradual decline for beta=-0.8 and an orange dashed near-step for beta=-100. Point area represents seedling count." width="844"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="small">
+<p><strong>Points:</strong> observed proportions.<br>
+<strong>Curves:</strong> illustrative, not fitted.</p>
+</div>
+</div><div class="column" style="width:45%;">
+<div class="small">
+<p><span class="math display">
+\begin{aligned}
+\text{Very diffuse:}\quad &amp;\beta\sim\mathcal N(0,10^8)\\[6pt]
+\text{Weakly informative:}\quad &amp;\beta\sim\mathcal N(0,2.5^2)
+\end{aligned}
+</span></p>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/slope-prior-relative-density-1.png" class="quarto-figure quarto-figure-center" alt="Zoomed comparison from beta=-120 to 20. Each prior density is divided by its own peak. The very diffuse Normal with SD 10000 is nearly flat across this range. The weakly informative Normal with SD 2.5 is concentrated near zero. An orange dashed line marks beta=-100, where the diffuse prior remains near its peak but the weakly informative density is negligible." width="652"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+<div class="model-takeaway" style="text-align: center; margin-top: 0.6em;">
 <p>We use simulation to approximate the posterior.</p>
 </div>
 <aside class="notes">
-<p>Alpha and beta are the unknown coefficients. Alpha is log-odds at reference density x=0; beta changes log-odds per one SD of density. Neither coefficient is itself a probability or a percentage reduction. Here Normal(0,2.5^2) uses a variance as its second argument: SD is 2.5. The two independent priors are unchanged and match stan/logit_reg.stan and the stored fit, whose normal(0,2.5) syntax uses an SD. Do not square the Stan SD. Read left to right: the priors describe uncertainty before seeing data; the observed data update them to the joint posterior for alpha and beta. Data enter the update through the likelihood from the preceding model slide. Independence is a prior assumption, not a claim that the posterior coefficients are independent. Day 1 calculated a posterior over a grid of p values; today we approximate the posterior for pairs using simulated draws. Do not imply simulation finds true parameters or that a grid is impossible for this two-parameter model. The next slide introduces the sampling idea.</p>
+<p>The right figure compares prior shapes, before using observed outcomes. Normal(0,10^8) means variance 10^8 and SD 10000, not SD 10^8. Normal(0,2.5^2) means SD 2.5, matching the unchanged fitted-model slope prior. The horizontal range [-120,20] is deliberately zoomed in: most of the diffuse prior lies outside this window. These are relative densities f(beta)/f(0), not probability densities that integrate to one over the shown range. At beta=-100 the diffuse relative density is exp(-0.00005), about 0.99995; the weak relative density is exp(-800), positive but below plotting precision. Thus the diffuse prior gives equal-width neighbourhoods near -100 and 0 almost the same prior weight; the weak prior greatly downweights -100. Do not compare absolute density heights across priors from this peak-normalised plot. The diffuse Normal is proper and is not literally a flat prior; it illustrates locally almost flat weighting across the slopes being discussed. Keep that separate from the binomial likelihood evidence in the left observations.</p>
+<p>Allow about 2 minutes, following the model and prior/posterior recap. These are illustrative curves, not fits. Keep alpha=logit(0.3), x in [-3,3] SD units, the binomial observation model and the link fixed. The green curve is exactly slide 7’s alpha and beta. The dashed orange curve changes only beta to -100. At x=0 both curves have p=0.3. Negative scaled density means below-average density, not a negative number of neighbours. The large logit slope becomes a near-step on the probability scale: the 99%-to-1% transition spans (qlogis(.99)-qlogis(.01))/100 = 0.0919024 SD of density. It is the abrupt transition across such a small density change that we judge implausible for this teaching setting, not merely that p approaches 0 or 1. Some ecological thresholds may be sharp; this is a contextual judgment, not a universal prohibition on steep slopes or a conclusion estimated from these data. Ask the before-data question first: would such an almost all-or-none change across a tiny density difference be ecologically credible in this setting? Then use the grey observations to show the additional evidence from the data.</p>
+<p>The points reuse ndd=make_ndd_data() from the preceding data slide: all 60 simulated quadrats, with observed survival proportions suv/n.&nbsp;Point AREA is proportional to n (5-20 seedlings); larger samples give more precise proportions at a fixed underlying p.&nbsp;No jitter, filtering or new data were introduced. Individual proportions fluctuate under the binomial model; points need not lie on a probability curve. The two curves are not posterior estimates or fitted alternatives. The green curve reuses the illustrative generating values; do not claim its visual agreement is independent validation of the model.</p>
+<p>For these observations the extreme curve also receives a much smaller binomial likelihood: it predicts near-certain survival for many quadrats with deaths and near-zero survival for many quadrats with survivors. These are count likelihoods, not unweighted distances from the plotted proportions. The likelihood and prior make distinct contributions. The observed mismatch is evidence from these data; it is not the justification for choosing a prior after looking at the same data. A flat prior leaves the likelihood to do the penalizing here. Weakly informative priors can express the separate ecological judgment before observing outcomes, which is especially useful when data are sparse. The preceding slide specifies the full model’s independent coefficient priors. Next explain how simulation approximates the posterior.</p>
+<p>Flat on beta means constant prior density: equal-width intervals around -0.8 and -100 receive the same weight, holding alpha fixed. It does not mean that survival probabilities are uniform. Do not confuse density with a point probability. A flat prior on the entire real line is improper, but that is not the teaching argument here. Bounded flat priors can be proper, and flat priors can be appropriate in some settings. The point is that flatness does not automatically encode sensible predictions. Next ask how to retain uncertainty while giving extreme effects less prior weight.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -546,27 +560,17 @@ likelihood</p>
 </section>
 <section id="approximate-the-posterior-using-simulation" class="slide level2">
 <h2>Approximate the posterior using simulation</h2>
-<p><strong>MCMC</strong> generates a sequence of parameter values. First, an illustration with one probability <span class="math inline">p</span>.</p>
+<p>MCMC generates a sequence of parameter values from the posterior distribution.</p>
 <div class="columns">
 <div class="column" style="width:50%;">
-<p><img data-src="../images/mh_trace.gif" alt="Two illustrative Metropolis chains updating a probability p over time." height="320"></p>
+<p><img data-src="../images/mh_trace.gif" alt="Two illustrative Metropolis chains updating a probability p over time." height="460"></p>
 </div><div class="column" style="width:50%;">
-<p><img data-src="../images/mh_post.gif" alt="The same two chains moving on the log unnormalised target density." height="320"></p>
+<p><img data-src="../images/mh_post.gif" alt="The same two chains moving on the log unnormalised target density." height="460"></p>
 </div></div>
-<div class="small">
-<p>Left: recorded values over time. Right: positions on the log unnormalised posterior.</p>
-</div>
-<ul>
-<li>Propose a move; accept or reject it. If rejected, record the current value again.</li>
-<li>Repeat: with adequate exploration, visit frequencies approximate posterior probabilities.</li>
-</ul>
-<p><strong>Many saved values describe uncertainty about the parameter.</strong></p>
-<div class="small">
-<p>Stan uses HMC/NUTS; this example illustrates the sampling idea.</p>
-</div>
+<p>The sampled values describe uncertainty about the parameter.</p>
 <aside class="notes">
 <p>About two minutes. Begin with the purpose: we use simulation to obtain draws that represent the posterior and its uncertainty. MCMC is the method used here to generate those draws. MCMC means Markov chain Monte Carlo. Ask participants to follow one coloured chain: a recorded step becomes one draw. A rejected proposal keeps the current value, so repeated values must be counted too. The two starting values are 0.2 and 0.8. Do not derive the acceptance probability or compare MCMC algorithms here. With the symmetric proposals used in this illustration, moves to higher target density are accepted; some moves to lower density are accepted as well. This helps explore a distribution rather than only climbing to a peak.</p>
-<p>These are the existing main.qmd teaching animations, generated by R/mh.R with seed 123, 200 steps per chain and symmetric proposals of +/-0.01. Their target is proportional to p^110 * (1-p)^90, corresponding to a Beta(111,91) density; it is a separate probability illustration, not today’s CNDD fit or Day 1’s data. The proposal grid gives a discrete approximation to that continuous target. The right GIF’s axis says ‘Posterior’, but its stored values are LOG unnormalised density (110<em>log(p)+90</em>log(1-p)); the visible caption makes this explicit. It is not a histogram, a normalised posterior density or a plot of visit counts. Explain that a histogram of many adequately explored retained values would approximate the distribution. Neither this short animation nor overlapping chains proves adequate exploration. The grey initial segment illustrates initial movement; the actual CNDD plots that follow show post-warmup draws.</p>
+<p>These are the existing main.qmd teaching animations, generated by R/mh.R with seed 123, 200 steps per chain and symmetric proposals of +/-0.01. Their target is proportional to p^110 * (1-p)^90, corresponding to a Beta(111,91) density; it is a separate probability illustration, not today’s CNDD fit or Day 1’s data. The proposal grid gives a discrete approximation to that continuous target. The right GIF’s axis says ‘Posterior’, but its stored values are LOG unnormalised density (110<em>log(p)+90</em>log(1-p)); explain this distinction orally. It is not a histogram, a normalised posterior density or a plot of visit counts. Explain that a histogram of many adequately explored retained values would approximate the distribution. Neither this short animation nor overlapping chains proves adequate exploration. The grey initial segment illustrates initial movement; the actual CNDD plots that follow show post-warmup draws.</p>
 <p>Transition: yesterday we represented uncertainty in one probability; today a draw is a pair (alpha,beta). Stan uses HMC/NUTS, not this random-walk proposal. The next slide shows actual saved CNDD pairs; then we check their exploration. Source: https://mc-stan.org/docs/reference-manual/mcmc.html</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -580,14 +584,13 @@ likelihood</p>
           display:block!important;
       }</style></aside>
 </section>
-<section id="for-cndd-each-draw-is-a-coefficient-pair" class="slide level2">
-<h2>For CNDD, each draw is a coefficient pair</h2>
+<section id="mcmc-samples-pairs-of-coefficients" class="slide level2">
+<h2>MCMC samples pairs of coefficients</h2>
 <div class="columns">
-<div class="column" style="width:35%;">
+<div class="column" style="width:45%;">
 <p><strong>One parameter:</strong> save a value of <span class="math inline">p</span>.</p>
-<p><strong>Our CNDD model:</strong> save a pair <span class="math inline">(\alpha,\beta)</span> at each step.</p>
-<p>Many paired draws describe uncertainty about both coefficients together.</p>
-</div><div class="column" style="width:65%;">
+<p><strong>Our logistic model:</strong> save a pair <span class="math inline">(\alpha,\beta)</span>.</p>
+</div><div class="column" style="width:55%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -622,7 +625,7 @@ likelihood</p>
 <li>Is there a lasting drift or separation?</li>
 </ul>
 <aside class="notes">
-<p>First identify the horizontal axis (saved sampling step), vertical axis (coefficient value), and colours (chains). These are the actual post-warmup stored draws. Look for persistent drift or between-chain offsets, rather than interpreting any single jump. Overlap is encouraging but does not establish convergence by itself. The instructor also checks numerical diagnostics; overlap alone is insufficient. The diagnostic comparison is in Optional reference for later questions. Source: https://mc-stan.org/learn-stan/diagnostics-warnings.html</p>
+<p>First identify the horizontal axis (saved sampling step), vertical axis (coefficient value), and colours (chains). These are the actual post-warmup stored draws. Look for persistent drift or between-chain offsets, rather than interpreting any single jump. Overlap is encouraging but does not establish convergence by itself. The instructor also checks numerical diagnostics; overlap alone is insufficient. The diagnostic comparison is in Optional reference for later questions. Transition orally: more complex models or problems in model formulation can make sampling difficult. Show a separate teaching failure as a short caution; it does not replace the CNDD fit and is not a test of ecological correctness. Source: https://mc-stan.org/learn-stan/diagnostics-warnings.html</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -637,14 +640,14 @@ likelihood</p>
 </section>
 <section id="what-does-failed-exploration-look-like" class="slide level2">
 <h2>What does failed exploration look like?</h2>
-<p><strong>Teaching failure:</strong> tree-height regression with two intercepts (a separate model).</p>
+<div class="small">
+<p>More complex models or problems in model formulation can make posterior sampling difficult.</p>
+</div>
 
-<img data-src="slides_files/figure-revealjs/failed-trace-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><ul>
-<li>The chains stay in different regions and move slowly.</li>
-<li>Would you trust a mean or interval calculated from these draws?</li>
-</ul>
+<img data-src="slides_files/figure-revealjs/failed-trace-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Here, the chains remain in different regions.</p>
+<p>We should investigate before interpreting these draws.</p>
 <aside class="notes">
-<p>Spend about one minute comparing this with the preceding CNDD traces. These are actual post-warmup draws from fits/day2_allo_bad.rds, not altered CNDD draws or a schematic. Do not use this fit for ecological interpretation. The response is log(height); x is log(DBH / reference DBH). Unlike the binomial CNDD model, this is a Normal regression. Both models use MCMC for coefficients, so the same question applies: have the chains explored the posterior adequately? Here the deliberately redundant intercepts, each with a Normal(0,1000) prior (SD 1000), create a difficult long ridge. The data inform their sum, not the two intercepts separately. Proper priors make the posterior proper, but these very broad priors do not make this run reliable. Explain the remedy on the next slide. Keep the first comparison visual; numerical details are in Optional reference. Source: https://mc-stan.org/docs/stan-users-guide/problematic-posteriors.html</p>
+<p>Spend about one minute comparing this with the preceding CNDD traces. These are actual post-warmup draws from fits/day2_allo_bad.rds, not altered CNDD draws or a schematic. Do not use this fit for ecological interpretation. The response is log(height); x is log(DBH / reference DBH). Unlike the binomial CNDD model, this is a Normal regression. Both models use MCMC for coefficients, so the same question applies: have the chains explored the posterior adequately? Here the deliberately redundant intercepts, each with a Normal(0,1000) prior (SD 1000), create a difficult long ridge. The data inform their sum, not the two intercepts separately. Proper priors make the posterior proper, but these very broad priors do not make this run reliable. Keep this explanation oral and brief: “This is a separate teaching example with duplicated intercepts, not today’s CNDD result.” Do not introduce its equation or derive the cause here. A complex model can be scientifically appropriate and still be hard to sample; a scientifically inappropriate model can sample well. Neither complexity nor model error guarantees this trace pattern. The plotted failure is evidence from this particular stored run, not an inevitable outcome of two intercepts. Details of this model and remedies are in Optional reference, together with numerical diagnostics. Return directly to the original CNDD fit on the next slide: its paired coefficient draws each give one survival curve. Source: https://mc-stan.org/docs/stan-users-guide/problematic-posteriors.html</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -657,70 +660,76 @@ likelihood</p>
           display:block!important;
       }</style></aside>
 </section>
-<section id="when-sampling-fails-investigate-before-interpreting" class="slide level2">
-<h2>When sampling fails, investigate before interpreting</h2>
-<p>In the failed example:</p>
-<p><span class="math display">\log(H_i)\sim\mathcal{N}(\alpha_1+\alpha_2+\beta x_i,\sigma)</span></p>
-<p>Adding 10 to <span class="math inline">\alpha_1</span> and subtracting 10 from <span class="math inline">\alpha_2</span> gives the same prediction.</p>
-<ul>
-<li><strong>Revise:</strong> use one intercept for this model; review scales and priors.</li>
-<li><strong>Refit and check:</strong> inspect traces and numerical diagnostics again.</li>
-<li><strong>Then:</strong> interpret estimates and check predictions against observations.</li>
-</ul>
-<aside class="notes">
-<p>About one minute. H is tree height in metres, x=log(DBH / 40 cm), and sigma is the residual SD on the log-height scale. The independent intercept priors are Normal(0,1000), beta has Normal(0,2.5), and sigma has a positive-constrained Normal(0,1) prior. The likelihood is unchanged by the offset, although the prior density need not be. The data alone cannot distinguish the two intercepts. Removing the redundancy addresses this example’s cause. No corrected refit is shown here; do not claim that a repair has already passed diagnostics. More iterations alone are not a general solution. Other failures need their own investigation (coding, scaling, priors, parameterisation and sampler settings). Return to the original CNDD fit for all following survival curves and exercises. Sampling checks do not establish ecological adequacy: posterior predictive checking is still required later in this session. Source: https://mc-stan.org/docs/stan-users-guide/problematic-posteriors.html</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="one-coefficient-pair-gives-one-survival-curve" class="slide level2">
-<h2>One coefficient pair gives one survival curve</h2>
+<section id="posterior-draws-10-survival-curves" class="slide level2">
+<h2>10 posterior draws, 10 survival curves</h2>
 <p><span class="math display">p(x)=\operatorname{logit}^{-1}(\alpha+\beta x)</span></p>
 <div class="columns">
 <div class="column" style="width:30%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
-<table class="table caption-top" style="font-size: 23px; width: auto !important; margin-left: auto; margin-right: auto;">
+<table class="table caption-top" style="font-size: 20px; width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">Draw</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">α</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">β</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; padding: 4px 8px;">Draw</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; padding: 4px 8px;">α</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; padding: 4px 8px;">β</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">1</td>
-<td style="text-align: left;">-0.769</td>
-<td style="text-align: left;">-0.904</td>
+<td style="text-align: left; padding: 4px 8px;">1</td>
+<td style="text-align: left; padding: 4px 8px;">-0.769</td>
+<td style="text-align: left; padding: 4px 8px;">-0.904</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">2</td>
-<td style="text-align: left;">-0.794</td>
-<td style="text-align: left;">-0.856</td>
+<td style="text-align: left; padding: 4px 8px;">2</td>
+<td style="text-align: left; padding: 4px 8px;">-0.794</td>
+<td style="text-align: left; padding: 4px 8px;">-0.856</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">3</td>
-<td style="text-align: left;">-0.794</td>
-<td style="text-align: left;">-0.856</td>
+<td style="text-align: left; padding: 4px 8px;">3</td>
+<td style="text-align: left; padding: 4px 8px;">-0.794</td>
+<td style="text-align: left; padding: 4px 8px;">-0.856</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">4</td>
-<td style="text-align: left;">-0.838</td>
-<td style="text-align: left;">-0.772</td>
+<td style="text-align: left; padding: 4px 8px;">4</td>
+<td style="text-align: left; padding: 4px 8px;">-0.838</td>
+<td style="text-align: left; padding: 4px 8px;">-0.772</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">⋮</td>
-<td style="text-align: left;">⋮</td>
-<td style="text-align: left;">⋮</td>
+<td style="text-align: left; padding: 4px 8px;">5</td>
+<td style="text-align: left; padding: 4px 8px;">-0.636</td>
+<td style="text-align: left; padding: 4px 8px;">-0.884</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding: 4px 8px;">6</td>
+<td style="text-align: left; padding: 4px 8px;">-0.652</td>
+<td style="text-align: left; padding: 4px 8px;">-0.630</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding: 4px 8px;">7</td>
+<td style="text-align: left; padding: 4px 8px;">-0.677</td>
+<td style="text-align: left; padding: 4px 8px;">-0.887</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding: 4px 8px;">8</td>
+<td style="text-align: left; padding: 4px 8px;">-0.752</td>
+<td style="text-align: left; padding: 4px 8px;">-0.871</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding: 4px 8px;">9</td>
+<td style="text-align: left; padding: 4px 8px;">-0.833</td>
+<td style="text-align: left; padding: 4px 8px;">-0.874</td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding: 4px 8px;">10</td>
+<td style="text-align: left; padding: 4px 8px;">-0.731</td>
+<td style="text-align: left; padding: 4px 8px;">-0.785</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left; padding: 4px 8px;">⋮</td>
+<td style="text-align: left; padding: 4px 8px;">⋮</td>
+<td style="text-align: left; padding: 4px 8px;">⋮</td>
 </tr>
 </tbody>
 </table>
@@ -737,9 +746,9 @@ likelihood</p>
 </div>
 </div>
 </div></div>
-<p>Four possible curves for the <strong>same survival relationship</strong>.</p>
+<p>Ten possible curves for the <strong>same survival relationship</strong>.</p>
 <aside class="notes">
-<p>Each table row supplies both coefficients for one curve. The displayed coefficients are rounded, but curves use their full precision. Rows are the first four saved paired draws, not independently chosen alpha and beta values. The vertical ellipses indicate that the stored draw table continues; they are display labels, not extra draws. These four rows need not span the posterior range. All curves use the same grey: these are alternative draws for the same relationship. The later species preview uses different colours for different species. The next slide shows 100 draws before summarising ALL stored draws as a band. These four illustrative draws do not define the band.</p>
+<p>Each table row supplies both coefficients for one curve. The displayed coefficients are rounded, but curves use their full precision. Rows are the first ten saved paired draws, not independently chosen alpha and beta values. The vertical ellipses indicate that the stored draw table continues; they are display labels, not extra draws. These ten rows need not span the posterior range. All curves use the same grey: these are alternative draws for the same relationship. The later species preview uses different colours for different species. The next slide shows 1000 draws before summarising ALL stored draws as a ribbon. These ten illustrative draws do not define the ribbon.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -752,12 +761,12 @@ likelihood</p>
           display:block!important;
       }</style></aside>
 </section>
-<section id="posterior-draws-100-survival-curves" class="slide level2">
-<h2>100 posterior draws, 100 survival curves</h2>
+<section id="posterior-draws-1000-survival-curves" class="slide level2">
+<h2>1000 posterior draws, 1000 survival curves</h2>
 
 <img data-src="slides_files/figure-revealjs/many-survival-curves-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Each curve comes from one posterior draw.</p>
 <aside class="notes">
-<p>These are 100 randomly selected actual paired draws without replacement from the same stored posterior, with a fixed seed. Each pair supplies a whole curve for the same survival relationship. Grey lines show uncertainty, not species differences or simulated survivor counts. Keep the density range and probability limits the same as the four-curve figure. At any fixed density, the spread of curves shows uncertainty about p.&nbsp;The next slide uses ALL stored draws to calculate pointwise 2.5th/97.5th percentiles and the median; the visible 100-curve envelope is not that interval.</p>
+<p>These are 1000 randomly selected actual paired draws without replacement from the same stored posterior, with a fixed seed. Each pair supplies a whole curve for the same survival relationship. Grey lines show uncertainty, not species differences or simulated survivor counts. Keep the density range and probability limits the same as the ten-curve figure. At any fixed density, the spread of curves shows uncertainty about p.&nbsp;The next slide uses ALL stored draws to calculate pointwise 2.5th/97.5th percentiles and the median; the visible 1000-curve envelope is not that interval.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -770,13 +779,13 @@ likelihood</p>
           display:block!important;
       }</style></aside>
 </section>
-<section id="all-draws-give-a-band-of-survival-curves" class="slide level2">
-<h2>All draws give a band of survival curves</h2>
+<section id="all-draws-give-a-ribbon-of-survival-curves" class="slide level2">
+<h2>All draws give a ribbon of survival curves</h2>
 
 <img data-src="slides_files/figure-revealjs/fitted-curve-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Each point represents one quadrat.</p>
-<p>The band shows uncertainty about <strong>survival probability</strong> at each density.</p>
+<p>The ribbon shows uncertainty about <strong>survival probability</strong> at each density.</p>
 <aside class="notes">
-<p>At each x, transform every paired draw into p, then calculate the median and 2.5th/97.5th percentiles. The line is not MLE or MAP and need not equal a single drawn curve. The band is pointwise, not a simultaneous band for the whole function. The observed proportions include binomial variation, so this is not an interval that must contain the observations. Leave numerical low/high comparisons to the exercise.</p>
+<p>At each x, transform every paired draw into p, then calculate the median and 2.5th/97.5th percentiles. The line is not MLE or MAP and need not equal a single drawn curve. The ribbon contains pointwise 95% credible intervals, not a simultaneous band for the whole function. The observed proportions include binomial variation, so this is not an interval that must contain the observations. Participants will construct the same kind of curve from the paired draws using plogis(), quantile() and ggplot() in the exercise.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -789,119 +798,19 @@ likelihood</p>
           display:block!important;
       }</style></aside>
 </section>
-<section id="exercise-survival-at-two-densities" class="slide level2" data-background-color="#f3e8f5">
-<h2>Exercise: survival at two densities</h2>
+<section id="r-walkthrough-survival-regression" class="slide level2" data-background-color="#f3e8f5">
+<h2>R walkthrough: survival regression</h2>
 <p><code>day2/exercise-student.qmd</code></p>
-<ul>
-<li>Predict which density has higher survival.</li>
-<li>Compare supplied probabilities at <span class="math inline">x=-1</span> and <span class="math inline">x=1</span>, with 95% intervals.</li>
-<li>Explain what the probabilities and intervals mean.</li>
-<li>Run supplied code or read the figures: both routes complete the task.</li>
-</ul>
-<aside class="notes">
-<p>40-55 minutes: prediction 2, figure comparison 6, written interpretation 2, debrief 5. No new inference or software installation. Nearby help is optional. If R access or operation takes more than two minutes, continue with results.html and the same questions. Low/high density are -1/+1 SD; hold the fitted data, model, priors and draws fixed. Computation diagnostics and model checking are explained by the instructor; students need to understand their purpose, not memorise syntax or thresholds.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="read-your-low-density-and-high-density-comparison" class="slide level2">
-<h2>Read your low-density and high-density comparison</h2>
-
-<img data-src="slides_files/figure-revealjs/density-comparison-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p>Predicted survival: <strong>0.52</strong> at low density; <strong>0.17</strong> at high density. Report both with their intervals.</p>
-<aside class="notes">
-<p>Debrief after participants have read their own tables. Low density is x=-1 and high is x=1, with the same fit and pointwise 95% intervals. The saved posterior medians are 0.52 and 0.17; intervals are 0.47 to 0.57 and 0.13 to 0.22, respectively. State that the fitted model predicts lower survival at high density, conditional on its assumptions. Beta is a logit coefficient, not a percent reduction. This simulated association does not establish a causal mechanism.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="a-probability-still-allows-different-survivor-counts" class="slide level2">
-<h2>A probability still allows different survivor counts</h2>
-<p><strong>Next question:</strong> how many of 20 new seedlings might survive?</p>
-
-<img data-src="slides_files/figure-revealjs/new-counts-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Both groups contain 20 seedlings. Density is the only condition that changes.</p>
-<aside class="notes">
-<p>55-70 minutes: discussion begins with the bridge from probability estimates to generated data. For each posterior pair, calculate p at each density and generate a Binomial(20,p) count. This incorporates uncertainty about p AND variation in counts given p. The saved fit is unchanged. Explain the two sources of uncertainty orally. Now ask whether this same simulation can reproduce our observed quadrats.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="could-the-model-reproduce-these-observations" class="slide level2">
-<h2>Could the model reproduce these observations?</h2>
+<p>We follow the R code and its outputs:</p>
 <ol type="1">
-<li>Keep each quadrat’s <strong>observed density and seedling count</strong>.</li>
-<li>Use a posterior curve to calculate its survival probability.</li>
-<li>Simulate survivors and compare the patterns with the observations.</li>
+<li>Coefficient summaries and credible intervals.</li>
+<li>Sampling diagnostics.</li>
+<li>Trace plots.</li>
+<li>Survival probabilities and a regression plot.</li>
 </ol>
-<p>Repeat across posterior draws: <strong>posterior predictive checking</strong>.</p>
+<p>Offline outputs: <code>day2/results.html</code>.</p>
 <aside class="notes">
-<p>Use one paired draw for ALL quadrats in a replicated data set, then repeat with other draws. Replicated survivor counts include binomial variation at the observed n_i. This uses the same generating logic as the 20-seedling prediction, now at the original conditions. It checks the data model, not whether the sampler mixed. No new inference is run. The equations are available in the appendix. Source: https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="does-the-density-pattern-look-compatible" class="slide level2">
-<h2>Does the density pattern look compatible?</h2>
-
-<img data-src="slides_files/figure-revealjs/check-pattern-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><ul>
-<li>Does the model reproduce the change in survival across densities?</li>
-<li>Are observations consistently higher or lower than predicted in part of the density range?</li>
-</ul>
-<aside class="notes">
-<p>The intervals concern replicated proportions at observed n_i, not uncertainty about p_i alone. Some points can lie outside a 95% interval without indicating a systematic failure; do not count every outside point as a model failure. Look across the density range for a pattern the model misses. These data were generated from the simple model, so do not promise a visible mismatch. Similar patterns do not prove that the model is correct. Ask what omitted conditions, such as light or soil, might matter before moving to the real-forest discussion. The SD-based comparison is an optional reference, not part of this introduction.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="interpretation-in-a-real-forest" class="slide level2">
-<h2>Interpretation in a real forest</h2>
-<ul>
-<li>A fitted association depends on the model and measured conditions.</li>
-<li>Light, soil and shared enemies could matter as well as density.</li>
-<li>Ecological knowledge helps decide which comparisons and checks matter.</li>
-</ul>
-<p>What additional information would you want before explaining the mechanism?</p>
-<aside class="notes">
-<p>70-80 minutes. Do not infer a causal effect or the cause of rarity from this simple simulation. The basic model assumes common p and conditional independence within each quadrat. Discuss what unmeasured shared conditions would imply.</p>
+<p>Guide the class through the handout, showing code and output together. Follow the root exercise.qmd style: explain the table columns and actual results, then the diagnostics, traces and graph. No timed student tasks, separate questions, written responses or debrief cycle. Running code alongside the instructor is optional; the rendered copy and result sheet contain the outputs. Planning allowance is 40-60 minutes, with 60-70 available for pace/questions. Keep read_csv(), readRDS(), summarise_draws(), mcmc_trace(), plogis(), quantile() and ggplot() visible rather than hiding analysis in course-specific helpers. PPC and repeated table slides remain optional. Finish with a brief Day 3 preview.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -919,25 +828,7 @@ likelihood</p>
 
 <img data-src="slides_files/figure-revealjs/species-preview-1.png" class="quarto-figure quarto-figure-center r-stretch" width="960"><p>Some species have few seedlings. How can we estimate their relationships?</p>
 <aside class="notes">
-<p>Conceptual simulation, not a species-level fit of today’s data. Do not explain all hierarchical equations now. Day 3 introduces sharing through mother trees first.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="your-research-question" class="slide level2">
-<h2>Your research question</h2>
-<p>Name a response you measure and one predictor you care about.</p>
-<p>What would you predict, and which observed pattern would you ask the model to reproduce?</p>
-<aside class="notes">
-<p>80-85 minutes: individual reflection, optional nearby discussion and two brief contributions. Keep the final five minutes for questions and delay buffer.</p>
+<p>A brief Day 3 preview only: conceptual simulation, not a species-level fit of today’s data. Do not explain hierarchical equations or add an exercise now. Day 3 introduces sharing through mother trees first; omit this preview if delayed.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -954,6 +845,171 @@ likelihood</p>
 <section id="optional-reference" class="title-slide slide level1 center" data-visibility="uncounted">
 <h1>Optional reference</h1>
 
+</section>
+<section id="can-our-fitted-model-reproduce-the-observed-data" class="slide level2" data-visibility="uncounted">
+<h2>Can our fitted model reproduce the observed data?</h2>
+<p>We checked the sampling. Now check the model against observations.</p>
+<ol type="1">
+<li>Keep each quadrat’s <strong>observed density and seedling count</strong>.</li>
+<li>Use a posterior curve to calculate its survival probability.</li>
+<li>Simulate survivors and compare the patterns with the observations.</li>
+</ol>
+<p>Repeat across posterior draws: <strong>posterior predictive checking</strong>.</p>
+<aside class="notes">
+<p>Use one paired draw for ALL quadrats in a replicated data set, then repeat with other draws. Replicated survivor counts include binomial variation at the observed n_i. Optional instructor reference only; omit from the core lecture. Use this if a later discussion specifically calls for a posterior predictive example. Generate binomial survivor counts directly at each observed density and seedling count. This includes binomial variation as well as uncertainty about probability. It checks the data model, not whether the sampler mixed. No new inference is run. The equations are available in the appendix. Source: https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="does-the-density-pattern-look-compatible" class="slide level2" data-visibility="uncounted">
+<h2>Does the density pattern look compatible?</h2>
+
+<img data-src="slides_files/figure-revealjs/check-pattern-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><ul>
+<li>Does the model reproduce the change in survival across densities?</li>
+<li>Are observations consistently higher or lower than predicted in part of the density range?</li>
+</ul>
+<aside class="notes">
+<p>The intervals concern replicated proportions at observed n_i, not uncertainty about p_i alone. Some points can lie outside a 95% interval without indicating a systematic failure; do not count every outside point as a model failure. Look across the density range for a pattern the model misses. These data were generated from the simple model, so do not promise a visible mismatch. Similar patterns do not prove that the model is correct. Ask what omitted conditions, such as light or soil, might matter if using this optional example. The SD-based comparison is an optional reference, not part of this introduction.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="read-the-regression-table" class="slide level2" data-visibility="uncounted">
+<h2>Read the regression table</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="table caption-top" style="font-size: 34px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">variable</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">mean</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">sd</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">2.5%</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">97.5%</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">alpha</td>
+<td style="text-align: right;">-0.750</td>
+<td style="text-align: right;">0.085</td>
+<td style="text-align: right;">-0.918</td>
+<td style="text-align: right;">-0.587</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">beta</td>
+<td style="text-align: right;">-0.837</td>
+<td style="text-align: right;">0.105</td>
+<td style="text-align: right;">-1.045</td>
+<td style="text-align: right;">-0.631</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<ul>
+<li><strong>mean:</strong> posterior mean. <strong>sd:</strong> uncertainty about the coefficient.</li>
+<li><strong>2.5%–97.5%:</strong> 95% credible interval.</li>
+</ul>
+<p>The density coefficient is negative. Does the survival curve agree?</p>
+<aside class="notes">
+<p>Optional reference only. Complete the core debrief in the exercise handout; use this slide only if a question requires revisiting the coefficient table. The negative beta interval excludes zero in this supplied fit. Alpha is baseline log-odds at density zero; beta changes log-odds per one SD of density, not a percent reduction. The means are not MLE or MAP. Posterior SD differs from Monte Carlo error and variation among seedlings. The interval is for the coefficient, not observations. Students should connect beta’s sign to their downward survival curve. This association does not establish a causal mechanism. Show the next diagnostic slide before accepting the coefficient interpretation.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="read-diagnostics-together-with-the-traces" class="slide level2" data-visibility="uncounted">
+<h2>Read diagnostics together with the traces</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="table caption-top" style="font-size: 34px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">variable</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">rhat</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">ess_bulk</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">ess_tail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">alpha</td>
+<td style="text-align: right;">1.001</td>
+<td style="text-align: right;">1854</td>
+<td style="text-align: right;">2260</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">beta</td>
+<td style="text-align: right;">1.001</td>
+<td style="text-align: right;">2066</td>
+<td style="text-align: right;">2228</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Post-warmup divergences: <strong>0</strong>.</p>
+<ul>
+<li>Do the chains agree, with enough sampling information?</li>
+<li>Do the trace plots support the numerical checks?</li>
+</ul>
+<p>Good sampling still needs a model check against observations.</p>
+<aside class="notes">
+<p>Optional reference only, not an extra debrief after the exercise. If needed, ask participants to name one visible feature alongside a numerical check. R-hat close to 1 and adequate bulk/tail ESS are encouraging; zero divergences alone is insufficient. For these four chains, R-hat &gt;1.01 or ESS &lt;400 are investigation guides, not automatic acceptance criteria. Instructor also checks treedepth, E-BFMI and Monte Carlo precision, including parameter-level lp__ diagnostics. No threshold memorisation or sampler repair is required. Now move from whether computation worked to whether this model can reproduce the observed quadrats.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="a-probability-still-allows-different-survivor-counts" class="slide level2" data-visibility="uncounted">
+<h2>A probability still allows different survivor counts</h2>
+<p><strong>Next question:</strong> how many of 20 new seedlings might survive?</p>
+
+<img data-src="slides_files/figure-revealjs/new-counts-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Both groups contain 20 seedlings. Density is the only condition that changes.</p>
+<aside class="notes">
+<p>Optional extension about predicting a new group. Omit from the main sequence. Both new-group prediction and posterior predictive checking are optional reference only. The core lecture ends with the exercise and a brief Day 3 preview. For each posterior pair, calculate p at each density and generate a Binomial(20,p) count. This incorporates uncertainty about p AND variation in counts given p. The saved fit is unchanged. Explain the two sources of uncertainty orally. This uses the same binomial generation as the optional PPC, but answers a different question about new groups rather than the observed quadrats.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
 </section>
 <section id="the-completed-model-in-stan" class="slide level2" data-visibility="uncounted">
 <h2>The completed model in Stan</h2>
@@ -986,6 +1042,30 @@ likelihood</p>
 </div></div>
 <aside class="notes">
 <p>Optional reference for the model recap. Do not ask participants to edit or compile it. The stored fit has the same seeded data, model name and prior specification.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="when-sampling-fails-investigate-before-interpreting" class="slide level2" data-visibility="uncounted">
+<h2>When sampling fails, investigate before interpreting</h2>
+<p>In the failed example:</p>
+<p><span class="math display">\log(H_i)\sim\mathcal{N}(\alpha_1+\alpha_2+\beta x_i,\sigma)</span></p>
+<p>Adding 10 to <span class="math inline">\alpha_1</span> and subtracting 10 from <span class="math inline">\alpha_2</span> gives the same prediction.</p>
+<ul>
+<li><strong>Revise:</strong> use one intercept for this model; review scales and priors.</li>
+<li><strong>Refit and check:</strong> inspect traces and numerical diagnostics again.</li>
+<li><strong>Then:</strong> interpret estimates and check predictions against observations.</li>
+</ul>
+<aside class="notes">
+<p>Optional reference for questions after the core flow. H is tree height in metres, x=log(DBH / 40 cm), and sigma is the residual SD on the log-height scale. The independent intercept priors are Normal(0,1000), beta has Normal(0,2.5), and sigma has a positive-constrained Normal(0,1) prior. The likelihood is unchanged by the offset, although the prior density need not be. The data alone cannot distinguish the two intercepts. Removing the redundancy addresses this example’s cause. No corrected refit is shown here; do not claim that a repair has already passed diagnostics. More iterations alone are not a general solution. Other failures need their own investigation (coding, scaling, priors, parameterisation and sampler settings). Return to the original CNDD fit for all following survival curves and exercises. Sampling checks do not establish ecological adequacy. A posterior predictive example is available in Optional reference, outside the core session. Source: https://mc-stan.org/docs/stan-users-guide/problematic-posteriors.html</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -1176,7 +1256,7 @@ s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
   <script src="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
   <script src="slides_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="slides_files/libs/revealjs/plugin/quarto-support/support.js"></script>
-  
+
 
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
@@ -1198,7 +1278,7 @@ s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
 'smaller': false,
- 
+
         // Display controls in the bottom right corner
         controls: true,
 
@@ -1360,7 +1440,7 @@ s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
         ]
       });
     </script>
-    
+
     <script>
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
@@ -1406,7 +1486,7 @@ s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
         });
         const isCodeAnnotation = (el) => {
           for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {                     
+            if (clz.startsWith('code-annotation-')) {
               return true;
             }
           }
@@ -1426,11 +1506,11 @@ s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
             button.setAttribute("data-bs-toggle", "tooltip");
             button.setAttribute("data-bs-placement", "left");
             button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button, 
-              { trigger: "manual", 
+            tooltip = new bootstrap.Tooltip(button,
+              { trigger: "manual",
                 customClass: "code-copy-button-tooltip",
                 offset: [0, -8]});
-            tooltip.show();    
+            tooltip.show();
           }
           setTimeout(function() {
             if (tooltip) {
@@ -1509,7 +1589,7 @@ s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
           }
             config['offset'] = [0,0];
             config['maxWidth'] = 700;
-          window.tippy(el, config); 
+          window.tippy(el, config);
         }
         const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
         for (var i=0; i<noterefs.length; i++) {
@@ -1568,6 +1648,6 @@ s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
       </script>
     <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
     <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
-    
+
 
 </body></html>
