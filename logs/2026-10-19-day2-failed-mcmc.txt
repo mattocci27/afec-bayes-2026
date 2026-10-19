@@ -1,0 +1,89 @@
+Day 2: failed MCMC example beside the sampling introduction
+
+Added actual post-warmup traces from day2_allo_bad, a comparison of stored
+diagnostics with CNDD, and an explanation of redundant intercepts and the
+revise/refit/check sequence. The failed fit is explicitly a separate Normal
+log-height regression, not a failed CNDD fit. No new inference was run.
+Allocated about three minutes within the existing 25-40 minute segment;
+shorten the posterior-path discussion/species preview if needed.
+
+Validation environment: local R 4.6.1, posterior 1.7.0, bayesplot 1.16.0,
+Quarto 1.10.19. Stored fits were generated with CmdStan 2.38.0.
+
+Commands:
+  RENV_CONFIG_SANDBOX_ENABLED=FALSE quarto render day2/slides.qmd
+  RENV_CONFIG_SANDBOX_ENABLED=FALSE Rscript R/check_classroom_materials.R
+
+Render passed (needed access to Quarto's cache outside the workspace).
+All 26 runnable participant chunks and all seven stored-fit checks passed.
+The failed fit's data were also checked against the seeded allometry data;
+course_fit now verifies the stored model name and matching data on load.
+Failed fit: maximum R-hat about 2.54, minimum bulk ESS 4.81, minimum tail ESS
+12.4, zero divergences, 3693 maximum-treedepth hits. It remains exempt from
+healthy-fit thresholds. The rendered trace image was visually inspected.
+No browser was available through the UI tool, so full slide overflow and
+browser layout remain unverified. renv reports the existing out-of-sync state;
+no dependencies were changed. The participant ZIP was not rebuilt.
+
+Technical references checked:
+  https://mc-stan.org/learn-stan/diagnostics-warnings.html
+  https://mc-stan.org/docs/stan-users-guide/problematic-posteriors.html
+
+Follow-up: enlarged both trace plots’ axis/strip/legend text to 24-26 pt.
+Moved the numerical diagnostic comparison to Optional reference, after the core
+exercise and main lecture. The core now proceeds from the two trace plots to
+investigation/remedy and then survival curves, without introducing diagnostic
+terminology through a numerical table. Allow about two minutes for this visual
+comparison. Updated cross-references and instructor notes; re-rendered Day 2.
+
+Follow-up: inserted a two-minute MCMC idea slide before the CNDD paired-draw
+exploration. Reuses the existing main.qmd MH GIFs without running targets.
+Checked R/mh.R: the right panel contains log unnormalised density, not a
+histogram; captions/notes identify this and the separate Beta(111,91) target
+and discrete proposal grid. Explains repeated values on rejection, visit
+frequencies, and distribution versus peak. Distinguishes this illustration
+from Stan HMC/NUTS. Preserves the exercise start by shortening recap/path talk.
+R 4.6.1 / Quarto 1.10.19 render passed; verified slide order and both local
+GIF references. Full browser layout remains unverified.
+
+Follow-up: revised slides 10-13 to state the computational purpose before
+introducing MCMC. Flow: seek the posterior for coefficients -> use simulation
+to approximate it -> record CNDD pairs -> check exploration before predictions.
+The model slide explicitly states this approach. Notes connect the Day 1 grid
+to simulated draws without claiming that simulation identifies true parameters
+or that a grid is impossible for this regression. Render passed with the same
+R/Quarto versions; verified the four slide positions and transition text.
+No model/data changes or new inference. Browser layout remains unverified.
+
+Follow-up: slide 10 explicitly labels likelihood (green), prior (purple),
+and unknown coefficients alpha/beta (orange). The logit relation is separately
+labelled Link. Observed n_i/s_i/x_i and derived p_i are distinguished.
+Equations, priors and stored model are unchanged. Render passed; checked
+labels/colour markup and absence of KaTeX errors in the generated slide.
+Full browser layout remains unverified.
+
+Follow-up: split the cluttered model slide into two consecutive slides.
+Slide 10, Our model: seedling survival, pairs observed data with two large
+equations. Slide 11, What are we estimating?, vertically presents parameters,
+independent Normal(0,2.5^2) priors, and posterior. Normal variance notation here
+is explicitly distinguished from Stan SD notation in instructor notes; the
+model and actual priors are unchanged. Only alpha/beta are orange; other content
+is dark. CSS is scoped to these two slide IDs. No unrelated slide source changed.
+Rendered with local R 4.6.1 and Quarto 1.10.19. Verified 27 counted slides and
+consecutive navigation. Both slides visually inspected in Arc at presentation
+size: equations, whitespace and takeaways fit without overflow.
+
+Follow-up: redesigned only slide 11 as aligned prior/posterior columns with
+a subtle Data arrow, prominent unknown coefficients, separate alpha/beta prior
+equations, and an independence sentence. Shortened takeaway as requested.
+CSS scoped entirely to slide 11. Local Quarto render passed; browser inspection
+in Arc confirmed large equations, aligned headings, comfortable spacing and no
+overflow. Compared rendered section contents against the pre-change HTML:
+only what-are-we-estimating changed; every other slide section is identical.
+
+Follow-up: restored the Day 1 likelihood connection with one sentence below
+slide 10 equations and a via the likelihood label under slide 11 Data arrow.
+Notes explain the likelihood for fixed observations using the binomial model
+and logit relation together. Widened the central arrow space slightly to fit
+the label. Render passed; both slides visually checked in Arc without overflow.
+Compared rendered sections: only slides 10 and 11 changed.

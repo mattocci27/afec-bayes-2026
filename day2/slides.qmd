@@ -32,11 +32,15 @@ Outcomes: read a survival curve and uncertainty at low/high density; distinguish
 uncertainty about p from future binomial counts; compare observations with replicated
 data. Understand the model, interpret results and distinguish sampling checks
 from checks against observations.
-0-10 review/question; 10-25 binomial/logit/Normal scale illustration; 25-40 model recap/MCMC/sampling purpose/draw-to-curve bridge;
+0-10 review/question; 10-25 binomial/logit/prior-implied survival curves; 25-40 model recap/MCMC/sampling purpose/draw-to-curve bridge;
 40-55 ONE exercise (10 compare/interpret + 5 debrief); 55-70 prediction/check discussion;
 70-80 interpretation/species bridge; optional brms overview up to 3 min; 80-85 research reflection; 85-90 questions/buffer.
 No R or GLM prerequisites. Core uses supplied draws/figures; code execution is optional. brms fitting is optional instructor reference.
-If delayed, shorten MCMC mechanics and species preview; Stan code is optional. Preserve the exercise debrief and checking.
+Allow about 2 minutes within 25-40 for the MH idea, and about 2 minutes for the
+visual failed-chain comparison and response. Keep the model recap and joint-path
+discussion brief so the exercise still begins at 40 minutes.
+Numerical diagnostic comparisons are optional reference after the exercise or for questions.
+If delayed, shorten the joint-posterior path discussion and species preview; Stan code is optional. Preserve the failed-chain contrast, exercise debrief and checking.
 -->
 
 ```{r setup, include=FALSE}
@@ -44,6 +48,7 @@ source(here::here("R/slides_setup.R"))
 ndd <- make_ndd_data()
 fit <- course_fit("day2_ndd")
 draws <- fit$draws
+bad_fit <- course_fit("day2_allo_bad")
 low <- plogis(draws$alpha-draws$beta)
 high <- plogis(draws$alpha+draws$beta)
 replicates <- cndd_replicates(draws,ndd,seed=20261023)
@@ -117,7 +122,7 @@ teaching data, not the paper's observations or fitted results.
 
 ```{r observed-data, fig.width=11, fig.height=4.7}
 ggplot(ndd,aes(cons,suv/n,size=n))+geom_point(alpha=.7)+
-  labs(x="Conspecific density (scaled)",y="Observed survival\nproportion",size="Seedlings")
+  labs(x="Conspecific density",y="Observed survival\nproportion",size="Seedlings")
 ```
 
 Which way would you expect the fitted curve to go?
@@ -150,113 +155,354 @@ these assumptions. We return to this during model checking.
 link_data <- tibble(x=seq(-3,3,length.out=101)) |>
   mutate(z=qlogis(.3)-.8*x,p=plogis(z))
 p1 <- ggplot(link_data,aes(x,z))+geom_line(linewidth=1.4,colour=col_like)+
-  labs(x="Density (scaled)",y="logit(p)")
+  labs(x="Conspecific density",y="logit(p)")
 p2 <- ggplot(link_data,aes(x,p))+geom_line(linewidth=1.4,colour=col_like)+
-  ylim(0,1)+labs(x="Density (scaled)",y="Survival\nprobability")
+  ylim(0,1)+labs(x="Conspecific density",y="Survival\nprobability")
 p1+p2
 ```
 
 $$\operatorname{logit}(p_i)=\alpha+\beta x_i,\qquad
 p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)$$
 
+::: small
+$$\operatorname{logit}(p)=\log\!\left(\frac{p}{1-p}\right),\qquad
+\operatorname{logit}^{-1}(z)=\frac{1}{1+e^{-z}}$$
+:::
+
 ::: notes
 These are illustrative generating values, not posterior estimates.
 The link keeps probabilities between zero and one. Explain the shapes and the
 sign of the slope. No derivation, odds-ratio exercise or syntax memorisation.
+Here log is the natural logarithm (0<p<1); z can be any real number.
+The superscript -1 denotes the inverse function, not a reciprocal.
 Source: Stan User's Guide, regression models.
 :::
 
-## Prior scale: a familiar Normal regression
-
-::: columns
-::: {.column width="58%"}
-```{r normal-prior-scale, fig.width=8.5, fig.height=5}
-plot_normal_prior_scale() + labs(x="x", y="y")
-```
-:::
-::: {.column width="42%"}
-
-$$y_i\sim\mathcal{N}(a x_i+b,\sigma)$$
-
-For these units and ranges, would a slope of 100 make sense?
-
-A candidate slope prior:
-
-$$a\sim\mathcal{N}(0,2.5)$$
-
-The second argument is an SD.
-:::
-:::
-
-::: notes
-Use the same scale intuition as main.qmd, for about 3 minutes within 10-25.
-This is a continuous-response illustration, not another fitted analysis.
-Judge the scale from the measurement units and plausible range, without using
-an observed direction to choose a positive slope prior. A prior with SD 10000
-permits much more extreme lines and should not be called assumption-free.
-Whether SD 2.5 is weakly informative depends on the units. The illustrative blue
-line and label both use slope 100, correcting the source example's mismatch.
-:::
-
-## The same scale question for CNDD
-
-$$\operatorname{logit}(p_i)=\alpha+\beta x_i$$
-
-- Density is measured in standard-deviation units.
-- The coefficients describe change on the logit scale.
-- Their priors imply survival curves on the probability scale.
-
-Would those curves give plausible survival probabilities in this habitat?
-
-::: notes
-Return explicitly from Normal observations to the binomial survival model.
-The numerical SD 2.5 has a different meaning across these models. In the saved
-CNDD fit both alpha and beta independently have Normal(0,2.5) priors.
-Use this as a short connection. Detailed CNDD prior-curve comparisons are optional.
-No independent allometry fit or extra exercise is introduced.
-:::
-
-## Our model: what are we estimating?
+## Why not use a flat prior? {#flat-prior-side-by-side}
 
 ::: columns
 ::: {.column width="55%"}
-$$s_i \sim \operatorname{Binomial}(n_i,p_i)$$
-
-$$\operatorname{logit}(p_i)=\alpha+\beta x_i$$
-
-$$\alpha,\beta\;\overset{\mathrm{ind}}{\sim}\;\mathcal{N}(0,2.5)$$
+```{r flat-prior-survival-side-by-side, fig.width=8.8, fig.height=5.8, fig.alt="The same observed quadrat survival proportions and illustrative slopes as the preceding slide: a green gradual decline for beta=-0.8 and an orange dashed near-step for beta=-100. Point area represents seedling count."}
+prior_density_grid <- seq(-3,3,length.out=2401)
+slope_examples <- crossing(
+  x=prior_density_grid,
+  effect=factor(c("Previous example","Extreme"),
+                levels=c("Previous example","Extreme"))
+) |>
+  mutate(beta=if_else(effect=="Previous example",-.8,-100),
+         logit_p=qlogis(.3)+beta*x, p=plogis(logit_p))
+effect_colours <- c("Previous example"=col_like,"Extreme"=col_post)
+effect_labels <- expression(paste("Previous example: ",beta==-0.8),
+                            paste("Extreme: ",beta==-100))
+effect_labels_side <- expression(beta==-0.8,beta==-100)
+ggplot(slope_examples,aes(x,p,colour=effect,linetype=effect)) +
+  geom_vline(xintercept=0,colour="grey80",linewidth=.5) +
+  geom_point(data=ndd,aes(cons,suv/n,size=n),inherit.aes=FALSE,
+             shape=21,fill="grey60",colour="grey30",alpha=.65,stroke=.4) +
+  geom_line(linewidth=1.5) +
+  scale_colour_manual(values=effect_colours,labels=effect_labels_side,name=NULL) +
+  scale_linetype_manual(values=c(1,2),labels=effect_labels_side,name=NULL) +
+  scale_size_area(max_size=6,breaks=c(5,10,20),name="Seedlings") +
+  scale_x_continuous(breaks=seq(-3,3)) +
+  scale_y_continuous(limits=c(0,1),breaks=c(0,.25,.5,.75,1)) +
+  labs(x="Conspecific density",y="Survival\nprobability") +
+  guides(colour=guide_legend(order=1),linetype=guide_legend(order=1),
+         size=guide_legend(order=2)) +
+  theme(legend.position="bottom",legend.key.width=grid::unit(1.2,"cm"),
+        legend.text=element_text(size=18),legend.title=element_text(size=18))
+```
 
 ::: small
-The Normal priors use SD 2.5.
+**Points:** observed proportions.\
+**Curves:** illustrative, not fitted.
 :::
 :::
+
 ::: {.column width="45%"}
 
-**Observed:** seedlings, survivors and density in each quadrat.
 
-**Unknown:** $\alpha$ and $\beta$, which determine the survival curve.
+- Uninformative priors (e.g. $\beta \sim N(0, 10^8)$) plausible and extreme slopes almost equally.
+- Weakly-informative priors (e.g. $\beta \sim N(0, 2.5^2)$) assign much less probability to extreme slopes.
 
-Which coefficient pairs are plausible after seeing the data?
+
 :::
+:::
+
+::: notes
+Allow about 2 minutes, continuing directly from slide 7. These are illustrative
+curves, not fits. Keep alpha=logit(0.3), x in [-3,3] SD units, the binomial
+observation model and the link fixed. The green curve is exactly slide 7's
+alpha and beta. The dashed orange curve changes only beta to -100.
+At x=0 both curves have p=0.3. Negative scaled density means below-average
+density, not a negative number of neighbours. The large logit slope becomes
+a near-step on the probability scale: the 99%-to-1% transition spans
+(qlogis(.99)-qlogis(.01))/100 = 0.0919024 SD of density.
+It is the abrupt transition across such a small density change that we judge
+implausible for this teaching setting, not merely that p approaches 0 or 1.
+Some ecological thresholds may be sharp; this is a contextual judgment, not a
+universal prohibition on steep slopes or a conclusion estimated from these data.
+Ask the before-data question first: would such an almost all-or-none change
+across a tiny density difference be ecologically credible in this setting?
+Then use the grey observations to show the additional evidence from the data.
+
+The points reuse ndd=make_ndd_data() from the preceding data slide: all 60
+simulated quadrats, with observed survival proportions suv/n. Point AREA is
+proportional to n (5-20 seedlings); larger samples give more precise proportions
+at a fixed underlying p. No jitter, filtering or new data were introduced.
+Individual proportions fluctuate under the binomial model; points need not lie
+on a probability curve. The two curves are not posterior estimates or fitted
+alternatives. The green curve reuses the illustrative generating values; do not
+claim its visual agreement is independent validation of the model.
+
+For these observations the extreme curve also receives a much smaller binomial
+likelihood: it predicts near-certain survival for many quadrats with deaths and
+near-zero survival for many quadrats with survivors. These are count likelihoods,
+not unweighted distances from the plotted proportions. The likelihood and prior
+make distinct contributions. The observed mismatch is evidence from these data;
+it is not the justification for choosing a prior after looking at the same data.
+A flat prior leaves the likelihood to do the penalizing here. Weakly informative
+priors can express the separate ecological judgment before observing outcomes,
+which is especially useful when data are sparse. Continue with the full
+model recap and the independent coefficient priors on the following slides.
+
+Flat on beta means constant prior density: equal-width intervals around -0.8
+and -100 receive the same weight, holding alpha fixed. It does not mean that
+survival probabilities are uniform. Do not confuse density with a point
+probability. A flat prior on the entire real line is improper, but that is not
+the teaching argument here. Bounded flat priors can be proper, and flat priors
+can be appropriate in some settings. The point is that flatness does not
+automatically encode sensible predictions. Next ask how to retain uncertainty
+while giving extreme effects less prior weight.
+:::
+
+## Our model: seedling survival
+
+<style>
+#our-model-seedling-survival h2,
+#what-are-we-estimating h2 { color: #222; }
+#our-model-seedling-survival .model-columns { margin-top: 1.4em; }
+#our-model-seedling-survival .model-equations { font-size: 1.2em; }
+#our-model-seedling-survival .model-equations .math.display { margin: 0.8em 0; }
+#our-model-seedling-survival .model-takeaway { margin-top: 1.5em; text-align: center; }
+#what-are-we-estimating .inference-flow { margin: 0.8em auto 0; text-align: center; }
+#what-are-we-estimating .inference-step { margin: 0.6em 0; }
+#what-are-we-estimating .inference-step p { margin: 0.2em 0; }
+#what-are-we-estimating .step-label { font-size: 0.75em; color: #333; }
+#what-are-we-estimating .posterior-step { font-size: 1.2em; }
+#what-are-we-estimating .model-takeaway { margin-top: 0.8em; text-align: center; }
+</style>
+
+::: {.columns .model-columns}
+::: {.column width="42%"}
+**Observed data**
+
+- $n_i$: number of seedlings
+- $s_i$: number of survivors
+- $x_i$: scaled conspecific density
+:::
+::: {.column width="58%"}
+**Statistical model**
+
+::: model-equations
+$$s_i \sim \operatorname{Binomial}(n_i,p_i)$$
+
+$$\operatorname{logit}(p_i)=\textcolor{#d95f02}{\alpha}+\textcolor{#d95f02}{\beta}\,x_i$$
+:::
+
+::: small
+With the observed data fixed, this model defines the **likelihood** for $\alpha$ and $\beta$.
+:::
+:::
+:::
+
+::: model-takeaway
+Survival probability depends on conspecific density.
 :::
 
 ::: notes
 25-40 minutes: model recap, MCMC introduction, sampling checks and curve interpretation.
-Alpha is log-odds at reference density x=0; beta changes log-odds per one SD of density.
-Neither coefficient is itself a probability or a percentage reduction.
-The likelihood assumes common p and conditional independence within each quadrat.
-The two Normal priors are independent and match stan/logit_reg.stan and the stored fit.
+Focus on the observed/unknown distinction: n_i, s_i and x_i are observed in each
+quadrat. The orange alpha and beta determine the survival curve. p_i is calculated
+from those coefficients and x_i. The likelihood assumes common p and conditional
+independence within each quadrat. Introduce the unknowns and priors on the next slide.
+Connect to Day 1: hold the observed data fixed and compare coefficient pairs.
+The binomial probabilities across quadrats, with p_i supplied by the logit
+relation, define the likelihood as a function of alpha and beta. The link
+equation alone is not the likelihood.
 :::
 
-## How do we get values of $\alpha$ and $\beta$?
+## What are we estimating?
+
+<style>
+#what-are-we-estimating .unknown-parameters { margin: 0.6em 0 0; font-size: 1.05em; }
+#what-are-we-estimating .updating-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 160px minmax(0, 1fr);
+  align-items: center;
+  min-height: 360px;
+  margin: 0.5em 0;
+}
+#what-are-we-estimating .updating-panel {
+  text-align: center;
+  height: 300px;
+  display: flex;
+  flex-direction: column;
+}
+#what-are-we-estimating .updating-heading { font-size: 0.8em; font-weight: bold; color: #222; }
+#what-are-we-estimating .updating-heading p { margin: 0 0 0.5em; }
+#what-are-we-estimating .updating-body {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 1.12em;
+}
+#what-are-we-estimating .updating-body p { margin: 0.2em 0; }
+#what-are-we-estimating .updating-body .katex-display { margin: 0.3em 0; }
+#what-are-we-estimating .independent-note { font-size: 0.68em; }
+#what-are-we-estimating .posterior-body { font-size: 1.3em; }
+#what-are-we-estimating .data-arrow { text-align: center; color: #666; }
+#what-are-we-estimating .data-arrow p { margin: 0; }
+#what-are-we-estimating .data-label { font-size: 0.65em; }
+#what-are-we-estimating .data-mechanism { font-size: 0.6em; line-height: 1.25; }
+#what-are-we-estimating .arrow-symbol { font-size: 1.4em; line-height: 1; }
+#what-are-we-estimating .posterior-takeaway { text-align: center; margin-top: 0.5em; }
+</style>
+
+::: unknown-parameters
+**Unknown parameters:** $\textcolor{#d95f02}{\alpha,\beta}$
+:::
+
+::: updating-layout
+::: updating-panel
+::: updating-heading
+Prior — Before seeing data
+:::
+
+::: updating-body
+$$\textcolor{#d95f02}{\alpha}\sim\operatorname{Normal}(0,2.5^2)$$
+
+$$\textcolor{#d95f02}{\beta}\sim\operatorname{Normal}(0,2.5^2)$$
+
+::: independent-note
+The priors are independent.
+:::
+:::
+:::
+
+::: data-arrow
+::: data-label
+Data
+:::
+
+::: arrow-symbol
+→
+:::
+
+::: data-mechanism
+via the\
+likelihood
+:::
+:::
+
+::: updating-panel
+::: updating-heading
+Posterior — After seeing data
+:::
+
+::: {.updating-body .posterior-body}
+$$p(\textcolor{#d95f02}{\alpha,\beta}\mid\mathrm{data})$$
+:::
+:::
+:::
+
+::: posterior-takeaway
+We use simulation to approximate the posterior.
+:::
+
+::: notes
+Alpha and beta are the unknown coefficients. Alpha is log-odds at reference
+density x=0; beta changes log-odds per one SD of density. Neither coefficient
+is itself a probability or a percentage reduction.
+Here Normal(0,2.5^2) uses a variance as its second argument: SD is 2.5.
+The two independent priors are unchanged and match stan/logit_reg.stan and the
+stored fit, whose normal(0,2.5) syntax uses an SD. Do not square the Stan SD.
+Read left to right: the priors describe uncertainty before seeing data; the
+observed data update them to the joint posterior for alpha and beta. Data enter
+the update through the likelihood from the preceding model slide. Independence
+is a prior assumption, not a claim that the posterior coefficients are independent.
+Day 1 calculated a posterior over a grid of p values; today we approximate the
+posterior for pairs using simulated draws. Do not imply simulation finds true
+parameters or that a grid is impossible for this two-parameter model.
+The next slide introduces the sampling idea.
+:::
+
+## Approximate the posterior using simulation
+
+**MCMC** generates a sequence of parameter values. First, an illustration with one probability $p$.
+
+::: columns
+::: {.column width="50%"}
+![](../images/mh_trace.gif){height=320 fig-alt="Two illustrative Metropolis chains updating a probability p over time."}
+:::
+::: {.column width="50%"}
+![](../images/mh_post.gif){height=320 fig-alt="The same two chains moving on the log unnormalised target density."}
+:::
+:::
+
+::: small
+Left: recorded values over time. Right: positions on the log unnormalised posterior.
+:::
+
+- Propose a move; accept or reject it. If rejected, record the current value again.
+- Repeat: with adequate exploration, visit frequencies approximate posterior probabilities.
+
+**Many saved values describe uncertainty about the parameter.**
+
+::: small
+Stan uses HMC/NUTS; this example illustrates the sampling idea.
+:::
+
+::: notes
+About two minutes. Begin with the purpose: we use simulation to obtain draws
+that represent the posterior and its uncertainty. MCMC is the method used here
+to generate those draws. MCMC means Markov chain Monte Carlo. Ask participants to follow
+one coloured chain: a recorded step becomes one draw. A rejected proposal keeps
+the current value, so repeated values must be counted too. The two starting
+values are 0.2 and 0.8. Do not derive the acceptance probability or compare MCMC
+algorithms here. With the symmetric proposals used in this illustration, moves
+to higher target density are accepted; some moves to lower density are accepted
+as well. This helps explore a distribution rather than only climbing to a peak.
+
+These are the existing main.qmd teaching animations, generated by R/mh.R with
+seed 123, 200 steps per chain and symmetric proposals of +/-0.01. Their target
+is proportional to p^110 * (1-p)^90, corresponding to a Beta(111,91) density;
+it is a separate probability illustration, not today's CNDD fit or Day 1's data.
+The proposal grid gives a discrete approximation to that continuous target.
+The right GIF's axis says 'Posterior', but its stored values are LOG unnormalised
+density (110*log(p)+90*log(1-p)); the visible caption makes this explicit.
+It is not a histogram, a normalised posterior density or a plot of visit counts.
+Explain that a histogram of many adequately explored retained values would
+approximate the distribution. Neither this short animation nor overlapping
+chains proves adequate exploration. The grey initial segment illustrates
+initial movement; the actual CNDD plots that follow show post-warmup draws.
+
+Transition: yesterday we represented uncertainty in one probability; today a
+draw is a pair (alpha,beta). Stan uses HMC/NUTS, not this random-walk proposal.
+The next slide shows actual saved CNDD pairs; then we check their exploration.
+Source: https://mc-stan.org/docs/reference-manual/mcmc.html
+:::
+
+## For CNDD, each draw is a coefficient pair
 
 ::: columns
 ::: {.column width="35%"}
-**Day 1:** values of $p$.
+**One parameter:** save a value of $p$.
 
-**Today:** pairs $(\alpha,\beta)$.
+**Our CNDD model:** save a pair $(\alpha,\beta)$ at each step.
 
-**MCMC** explores the posterior by moving through parameter values.
+Many paired draws describe uncertainty about both coefficients together.
 :::
 ::: {.column width="65%"}
 ```{r posterior-exploration, fig.width=8, fig.height=4.1}
@@ -273,7 +519,7 @@ ggplot(ndd_draw_table, aes(alpha,beta)) +
 :::
 :::
 
-We run several chains to help check the exploration.
+Before interpreting these draws, did the simulation explore the posterior adequately?
 
 ::: notes
 MCMC means Markov chain Monte Carlo. Stan uses an HMC-based MCMC sampler.
@@ -282,14 +528,27 @@ The grey cloud is the actual stored joint posterior, not a schematic or new fit.
 The orange path joins 25 consecutive post-warmup draws from one chain; it does not
 show initialization or warmup and is not an optimization trajectory.
 Ask why we might want several chains before moving to their traces.
+This applies the preceding simulation idea to our actual regression; do not
+restart the explanation of why MCMC is used. Each pair will later give one
+survival curve, so the draws need to be reliable before making predictions.
 No acceptance-rule or HMC derivation is required.
 Source: https://mc-stan.org/docs/reference-manual/mcmc.html
 :::
 
-## Can we use these draws?
+## Did the simulation explore the posterior?
+
+Compare several chains before using the draws for survival predictions.
 
 ```{r trace, fig.width=12, fig.height=3.9}
-bayesplot::mcmc_trace(draws,pars=c("alpha","beta"))
+trace_slide_theme <- theme(
+  axis.title=element_text(size=26),
+  axis.text=element_text(size=24),
+  strip.text=element_text(size=26),
+  legend.title=element_text(size=24),
+  legend.text=element_text(size=24),
+  legend.position="bottom"
+)
+bayesplot::mcmc_trace(draws,pars=c("alpha","beta")) + trace_slide_theme
 ```
 
 - Do the coloured chains explore the same range?
@@ -300,36 +559,63 @@ First identify the horizontal axis (saved sampling step), vertical axis (coeffic
 value), and colours (chains). These are the actual post-warmup stored draws.
 Look for persistent drift or between-chain offsets, rather than interpreting any
 single jump. Overlap is encouraging but does not establish convergence by itself.
-Numerical diagnostics complement this plot on the next slide.
+The instructor also checks numerical diagnostics; overlap alone is insufficient.
+The diagnostic comparison is in Optional reference for later questions.
 Source: https://mc-stan.org/learn-stan/diagnostics-warnings.html
 :::
 
-## Read the sampling checks together
+## What does failed exploration look like?
 
-```{r diagnostic-numbers}
-sampling_checks <- course_diagnostics(fit)
-tibble(
-  Check=c("R-hat (maximum)","ESS (minimum bulk / tail)","Divergences"),
-  Result=c(sprintf("%.3f",sampling_checks$max_rhat),
-           sprintf("%.0f / %.0f",sampling_checks$min_bulk_ess,
-                   sampling_checks$min_tail_ess),
-           as.character(sampling_checks$divergent)),
-  Question=c("Do chains agree?","Enough sampling information?","Did sampling struggle?")
-) |> knitr::kable(format="html") |>
-  kableExtra::kable_styling(font_size=27)
+**Teaching failure:** tree-height regression with two intercepts (a separate model).
+
+```{r failed-trace, fig.width=12, fig.height=3.9}
+bayesplot::mcmc_trace(bad_fit$draws,pars=c("alpha1","alpha2")) + trace_slide_theme
 ```
 
-These check the **sampling**. We still need to check the model against observations.
+- The chains stay in different regions and move slowly.
+- Would you trust a mean or interval calculated from these draws?
 
 ::: notes
-Use these actual values with the traces; no single diagnostic is sufficient.
-R-hat compares within- and between-chain behavior. ESS accounts for dependence
-among draws; bulk and tail ESS address different aspects of the distribution.
-Divergences after warmup require investigation rather than being assumed harmless.
-Do not turn this into a threshold-memorisation task. Before class, also inspect
-parameter-level diagnostics, treedepth, E-BFMI and accuracy for quantities of interest.
-The full stored-fit summary is in the appendix and the result sheet.
-Source: https://mc-stan.org/learn-stan/diagnostics-warnings.html
+Spend about one minute comparing this with the preceding CNDD traces. These are
+actual post-warmup draws from fits/day2_allo_bad.rds, not altered CNDD draws or a
+schematic. Do not use this fit for ecological interpretation.
+The response is log(height); x is log(DBH / reference DBH). Unlike the binomial
+CNDD model, this is a Normal regression. Both models use MCMC for coefficients,
+so the same question applies: have the chains explored the posterior adequately?
+Here the deliberately redundant intercepts, each with a Normal(0,1000) prior
+(SD 1000), create a difficult long ridge. The data inform their sum, not the two
+intercepts separately. Proper priors make the posterior proper, but these very
+broad priors do not make this run reliable. Explain the remedy on the next slide.
+Keep the first comparison visual; numerical details are in Optional reference.
+Source: https://mc-stan.org/docs/stan-users-guide/problematic-posteriors.html
+:::
+
+## When sampling fails, investigate before interpreting
+
+In the failed example:
+
+$$\log(H_i)\sim\mathcal{N}(\alpha_1+\alpha_2+\beta x_i,\sigma)$$
+
+Adding 10 to $\alpha_1$ and subtracting 10 from $\alpha_2$ gives the same prediction.
+
+- **Revise:** use one intercept for this model; review scales and priors.
+- **Refit and check:** inspect traces and numerical diagnostics again.
+- **Then:** interpret estimates and check predictions against observations.
+
+::: notes
+About one minute. H is tree height in metres, x=log(DBH / 40 cm), and sigma is
+the residual SD on the log-height scale. The independent intercept priors are
+Normal(0,1000), beta has Normal(0,2.5), and sigma has a positive-constrained
+Normal(0,1) prior. The likelihood is unchanged by the offset, although the prior
+density need not be. The data alone cannot distinguish the two intercepts.
+Removing the redundancy addresses this example's cause. No corrected refit is
+shown here; do not claim that a repair has already passed diagnostics. More
+iterations alone are not a general solution. Other failures need their own
+investigation (coding, scaling, priors, parameterisation and sampler settings).
+Return to the original CNDD fit for all following survival curves and exercises.
+Sampling checks do not establish ecological adequacy: posterior predictive
+checking is still required later in this session.
+Source: https://mc-stan.org/docs/stan-users-guide/problematic-posteriors.html
 :::
 
 ## One coefficient pair gives one survival curve
@@ -337,10 +623,10 @@ Source: https://mc-stan.org/learn-stan/diagnostics-warnings.html
 $$p(x)=\operatorname{logit}^{-1}(\alpha+\beta x)$$
 
 ```{r curve-pairs-setup, include=FALSE}
-# Four actual paired draws, chosen across beta's central range for illustration.
-curve_indices <- order(draws$beta)[round(seq(.1,.9,length.out=4)*(nrow(draws)-1))+1L]
-curve_pairs <- as_tibble(draws)[curve_indices,c("alpha","beta")] |>
-  mutate(Draw=LETTERS[1:4],.before=1)
+# Show the first four saved paired draws; the table continues beyond this excerpt.
+curve_pairs <- as_tibble(draws) |>
+  slice_head(n=4) |> select(alpha,beta) |>
+  mutate(Draw=1:4,.before=1)
 curve_examples <- curve_pairs |>
   crossing(density=seq(min(ndd$cons),max(ndd$cons),length.out=101)) |>
   mutate(p=plogis(alpha+beta*density))
@@ -349,7 +635,9 @@ curve_examples <- curve_pairs |>
 ::: columns
 ::: {.column width="30%"}
 ```{r curve-pairs-table}
-curve_pairs |> mutate(across(c(alpha,beta),~round(.x,3))) |>
+curve_pairs |>
+  mutate(across(c(alpha,beta),~sprintf("%.3f",.x)), Draw=as.character(Draw)) |>
+  bind_rows(tibble(Draw="⋮",alpha="⋮",beta="⋮")) |>
   knitr::kable(format="html",col.names=c("Draw","α","β")) |>
   kableExtra::kable_styling(font_size=23,full_width=FALSE)
 ```
@@ -359,7 +647,7 @@ curve_pairs |> mutate(across(c(alpha,beta),~round(.x,3))) |>
 ggplot(curve_examples,aes(density,p,group=Draw)) +
   geom_line(linewidth=1.2,colour="grey40") +
   scale_y_continuous(limits=c(0,1)) +
-  labs(x="Conspecific density (scaled)",y="Survival\nprobability")
+  labs(x="Conspecific density",y="Survival\nprobability")
 ```
 :::
 :::
@@ -368,9 +656,11 @@ Four possible curves for the **same survival relationship**.
 
 ::: notes
 Each table row supplies both coefficients for one curve. The displayed
-coefficients are rounded, but curves use their full precision. Rows are selected
-actual paired draws at four spaced beta ranks between its 10th and 90th
-percentiles, not independently chosen alpha and beta values. All curves use the
+coefficients are rounded, but curves use their full precision. Rows are the first
+four saved paired draws, not independently chosen alpha and beta values. The
+vertical ellipses indicate that the stored draw table continues; they are display
+labels, not extra draws. These four rows need not span the posterior range.
+All curves use the
 same grey: these are alternative draws for the same relationship. The later
 species preview uses different colours for different species.
 The next slide shows 100 draws before summarising ALL stored draws as a band.
@@ -389,7 +679,7 @@ curve_sample <- as_tibble(draws) |>
 ggplot(curve_sample,aes(density,p,group=.draw)) +
   geom_line(colour="grey40",alpha=.2,linewidth=.6) +
   scale_y_continuous(limits=c(0,1)) +
-  labs(x="Conspecific density (scaled)",y="Survival\nprobability")
+  labs(x="Conspecific density",y="Survival\nprobability")
 ```
 
 Each curve comes from one posterior draw.
@@ -408,6 +698,7 @@ uncertainty about p. The next slide uses ALL stored draws to calculate pointwise
 
 ```{r fitted-curve, fig.width=12, fig.height=4.3}
 plot_cndd(draws,ndd) +
+  labs(x="Conspecific density") +
   labs(y="Survival\nprobability",
        subtitle="Line: posterior median. Band: 95% pointwise interval for p.")
 ```
@@ -502,6 +793,7 @@ Source: https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.ht
 
 ```{r check-pattern, fig.width=12, fig.height=3.9}
 plot_cndd_check(replicates,ndd) +
+  labs(x="Conspecific density") +
   labs(y="Survival\nproportion",
        subtitle="Open: observed. Orange: 95% predictive intervals.")
 ```
@@ -537,7 +829,7 @@ each quadrat. Discuss what unmeasured shared conditions would imply.
 ## Tomorrow: species may differ
 
 ```{r species-preview, fig.width=10, fig.height=4.1}
-plot_cndd_species()
+plot_cndd_species() + labs(x="Conspecific density")
 ```
 
 Some species have few seedlings. How can we estimate their relationships?
@@ -583,6 +875,49 @@ Optional reference for the model recap. Do not ask participants to edit or compi
 The stored fit has the same seeded data, model name and prior specification.
 :::
 
+
+## Read the sampling checks together {visibility="uncounted"}
+
+Compare chain agreement (R-hat), sampling information (ESS), and sampler warnings.
+
+```{r diagnostic-numbers}
+sampling_checks <- course_diagnostics(fit)
+failed_checks <- course_diagnostics(bad_fit)
+format_checks <- function(x) c(
+  sprintf("%.3f",x$max_rhat),
+  sprintf("%.0f / %.0f",x$min_bulk_ess,x$min_tail_ess),
+  as.character(x$divergent),
+  as.character(x$max_treedepth)
+)
+tibble(
+  Check=c("R-hat (maximum)","ESS (minimum bulk / tail)","Divergences",
+          "Maximum treedepth hits"),
+  CNDD=format_checks(sampling_checks),
+  `Failed example`=format_checks(failed_checks)
+) |> knitr::kable(format="html") |>
+  kableExtra::kable_styling(font_size=27)
+```
+
+**Zero divergences does not guarantee reliable sampling.** Read the traces and numbers together.
+
+::: notes
+Optional instructor reference after the core exercise or in response to questions.
+Introduce each check in words before showing its values. Revisit both trace plots
+with this table; no single diagnostic is sufficient. Do not add this table as a
+required participant task or interrupt the first draw-to-curve explanation.
+R-hat compares within- and between-chain behavior. ESS accounts for dependence
+among draws; bulk and tail ESS address different aspects of the distribution.
+Divergences after warmup require investigation rather than being assumed harmless.
+Do not turn this into a threshold-memorisation task. Before class, also inspect
+parameter-level diagnostics, treedepth, E-BFMI and accuracy for quantities of interest.
+The failed run has high R-hat, very small ESS and many maximum-treedepth hits,
+despite zero divergences. Treedepth hits indicate the trajectory-length limit was
+reached; they are not divergent transitions. Do not simply increase the limit
+without investigating the model. These are different models/data, so the table
+illustrates warning patterns, not a controlled comparison of sampler settings.
+The full CNDD stored-fit summary is in the appendix and the result sheet.
+Source: https://mc-stan.org/learn-stan/diagnostics-warnings.html
+:::
 
 ## Full computation diagnostics {visibility="uncounted"}
 
@@ -636,7 +971,7 @@ prior_lines <- tibble(curve=1:30,alpha=rnorm(30,0,2.5),beta=rnorm(30,0,2.5)) |>
   crossing(density=seq(-2,2,length.out=81)) |>
   mutate(p=plogis(alpha+beta*density))
 ggplot(prior_lines,aes(density,p,group=curve))+geom_line(alpha=.4,colour=col_prior)+
-  ylim(0,1)+labs(x="Conspecific density (scaled)",y="Prior survival probability")
+  ylim(0,1)+labs(x="Conspecific density",y="Prior survival probability")
 ```
 
 Are the predicted survival probabilities plausible for this habitat and census period?
@@ -666,5 +1001,6 @@ Compute the difference for each paired draw. The comparison holds the two densit
 - [Song & Katabuchi et al. 2024, Ecology](https://doi.org/10.1002/ecy.4382)
 - [Stan Reference Manual: MCMC](https://mc-stan.org/docs/reference-manual/mcmc.html)
 - [Stan: diagnostics and warnings](https://mc-stan.org/learn-stan/diagnostics-warnings.html)
+- [Stan User's Guide: problematic posteriors](https://mc-stan.org/docs/stan-users-guide/problematic-posteriors.html)
 - [Stan User's Guide: regression](https://mc-stan.org/docs/stan-users-guide/regression.html)
 - [Stan User's Guide: predictive checks](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html)

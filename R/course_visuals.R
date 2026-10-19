@@ -4,6 +4,11 @@ course_fit <- function(name) {
   specification <- switch(name,
     day1_seedling = list("stan/binomial.stan", list(N=5, y=2, a=1, b=1)),
     day2_ndd = list("stan/logit_reg.stan", ndd_stan_data(make_ndd_data())),
+    day2_allo_bad = {
+      data <- allometry_stan_data(make_allometry_data())
+      data$beta_sd <- NULL
+      list("stan/linear_bad.stan", data)
+    },
     day3_trees = list("stan/logistic.stan", tree_stan_data(make_tree_data())),
     day3_vslope = list("stan/vslope.stan", vslope_stan_data(make_allometry_data())),
     stop("Unknown course result: ", name))

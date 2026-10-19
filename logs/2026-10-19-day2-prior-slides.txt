@@ -1,0 +1,80 @@
+Day 2 slides 8-9: prior intuition revision (2026-10-19)
+
+Changed day2/slides.qmd and regenerated day2/slides.html.
+Slide 8 retains slide 7's alpha=logit(0.3), density range [-3,3] SD units
+and logistic model. Compare beta=-0.8 with beta=-100 on logit and probability
+scales. The extreme curve drops from 99% to 1% over 0.0919024 SD.
+Slide 9 compares 24 slope-prior-implied survival curves: Normal mean 0,
+SD 100 versus SD 2.5, with fixed alpha=logit(0.3). Seed 20261019;
+the same standard-Normal draws are rescaled in both panels.
+
+The teaching argument is contextual plausibility, not a claim that all flat
+priors are invalid. Speaker notes distinguish the fixed-intercept illustration
+from a full prior predictive check drawing both coefficients and binomial data.
+The candidate slope SD matches the unchanged Stan prior and slide 11.
+No data, Stan models or stored fits were changed or refitted.
+
+Validation:
+- R 4.6.1; Quarto 1.10.19; ggplot2 4.0.3; patchwork 1.3.2;
+  knitr 1.52; here 1.0.2; posterior 1.7.0.
+- Command: RENV_CONFIG_SANDBOX_ENABLED=FALSE quarto render day2/slides.qmd
+  All 47 processing steps completed; output created successfully.
+- Initial sandboxed render executed R chunks but could not open Quarto's
+  Sass cache database. The approved unsandboxed render succeeded.
+- Existing renv warnings about unrelated missing cached packages remain;
+  dependencies needed for this render were available. No packages installed.
+- Source comparison with the start-of-task copy: only slides 8 and 9 changed
+  (plus the session-plan comment). Existing uncommitted edits preserved.
+- Rendered sections for slides 7, 10 and 11 match the start-of-task HTML exactly.
+- Inspected slides 7-11 in Zen, including final reloaded slides 8 and 9:
+  figures, legends, equations, headings and text are readable without clipping.
+
+Technical reference checked:
+https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html
+
+No new instructor decisions are required for this focused revision.
+Classroom deployment and participant-environment validation remain separate.
+
+Follow-up revisions in the same session:
+- Slide 7: added logit(p)=log(p/(1-p)) and inverse logit(z)=1/(1+exp(-z))
+  below the model equations. Natural-log and inverse-function meanings are in
+  the notes. Rendered successfully and visually checked in Zen.
+- Slide 8: replaced the two panels with a larger probability-scale plot,
+  overlaid all 60 existing make_ndd_data() quadrats as suv/n, with point area
+  proportional to n (5-20 seedlings). Green solid beta=-0.8 and orange dashed
+  beta=-100 retain the same baseline and density range. No fits were changed.
+- Visible Before data / With data statements distinguish ecological prior
+  reasoning from likelihood evidence. Notes explain that the green curve uses
+  the teaching data's generating values, so its agreement is not independent
+  model validation. Observations are not used to select the candidate prior.
+- Stable binomial log-likelihood calculation at the fixed intercept gives
+  -113.3583 for beta=-0.8 and -18544.24 for beta=-100 (including combinatorial
+  terms). Evaluated as sum(lchoose(n,s)+s*z-n*softplus(z)), where
+  softplus(z)=pmax(z,0)+log1p(exp(-abs(z))). These numbers are validation only,
+  not additional slide content.
+- Same software and render command as above. All 47 render steps completed.
+  Browser inspection confirmed readable points, curves, sample-size legend and
+  explanations; the y-axis label was shortened to avoid clipping.
+- Comparison against the immediately preceding QMD: only slide 8 changed.
+
+Axis-label follow-up:
+- All continuous conspecific-density x-axis titles in day2/slides.qmd,
+  including plots built with shared helpers and the optional prior plot,
+  now read "Conspecific density", without scaled/SD unit suffixes.
+  Labels are overridden within Day 2; shared helpers and Day 3 are unchanged.
+- RENV_CONFIG_SANDBOX_ENABLED=FALSE quarto render day2/slides.qmd succeeded.
+  Checked source labels and the regenerated two-panel link-function figure:
+  both longer axis titles fit without clipping. Software versions as above.
+
+Alternative-layout follow-up:
+- Original slide 8 is preserved exactly, including the instructor's latest
+  wording. Added a new slide immediately afterward (now slide 9), with the
+  same data and curves on the left (64%) and explanatory text on the right
+  (36%). Subsequent slides advance by one page; total counted slides: 28.
+- The new figure is rendered at 8.8 x 5.8 inches, with compact coefficient
+  legend labels; captions and baseline text use explicit line breaks.
+- Source comparison confirms removing the added section reproduces the
+  immediately preceding QMD byte-for-byte. No other source content changed.
+- Same R/Quarto versions and render command as above; all 49 processing steps
+  passed. Inspected the final new slide in Zen: no text/legend clipping or
+  overlap. Speaker notes identify this as an alternative, not repeated teaching.
