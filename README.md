@@ -23,6 +23,13 @@ View the accompanying slides [here](https://forest-canopy.github.io/assets/bayes
 
 # 2026 course: three 90-minute sessions (draft)
 
+Course website: <https://mattocci27.github.io/afec-bayes-2026/>.
+The website serves the participant materials from the `gh-pages` branch.
+After rebuilding classroom materials, stage a fresh website with
+`python3 scripts/build_pages.py --output /path/to/empty-directory` and publish
+that directory to `gh-pages`. This staging step uses existing HTML and the
+participant ZIP; it does not render materials or run inference.
+
 AFEC-X 2026: **21–23 October, 19:00–20:30 China time (UTC+8)**, about 30
 participants. The agreed plan prioritises Bayesian thinking, figure interpretation
 and connections to ecological research at the level of `main.qmd`. Participants run
