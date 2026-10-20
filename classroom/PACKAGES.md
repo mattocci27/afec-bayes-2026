@@ -5,13 +5,20 @@ Created by Masatoshi Katabuchi.
 
 ```r
 install.packages(c(
-  "tidyverse", "posterior", "bayesplot", "patchwork",
-  "here", "knitr", "rmarkdown", "kableExtra", "brms"
+  "tidyverse",
+  "posterior",
+  "bayesplot",
+  "patchwork",
+  "here",
+  "knitr",
+  "rmarkdown",
+  "kableExtra",
+  "brms"
 ))
 
 install.packages(
   "cmdstanr",
-  repos=c("https://stan-dev.r-universe.dev", "https://cloud.r-project.org")
+  repos = c("https://stan-dev.r-universe.dev", "https://cloud.r-project.org")
 )
 ```
 
@@ -32,7 +39,7 @@ Then run in **R** on either system (install CmdStan once):
 
 ```r
 cmdstanr::check_cmdstan_toolchain()
-cmdstanr::install_cmdstan(cores=2)
+cmdstanr::install_cmdstan(cores = 2)
 ```
 
 See the [CmdStanR setup instructions](https://mc-stan.org/cmdstanr/articles/cmdstanr.html#installing-cmdstan).

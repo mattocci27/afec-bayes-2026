@@ -24,8 +24,14 @@ source(here("R/functions.R"))
 source(here("R/course_data.R"))
 source(here("R/course_utils.R"))
 source(here("R/course_visuals.R"))
-knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE,fig.width=8,fig.height=4.5)
-theme_set(theme_bw(base_size=14))
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 8,
+  fig.height = 4.5
+)
+theme_set(theme_bw(base_size = 14))
 ```
 
 ## The core comparison: mother trees
@@ -33,11 +39,17 @@ theme_set(theme_bw(base_size=14))
 ```{r core-results}
 fit <- course_fit("day3_trees")
 trees <- make_tree_data()
-knitr::kable(trees |> select(tree,n,suv) |> mutate(observed=suv/n),digits=3)
-comparison <- mother_comparison(fit,seed=20261024)
+knitr::kable(
+  trees |> select(tree, n, suv) |> mutate(observed = suv / n),
+  digits = 3
+)
+comparison <- mother_comparison(fit, seed = 20261024)
 plot_mother_comparison(comparison)
-plot_mother_truth(comparison,trees)
-knitr::kable(comparison |> select(tree,n,model,mean,lower,upper),digits=3)
+plot_mother_truth(comparison, trees)
+knitr::kable(
+  comparison |> select(tree, n, model, mean, lower, upper),
+  digits = 3
+)
 ```
 
 Purple open points show separate estimates; orange filled points show partial
@@ -61,8 +73,8 @@ It does not guarantee smaller error for every tree.
 
 ```{r demonstrations}
 plot_group_spread()
-knitr::kable(course_diagnostics(fit),digits=2)
-bayesplot::mcmc_trace(fit$draws,pars=c("mu","sigma"))
+knitr::kable(course_diagnostics(fit), digits = 2)
+bayesplot::mcmc_trace(fit$draws, pars = c("mu", "sigma"))
 plot_mother_check(fit)
 plot_cndd_species()
 plot_cndd_abundance()

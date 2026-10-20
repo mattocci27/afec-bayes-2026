@@ -203,14 +203,22 @@ tibble(x, y) |>
   geom_segment(
     data = normal_observations,
     aes(x = x, xend = x, y = 0, yend = dnorm(x, mean = 0, sd = 1)),
-    inherit.aes = FALSE, linetype = 3
+    inherit.aes = FALSE,
+    linetype = 3
   ) +
   geom_point(
     data = normal_observations,
     aes(x, dnorm(x, mean = 0, sd = 1)),
-    inherit.aes = FALSE, size = 4, colour = col_like
+    inherit.aes = FALSE,
+    size = 4,
+    colour = col_like
   ) +
-  geom_rug(data = normal_observations, aes(x = x), inherit.aes = FALSE, sides = "b") +
+  geom_rug(
+    data = normal_observations,
+    aes(x = x),
+    inherit.aes = FALSE,
+    sides = "b"
+  ) +
   labs(x = "Observed value x", y = "Density", title = "Mean = 0, SD = 1")
 ```
 :::
@@ -250,22 +258,46 @@ normal_comparison <- crossing(x = seq(-5, 5, length.out = 501), mu = c(0, 2)) |>
   mutate(density = dnorm(x, mean = mu, sd = 1), model = factor(mu))
 normal_point_densities <- crossing(normal_observations, mu = c(0, 2)) |>
   mutate(density = dnorm(x, mean = mu, sd = 1), model = factor(mu))
-normal_density_plot <- ggplot(normal_comparison, aes(x, density, colour = model, linetype = model)) +
+normal_density_plot <- ggplot(
+  normal_comparison,
+  aes(x, density, colour = model, linetype = model)
+) +
   geom_line(linewidth = 1.2) +
   geom_point(data = normal_point_densities, size = 3) +
-  geom_rug(data = normal_observations, aes(x = x), inherit.aes = FALSE, sides = "b") +
-  scale_colour_manual(values = c("0" = col_like, "2" = "grey50"), labels = c("Mean = 0", "Mean = 2")) +
-  scale_linetype_manual(values = c("0" = "solid", "2" = "dashed"), labels = c("Mean = 0", "Mean = 2")) +
+  geom_rug(
+    data = normal_observations,
+    aes(x = x),
+    inherit.aes = FALSE,
+    sides = "b"
+  ) +
+  scale_colour_manual(
+    values = c("0" = col_like, "2" = "grey50"),
+    labels = c("Mean = 0", "Mean = 2")
+  ) +
+  scale_linetype_manual(
+    values = c("0" = "solid", "2" = "dashed"),
+    labels = c("Mean = 0", "Mean = 2")
+  ) +
   labs(x = "Observed value x", y = "Density", colour = NULL, linetype = NULL) +
-  theme(legend.position = "top", legend.text = element_text(size = 18),
-        axis.title = element_text(size = 22), axis.text = element_text(size = 18))
+  theme(
+    legend.position = "top",
+    legend.text = element_text(size = 18),
+    axis.title = element_text(size = 22),
+    axis.text = element_text(size = 18)
+  )
 normal_likelihood <- tibble(mu = seq(-5, 5, length.out = 501)) |>
   mutate(log_likelihood = like_fun(mu))
 normal_likelihood_plot <- ggplot(normal_likelihood, aes(mu, log_likelihood)) +
   geom_line(linewidth = 1.5, colour = col_like) +
   geom_vline(xintercept = 0, linetype = 3) +
-  labs(x = expression("Mean " * mu), y = expression("Log-likelihood " * log(L(mu)))) +
-  theme(axis.title = element_text(size = 22), axis.text = element_text(size = 18))
+  labs(
+    x = expression("Mean " * mu),
+    y = expression("Log-likelihood " * log(L(mu)))
+  ) +
+  theme(
+    axis.title = element_text(size = 22),
+    axis.text = element_text(size = 18)
+  )
 normal_density_plot
 ```
 :::
@@ -384,7 +416,11 @@ seedling_likelihood <- tibble(p = seq(0, 1, length.out = 501)) |>
   mutate(likelihood = dbinom(2, size = 5, prob = p))
 seedling_likelihood_plot <- ggplot(seedling_likelihood, aes(p, likelihood)) +
   geom_line(linewidth = 1.5, colour = col_like) +
-  labs(x = "Survival probability p", y = "Likelihood", title = "2 survivors out of 5")
+  labs(
+    x = "Survival probability p",
+    y = "Likelihood",
+    title = "2 survivors out of 5"
+  )
 seedling_likelihood_plot +
   geom_vline(xintercept = 0.4, linetype = 3, colour = col_like) +
   annotate("point", x = 0.4, y = dbinom(2, 5, 0.4), size = 4, colour = col_like)
@@ -438,7 +474,12 @@ lens <- bind_rows(
 )
 
 ggplot() +
-  geom_polygon(data = circle(a, 0, radius), aes(x, y), fill = "blue", alpha = 0.3) +
+  geom_polygon(
+    data = circle(a, 0, radius),
+    aes(x, y),
+    fill = "blue",
+    alpha = 0.3
+  ) +
   geom_polygon(data = lens, aes(x, y), fill = "blue", alpha = 0.6) +
   geom_path(data = circle(-a, 0, radius), aes(x, y), linewidth = 1.5) +
   geom_path(data = circle(a, 0, radius), aes(x, y), linewidth = 1.5) +
@@ -635,14 +676,29 @@ ggplot(seedling_densities, aes(p, density, colour = curve, linetype = curve)) +
   geom_ribbon(
     data = seedling_interval_density,
     aes(x = p, ymin = 0, ymax = density),
-    inherit.aes = FALSE, fill = col_post, alpha = 0.15, colour = NA
+    inherit.aes = FALSE,
+    fill = col_post,
+    alpha = 0.15,
+    colour = NA
   ) +
   geom_line(linewidth = 1.8) +
-  annotate("text", x = 3/7, y = 0.55, label = "95%",
-           colour = col_post, size = 9, fontface = "bold") +
+  annotate(
+    "text",
+    x = 3 / 7,
+    y = 0.55,
+    label = "95%",
+    colour = col_post,
+    size = 9,
+    fontface = "bold"
+  ) +
   scale_colour_manual(values = c(Prior = col_prior, Posterior = col_post)) +
   scale_linetype_manual(values = c(Prior = "dashed", Posterior = "solid")) +
-  labs(x = "Survival probability p", y = "Density", colour = NULL, linetype = NULL) +
+  labs(
+    x = "Survival probability p",
+    y = "Density",
+    colour = NULL,
+    linetype = NULL
+  ) +
   theme(legend.position = "top")
 ```
 :::
@@ -661,12 +717,12 @@ $p \sim \operatorname{Beta}(1,1)$
 Posterior $\propto$ Prior $\times$ Likelihood\
 $p\mid y \sim \operatorname{Beta}(3,4)$
 
-[**Posterior mean:**]{.orange} `r round(3/7,2)`
+[**Posterior mean:**]{.orange} `r round(3 / 7, 2)`
 
 [**Peak:**]{.orange} 0.4 (= MLE)
 
 ::: seedling-interval
-[**95% credible interval:**]{.orange} **[`r round(seedling_interval[1],2)`, `r round(seedling_interval[2],2)`]**
+[**95% credible interval:**]{.orange} **[`r round(seedling_interval[1], 2)`, `r round(seedling_interval[2], 2)`]**
 :::
 
 :::
@@ -690,8 +746,16 @@ $p\mid y \sim \operatorname{Beta}(3,4)$
 :::
 
 ```{r, fig.width=13, fig.height=5.1}
-coin_colours <- c("3 of 5" = "#F8766D", "60 of 100" = "#00BA38", Prior = col_prior)
-coin_linetypes <- c("3 of 5" = "solid", "60 of 100" = "dashed", Prior = "dotdash")
+coin_colours <- c(
+  "3 of 5" = "#F8766D",
+  "60 of 100" = "#00BA38",
+  Prior = col_prior
+)
+coin_linetypes <- c(
+  "3 of 5" = "solid",
+  "60 of 100" = "dashed",
+  Prior = "dotdash"
+)
 coin_p <- seq(0, 1, length.out = 1001)
 coin_likelihoods <- tibble(
   p = coin_p,
@@ -700,62 +764,111 @@ coin_likelihoods <- tibble(
 ) |>
   pivot_longer(-p, names_to = "Dataset", values_to = "relative_likelihood")
 coin_likelihood_panel <- ggplot(
-  coin_likelihoods, aes(p, relative_likelihood, colour = Dataset, linetype = Dataset)
+  coin_likelihoods,
+  aes(p, relative_likelihood, colour = Dataset, linetype = Dataset)
 ) +
-  geom_vline(xintercept = 0.6, linetype = "dotted", colour = "grey65", linewidth = 0.5) +
+  geom_vline(
+    xintercept = 0.6,
+    linetype = "dotted",
+    colour = "grey65",
+    linewidth = 0.5
+  ) +
   geom_line(linewidth = 1.5) +
   scale_colour_manual(values = coin_colours) +
   scale_linetype_manual(values = coin_linetypes) +
-  scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.25),
-                     expand = expansion(mult = 0.03)) +
-  scale_y_continuous(limits = c(0, 1.05), breaks = c(0, 0.5, 1),
-                     expand = expansion(mult = 0)) +
-  labs(title = "Likelihood A vs. B", subtitle = "\n",
-       x = "Probability of heads (p)", y = "Relative likelihood") +
+  scale_x_continuous(
+    limits = c(0, 1),
+    breaks = seq(0, 1, 0.25),
+    expand = expansion(mult = 0.03)
+  ) +
+  scale_y_continuous(
+    limits = c(0, 1.05),
+    breaks = c(0, 0.5, 1),
+    expand = expansion(mult = 0)
+  ) +
+  labs(
+    title = "Likelihood A vs. B",
+    subtitle = "\n",
+    x = "Probability of heads (p)",
+    y = "Relative likelihood"
+  ) +
   theme(legend.position = "none")
-coin_prior_panel <- ggplot(tibble(p = coin_p, density = dbeta(coin_p, 51, 51)),
-                           aes(p, density)) +
-  geom_line(colour = coin_colours[["Prior"]], linetype = coin_linetypes[["Prior"]],
-            linewidth = 1.5) +
-  scale_x_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.25),
-                     expand = expansion(mult = 0.03)) +
+coin_prior_panel <- ggplot(
+  tibble(p = coin_p, density = dbeta(coin_p, 51, 51)),
+  aes(p, density)
+) +
+  geom_line(
+    colour = coin_colours[["Prior"]],
+    linetype = coin_linetypes[["Prior"]],
+    linewidth = 1.5
+  ) +
+  scale_x_continuous(
+    limits = c(0, 1),
+    breaks = seq(0, 1, 0.25),
+    expand = expansion(mult = 0.03)
+  ) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.06))) +
-  labs(title = "Prior: Beta(51, 51)",
-       subtitle = "Same prior for A and B\np ~ Beta(51, 51)",
-       caption = "Strong prior centered at p = 0.5",
-       x = "Probability of heads (p)", y = "Density") +
+  labs(
+    title = "Prior: Beta(51, 51)",
+    subtitle = "Same prior for A and B\np ~ Beta(51, 51)",
+    caption = "Strong prior centered at p = 0.5",
+    x = "Probability of heads (p)",
+    y = "Density"
+  ) +
   theme(plot.caption = element_text(size = 20, hjust = 0.5))
 coin_panel_theme <- theme(
-  axis.title = element_text(size = 24), axis.text = element_text(size = 22),
-  plot.title = element_text(size = 28), plot.subtitle = element_text(size = 20),
+  axis.title = element_text(size = 24),
+  axis.text = element_text(size = 22),
+  plot.title = element_text(size = 28),
+  plot.subtitle = element_text(size = 20),
   plot.margin = margin(8, 16, 8, 8)
 )
 # Put aligned, coloured equations in the subtitle area, outside the plotting panel.
 coin_equation_a <- grid::textGrob(
-  expression(L[A](p)), x = 0, y = 0.75, just = "left",
+  expression(L[A](p)),
+  x = 0,
+  y = 0.75,
+  just = "left",
   gp = grid::gpar(col = coin_colours[["3 of 5"]], fontsize = 20)
 )
 coin_equation_b <- grid::textGrob(
-  expression(L[B](p)), x = 0, y = 0.28, just = "left",
+  expression(L[B](p)),
+  x = 0,
+  y = 0.28,
+  just = "left",
   gp = grid::gpar(col = coin_colours[["60 of 100"]], fontsize = 20)
 )
 coin_equation_rhs_x <- grid::unit.pmax(
-  grid::grobWidth(coin_equation_a), grid::grobWidth(coin_equation_b)
-) + grid::unit(2, "pt")
+  grid::grobWidth(coin_equation_a),
+  grid::grobWidth(coin_equation_b)
+) +
+  grid::unit(2, "pt")
 coin_likelihood_grob <- ggplotGrob(coin_likelihood_panel + coin_panel_theme)
 coin_subtitle_index <- which(coin_likelihood_grob$layout$name == "subtitle")
 coin_likelihood_grob$grobs[[coin_subtitle_index]] <- grid::grobTree(
-  coin_equation_a, coin_equation_b,
-  grid::textGrob(expression({} %prop% p^3 * (1-p)^2),
-                 x = coin_equation_rhs_x, y = 0.75, just = "left",
-                 gp = grid::gpar(fontsize = 20)),
-  grid::textGrob(expression({} %prop% p^60 * (1-p)^40),
-                 x = coin_equation_rhs_x, y = 0.28, just = "left",
-                 gp = grid::gpar(fontsize = 20))
+  coin_equation_a,
+  coin_equation_b,
+  grid::textGrob(
+    expression({} %prop% p^3 * (1 - p)^2),
+    x = coin_equation_rhs_x,
+    y = 0.75,
+    just = "left",
+    gp = grid::gpar(fontsize = 20)
+  ),
+  grid::textGrob(
+    expression({} %prop% p^60 * (1 - p)^40),
+    x = coin_equation_rhs_x,
+    y = 0.28,
+    just = "left",
+    gp = grid::gpar(fontsize = 20)
+  )
 )
-coin_likelihood_grob$heights[coin_likelihood_grob$layout$t[coin_subtitle_index]] <-
+coin_likelihood_grob$heights[coin_likelihood_grob$layout$t[
+  coin_subtitle_index
+]] <-
   grid::unit(58, "pt")
-wrap_ggplot_grob(coin_likelihood_grob) + (coin_prior_panel + coin_panel_theme) +
+wrap_ggplot_grob(coin_likelihood_grob) +
+  (coin_prior_panel + coin_panel_theme) +
   plot_layout(widths = c(1, 1))
 ```
 
@@ -784,15 +897,20 @@ wrap_ggplot_grob(coin_likelihood_grob) + (coin_prior_panel + coin_panel_theme) +
 ```
 
 ```{r coin-posteriors, fig.width=11, fig.height=3.7}
-p_grid <- seq(0,1,length.out=501)
-coin <- tibble(p=p_grid, Prior=dbeta(p_grid,51,51),
-               `3 of 5`=dbeta(p_grid,54,53), `60 of 100`=dbeta(p_grid,111,91)) |>
-  pivot_longer(-p,names_to="Distribution",values_to="density")
-ggplot(coin,aes(p,density,colour=Distribution,linetype=Distribution))+
-  geom_line(linewidth=1.2)+labs(x="Probability of heads",y="Density")+
-  scale_colour_manual(values=coin_colours)+
-  scale_linetype_manual(values=coin_linetypes)+
-  theme(legend.position="top")
+p_grid <- seq(0, 1, length.out = 501)
+coin <- tibble(
+  p = p_grid,
+  Prior = dbeta(p_grid, 51, 51),
+  `3 of 5` = dbeta(p_grid, 54, 53),
+  `60 of 100` = dbeta(p_grid, 111, 91)
+) |>
+  pivot_longer(-p, names_to = "Distribution", values_to = "density")
+ggplot(coin, aes(p, density, colour = Distribution, linetype = Distribution)) +
+  geom_line(linewidth = 1.2) +
+  labs(x = "Probability of heads", y = "Density") +
+  scale_colour_manual(values = coin_colours) +
+  scale_linetype_manual(values = coin_linetypes) +
+  theme(legend.position = "top")
 ```
 
 ::: coin-interpretation
@@ -861,11 +979,18 @@ tibble(p = round(head(draws$p, 4), 3)) |>
 ::: {.column width="70%"}
 ```{r seedling-draw-histogram, fig.height=3.7, fig.width=8}
 ggplot(as_tibble(draws), aes(p)) +
-  geom_histogram(aes(y = after_stat(density)), bins = 40,
-                 fill = col_post, alpha = 0.5) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    bins = 40,
+    fill = col_post,
+    alpha = 0.5
+  ) +
   stat_function(fun = dbeta, args = list(3, 4), linewidth = 1.2) +
-  labs(x = "Survival probability p", y = "Density",
-       subtitle = "Orange: Stan draws; black curve: exact posterior")
+  labs(
+    x = "Survival probability p",
+    y = "Density",
+    subtitle = "Orange: Stan draws; black curve: exact posterior"
+  )
 ```
 :::
 :::
@@ -953,7 +1078,7 @@ do not repeat the exercise here. Keep 85-90 minutes for questions and delay buff
 ::: columns
 ::: {.column width="50%"}
 ```{r, results="asis"}
-show_stan("stan/binomial.stan", compact=TRUE)
+show_stan("stan/binomial.stan", compact = TRUE)
 ```
 :::
 
@@ -1103,9 +1228,9 @@ If the PCR test is positive, how likely is it that the person is infected?
 ::: small
 | | What it is | Seedlings (2 of 5, prior Beta(8, 2)) |
 |---|---|---|
-| **MLE** | the $p$ that maximises the [likelihood]{.teal} | `r round(2/5, 3)` |
-| **MAP** | the $p$ that maximises the [posterior]{.orange} (its peak) | `r round(9/13, 3)` |
-| **Posterior mean** | the average of the [posterior]{.orange} | `r round(10/15, 3)` |
+| **MLE** | the $p$ that maximises the [likelihood]{.teal} | `r round(2 / 5, 3)` |
+| **MAP** | the $p$ that maximises the [posterior]{.orange} (its peak) | `r round(9 / 13, 3)` |
+| **Posterior mean** | the average of the [posterior]{.orange} | `r round(10 / 15, 3)` |
 | **Posterior distribution** | every value of $p$ with its plausibility | Beta(10, 5) |
 :::
 
@@ -1122,19 +1247,25 @@ If the PCR test is positive, how likely is it that the person is infected?
 ```{r, fig.height=5.5, fig.width=15}
 set.seed(1)
 priors <- tribble(
-  ~name, ~a, ~b,
-  "Flat: Beta(1, 1)", 1, 1,
-  "Weakly informative: Beta(2, 2)", 2, 2,
-  "Informative: Beta(3, 7)", 3, 7
+  ~name                            , ~a , ~b ,
+  "Flat: Beta(1, 1)"               ,  1 ,  1 ,
+  "Weakly informative: Beta(2, 2)" ,  2 ,  2 ,
+  "Informative: Beta(3, 7)"        ,  3 ,  7
 ) |>
   mutate(name = fct_inorder(name))
 
 dens <- priors |>
-  mutate(d = map2(a, b, \(a, b) tibble(p = seq(0, 1, length.out = 201), density = dbeta(p, a, b)))) |>
+  mutate(
+    d = map2(a, b, \(a, b) {
+      tibble(p = seq(0, 1, length.out = 201), density = dbeta(p, a, b))
+    })
+  ) |>
   unnest(d)
 
 sims <- priors |>
-  mutate(s = map2(a, b, \(a, b) tibble(y = rbinom(1e4, 5, rbeta(1e4, a, b))))) |>
+  mutate(
+    s = map2(a, b, \(a, b) tibble(y = rbinom(1e4, 5, rbeta(1e4, a, b))))
+  ) |>
   unnest(s) |>
   count(name, y) |>
   group_by(name) |>
@@ -1149,7 +1280,10 @@ p1 <- ggplot(dens, aes(p, density)) +
 p2 <- ggplot(sims, aes(y, prop)) +
   geom_col(fill = col_prior, alpha = 0.7) +
   facet_wrap(~name) +
-  labs(x = "Survivors out of 5 seedlings, simulated from the prior", y = "Proportion") +
+  labs(
+    x = "Survivors out of 5 seedlings, simulated from the prior",
+    y = "Proportion"
+  ) +
   theme(strip.text = element_blank())
 
 p1 / p2
@@ -1212,8 +1346,9 @@ tibble(x, y) |>
   ggtitle("N(0, 1)") +
   geom_line(aes(x, y)) +
   theme(
-    axis.title   = element_text(size = 32),
-    axis.text    = element_text(size = 28))
+    axis.title = element_text(size = 32),
+    axis.text = element_text(size = 28)
+  )
 ```
 
 ::: small
@@ -1277,8 +1412,9 @@ tibble(x, y) |>
   ylab("ln L") +
   geom_line(aes(x, y)) +
   theme(
-    axis.title   = element_text(size = 32),
-    axis.text    = element_text(size = 28))
+    axis.title = element_text(size = 32),
+    axis.text = element_text(size = 28)
+  )
 ```
 :::
 

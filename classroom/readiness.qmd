@@ -35,8 +35,12 @@ library(tidyverse)
 library(posterior)
 library(here)
 source(here("R/course_utils.R"))
-fit <- fit_or_load("day1_seedling", "stan/binomial.stan",
-                  list(N = 5, y = 2, a = 1, b = 1), use_precomputed = TRUE)
+fit <- fit_or_load(
+  "day1_seedling",
+  "stan/binomial.stan",
+  list(N = 5, y = 2, a = 1, b = 1),
+  use_precomputed = TRUE
+)
 fit$source
 nrow(fit$draws)
 mean(fit$draws$p)

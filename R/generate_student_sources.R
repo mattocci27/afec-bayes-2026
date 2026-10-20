@@ -2,5 +2,7 @@
 # Rscript R/generate_student_sources.R [day1 day2 day3]
 source("R/classroom_materials.R")
 days <- commandArgs(trailingOnly = TRUE)
-if (!length(days)) days <- paste0("day", 1:3)
+if (!length(days)) {
+  days <- paste0("day", 1:3)
+}
 generate_student_sources(days)

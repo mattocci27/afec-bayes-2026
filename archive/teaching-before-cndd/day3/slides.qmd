@@ -70,7 +70,7 @@ dbh_ref <- allometry_truth$dbh_ref
 # posterior summaries used on several slides
 p_sum <- trees_fit$draws |>
   subset_draws(variable = "p") |>
-  summarise_draws(mean, median, ~quantile(.x, c(0.05, 0.95)))
+  summarise_draws(mean, median, \(x) quantile(x, c(0.05, 0.95)))
 trees_re <- trees |>
   mutate(p_bayes = p_sum$median, p_lo = p_sum$`5%`, p_hi = p_sum$`95%`)
 suv_pool <- sum(trees$suv) / sum(trees$n)
@@ -199,7 +199,14 @@ trees |>
 ggplot(trees, aes(x = p_true, y = p_like)) +
   geom_point(size = 8, pch = 21) +
   geom_abline(slope = 1, intercept = 0, lty = 2) +
-  annotate(geom = "text", x = 0.34, y = 0.38, label = "1:1", size = 10, angle = 18) +
+  annotate(
+    geom = "text",
+    x = 0.34,
+    y = 0.38,
+    label = "1:1",
+    size = 10,
+    angle = 18
+  ) +
   xlab("True survival rate") +
   ylab("Estimated \nsurvival rate")
 ```
@@ -303,20 +310,25 @@ sig3 <- 3
 n_sp <- 8
 sig <- 0.2
 
-xx <- seq(-3, 3, length = 100)
+xx <- seq(-3, 3, length.out = 100)
 mu1 <- rnorm(n_sp, z, sig1)
 mu2 <- rnorm(n_sp, z, sig2)
 mu3 <- rnorm(n_sp, z, sig3)
 
-data <- tibble(mu1 = as.list(mu1), mu2 = as.list(mu2), mu3 = as.list(mu3), sp = LETTERS[1:8]) |>
-  mutate(y1 = map(mu1, \(mu)dnorm(xx, mu, sig))) |>
-  mutate(y2 = map(mu2, \(mu)dnorm(xx, mu, sig))) |>
-  mutate(y3 = map(mu3, \(mu)dnorm(xx, mu, sig))) |>
-  unnest(cols = c(mu1, mu2, mu3, y1, y2, y3))  |>
+data <- tibble(
+  mu1 = as.list(mu1),
+  mu2 = as.list(mu2),
+  mu3 = as.list(mu3),
+  sp = LETTERS[1:8]
+) |>
+  mutate(y1 = map(mu1, \(mu) dnorm(xx, mu, sig))) |>
+  mutate(y2 = map(mu2, \(mu) dnorm(xx, mu, sig))) |>
+  mutate(y3 = map(mu3, \(mu) dnorm(xx, mu, sig))) |>
+  unnest(cols = c(mu1, mu2, mu3, y1, y2, y3)) |>
   mutate(xx = rep(xx, 8))
 
 plot_density <- function(data, y, title_suffix) {
-  ggplot(data, aes(x = logistic(xx), y = {{y}}, col = sp)) +
+  ggplot(data, aes(x = logistic(xx), y = {{ y }}, col = sp)) +
     geom_line() +
     xlab("p") +
     ylab("Density") +
@@ -337,7 +349,7 @@ p1 / p2 / p3
 ```{r, fig.height=8.5}
 plot_sigma <- function(density_func, params, title) {
   y <- density_func(sigma, params[[1]], params[[2]])
-  tibble(sigma, y) %>%
+  tibble(sigma, y) |>
     ggplot(aes(x = sigma, y = y)) +
     geom_line() +
     xlab("Sigma") +
@@ -346,7 +358,7 @@ plot_sigma <- function(density_func, params, title) {
 }
 
 # Sigma values
-sigma <- seq(0.01, 10, length = 100)
+sigma <- seq(0.01, 10, length.out = 100)
 
 # Generating plots
 p4 <- plot_sigma(dcauchy, list(0, 1), "sigma ~ Half-Cauchy(0, 1)")
@@ -388,18 +400,25 @@ trees_re |>
 trees_re |>
   pivot_longer(c(p_like, p_bayes)) |>
   ggplot(aes(x = p_true, y = value, fill = name)) +
-    geom_point(size = 12, pch = 21, alpha = 0.8) +
-    annotate(geom = "text", x = 0.34, y = 0.38, label = "1:1", size = 10, angle = 18) +
-    geom_abline(slope = 1, intercept = 0, lty = 2) +
-    xlab("True survival rate") +
-    ylab("Estimated \nsurvival rate") +
-    theme(
-      legend.position = "inside",
-      legend.position.inside = c(0.2, 0.75),
-      legend.text = element_text(size = 24),
-      legend.title = element_blank(),
-      legend.box.background = element_rect(color = "grey40", linewidth = 1)
-    )
+  geom_point(size = 12, pch = 21, alpha = 0.8) +
+  annotate(
+    geom = "text",
+    x = 0.34,
+    y = 0.38,
+    label = "1:1",
+    size = 10,
+    angle = 18
+  ) +
+  geom_abline(slope = 1, intercept = 0, lty = 2) +
+  xlab("True survival rate") +
+  ylab("Estimated \nsurvival rate") +
+  theme(
+    legend.position = "inside",
+    legend.position.inside = c(0.2, 0.75),
+    legend.text = element_text(size = 24),
+    legend.title = element_blank(),
+    legend.box.background = element_rect(color = "grey40", linewidth = 1)
+  )
 ```
 
 ::: small
@@ -431,12 +450,19 @@ trees_re |>
   mutate(label = fct_reorder(sprintf("%s (n = %d)", tree, n), n)) |>
   ggplot(aes(y = label)) +
   geom_vline(xintercept = suv_pool, linetype = 2) +
-  geom_segment(aes(x = p_like, xend = p_bayes, yend = label),
-    arrow = arrow(length = unit(0.3, "cm")), linewidth = 1, colour = "grey40") +
+  geom_segment(
+    aes(x = p_like, xend = p_bayes, yend = label),
+    arrow = arrow(length = unit(0.3, "cm")),
+    linewidth = 1,
+    colour = "grey40"
+  ) +
   geom_point(aes(x = p_like), size = 6, shape = 21, fill = "white") +
   geom_point(aes(x = p_bayes), size = 6, colour = col_post) +
-  labs(x = "Survival rate", y = NULL,
-    subtitle = "Open: separate estimate. Orange: partial pooling. Dashed: pooled")
+  labs(
+    x = "Survival rate",
+    y = NULL,
+    subtitle = "Open: separate estimate. Orange: partial pooling. Dashed: pooled"
+  )
 ```
 :::
 
@@ -538,13 +564,15 @@ b1_hat <- gamma1 * trait + gamma0
 b1 <- rnorm(n_sp, b1_hat, 0.01)
 b0 <- rnorm(n_sp, 0.55, 0.05)
 y_fun <- function(beta0, beta1) beta0 + beta1 * log_xx
-log_xx <- seq(1, 100, length = n_rep) |> log()
+log_xx <- seq(1, 100, length.out = n_rep) |> log()
 
 log_y <- map2(as.list(b0), as.list(b1), y_fun) |> unlist()
 
-tmp <- tibble(y = exp(log_y),
-              x = rep(exp(log_xx), n_sp),
-              sp = rep(paste0("sp", 1:n_sp), each = n_rep))
+tmp <- tibble(
+  y = exp(log_y),
+  x = rep(exp(log_xx), n_sp),
+  sp = rep(paste0("sp", 1:n_sp), each = n_rep)
+)
 
 tmp2 <- tibble(x = trait, y = b1, sp = rep(paste0("sp", 1:n_sp)))
 
@@ -557,7 +585,7 @@ p1 <- tmp |>
   theme(
     legend.position = "none",
     plot.title = element_text(size = 24)
-    )
+  )
 
 
 p2 <- tmp |>
@@ -571,13 +599,18 @@ p2 <- tmp |>
   theme(
     legend.position = "none",
     plot.title = element_text(size = 24)
-    )
+  )
 
 p3 <- tmp2 |>
   ggplot(aes(x = x, y = y, col = sp)) +
-  geom_smooth(method = "lm", se = TRUE, lty = 2,
+  geom_smooth(
+    method = "lm",
+    se = TRUE,
+    lty = 2,
     alpha = 0.2,
-    linewidth = 0.5, col = "black") +
+    linewidth = 0.5,
+    col = "black"
+  ) +
   geom_point(size = 3) +
   xlab("Wood density") +
   ylab("b") +
@@ -592,7 +625,9 @@ p1 + p2 + p3
 ::: {.column width="62%"}
 ```{r, fig.height=6.5, fig.width=10}
 allo |>
-  mutate(sp_lab = fct_inorder(sprintf("%s (n = %d)", sp, as.integer(table(sp)[sp])))) |>
+  mutate(
+    sp_lab = fct_inorder(sprintf("%s (n = %d)", sp, as.integer(table(sp)[sp])))
+  ) |>
   ggplot(aes(dbh, h)) +
   geom_point(alpha = 0.6, size = 1.5) +
   geom_smooth(method = "lm", se = FALSE, linewidth = 0.8, colour = col_like) +
@@ -600,7 +635,10 @@ allo |>
   scale_x_log10() +
   scale_y_log10() +
   labs(x = "DBH (cm)", y = "Height (m)") +
-  theme(axis.text = element_text(size = 14), strip.text = element_text(size = 16))
+  theme(
+    axis.text = element_text(size = 14),
+    strip.text = element_text(size = 16)
+  )
 ```
 :::
 
@@ -629,8 +667,10 @@ $$
 ```{r}
 vint_sum <- vint_fit$draws |>
   subset_draws(variable = c("mu0", "tau", "beta1", "sigma")) |>
-  summarise_draws(mean, ~quantile(.x, c(0.05, 0.95)))
-vs <- function(v, col = "mean", digits = 2) round(vint_sum[[col]][vint_sum$variable == v], digits)
+  summarise_draws(mean, \(x) quantile(x, c(0.05, 0.95)))
+vs <- function(v, col = "mean", digits = 2) {
+  round(vint_sum[[col]][vint_sum$variable == v], digits)
+}
 ```
 
 ::: small
@@ -683,20 +723,28 @@ $$
 
 ```{r}
 g <- as_tibble(vslope_fit$draws)
-fmt <- function(x, digits = 2) sprintf(paste0("%.", digits, "f (%.", digits, "f to %.", digits, "f)"),
-  mean(x), quantile(x, 0.05), quantile(x, 0.95))
+fmt <- function(x, digits = 2) {
+  sprintf(
+    paste0("%.", digits, "f (%.", digits, "f to %.", digits, "f)"),
+    mean(x),
+    quantile(x, 0.05),
+    quantile(x, 0.95)
+  )
+}
 
 no_pool <- allo |>
   group_by(sp) |>
-  group_modify(~ {
-    m <- lm(log(h) ~ log(dbh / dbh_ref), data = .x)
-    tibble(n = nrow(.x), wd = .x$wd[1], b_np = coef(m)[2])
-  }) |>
+  group_modify(
+    ~ {
+      m <- lm(log(h) ~ log(dbh / dbh_ref), data = .x)
+      tibble(n = nrow(.x), wd = .x$wd[1], b_np = coef(m)[2])
+    }
+  ) |>
   ungroup()
 
 slope_sum <- vslope_fit$draws |>
   subset_draws(variable = "beta") |>
-  summarise_draws(mean, ~quantile(.x, c(0.05, 0.95))) |>
+  summarise_draws(mean, \(x) quantile(x, c(0.05, 0.95))) |>
   filter(str_detect(variable, "^beta\\[2,"))
 
 slopes <- no_pool |>
@@ -706,23 +754,36 @@ wd_grid <- seq(-1.6, 2, length.out = 50)
 line_df <- map(wd_grid, \(w) {
   m <- g$`gamma[2,1]` + g$`gamma[2,2]` * w
   tibble(wd = w, mid = mean(m), lo = quantile(m, 0.05), hi = quantile(m, 0.95))
-}) |> list_rbind()
+}) |>
+  list_rbind()
 ```
 
 ::: columns
 ::: {.column width="58%"}
 ```{r, fig.height=6.5, fig.width=9.5}
 ggplot(slopes, aes(wd)) +
-  geom_ribbon(data = line_df, aes(ymin = lo, ymax = hi), fill = col_post, alpha = 0.25) +
+  geom_ribbon(
+    data = line_df,
+    aes(ymin = lo, ymax = hi),
+    fill = col_post,
+    alpha = 0.25
+  ) +
   geom_line(data = line_df, aes(y = mid), colour = col_post, linewidth = 1) +
-  geom_segment(aes(xend = wd, y = b_np, yend = b_pp), colour = "grey40",
-    arrow = arrow(length = unit(0.25, "cm"))) +
+  geom_segment(
+    aes(xend = wd, y = b_np, yend = b_pp),
+    colour = "grey40",
+    arrow = arrow(length = unit(0.25, "cm"))
+  ) +
   geom_point(aes(y = b_np, size = n), shape = 21, fill = "white") +
   geom_linerange(aes(ymin = lo, ymax = hi), colour = col_post, linewidth = 1) +
   geom_point(aes(y = b_pp, size = n), colour = col_post) +
   scale_size_area(max_size = 7) +
-  labs(x = "Wood density (scaled)", y = "Exponent", size = "Trees",
-    subtitle = "Open: separate regressions. Orange: multilevel model (90% interval)")
+  labs(
+    x = "Wood density (scaled)",
+    y = "Exponent",
+    size = "Trees",
+    subtitle = "Open: separate regressions. Orange: multilevel model (90% interval)"
+  )
 ```
 :::
 
@@ -1015,8 +1076,12 @@ e.g.,
 ::: {style="font-size: 0.62em;"}
 ```{r, results="asis"}
 mv <- readLines(here("stan/mv_logistic.stan"))
-cat("```stan\n", paste(mv[seq_len(grep("^generated quantities", mv) - 2)], collapse = "\n"),
-  "\n```\n", sep = "")
+cat(
+  "```stan\n",
+  paste(mv[seq_len(grep("^generated quantities", mv) - 2)], collapse = "\n"),
+  "\n```\n",
+  sep = ""
+)
 ```
 :::
 :::
@@ -1069,14 +1134,20 @@ x <- seq(-3, 3, length.out = 100)
 b <- rnorm(n_sp, mean = 3, sd = 0.8)
 a <- 2
 
-y <- map(b, \(b)(a*x + b))
-tibble(y = unlist(y), x = rep(x, n_sp), .id = rep(letters[1:n_sp], each = 100)) |>
-  ggplot(aes(x = x, y = y , col = .id)) +
+y <- map(b, \(b) (a * x + b))
+tibble(
+  y = unlist(y),
+  x = rep(x, n_sp),
+  .id = rep(letters[1:n_sp], each = 100)
+) |>
+  ggplot(aes(x = x, y = y, col = .id)) +
   geom_line(linewidth = 1.5) +
   scale_color_viridis_d() +
-  theme(legend.position = "none",
-    axis.title   = element_text(size = 52),
-    axis.text    = element_text(size = 48))
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 52),
+    axis.text = element_text(size = 48)
+  )
 ```
 
 ::: footer

@@ -40,7 +40,7 @@ ENV ROOT=FALSE DISABLE_AUTH=FALSE \
 COPY docker/Rprofile.site /opt/afec/Rprofile.site
 RUN mkdir -p /opt/cmdstan \
     && BUILD_JOBS=${BUILD_JOBS} Rscript -e \
-       'cmdstanr::install_cmdstan(version="2.38.0", dir="/opt/cmdstan", cores=as.integer(Sys.getenv("BUILD_JOBS")), cpp_options=list(PRECOMPILED_HEADERS=TRUE, STAN_THREADS=TRUE))' \
+       'cmdstanr::install_cmdstan(version = "2.38.0", dir = "/opt/cmdstan", cores = as.integer(Sys.getenv("BUILD_JOBS")), cpp_options = list(PRECOMPILED_HEADERS = TRUE, STAN_THREADS = TRUE))' \
     && chmod -R a+rX,go-w /opt/cmdstan
 
 # Only the current course is shipped. The legacy targets pipeline is not run.

@@ -1,0 +1,49 @@
+Tidyverse R style update — 2026-10-20
+
+Reference: https://style.tidyverse.org/
+Baseline: e7e3182 (existing Day 3 edits preserved).
+
+Scope
+- Project-owned R scripts, .Rprofile, docker/Rprofile.site, R chunks and inline
+  R in QMD/Rmd/Markdown, and the embedded R command in Dockerfile.
+- Includes legacy materials and archive/teaching-before-cndd.
+- Excludes renv/activate.R and other external/generated dependency code.
+- Participant exercise sources regenerated from instructor sources.
+- AGENTS.md already contained a user edit; it was not edited in this task.
+
+Tools/environment
+- R 4.6.1; Quarto 1.10.19; styler 1.11.0; Posit Air 0.12.0.
+- Formatters installed in temporary directories; renv.lock unchanged.
+- styler::style_text(code, strict = TRUE), followed by Air (80 columns,
+  two-space indentation), applied to extracted R fragments only.
+- Prose, chunk headers/options, Stan code, seeds and saved model fits retained.
+- Native pipes, explicit seq(length.out = ...) arguments, and short anonymous
+  functions updated to current guide conventions.
+
+Validation
+- 475 R fragments parse after masking intentional exercise blanks.
+- Syntax comparison passed after accounting for equivalent single-expression
+  braces, assignment syntax, native/magrittr pipes, full seq argument naming,
+  and formula/lambda anonymous functions.
+- Native-pipe row counts use n() in the legacy ungrouped dplyr data masks.
+- Exact pre/post output comparisons passed for make_tree_data(),
+  make_allometry_data(), make_ndd_data(), generate_mh_df(), generate_hmc_df(),
+  generate_leapfrog_list(), and generate_simple_hmc_list().
+- Rscript R/generate_student_sources.R: passed.
+- Rscript R/check_classroom_materials.R: passed; 3/8/10 safe chunks for Days
+  1/2/3, changed-input/stale-source guards, seven fit/data/diagnostic checks.
+- Rscript docker/test-static.R: passed, including package closure, RDS checks,
+  stored-fit/auth guards and workspace copy simulation.
+- Rscript R/build_classroom_materials.R: passed on final sources; all current
+  course HTML and dist/afec-classroom-materials.zip regenerated from saved fits.
+- Browser spot checks: Day 1 Compare the two means in R slide and Day 2
+  participant brms code display correctly.
+- Source-only git diff --check: passed. Quarto-generated HTML may contain
+  upstream JavaScript trailing whitespace.
+
+Limits
+- Legacy main.qmd/exercise.qmd/setup.Rmd/docs/hmc.qmd and archived decks:
+  R source syntax checked; their complete historical workflows not rerun.
+- No model refits, targets pipeline runs, GIF regeneration or Docker image build.
+- The existing local renv cache reports missing optional packages; the checks
+  and current-course rendering above completed successfully.

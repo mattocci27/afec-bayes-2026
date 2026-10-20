@@ -24,8 +24,14 @@ source(here("R/functions.R"))
 source(here("R/course_data.R"))
 source(here("R/course_utils.R"))
 source(here("R/course_visuals.R"))
-knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE,fig.width=8,fig.height=4.5)
-theme_set(theme_bw(base_size=14))
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 8,
+  fig.height = 4.5
+)
+theme_set(theme_bw(base_size = 14))
 ```
 
 ## More seedlings, same observed proportion
@@ -46,9 +52,11 @@ for (N in c(10, 50)) {
     ggplot(aes(x = p, y = posterior)) +
     geom_line(linewidth = 1.2, colour = "#d95f02") +
     coord_cartesian(xlim = c(0, 1)) +
-    labs(x = "Survival probability p",
-         y = "Posterior probability per grid point",
-         title = paste(y, "survivors out of", N, "seedlings"))
+    labs(
+      x = "Survival probability p",
+      y = "Posterior probability per grid point",
+      title = paste(y, "survivors out of", N, "seedlings")
+    )
   print(figure)
 }
 ```
@@ -71,9 +79,11 @@ tibble(p = p, posterior = posterior) |>
   ggplot(aes(x = p, y = posterior)) +
   geom_line(linewidth = 1.2, colour = "#d95f02") +
   coord_cartesian(xlim = c(0, 1)) +
-  labs(x = "Survival probability p",
-       y = "Posterior probability per grid point",
-       title = "2 survivors out of 5 seedlings; prior Beta(8,2)")
+  labs(
+    x = "Survival probability p",
+    y = "Posterior probability per grid point",
+    title = "2 survivors out of 5 seedlings; prior Beta(8,2)"
+  )
 ```
 
 Only the prior changes. The posterior shifts towards higher survival
@@ -85,9 +95,10 @@ Vertical scales adjust automatically; compare horizontal widths.
 
 ```{r stan-result}
 fit <- course_fit("day1_seedling")
-knitr::kable(course_diagnostics(fit),digits=2)
-ggplot(as_tibble(fit$draws),aes(p))+geom_histogram(bins=30,fill="#d95f02")+
-  labs(x="Survival probability",y="Posterior draws")
+knitr::kable(course_diagnostics(fit), digits = 2)
+ggplot(as_tibble(fit$draws), aes(p)) +
+  geom_histogram(bins = 30, fill = "#d95f02") +
+  labs(x = "Survival probability", y = "Posterior draws")
 ```
 
 This is the 2/5, Beta(1,1) posterior. Stored draws approximate a distribution.

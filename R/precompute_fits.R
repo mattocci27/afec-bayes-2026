@@ -19,8 +19,14 @@ source(here("R/course_utils.R"))
 dir.create(here("fits"), showWarnings = FALSE)
 
 save_fit <- function(name, stan_file, data, ...) {
-  res <- fit_or_load(name, stan_file, data, ...,
-    use_precomputed = FALSE, fallback = FALSE)
+  res <- fit_or_load(
+    name,
+    stan_file,
+    data,
+    ...,
+    use_precomputed = FALSE,
+    fallback = FALSE
+  )
   res$meta <- list(
     stan_file = stan_file,
     cmdstan = cmdstanr::cmdstan_version(),
@@ -28,8 +34,15 @@ save_fit <- function(name, stan_file, data, ...) {
     created = format(Sys.time(), "%Y-%m-%d")
   )
   saveRDS(res, here("fits", paste0(name, ".rds")), compress = "xz")
-  message(name, ": ", paste(names(diagnostic_table(res)),
-    unlist(diagnostic_table(res)), collapse = ", "))
+  message(
+    name,
+    ": ",
+    paste(
+      names(diagnostic_table(res)),
+      unlist(diagnostic_table(res)),
+      collapse = ", "
+    )
+  )
   invisible(res)
 }
 
@@ -38,8 +51,11 @@ ndd <- make_ndd_data()
 trees <- make_tree_data()
 
 # Day 1: 2 survivors out of 5 seedlings, flat prior
-save_fit("day1_seedling", "stan/binomial.stan",
-  list(N = 5, y = 2, a = 1, b = 1))
+save_fit(
+  "day1_seedling",
+  "stan/binomial.stan",
+  list(N = 5, y = 2, a = 1, b = 1)
+)
 
 # Day 2: allometry, all trees pooled
 save_fit("day2_allo", "stan/linear.stan", allometry_stan_data(allo))
@@ -61,7 +77,11 @@ save_fit("day3_vint", "stan/vint.stan", vint_stan_data(allo))
 
 # Day 3: allometry, varying intercepts and slopes + wood density
 # Heavier model: default to the precomputed result in class.
-save_fit("day3_vslope", "stan/vslope.stan", vslope_stan_data(allo),
-  adapt_delta = 0.95)
+save_fit(
+  "day3_vslope",
+  "stan/vslope.stan",
+  vslope_stan_data(allo),
+  adapt_delta = 0.95
+)
 
 writeLines(capture.output(sessionInfo()), here("fits", "sessionInfo.txt"))

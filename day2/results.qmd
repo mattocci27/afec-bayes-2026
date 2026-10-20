@@ -25,20 +25,27 @@ library(tidyverse)
 library(posterior)
 library(bayesplot)
 library(here)
-theme_set(theme_bw(base_size=14))
+theme_set(theme_bw(base_size = 14))
 
 ndd <- read_csv(here("data", "ndd.csv"))
 fit <- readRDS(here("fits", "day2_ndd.rds"))
 draws <- fit$draws
 sampler_diagnostics <- fit$diagnostics
-coef_draws <- posterior::subset_draws(draws, variable=c("alpha", "beta"))
+coef_draws <- posterior::subset_draws(draws, variable = c("alpha", "beta"))
 stopifnot(
   fit$meta$stan_file == "stan/logit_reg.stan",
   nrow(ndd) == fit$data$N,
-  all(ndd$n == fit$data$n), all(ndd$suv == fit$data$suv),
+  all(ndd$n == fit$data$n),
+  all(ndd$suv == fit$data$suv),
   isTRUE(all.equal(ndd$cons, fit$data$cons))
 )
-knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE,fig.width=8,fig.height=4.5)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width = 8,
+  fig.height = 4.5
+)
 ```
 
 ## 1. Coefficient table
@@ -46,10 +53,11 @@ knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE,fig.width=8,fig.hei
 ```{r coefficient-table}
 coefficient_table <- posterior::summarise_draws(
   coef_draws,
-  mean=mean, sd=sd,
-  ~quantile(.x, probs=c(0.025, 0.975))
+  mean = mean,
+  sd = sd,
+  \(x) quantile(x, probs = c(0.025, 0.975))
 )
-knitr::kable(coefficient_table, digits=3)
+knitr::kable(coefficient_table, digits = 3)
 ```
 
 `mean` is the posterior mean; `sd` is posterior uncertainty; `2.5%` and
@@ -62,16 +70,16 @@ with density under this model.
 ```{r sampling-diagnostics}
 sampling_table <- posterior::summarise_draws(
   coef_draws,
-  rhat=posterior::rhat,
-  ess_bulk=posterior::ess_bulk,
-  ess_tail=posterior::ess_tail
+  rhat = posterior::rhat,
+  ess_bulk = posterior::ess_bulk,
+  ess_tail = posterior::ess_tail
 )
-knitr::kable(sampling_table, digits=3)
+knitr::kable(sampling_table, digits = 3)
 
 # One row per chain, recorded when the model was fitted.
 sampler_table <- as_tibble(sampler_diagnostics) |>
-  mutate(chain=row_number(), .before=1)
-knitr::kable(sampler_table, digits=3)
+  mutate(chain = row_number(), .before = 1)
+knitr::kable(sampler_table, digits = 3)
 ```
 
 R-hat near 1, sufficient bulk/tail ESS and no divergences are encouraging.
@@ -81,7 +89,7 @@ divergences alone does not establish reliable sampling or an adequate model.
 ## 3. Trace plots
 
 ```{r trace-plots}
-bayesplot::mcmc_trace(coef_draws, pars=c("alpha", "beta"))
+bayesplot::mcmc_trace(coef_draws, pars = c("alpha", "beta"))
 ```
 
 Colours identify chains. They cover similar ranges without persistent drift or
@@ -91,29 +99,30 @@ separation, supporting the encouraging numerical diagnostics.
 
 ```{r curve-probabilities}
 density_grid <- tibble(
-  cons=seq(min(ndd$cons), max(ndd$cons), length.out=81)
+  cons = seq(min(ndd$cons), max(ndd$cons), length.out = 81)
 )
 curve_draws <- as_tibble(coef_draws) |>
   select(.draw, alpha, beta) |>
   crossing(density_grid) |>
-  mutate(p=plogis(alpha + beta * cons))
+  mutate(p = plogis(alpha + beta * cons))
 
 curve_summary <- curve_draws |>
   group_by(cons) |>
   summarise(
-    median=median(p),
-    lower=quantile(p, 0.025), upper=quantile(p, 0.975),
-    .groups="drop"
+    median = median(p),
+    lower = quantile(p, 0.025),
+    upper = quantile(p, 0.975),
+    .groups = "drop"
   )
 ```
 
 ```{r regression-plot}
-regression_plot <- ggplot(curve_summary, aes(x=cons)) +
-  geom_ribbon(aes(ymin=lower, ymax=upper), fill="#d95f02", alpha=0.2) +
-  geom_line(aes(y=median), colour="#d95f02", linewidth=1) +
-  geom_point(data=ndd, aes(y=suv/n), alpha=0.6) +
-  scale_y_continuous(limits=c(0, 1)) +
-  labs(x="Conspecific density (scaled)", y="Survival probability")
+regression_plot <- ggplot(curve_summary, aes(x = cons)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "#d95f02", alpha = 0.2) +
+  geom_line(aes(y = median), colour = "#d95f02", linewidth = 1) +
+  geom_point(data = ndd, aes(y = suv / n), alpha = 0.6) +
+  scale_y_continuous(limits = c(0, 1)) +
+  labs(x = "Conspecific density (scaled)", y = "Survival probability")
 regression_plot
 ```
 

@@ -45,11 +45,12 @@ If delayed, shorten research equations/code and put allometry in optional readin
 source(here::here("R/slides_setup.R"))
 trees <- make_tree_data()
 fit <- course_fit("day3_trees")
-comparison <- mother_comparison(fit, seed=42)
-tree_a <- comparison |> filter(tree=="A") |>
-  select(tree,n,model,mean) |>
-  pivot_wider(names_from=model,values_from=mean) |>
-  left_join(trees |> select(tree,p_true),by="tree")
+comparison <- mother_comparison(fit, seed = 42)
+tree_a <- comparison |>
+  filter(tree == "A") |>
+  select(tree, n, model, mean) |>
+  pivot_wider(names_from = model, values_from = mean) |>
+  left_join(trees |> select(tree, p_true), by = "tree")
 ```
 
 ##  {#title-slide background="../images/priors.png" background-size="50%" background-position="50% 20%"}
@@ -102,9 +103,13 @@ its own simulated data and saved hierarchical regression fit.
 ::: columns
 ::: {.column width="42%"}
 ```{r tree-data}
-trees |> select(tree,n,suv) |>
-  knitr::kable(format="html",col.names=c("Tree","Seedlings","Survivors")) |>
-  kableExtra::kable_styling(font_size=27)
+trees |>
+  select(tree, n, suv) |>
+  knitr::kable(
+    format = "html",
+    col.names = c("Tree", "Seedlings", "Survivors")
+  ) |>
+  kableExtra::kable_styling(font_size = 27)
 ```
 :::
 ::: {.column width="58%"}
@@ -117,7 +122,7 @@ What if we combine all seedlings into one group?
 sum(trees$suv) / sum(trees$n)
 ```
 
-One overall observed survival proportion: **`r round(sum(trees$suv)/sum(trees$n),3)`**.
+One overall observed survival proportion: **`r round(sum(trees$suv) / sum(trees$n), 3)`**.
 :::
 :::
 
@@ -134,9 +139,15 @@ Do not introduce the hypothetical 0/2 and 2/2 cases here.
 ::: columns
 ::: {.column width="48%"}
 ```{r separate-proportions}
-trees |> transmute(Tree=tree,Seedlings=n,Survivors=suv,Proportion=round(suv/n,2)) |>
-  knitr::kable(format="html") |>
-  kableExtra::kable_styling(font_size=25)
+trees |>
+  transmute(
+    Tree = tree,
+    Seedlings = n,
+    Survivors = suv,
+    Proportion = round(suv / n, 2)
+  ) |>
+  knitr::kable(format = "html") |>
+  kableExtra::kable_styling(font_size = 25)
 ```
 :::
 ::: {.column width="52%"}
@@ -145,7 +156,7 @@ For each mother tree:
 
 Survival proportion = survivors / seedlings.
 
-The proportions range from **`r round(min(trees$suv/trees$n),2)`** to **`r round(max(trees$suv/trees$n),2)`**.
+The proportions range from **`r round(min(trees$suv / trees$n), 2)`** to **`r round(max(trees$suv / trees$n), 2)`**.
 
 Do these differences reflect real tree differences, sampling variation, or both?
 :::
@@ -160,12 +171,20 @@ observed proportions alone do not establish different underlying probabilities.
 ## One common probability, or different probabilities?
 
 ```{r observed-trees, fig.width=11, fig.height=4.2}
-ggplot(trees,aes(tree,suv/n,size=n)) +
-  geom_hline(yintercept=sum(trees$suv)/sum(trees$n),linetype="dashed",colour="grey40") +
-  geom_point(shape=21,fill="white",stroke=1.2) +
-  ylim(0,1) +
-  labs(x="Mother tree",y="Observed survival\nproportion",size="Seedlings",
-       subtitle="Points: tree-specific proportions. Dashed line: pooled proportion.")
+ggplot(trees, aes(tree, suv / n, size = n)) +
+  geom_hline(
+    yintercept = sum(trees$suv) / sum(trees$n),
+    linetype = "dashed",
+    colour = "grey40"
+  ) +
+  geom_point(shape = 21, fill = "white", stroke = 1.2) +
+  ylim(0, 1) +
+  labs(
+    x = "Mother tree",
+    y = "Observed survival\nproportion",
+    size = "Seedlings",
+    subtitle = "Points: tree-specific proportions. Dashed line: pooled proportion."
+  )
 ```
 
 Can data from other trees help us estimate each tree's survival probability?
@@ -248,30 +267,51 @@ The Normal second argument is SD, on the logit scale.
 ::: {.column width="65%"}
 ```{r group-variation, fig.width=8.8, fig.height=5.2, out.width="100%", dev.args=list(bg="white")}
 plot_group_curves() +
-  labs(subtitle="Same logit centre; only sigma changes",
-       caption="Eight colours: eight trees. Illustrative curves, not fitted.") +
-  theme(plot.margin=margin(5.5,22,5.5,5.5))
+  labs(
+    subtitle = "Same logit centre; only sigma changes",
+    caption = "Eight colours: eight trees. Illustrative curves, not fitted."
+  ) +
+  theme(plot.margin = margin(5.5, 22, 5.5, 5.5))
 ```
 :::
 ::: {.column width="35%"}
 ```{r group-sd-prior, fig.width=4.6, fig.height=3.6, out.width="100%", dev.args=list(bg="white")}
-sigma_examples <- tibble(sigma=c(.1,1,3))
-tibble(sigma=seq(0,3.5,length.out=701)) |>
-  mutate(density=2*dnorm(sigma, mean=0, sd=1)) |>
-  ggplot(aes(sigma,density)) +
-  geom_vline(data=sigma_examples, aes(xintercept=sigma),
-             linetype="dashed", colour="grey55", linewidth=.6) +
-  geom_line(colour="#d95f02", linewidth=1.2) +
-  geom_point(data=sigma_examples,
-             aes(y=2*dnorm(sigma, mean=0, sd=1)),
-             colour="#d95f02", size=3) +
-  scale_x_continuous(limits=c(0,3.5), breaks=c(.1,1,3),
-                     expand=expansion(mult=.04)) +
-  scale_y_continuous(limits=c(0,.85), breaks=c(0,.4,.8)) +
-  labs(title="Prior for sigma", subtitle="Half-Normal(0, 1)",
-       x=expression(sigma), y="Prior density") +
-  theme(axis.title=element_text(size=20), axis.text=element_text(size=18),
-        plot.title=element_text(size=23), plot.subtitle=element_text(size=19))
+sigma_examples <- tibble(sigma = c(.1, 1, 3))
+tibble(sigma = seq(0, 3.5, length.out = 701)) |>
+  mutate(density = 2 * dnorm(sigma, mean = 0, sd = 1)) |>
+  ggplot(aes(sigma, density)) +
+  geom_vline(
+    data = sigma_examples,
+    aes(xintercept = sigma),
+    linetype = "dashed",
+    colour = "grey55",
+    linewidth = .6
+  ) +
+  geom_line(colour = "#d95f02", linewidth = 1.2) +
+  geom_point(
+    data = sigma_examples,
+    aes(y = 2 * dnorm(sigma, mean = 0, sd = 1)),
+    colour = "#d95f02",
+    size = 3
+  ) +
+  scale_x_continuous(
+    limits = c(0, 3.5),
+    breaks = c(.1, 1, 3),
+    expand = expansion(mult = .04)
+  ) +
+  scale_y_continuous(limits = c(0, .85), breaks = c(0, .4, .8)) +
+  labs(
+    title = "Prior for sigma",
+    subtitle = "Half-Normal(0, 1)",
+    x = expression(sigma),
+    y = "Prior density"
+  ) +
+  theme(
+    axis.title = element_text(size = 20),
+    axis.text = element_text(size = 18),
+    plot.title = element_text(size = 23),
+    plot.subtitle = element_text(size = 19)
+  )
 ```
 
 $\sigma$ describes differences among trees.
@@ -304,8 +344,11 @@ half-Normal prior with main.qmd's older half-Cauchy prior.
 ## Which estimates might move?
 
 ```{r prediction-table}
-trees |> select(tree,n,suv) |> mutate(proportion=round(suv/n,2)) |>
-  knitr::kable(format="html") |> kableExtra::kable_styling(font_size=25)
+trees |>
+  select(tree, n, suv) |>
+  mutate(proportion = round(suv / n, 2)) |>
+  knitr::kable(format = "html") |>
+  kableExtra::kable_styling(font_size = 25)
 ```
 
 Choose two mother trees and explain your prediction to your partner.
@@ -357,10 +400,10 @@ slide retains those encodings and reveals the generating probabilities on a
 ## Does sharing information improve the estimates? {#in-a-simulation-we-can-check-against-the-truth .mother-story}
 
 ```{r tree-truth-comparison, fig.width=8, fig.height=6.4, out.width="588px", out.height="470px", dev.args=list(bg="white")}
-plot_mother_truth(comparison,trees,highlight="A",limits=c(.2,.5))
+plot_mother_truth(comparison, trees, highlight = "A", limits = c(.2, .5))
 ```
 
-**Tree A: `r sprintf("%.2f",tree_a$Separate)` → `r sprintf("%.2f",tree_a$Partial)`; true probability = `r sprintf("%.2f",tree_a$p_true)`.**<br>
+**Tree A: `r sprintf("%.2f", tree_a$Separate)` → `r sprintf("%.2f", tree_a$Partial)`; true probability = `r sprintf("%.2f", tree_a$p_true)`.**<br>
 Arrows: Separate → Partial pooling. Dashed diagonal: estimate = truth.
 
 ::: notes
@@ -374,9 +417,9 @@ the same true probability, so some trajectories overlap.
 Both axes are restricted to 0.2–0.5; Tree G estimates fall below this window.
 
 Follow labelled Tree A: n=`r tree_a$n`, separate posterior mean
-`r sprintf("%.2f",tree_a$Separate)`, partial-pooling mean
-`r sprintf("%.2f",tree_a$Partial)` and generating probability
-`r sprintf("%.2f",tree_a$p_true)`.
+`r sprintf("%.2f", tree_a$Separate)`, partial-pooling mean
+`r sprintf("%.2f", tree_a$Partial)` and generating probability
+`r sprintf("%.2f", tree_a$p_true)`.
 Movement depends on n, extremity and the inferred group distribution.
 Separate points remain posterior means under independent Beta(1,1) priors,
 not observed proportions or MLEs. Do not claim that sharing information always
@@ -443,8 +486,10 @@ The model asks about an association. It alone does not establish the cause of ra
 ::: {.column width="52%"}
 ```{r allometry-curves, fig.width=8, fig.height=4.6}
 allo <- make_allometry_data()
-ggplot(allo,aes(dbh,h,colour=sp))+geom_point(alpha=.6)+
-  labs(x="DBH (cm)",y="Height (m)")+guides(colour="none")
+ggplot(allo, aes(dbh, h, colour = sp)) +
+  geom_point(alpha = .6) +
+  labs(x = "DBH (cm)", y = "Height (m)") +
+  guides(colour = "none")
 ```
 :::
 ::: {.column width="48%"}
@@ -569,8 +614,8 @@ Priors: mu Normal(0,5), sigma half-Normal(0,1). z_tilde is standard Normal.
 ```{r echo=TRUE, eval=FALSE}
 set.seed(20261026)
 draws <- fit$draws
-p_new <- plogis(rnorm(nrow(draws),draws$mu,draws$sigma))
-quantile(p_new,c(.025,.5,.975))
+p_new <- plogis(rnorm(nrow(draws), draws$mu, draws$sigma))
+quantile(p_new, c(.025, .5, .975))
 ```
 
 This predicts a new tree's probability, including group variation. A future

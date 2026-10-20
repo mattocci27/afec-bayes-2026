@@ -5,9 +5,11 @@ if (workers == 1) {
   targets::tar_make()
 } else if (workers == 100) {
   targets::tar_make_clustermq(
-   workers = parallel::detectCores())
+    workers = parallel::detectCores()
+  )
 } else if (is.numeric(workers)) {
-# for HPC
+  # for HPC
   targets::tar_make_clustermq(
-   workers = workers)
+    workers = workers
+  )
 }

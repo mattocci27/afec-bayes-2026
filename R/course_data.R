@@ -12,8 +12,12 @@
 #' Species differ a lot in sample size (3 to 40 trees), as in real plots.
 allometry_truth <- list(
   dbh_ref = 40,
-  gamma00 = log(16), gamma01 = 0.05, tau0 = 0.10,
-  gamma10 = 0.60,    gamma11 = 0.10, tau1 = 0.05,
+  gamma00 = log(16),
+  gamma01 = 0.05,
+  tau0 = 0.10,
+  gamma10 = 0.60,
+  gamma11 = 0.10,
+  tau1 = 0.05,
   sigma = 0.10
 )
 
@@ -70,7 +74,11 @@ make_tree_data <- function() {
 
 # ---- Stan data lists ---------------------------------------------------------
 
-allometry_stan_data <- function(d, beta_sd = 2.5, dbh_ref = allometry_truth$dbh_ref) {
+allometry_stan_data <- function(
+  d,
+  beta_sd = 2.5,
+  dbh_ref = allometry_truth$dbh_ref
+) {
   list(
     N = nrow(d),
     x = log(d$dbh / dbh_ref),

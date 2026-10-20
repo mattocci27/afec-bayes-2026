@@ -47,7 +47,7 @@ execute:
 🧑🏻‍💻 [`r rmarkdown::metadata$author` \@ `r rmarkdown::metadata$institute`]{.author}
 
 
-`r rotating_text(c('<i class="fa-solid fa-envelope"></i> mattocci27@gmail.com', '<i class="fa-brands fa-twitter"></i> @mattocci', '<i class="fa-brands fa-github"></i> github.com/mattocci27/bayes-afec', '<i class="fa-solid fa-globe"></i> https://mattocci27.github.io'))`
+`r rotating_text(c( '<i class="fa-solid fa-envelope"></i> mattocci27@gmail.com', '<i class="fa-brands fa-twitter"></i> @mattocci', '<i class="fa-brands fa-github"></i> github.com/mattocci27/bayes-afec', '<i class="fa-solid fa-globe"></i> https://mattocci27.github.io' ))`
 </h3>
 :::
 
@@ -145,8 +145,9 @@ tibble(x, y) |>
   ggtitle("N(0, 1)") +
   geom_line(aes(x, y)) +
   theme(
-    axis.title   = element_text(size = 32),
-    axis.text    = element_text(size = 28))
+    axis.title = element_text(size = 32),
+    axis.text = element_text(size = 28)
+  )
 ```
 
 ::: small
@@ -163,7 +164,7 @@ $f(x \mid \mu, \sigma) = \frac{1}{\sqrt{2\pi\sigma^2}}\mathrm{exp} \bigl[{-\frac
 
 ::: fragment
 ```{r, echo=TRUE}
-1 / sqrt(2 * pi * 1) * exp(-1/2 * (1.96 - 0)^2 / 1)
+1 / sqrt(2 * pi * 1) * exp(-1 / 2 * (1.96 - 0)^2 / 1)
 ```
 :::
 
@@ -200,7 +201,9 @@ When your data is x = {-1.5, 0, 1.5} and your model is $x \sim \mathcal{N}(0, 1)
 
 ::: fragment
 ```{r, echo=TRUE}
-dnorm(-1.5, mean = 0, sd = 1, log = TRUE) + dnorm(0, mean = 0, sd = 1, log = TRUE) + dnorm(1.5, mean = 0, sd = 1, log = TRUE)
+dnorm(-1.5, mean = 0, sd = 1, log = TRUE) +
+  dnorm(0, mean = 0, sd = 1, log = TRUE) +
+  dnorm(1.5, mean = 0, sd = 1, log = TRUE)
 ```
 :::
 
@@ -208,7 +211,9 @@ dnorm(-1.5, mean = 0, sd = 1, log = TRUE) + dnorm(0, mean = 0, sd = 1, log = TRU
 
 ```{r, fig.height=3.5}
 like_fun <- function(mu) {
-  dnorm(-1.5, mean = mu, sd = 1, log = TRUE) + dnorm(0, mean = mu, sd = 1, log = TRUE) + dnorm(1.5, mean = mu, sd = 1, log = TRUE)
+  dnorm(-1.5, mean = mu, sd = 1, log = TRUE) +
+    dnorm(0, mean = mu, sd = 1, log = TRUE) +
+    dnorm(1.5, mean = mu, sd = 1, log = TRUE)
 }
 
 x <- seq(-5, 5, length.out = 100)
@@ -220,9 +225,9 @@ tibble(x, y) |>
   ggtitle("N(0, 1)") +
   geom_line(aes(x, y)) +
   theme(
-    axis.title   = element_text(size = 32),
-    axis.text    = element_text(size = 28))
-
+    axis.title = element_text(size = 32),
+    axis.text = element_text(size = 28)
+  )
 ```
 :::
 
@@ -337,12 +342,14 @@ b1 <- rnorm(n_sp, b1_hat, 0.1)
 
 b0 <- rnorm(n_sp, 0, 0.5)
 y_fun <- function(beta0, beta1) beta0 + beta1 * xx
-xx <- seq(-3, 3, length = n_rep)
+xx <- seq(-3, 3, length.out = n_rep)
 z <- map2(as.list(b0), as.list(b1), y_fun) |> unlist()
 
-tmp <- tibble(z,
-              x = rep(xx, n_sp),
-              sp = rep(paste0("sp", 1:n_sp), each = n_rep))
+tmp <- tibble(
+  z,
+  x = rep(xx, n_sp),
+  sp = rep(paste0("sp", 1:n_sp), each = n_rep)
+)
 
 tmp2 <- tibble(x = trait, y = b1, sp = rep(paste0("sp", 1:n_sp)))
 logistic <- function(z) 1 / (1 + exp(-z))
@@ -365,9 +372,14 @@ p2 <- tmp |>
 
 p3 <- tmp2 |>
   ggplot(aes(x = x, y = y, col = sp)) +
-  geom_smooth(method = "lm", se = TRUE, lty = 2,
+  geom_smooth(
+    method = "lm",
+    se = TRUE,
+    lty = 2,
     alpha = 0.2,
-    linewidth = 0.5, col = "black") +
+    linewidth = 0.5,
+    col = "black"
+  ) +
   geom_point(size = 3) +
   xlab("Abundance") +
   ylab("Strength of NDD") +
@@ -416,13 +428,15 @@ b1_hat <- gamma1 * trait + gamma0
 b1 <- rnorm(n_sp, b1_hat, 0.01)
 b0 <- rnorm(n_sp, 0.55, 0.05)
 y_fun <- function(beta0, beta1) beta0 + beta1 * log_xx
-log_xx <- seq(1, 100, length = n_rep) |> log()
+log_xx <- seq(1, 100, length.out = n_rep) |> log()
 
 log_y <- map2(as.list(b0), as.list(b1), y_fun) |> unlist()
 
-tmp <- tibble(y = exp(log_y),
-              x = rep(exp(log_xx), n_sp),
-              sp = rep(paste0("sp", 1:n_sp), each = n_rep))
+tmp <- tibble(
+  y = exp(log_y),
+  x = rep(exp(log_xx), n_sp),
+  sp = rep(paste0("sp", 1:n_sp), each = n_rep)
+)
 
 tmp2 <- tibble(x = trait, y = b1, sp = rep(paste0("sp", 1:n_sp)))
 
@@ -435,7 +449,7 @@ p1 <- tmp |>
   theme(
     legend.position = "none",
     plot.title = element_text(size = 24)
-    )
+  )
 
 
 p2 <- tmp |>
@@ -449,13 +463,18 @@ p2 <- tmp |>
   theme(
     legend.position = "none",
     plot.title = element_text(size = 24)
-    )
+  )
 
 p3 <- tmp2 |>
   ggplot(aes(x = x, y = y, col = sp)) +
-  geom_smooth(method = "lm", se = TRUE, lty = 2,
+  geom_smooth(
+    method = "lm",
+    se = TRUE,
+    lty = 2,
     alpha = 0.2,
-    linewidth = 0.5, col = "black") +
+    linewidth = 0.5,
+    col = "black"
+  ) +
   geom_point(size = 3) +
   xlab("Wood density") +
   ylab("b") +
@@ -485,8 +504,10 @@ tar_load(dummy_simple)
 
 ```{r, echo=TRUE, eval=FALSE}
 fit_ind <- lme4::glmer(
-  cbind(suv, n - suv) ~  cons + (1 + cons | sp),
-  data = dummy, family = binomial)
+  cbind(suv, n - suv) ~ cons + (1 + cons | sp),
+  data = dummy,
+  family = binomial
+)
 ```
 
 We need to extract the slope coefficients for each species from `fit_ind` and make `new_data`.
@@ -495,7 +516,7 @@ We need to extract the slope coefficients for each species from `fit_ind` and ma
 ### Group-level model: LM
 
 ```{r, echo=TRUE, eval=FALSE}
-fit_gr <- lm(slope_coef ~  abund, data = new_data)
+fit_gr <- lm(slope_coef ~ abund, data = new_data)
 ```
 :::
 
@@ -514,8 +535,10 @@ e.g.,
 
 ```{r, echo=TRUE, eval=FALSE}
 fit_mle <- lme4::glmer(
-  cbind(suv, n - suv) ~  cons + abund + cons:abund + (1 + cons | sp),
-  data = dummy, family = binomial)
+  cbind(suv, n - suv) ~ cons + abund + cons:abund + (1 + cons | sp),
+  data = dummy,
+  family = binomial
+)
 ```
 
 ::: incremental
@@ -527,8 +550,10 @@ fit_mle <- lme4::glmer(
 
 ```{r, echo=TRUE, eval=FALSE}
 fit_bayes <- brms::brms(
-  cbind(suv, n - suv) ~  cons + abund + cons:abund + (1 + cons | sp),
-  data = dummy, family = binomial())
+  cbind(suv, n - suv) ~ cons + abund + cons:abund + (1 + cons | sp),
+  data = dummy,
+  family = binomial()
+)
 ```
 
 ::: incremental
@@ -613,10 +638,10 @@ ggplot() +
   theme_void() +
   annotate("text", x = 0, y = 0, label = "A", size = 10) +
   theme(
-      title = element_text(size = 30),
-      panel.border = element_rect(colour = "black", size = 2),
-      legend.position = "none"
-    )
+    title = element_text(size = 30),
+    panel.border = element_rect(colour = "black", size = 2),
+    legend.position = "none"
+  )
 ```
 :::
 ::: {.column width="50%"}
@@ -653,10 +678,12 @@ ggplot() +
 
 ```{r}
 a <- 1
-df.venn <- data.frame(x = c(-a, a),
-                      y = c(0, 0),
-                      labels = c("A", "B"),
-                      stringsAsFactors = FALSE)
+df.venn <- data.frame(
+  x = c(-a, a),
+  y = c(0, 0),
+  labels = c("A", "B"),
+  stringsAsFactors = FALSE
+)
 
 radius <- 1.5
 
@@ -668,36 +695,43 @@ xvals <- c(xvals, -xvals)
 yvals <- c(yvals, -yvals)
 combo <- data.frame(x = xvals, y = yvals)
 
-xvals <- seq(a - radius, a  + radius, 0.01)
+xvals <- seq(a - radius, a + radius, 0.01)
 yvals <- sqrt(radius^2 - (xvals - a)^2)
 xvals <- c(xvals, rev(xvals))
 yvals <- c(yvals, -yvals)
 combo2 <- data.frame(x = xvals, y = yvals)
 
 ggplot2::ggplot(data = df.venn) +
-    ggforce::geom_circle(
-        ggplot2::aes_string(x0 = "x", y0 = "y", r = radius, fill = "labels"),
-        alpha = 0,
-        size = 1.5
-#       colour = 'darkgray'
-    ) +
-    ggtitle("U") +
-    ggplot2::geom_polygon(data = combo, aes(x = x, y = y),
-      fill = "blue", alpha = 0.6) +
-    ggplot2::geom_polygon(data = combo2, aes(x = x, y = y),
-      fill = "blue", alpha = 0.3) +
-    ggplot2::coord_fixed() +
-    ggplot2::theme_void() +
-    ggplot2::scale_fill_manual(values = c("gray50", "gray50")) +
-    annotate("text", x = 0, y = 0, label = "A ∩ B", size = 10) +
-    annotate("text", x = -1, y = 0, label = "A", size = 10) +
-    annotate("text", x = 1, y = 0, label = "B", size = 10) +
-    theme(
-      title = element_text(size = 30),
-      panel.border = element_rect(colour = "black", size = 2),
-      legend.position = "none"
-    )
-
+  ggforce::geom_circle(
+    ggplot2::aes_string(x0 = "x", y0 = "y", r = radius, fill = "labels"),
+    alpha = 0,
+    size = 1.5
+    #       colour = 'darkgray'
+  ) +
+  ggtitle("U") +
+  ggplot2::geom_polygon(
+    data = combo,
+    aes(x = x, y = y),
+    fill = "blue",
+    alpha = 0.6
+  ) +
+  ggplot2::geom_polygon(
+    data = combo2,
+    aes(x = x, y = y),
+    fill = "blue",
+    alpha = 0.3
+  ) +
+  ggplot2::coord_fixed() +
+  ggplot2::theme_void() +
+  ggplot2::scale_fill_manual(values = c("gray50", "gray50")) +
+  annotate("text", x = 0, y = 0, label = "A ∩ B", size = 10) +
+  annotate("text", x = -1, y = 0, label = "A", size = 10) +
+  annotate("text", x = 1, y = 0, label = "B", size = 10) +
+  theme(
+    title = element_text(size = 30),
+    panel.border = element_rect(colour = "black", size = 2),
+    legend.position = "none"
+  )
 ```
 
 :::
@@ -882,16 +916,21 @@ $$
 # Prior
 
 ```{r}
-my_prior <- function(p) p^50 * (1 - p)^ 50
+my_prior <- function(p) p^50 * (1 - p)^50
 my_like <- function(p) p^2 * (1 - p)^1
-x <- seq(0, 1, length = 100)
+x <- seq(0, 1, length.out = 100)
 y <- my_prior(x)
 y2 <- my_like(x)
 y3 <- y * y2
 
 dark2 <- brewer.pal(3, "Dark2")
 
-p1 <- tibble(x, Prior = y * 10^29.5, Likelihood = y2, Posterior = y3 * 10^30.5) |>
+p1 <- tibble(
+  x,
+  Prior = y * 10^29.5,
+  Likelihood = y2,
+  Posterior = y3 * 10^30.5
+) |>
   pivot_longer(Prior:Posterior) |>
   mutate(name = factor(name, levels = c("Posterior", "Likelihood", "Prior"))) |>
   ggplot(aes(x = x, y = value, color = name)) +
@@ -904,7 +943,7 @@ p1 <- tibble(x, Prior = y * 10^29.5, Likelihood = y2, Posterior = y3 * 10^30.5) 
     legend.text = element_text(size = 28),
     legend.title = element_blank(),
     axis.text.y = element_blank()
-    )
+  )
 
 p1
 
@@ -936,18 +975,18 @@ We compare two coins, A and B, with the same prior but different likelihood (due
 
 ::: {.column width="50%"}
 ```{r}
-my_prior <- function(p) p^50 * (1 - p)^ 50
-x <- seq(0, 1, length = 100)
+my_prior <- function(p) p^50 * (1 - p)^50
+x <- seq(0, 1, length.out = 100)
 y <- my_prior(x)
 
-tibble(x, prior = y * 10^29.5) %>%
+tibble(x, prior = y * 10^29.5) |>
   ggplot(aes(x, prior)) +
   geom_line(size = 1.5) +
   theme(
     legend.position = "none",
     axis.text = element_text(size = 28),
-    axis.title = element_text(size = 32))
-
+    axis.title = element_text(size = 32)
+  )
 ```
 :::
 
@@ -1017,15 +1056,16 @@ p1 <- tibble(x1, y1) |>
   geom_abline(intercept = 2, slope = 1000, col = "blue", size = 2, lty = 2) +
   annotate(
     "text",
-    x     = 1,
-    y     = -4,
+    x = 1,
+    y = -4,
     label = "y = 100x + 2",
     color = "blue",
-    size  = 10
+    size = 10
   ) +
   theme(
-    axis.title   = element_text(size = 32),
-    axis.text    = element_text(size = 28))
+    axis.title = element_text(size = 32),
+    axis.text = element_text(size = 28)
+  )
 p1
 ```
 :::
@@ -1053,14 +1093,20 @@ x <- seq(-3, 3, length.out = 100)
 b <- rnorm(n_sp, mean = 3, sd = 0.8)
 a <- 2
 
-y <- map(b, \(b)(a*x + b))
-tibble(y = unlist(y), x = rep(x, n_sp), .id = rep(letters[1:n_sp], each = 100)) |>
-  ggplot(aes(x = x, y = y , col = .id)) +
+y <- map(b, \(b) (a * x + b))
+tibble(
+  y = unlist(y),
+  x = rep(x, n_sp),
+  .id = rep(letters[1:n_sp], each = 100)
+) |>
+  ggplot(aes(x = x, y = y, col = .id)) +
   geom_line(size = 1.5) +
   scale_color_viridis_d() +
-  theme(legend.position = "none",
-    axis.title   = element_text(size = 52),
-    axis.text    = element_text(size = 48))
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 52),
+    axis.text = element_text(size = 48)
+  )
 ```
 
 ::: footer
@@ -1251,7 +1297,14 @@ dummy_simple |>
 ggplot(dummy_simple, aes(x = p_true, y = p_like)) +
   geom_point(size = 12, pch = 21) +
   geom_abline(slope = 1, intercept = 0, lty = 2) +
-  annotate(geom = "text", x = 0.34, y = 0.38, label = "1:1", size = 10, angle = 18) +
+  annotate(
+    geom = "text",
+    x = 0.34,
+    y = 0.38,
+    label = "1:1",
+    size = 10,
+    angle = 18
+  ) +
   xlab("True survival rate") +
   ylab("Estimated \nsurvival rate")
 ```
@@ -1351,20 +1404,25 @@ sig3 <- 3
 n_sp <- 8
 sig <- 0.2
 
-xx <- seq(-3, 3, length = 100)
+xx <- seq(-3, 3, length.out = 100)
 mu1 <- rnorm(n_sp, z, sig1)
 mu2 <- rnorm(n_sp, z, sig2)
 mu3 <- rnorm(n_sp, z, sig3)
 
-data <- tibble(mu1 = as.list(mu1), mu2 = as.list(mu2), mu3 = as.list(mu3), sp = LETTERS[1:8]) |>
-  mutate(y1 = map(mu1, \(mu)dnorm(xx, mu, sig))) |>
-  mutate(y2 = map(mu2, \(mu)dnorm(xx, mu, sig))) |>
-  mutate(y3 = map(mu3, \(mu)dnorm(xx, mu, sig))) |>
-  unnest(cols = c(mu1, mu2, mu3, y1, y2, y3))  |>
+data <- tibble(
+  mu1 = as.list(mu1),
+  mu2 = as.list(mu2),
+  mu3 = as.list(mu3),
+  sp = LETTERS[1:8]
+) |>
+  mutate(y1 = map(mu1, \(mu) dnorm(xx, mu, sig))) |>
+  mutate(y2 = map(mu2, \(mu) dnorm(xx, mu, sig))) |>
+  mutate(y3 = map(mu3, \(mu) dnorm(xx, mu, sig))) |>
+  unnest(cols = c(mu1, mu2, mu3, y1, y2, y3)) |>
   mutate(xx = rep(xx, 8))
 
 plot_density <- function(data, y, title_suffix) {
-  ggplot(data, aes(x = logistic(xx), y = {{y}}, col = sp)) +
+  ggplot(data, aes(x = logistic(xx), y = {{ y }}, col = sp)) +
     geom_line() +
     xlab("p") +
     ylab("Density") +
@@ -1385,7 +1443,7 @@ p1 / p2 / p3
 ```{r, fig.height=10}
 plot_sigma <- function(density_func, params, title) {
   y <- density_func(sigma, params[[1]], params[[2]])
-  tibble(sigma, y) %>%
+  tibble(sigma, y) |>
     ggplot(aes(x = sigma, y = y)) +
     geom_line() +
     xlab("Sigma") +
@@ -1394,7 +1452,7 @@ plot_sigma <- function(density_func, params, title) {
 }
 
 # Sigma values
-sigma <- seq(0.01, 10, length = 100)
+sigma <- seq(0.01, 10, length.out = 100)
 
 # Generating plots
 p4 <- plot_sigma(dcauchy, list(0, 1), "sigma ~ Half-Cauchy(0, 1)")
@@ -1442,18 +1500,25 @@ dummy_simple_re |>
 dummy_simple_re |>
   pivot_longer(c(p_like, p_bayes)) |>
   ggplot(aes(x = p_true, y = value, fill = name)) +
-    # geom_jitter(size = 12, pch = 21, width = 0.001, alpha = 0.8) +
-    geom_point(size = 12, pch = 21, alpha = 0.8) +
-    annotate(geom = "text", x = 0.34, y = 0.38, label = "1:1", size = 10, angle = 18) +
-    geom_abline(slope = 1, intercept = 0, lty = 2) +
-    xlab("True survival rate") +
-    ylab("Estimated \nsurvival rate") +
-    theme(
-      legend.position = c(0.2, 0.75),
-      legend.text = element_text(size = 24),
-      legend.title = element_blank(),
-      legend.box.background = element_rect(color = "grey40", size = 1)
-    )
+  # geom_jitter(size = 12, pch = 21, width = 0.001, alpha = 0.8) +
+  geom_point(size = 12, pch = 21, alpha = 0.8) +
+  annotate(
+    geom = "text",
+    x = 0.34,
+    y = 0.38,
+    label = "1:1",
+    size = 10,
+    angle = 18
+  ) +
+  geom_abline(slope = 1, intercept = 0, lty = 2) +
+  xlab("True survival rate") +
+  ylab("Estimated \nsurvival rate") +
+  theme(
+    legend.position = c(0.2, 0.75),
+    legend.text = element_text(size = 24),
+    legend.title = element_blank(),
+    legend.box.background = element_rect(color = "grey40", size = 1)
+  )
 ```
 
 ::: small
@@ -1540,7 +1605,7 @@ posterior distribution is proportional to the likelihood times the prior
 ```{r}
 # Load necessary packages
 library(bayesplot)
-library(posterior)  # for creating a draws_array
+library(posterior) # for creating a draws_array
 
 # Simulate MCMC draws for 3 chains and 1000 iterations
 set.seed(42)
@@ -1549,9 +1614,11 @@ n_chains <- 3
 param <- replicate(n_chains, cumsum(rnorm(n_iter, 0, 0.1)) + 0)
 
 # Combine into a 3D array: iterations × chains × parameters
-draws_array <- array(param,
+draws_array <- array(
+  param,
   dim = c(n_iter, n_chains, 1),
-  dimnames = list(NULL, NULL, "beta[1]"))
+  dimnames = list(NULL, NULL, "beta[1]")
+)
 
 # Traceplot using bayesplot
 color_scheme_set("viridis")
@@ -1635,8 +1702,8 @@ gibbs_sampler <- function(n_iter = 1000, rho = 0.9) {
   p[1] <- 0
   q[1] <- 0
   for (t in 2:n_iter) {
-    p[t] <- rnorm(1, mean = rho * q[t-1], sd = sqrt(1 - rho^2))
-    q[t] <- rnorm(1, mean = rho * p[t],   sd = sqrt(1 - rho^2))
+    p[t] <- rnorm(1, mean = rho * q[t - 1], sd = sqrt(1 - rho^2))
+    q[t] <- rnorm(1, mean = rho * p[t], sd = sqrt(1 - rho^2))
   }
   tibble(iter = 1:n_iter, p = p, q = q)
 }

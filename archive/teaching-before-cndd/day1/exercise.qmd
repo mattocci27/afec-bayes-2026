@@ -114,8 +114,11 @@ bind_rows(
   summarise_update(y = 40, N = 100)
 )
 
-plot_update(2, 5) + plot_update(8, 20) + plot_update(40, 100) +
-  plot_layout(guides = "collect") & theme(legend.position = "bottom")
+plot_update(2, 5) +
+  plot_update(8, 20) +
+  plot_update(40, 100) +
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom")
 ```
 
 **Expected observations**
@@ -154,7 +157,9 @@ compared 2/5 with 40/100 under the flat prior.
 ## Solution and notes
 
 ```{r ex1a-sol2, fig.width=10, fig.height=6}
-priors <- tribble(~a, ~b, 1, 1, 2, 2, 8, 2)
+priors <- tribble(
+  ~a , ~b , 1 , 1 , 2 , 2 , 8 , 2
+)
 
 # 2 of 5
 pmap(priors, \(a, b) summarise_update(2, 5, a, b)) |> list_rbind()
@@ -162,8 +167,11 @@ pmap(priors, \(a, b) summarise_update(2, 5, a, b)) |> list_rbind()
 pmap(priors, \(a, b) summarise_update(40, 100, a, b)) |> list_rbind()
 
 (plot_update(2, 5, 1, 1) + plot_update(2, 5, 2, 2) + plot_update(2, 5, 8, 2)) /
-  (plot_update(40, 100, 1, 1) + plot_update(40, 100, 2, 2) + plot_update(40, 100, 8, 2)) +
-  plot_layout(guides = "collect") & theme(legend.position = "bottom")
+  (plot_update(40, 100, 1, 1) +
+    plot_update(40, 100, 2, 2) +
+    plot_update(40, 100, 8, 2)) +
+  plot_layout(guides = "collect") &
+  theme(legend.position = "bottom")
 ```
 
 **Expected observations**
@@ -239,7 +247,12 @@ Judging a prior on the scale of the data is usually easier than judging it on th
 The Stan model. Find the data, the parameter, the prior, and the likelihood:
 
 ```{r show-stan, echo=FALSE, results="asis"}
-cat("```stan\n", paste(readLines(here("stan/binomial.stan")), collapse = "\n"), "\n```\n", sep = "")
+cat(
+  "```stan\n",
+  paste(readLines(here("stan/binomial.stan")), collapse = "\n"),
+  "\n```\n",
+  sep = ""
+)
 ```
 
 ## Task 1: load the fitted model and look at the draws (5 minutes)
@@ -247,10 +260,14 @@ cat("```stan\n", paste(readLines(here("stan/binomial.stan")), collapse = "\n"), 
 ```{r ex1b-fit}
 seedling_data <- list(N = 5, y = 2, a = 1, b = 1)
 
-fit <- fit_or_load("day1_seedling", "stan/binomial.stan", data = seedling_data,
-  use_precomputed = TRUE)
+fit <- fit_or_load(
+  "day1_seedling",
+  "stan/binomial.stan",
+  data = seedling_data,
+  use_precomputed = TRUE
+)
 
-fit$source   # "live" or "precomputed"
+fit$source # "live" or "precomputed"
 draws <- fit$draws
 draws
 ```
@@ -263,8 +280,14 @@ Live inference calls a matching precompiled model in the classroom:
 
 ```{r, eval=FALSE}
 mod <- course_model("stan/binomial.stan")
-fit <- mod$sample(data = seedling_data, seed = 123, chains = 4,
-                  parallel_chains = 1, iter_warmup = 1000, iter_sampling = 1000)
+fit <- mod$sample(
+  data = seedling_data,
+  seed = 123,
+  chains = 4,
+  parallel_chains = 1,
+  iter_warmup = 1000,
+  iter_sampling = 1000
+)
 draws <- posterior::as_draws_df(fit$draws())
 ```
 
@@ -294,14 +317,18 @@ quantile(draws$p, probs = c(0.05, 0.95))
 summarise_update(2, 5, 1, 1)
 
 # the same, with the posterior package
-summarise_draws(draws, mean, ~quantile(.x, c(0.05, 0.95)), rhat, ess_bulk)
+summarise_draws(draws, mean, \(x) quantile(x, c(0.05, 0.95)), rhat, ess_bulk)
 ```
 
 ```{r ex1b-sol1-plot}
 ggplot(draws, aes(p)) +
   geom_histogram(aes(y = after_stat(density)), bins = 40, alpha = 0.5) +
   stat_function(fun = dbeta, args = list(3, 4)) +
-  labs(x = "p", y = "Density", subtitle = "Histogram: draws; line: exact posterior Beta(3, 4)")
+  labs(
+    x = "p",
+    y = "Density",
+    subtitle = "Histogram: draws; line: exact posterior Beta(3, 4)"
+  )
 ```
 
 **Expected observations**: the numbers agree with the exact posterior to about two decimals.
@@ -389,11 +416,15 @@ The prior settings `a` and `b` are part of the data list, so nothing needs to be
 - (b) 2 survivors out of 5, prior $\text{Beta}(8, 2)$.
 
 ```{r ex1b-task3, eval=FALSE}
-fit_a <- fit_or_load("day1_seedling", "stan/binomial.stan",
+fit_a <- fit_or_load(
+  "day1_seedling",
+  "stan/binomial.stan",
   data = list(N = ___, y = ___, a = 1, b = 1),
-  use_precomputed = FALSE, fallback = FALSE)
+  use_precomputed = FALSE,
+  fallback = FALSE
+)
 
-summarise_draws(fit_a$draws, mean, ~quantile(.x, c(0.05, 0.95)))
+summarise_draws(fit_a$draws, mean, \(x) quantile(x, c(0.05, 0.95)))
 ```
 
 ::: {.content-visible when-meta="solutions"}
@@ -401,17 +432,37 @@ summarise_draws(fit_a$draws, mean, ~quantile(.x, c(0.05, 0.95)))
 ## Solution and notes
 
 ```{r ex1b-sol3, eval=FALSE}
-fit_a <- fit_or_load("day1_seedling", "stan/binomial.stan",
+fit_a <- fit_or_load(
+  "day1_seedling",
+  "stan/binomial.stan",
   data = list(N = 100, y = 40, a = 1, b = 1),
-  use_precomputed = FALSE, fallback = FALSE)
-fit_b <- fit_or_load("day1_seedling", "stan/binomial.stan",
+  use_precomputed = FALSE,
+  fallback = FALSE
+)
+fit_b <- fit_or_load(
+  "day1_seedling",
+  "stan/binomial.stan",
   data = list(N = 5, y = 2, a = 8, b = 2),
-  use_precomputed = FALSE, fallback = FALSE)
+  use_precomputed = FALSE,
+  fallback = FALSE
+)
 
 bind_rows(
-  `2/5, Beta(1,1)` = summarise_draws(draws, mean, ~quantile(.x, c(0.05, 0.95))),
-  `40/100, Beta(1,1)` = summarise_draws(fit_a$draws, mean, ~quantile(.x, c(0.05, 0.95))),
-  `2/5, Beta(8,2)` = summarise_draws(fit_b$draws, mean, ~quantile(.x, c(0.05, 0.95))),
+  `2/5, Beta(1,1)` = summarise_draws(
+    draws,
+    mean,
+    \(x) quantile(x, c(0.05, 0.95))
+  ),
+  `40/100, Beta(1,1)` = summarise_draws(
+    fit_a$draws,
+    mean,
+    \(x) quantile(x, c(0.05, 0.95))
+  ),
+  `2/5, Beta(8,2)` = summarise_draws(
+    fit_b$draws,
+    mean,
+    \(x) quantile(x, c(0.05, 0.95))
+  ),
   .id = "case"
 ) |>
   filter(variable == "p")
@@ -424,8 +475,11 @@ need convergence diagnostics and predictive checks.
 **Exact comparison without Stan (also in the offline result sheet):**
 
 ```{r ex1b-exact-comparison}
-bind_rows(summarise_update(2, 5), summarise_update(40, 100),
-          summarise_update(2, 5, 8, 2))
+bind_rows(
+  summarise_update(2, 5),
+  summarise_update(40, 100),
+  summarise_update(2, 5, 8, 2)
+)
 ```
 
 These are exact Beta summaries for the changed conditions, not reused default Stan draws.

@@ -214,7 +214,11 @@ n_line <- 60
 x_grid <- seq(log(10 / dbh_ref), log(150 / dbh_ref), length.out = 30)
 
 prior_lines <- function(beta_sd, label) {
-  tibble(line = seq_len(n_line), alpha = rnorm(n_line, 0, 2.5), beta = rnorm(n_line, 0, beta_sd)) |>
+  tibble(
+    line = seq_len(n_line),
+    alpha = rnorm(n_line, 0, 2.5),
+    beta = rnorm(n_line, 0, beta_sd)
+  ) |>
     expand_grid(x = x_grid) |>
     mutate(dbh = dbh_ref * exp(x), h = exp(alpha + beta * x), prior = label)
 }
@@ -225,7 +229,15 @@ bind_rows(
 ) |>
   mutate(prior = fct_inorder(prior)) |>
   ggplot(aes(dbh, h, group = line)) +
-  annotate("rect", xmin = 10, xmax = 150, ymin = 1, ymax = 100, fill = col_like, alpha = 0.25) +
+  annotate(
+    "rect",
+    xmin = 10,
+    xmax = 150,
+    ymin = 1,
+    ymax = 100,
+    fill = col_like,
+    alpha = 0.25
+  ) +
   geom_line(alpha = 0.4, colour = col_prior) +
   facet_wrap(~prior, scales = "free_y") +
   scale_x_log10() +
@@ -286,7 +298,7 @@ $$
 ```{r}
 allo_draws <- allo_fit$draws
 allo_draws |>
-  summarise_draws(mean, sd, ~quantile(.x, c(0.05, 0.95)), rhat, ess_bulk) |>
+  summarise_draws(mean, sd, \(x) quantile(x, c(0.05, 0.95)), rhat, ess_bulk) |>
   filter(variable != "lp__") |>
   mutate(across(mean:rhat, \(x) round(x, 3)), ess_bulk = round(ess_bulk)) |>
   kable(format = "html") |>
@@ -298,7 +310,7 @@ allo_draws |>
 - Exponent: `r round(mean(allo_draws$beta), 2)` (90% interval `r paste(round(quantile(allo_draws$beta, c(0.05, 0.95)), 2), collapse = " to ")`).
 - A 40-cm tree is typically $e^{\alpha}$ = `r round(mean(exp(allo_draws$alpha)), 1)` m tall.
 - Elastic similarity theory predicts $\beta = 2/3$.
-  The posterior probability that $\beta < 2/3$ is $P(\beta < 2/3 \mid \text{data})$ = `r round(mean(allo_draws$beta < 2/3), 2)`.
+  The posterior probability that $\beta < 2/3$ is $P(\beta < 2/3 \mid \text{data})$ = `r round(mean(allo_draws$beta < 2 / 3), 2)`.
 :::
 :::
 :::
@@ -308,7 +320,15 @@ allo_draws |>
 ggplot(as_tibble(allo_draws), aes(beta)) +
   geom_histogram(bins = 50, fill = col_post, alpha = 0.6) +
   geom_vline(xintercept = 2 / 3, linetype = 2, linewidth = 1) +
-  annotate("text", x = 2 / 3, y = Inf, label = "2/3 ", hjust = 1.1, vjust = 2, size = 9) +
+  annotate(
+    "text",
+    x = 2 / 3,
+    y = Inf,
+    label = "2/3 ",
+    hjust = 1.1,
+    vjust = 2,
+    size = 9
+  ) +
   labs(x = expression(beta ~ "(scaling exponent)"), y = "Number of draws")
 ```
 :::
@@ -338,11 +358,14 @@ pred <- map(seq_along(x_grid), \(i) {
   y_new <- rnorm(nrow(d), mu, d$sigma)
   tibble(
     dbh = dbh_grid[i],
-    mu_lo = exp(quantile(mu, 0.05)), mu_hi = exp(quantile(mu, 0.95)),
-    new_lo = exp(quantile(y_new, 0.05)), new_hi = exp(quantile(y_new, 0.95)),
+    mu_lo = exp(quantile(mu, 0.05)),
+    mu_hi = exp(quantile(mu, 0.95)),
+    new_lo = exp(quantile(y_new, 0.05)),
+    new_hi = exp(quantile(y_new, 0.95)),
     mid = exp(median(mu))
   )
-}) |> list_rbind()
+}) |>
+  list_rbind()
 
 ggplot(pred, aes(dbh)) +
   geom_ribbon(aes(ymin = new_lo, ymax = new_hi), fill = col_post, alpha = 0.2) +
@@ -376,14 +399,28 @@ Does the model generate data like ours?
 set.seed(1)
 sdat <- allometry_stan_data(allo)
 idx <- sample(nrow(d), 50)
-y_rep <- map(idx, \(i) tibble(rep = i, y = rnorm(sdat$N, d$alpha[i] + d$beta[i] * sdat$x, d$sigma[i]))) |>
+y_rep <- map(idx, \(i) {
+  tibble(
+    rep = i,
+    y = rnorm(sdat$N, d$alpha[i] + d$beta[i] * sdat$x, d$sigma[i])
+  )
+}) |>
   list_rbind()
 
 ggplot() +
-  geom_density(data = y_rep, aes(y, group = rep), colour = col_post, alpha = 0.3, linewidth = 0.3) +
+  geom_density(
+    data = y_rep,
+    aes(y, group = rep),
+    colour = col_post,
+    alpha = 0.3,
+    linewidth = 0.3
+  ) +
   geom_density(data = tibble(y = sdat$y), aes(y), linewidth = 1.8) +
-  labs(x = "log height", y = "Density",
-    subtitle = "Black: observed. Orange: 50 data sets simulated from the posterior")
+  labs(
+    x = "log height",
+    y = "Density",
+    subtitle = "Black: observed. Orange: 50 data sets simulated from the posterior"
+  )
 ```
 :::
 
@@ -424,8 +461,20 @@ ggplot() +
 
 ```{r, fig.width=15, fig.height=5}
 trace_df <- bind_rows(
-  as_tibble(allo_draws) |> transmute(.chain, .iteration, value = alpha, model = "OK: alpha in the allometry model"),
-  as_tibble(bad_fit$draws) |> transmute(.chain, .iteration, value = alpha1, model = "PROBLEM: alpha1 in a deliberately broken model")
+  as_tibble(allo_draws) |>
+    transmute(
+      .chain,
+      .iteration,
+      value = alpha,
+      model = "OK: alpha in the allometry model"
+    ),
+  as_tibble(bad_fit$draws) |>
+    transmute(
+      .chain,
+      .iteration,
+      value = alpha1,
+      model = "PROBLEM: alpha1 in a deliberately broken model"
+    )
 )
 
 ggplot(trace_df, aes(.iteration, value, colour = factor(.chain))) +
@@ -465,11 +514,23 @@ ggplot(trace_df, aes(.iteration, value, colour = factor(.chain))) +
 ```{r}
 bind_rows(
   `OK` = summarise_draws(allo_draws, mean, sd, rhat, ess_bulk, ess_tail),
-  `PROBLEM (broken model)` = summarise_draws(bad_fit$draws, mean, sd, rhat, ess_bulk, ess_tail),
+  `PROBLEM (broken model)` = summarise_draws(
+    bad_fit$draws,
+    mean,
+    sd,
+    rhat,
+    ess_bulk,
+    ess_tail
+  ),
   .id = "fit"
 ) |>
   filter(variable != "lp__") |>
-  mutate(mean = round(mean, 2), sd = round(sd, 3), rhat = round(rhat, 2), across(starts_with("ess"), round)) |>
+  mutate(
+    mean = round(mean, 2),
+    sd = round(sd, 3),
+    rhat = round(rhat, 2),
+    across(starts_with("ess"), round)
+  ) |>
   kable(format = "html") |>
   kable_material(c("striped"), full_width = FALSE, font_size = 26)
 ```
@@ -510,8 +571,12 @@ as_tibble(bad_fit$draws) |>
   ggplot(aes(alpha1, alpha2, colour = factor(.chain))) +
   geom_point(alpha = 0.3, size = 1) +
   scale_colour_viridis_d(end = 0.9) +
-  labs(x = expression(alpha[1]), y = expression(alpha[2]), colour = "Chain",
-    subtitle = "PROBLEM fit: draws of the two intercepts") +
+  labs(
+    x = expression(alpha[1]),
+    y = expression(alpha[2]),
+    colour = "Chain",
+    subtitle = "PROBLEM fit: draws of the two intercepts"
+  ) +
   theme(legend.position = "bottom")
 ```
 :::
@@ -570,7 +635,10 @@ $$
 
 ::: {.column width="50%"}
 ```{r, fig.height=6.2, fig.width=8}
-curve_df <- expand_grid(x = seq(-3, 3, length.out = 100), beta = c(-2, -0.8, 0, 0.8)) |>
+curve_df <- expand_grid(
+  x = seq(-3, 3, length.out = 100),
+  beta = c(-2, -0.8, 0, 0.8)
+) |>
   mutate(z = qlogis(0.3) + beta * x, p = plogis(z), beta_f = factor(beta))
 
 p1 <- ggplot(curve_df, aes(x, z, colour = beta_f)) +
@@ -579,7 +647,11 @@ p1 <- ggplot(curve_df, aes(x, z, colour = beta_f)) +
   scale_colour_viridis_d(end = 0.9)
 p2 <- ggplot(curve_df, aes(x, p, colour = beta_f)) +
   geom_line(linewidth = 1.2) +
-  labs(x = "Conspecific density (scaled)", y = "Survival probability p", colour = expression(beta)) +
+  labs(
+    x = "Conspecific density (scaled)",
+    y = "Survival probability p",
+    colour = expression(beta)
+  ) +
   scale_colour_viridis_d(end = 0.9)
 
 p1 / p2 + plot_layout(guides = "collect")
@@ -623,15 +695,25 @@ nd <- as_tibble(ndd_fit$draws)
 cons_grid <- seq(-2.5, 2.5, length.out = 60)
 ndd_pred <- map(cons_grid, \(x) {
   p <- plogis(nd$alpha + nd$beta * x)
-  tibble(cons = x, mid = median(p), lo = quantile(p, 0.05), hi = quantile(p, 0.95))
-}) |> list_rbind()
+  tibble(
+    cons = x,
+    mid = median(p),
+    lo = quantile(p, 0.05),
+    hi = quantile(p, 0.95)
+  )
+}) |>
+  list_rbind()
 
 ggplot(ndd_pred, aes(cons)) +
   geom_ribbon(aes(ymin = lo, ymax = hi), fill = col_post, alpha = 0.5) +
   geom_line(aes(y = mid), linewidth = 1) +
   geom_point(data = ndd, aes(cons, suv / n, size = n), alpha = 0.4) +
   scale_size_area(max_size = 6) +
-  labs(x = "Conspecific density (scaled)", y = "Proportion surviving", size = "Seedlings")
+  labs(
+    x = "Conspecific density (scaled)",
+    y = "Proportion surviving",
+    size = "Seedlings"
+  )
 ```
 :::
 
@@ -639,8 +721,14 @@ ggplot(ndd_pred, aes(cons)) +
 ```{r}
 p_low <- plogis(nd$alpha - nd$beta)
 p_high <- plogis(nd$alpha + nd$beta)
-fmt <- function(x, digits = 2) sprintf(paste0("%.", digits, "f (%.", digits, "f to %.", digits, "f)"),
-  mean(x), quantile(x, 0.05), quantile(x, 0.95))
+fmt <- function(x, digits = 2) {
+  sprintf(
+    paste0("%.", digits, "f (%.", digits, "f to %.", digits, "f)"),
+    mean(x),
+    quantile(x, 0.05),
+    quantile(x, 0.95)
+  )
+}
 ```
 
 ::: small
@@ -703,7 +791,9 @@ Go back to step 1 whenever a check fails.
 ::: {.column width="55%"}
 ```{r, fig.height=6, fig.width=9}
 allo |>
-  mutate(resid = log(h) - (mean(d$alpha) + mean(d$beta) * log(dbh / dbh_ref))) |>
+  mutate(
+    resid = log(h) - (mean(d$alpha) + mean(d$beta) * log(dbh / dbh_ref))
+  ) |>
   ggplot(aes(sp, resid)) +
   geom_hline(yintercept = 0, linetype = 2) +
   geom_boxplot(fill = col_post, alpha = 0.4, outlier.shape = NA) +
@@ -745,19 +835,26 @@ p1 <- tibble(x1, y1) |>
   ylab("y") +
   ggtitle("y = ax + b") +
   geom_point(aes(x1, y1), size = 5) +
-  geom_abline(intercept = 2, slope = 100, col = "blue", linewidth = 2, lty = 2) +
+  geom_abline(
+    intercept = 2,
+    slope = 100,
+    col = "blue",
+    linewidth = 2,
+    lty = 2
+  ) +
   annotate(
     "text",
-    x     = -2.5,
-    y     = 3.4,
+    x = -2.5,
+    y = 3.4,
     label = "y = 100x + 2",
     color = "blue",
     hjust = 0,
-    size  = 9
+    size = 9
   ) +
   theme(
-    axis.title   = element_text(size = 32),
-    axis.text    = element_text(size = 28))
+    axis.title = element_text(size = 32),
+    axis.text = element_text(size = 28)
+  )
 p1
 ```
 :::
@@ -810,7 +907,8 @@ library(brms)
 # Tree allometry
 brm(
   log(h) ~ log(dbh / 40),
-  family = gaussian(), data = allo,
+  family = gaussian(),
+  data = allo,
   prior = c(
     prior(normal(0, 2.5), class = "Intercept"),
     prior(normal(0, 2.5), class = "b"),
@@ -821,7 +919,8 @@ brm(
 # Seedling survival
 brm(
   suv | trials(n) ~ cons,
-  family = binomial(), data = ndd,
+  family = binomial(),
+  data = ndd,
   prior = c(
     prior(normal(0, 2.5), class = "Intercept"),
     prior(normal(0, 2.5), class = "b")

@@ -966,8 +966,8 @@ Masatoshi Katabuchi @ XTBG, CAS
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="" aria-label="1"></a><span class="fu">set.seed</span>(<span class="dv">20261026</span>)</span>
 <span id="cb4-2"><a href="" aria-label="2"></a>draws <span class="ot">&lt;-</span> fit<span class="sc">$</span>draws</span>
-<span id="cb4-3"><a href="" aria-label="3"></a>p_new <span class="ot">&lt;-</span> <span class="fu">plogis</span>(<span class="fu">rnorm</span>(<span class="fu">nrow</span>(draws),draws<span class="sc">$</span>mu,draws<span class="sc">$</span>sigma))</span>
-<span id="cb4-4"><a href="" aria-label="4"></a><span class="fu">quantile</span>(p_new,<span class="fu">c</span>(.<span class="dv">025</span>,.<span class="dv">5</span>,.<span class="dv">975</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-3"><a href="" aria-label="3"></a>p_new <span class="ot">&lt;-</span> <span class="fu">plogis</span>(<span class="fu">rnorm</span>(<span class="fu">nrow</span>(draws), draws<span class="sc">$</span>mu, draws<span class="sc">$</span>sigma))</span>
+<span id="cb4-4"><a href="" aria-label="4"></a><span class="fu">quantile</span>(p_new, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">5</span>, .<span class="dv">975</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>This predicts a new tree’s probability, including group variation. A future survivor count would also require a seedling count and binomial sampling.</p>
 </section>

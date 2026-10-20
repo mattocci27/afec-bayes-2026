@@ -1,7 +1,7 @@
 ---
 title: "Practical Bayesian Modeling with Stan and brms"
 author: "Masatoshi Katabuchi"
-date: "`r format(Sys.time(), '%B %d, %Y')`"
+date: "`r format(Sys.time(), "%B %d, %Y")`"
 fontsize: 12pt
 format:
   html:
@@ -82,7 +82,11 @@ cat("```stan\n", paste(readLines("stan/normal.stan"), collapse = "\n"), "\n```")
 `stan/normal_vague.stan`
 
 ```{r, echo=FALSE, results='asis'}
-cat("```stan\n", paste(readLines("stan/normal_vague.stan"), collapse = "\n"), "\n```")
+cat(
+  "```stan\n",
+  paste(readLines("stan/normal_vague.stan"), collapse = "\n"),
+  "\n```"
+)
 ```
 
 ```{r}
@@ -238,7 +242,7 @@ $$
 
 ```{r}
 set.seed(123)
-n <-  100
+n <- 100
 y <- rpois(n, lambda = 5)
 
 pois_list <- list(
@@ -265,7 +269,11 @@ cat("```stan\n", paste(readLines("stan/pois.stan"), collapse = "\n"), "\n```")
 `stan/pois_re.stan`
 
 ```{r, echo=FALSE, results='asis'}
-cat("```stan\n", paste(readLines("stan/pois_re.stan"), collapse = "\n"), "\n```")
+cat(
+  "```stan\n",
+  paste(readLines("stan/pois_re.stan"), collapse = "\n"),
+  "\n```"
+)
 ```
 
 ```{r}
@@ -428,18 +436,21 @@ log_b0 <- rnorm(n_sp, 0.55, 0.05)
 
 # ---- simulate ----
 allo_df <- tibble(
-  sp     = factor(rep(paste0("sp", 1:n_sp), each = n_rep)),
-  wd  = rep(wd, each = n_rep),
+  sp = factor(rep(paste0("sp", 1:n_sp), each = n_rep)),
+  wd = rep(wd, each = n_rep),
   # now log_xx ~ Normal(mean log‐dbh, sd
-  log_xx = rnorm(n_sp * n_rep, mean = log(40), sd = 0.5)) |>
+  log_xx = rnorm(n_sp * n_rep, mean = log(40), sd = 0.5)
+) |>
   mutate(
     # add observation‐level noise on log‐height
     log_y = rnorm(
       n(),
       log_b0[as.integer(sp)] + b1[as.integer(sp)] * log_xx,
-      sigma_y),
+      sigma_y
+    ),
     dbh = exp(log_xx),
-    h = exp(log_y)) |>
+    h = exp(log_y)
+  ) |>
   select(sp, wd, dbh, h)
 
 dbh_hist <- allo_df |>
@@ -450,7 +461,7 @@ dbh_hist <- allo_df |>
   theme(
     legend.position = "none",
     plot.title = element_text(size = 24)
-    )
+  )
 
 h_hist <- allo_df |>
   ggplot(aes(h)) +
@@ -460,7 +471,7 @@ h_hist <- allo_df |>
   theme(
     legend.position = "none",
     plot.title = element_text(size = 24)
-    )
+  )
 
 p1 <- allo_df |>
   ggplot(aes(x = dbh, y = h, col = sp)) +
@@ -471,7 +482,7 @@ p1 <- allo_df |>
   theme(
     legend.position = "none",
     plot.title = element_text(size = 24)
-    )
+  )
 
 p2 <- p1 +
   scale_x_log10() +
@@ -522,9 +533,9 @@ vint_fit$diagnostic_summary()
 ```{r vint-brm}
 priors <- c(
   prior(normal(0, 2.5), class = Intercept),
-  prior(normal(0, 2.5),   class = b),
-  prior(cauchy(0, 1),   class = sd),
-  prior(cauchy(0, 1),   class = sigma)
+  prior(normal(0, 2.5), class = b),
+  prior(cauchy(0, 1), class = sd),
+  prior(cauchy(0, 1), class = sigma)
 )
 
 vint_fit_brm <- brm(
@@ -548,7 +559,8 @@ pp_check(vint_fit_brm)
 ```{r vint-lme4}
 vint_fit_lme <- lme4::lmer(
   log(h) ~ log(dbh) + (1 | sp),
-  data = allo_df)
+  data = allo_df
+)
 
 summary(vint_fit_lme)
 ```
@@ -563,24 +575,24 @@ What is the effect of the treatment (a new education method) on students' scores
 
 ```{r, echo=FALSE, message=FALSE}
 # Eight schools estimates and standard errors
-y     <- c(28,  8, -3,  7, -1,  1, 18, 12)
-sigma <- c(15, 10, 16, 11,  9, 11, 10, 18)
+y <- c(28, 8, -3, 7, -1, 1, 18, 12)
+sigma <- c(15, 10, 16, 11, 9, 11, 10, 18)
 
 # Number of schools
 J <- length(y)
 
 # Pack into a list for Stan
 schools_dat <- list(
-  J     = J,
-  y     = y,
+  J = J,
+  y = y,
   sigma = sigma
 )
 
 # (Optionally) also create a data frame for quick inspection / plotting
 schools_df <- tibble(
   school = paste0("School_", 1:J),
-  y      = y,
-  sigma  = sigma
+  y = y,
+  sigma = sigma
 )
 
 # Inspect
@@ -727,7 +739,11 @@ allo_vslope_list <- list(
   J = allo_df$sp |> unique() |> length(),
   L = 1 # number of group-level predictors (intercept)
 )
-allo_vslope_list$u <- matrix(1, nrow = allo_vslope_list$L, ncol = allo_vslope_list$J)
+allo_vslope_list$u <- matrix(
+  1,
+  nrow = allo_vslope_list$L,
+  ncol = allo_vslope_list$J
+)
 ```
 
 ```{r}
@@ -754,9 +770,9 @@ vslope_fit$diagnostic_summary()
 ```{r vslope-brm}
 priors <- c(
   prior(normal(0, 2.5), class = Intercept),
-  prior(normal(0, 2.5),   class = b),
-  prior(lkj(2), class = cor),                # Ω ~ LKJ(2)
-  prior(cauchy(0, 1),   class = sigma)
+  prior(normal(0, 2.5), class = b),
+  prior(lkj(2), class = cor), # Ω ~ LKJ(2)
+  prior(cauchy(0, 1), class = sigma)
 )
 
 slope_fit_brm <- brm(
@@ -766,8 +782,8 @@ slope_fit_brm <- brm(
   prior = priors,
   refresh = 0, # don't print update
   control = list(
-    adapt_delta  = 0.95,  # default is 0.8
-    max_treedepth = 15    # default is 10
+    adapt_delta = 0.95, # default is 0.8
+    max_treedepth = 15 # default is 10
   )
 )
 ```
@@ -787,7 +803,8 @@ summary(slope_fit_brm)
 ```{r slope-lme4}
 slope_fit_lme <- lme4::lmer(
   log(h) ~ log(dbh) + (1 + log(dbh) | sp),
-  data = allo_df)
+  data = allo_df
+)
 ```
 
 **Not convergent!**
@@ -830,9 +847,14 @@ The rest of part is the same as the section Varying slopes and intercepts.
 ```{r, eval=FALSE, echo=FALSE}
 p3 <- allo_df |>
   ggplot(aes(x = x, y = y, col = sp)) +
-  geom_smooth(method = "lm", se = TRUE, lty = 2,
+  geom_smooth(
+    method = "lm",
+    se = TRUE,
+    lty = 2,
     alpha = 0.2,
-    linewidth = 0.5, col = "black") +
+    linewidth = 0.5,
+    col = "black"
+  ) +
   geom_point(size = 3) +
   xlab("Wood density") +
   ylab("b") +
@@ -842,7 +864,11 @@ p3 <- allo_df |>
 
 ```{r}
 allo_vslope_list$L <- 2 # number of group-level predictors (intercept and wd)
-allo_vslope_list$u <- matrix(1, nrow = allo_vslope_list$L, ncol = allo_vslope_list$J)
+allo_vslope_list$u <- matrix(
+  1,
+  nrow = allo_vslope_list$L,
+  ncol = allo_vslope_list$J
+)
 ```
 
 ```{r}
@@ -867,9 +893,9 @@ vgrp_fit$diagnostic_summary()
 ```{r vgrp-brm}
 priors <- c(
   prior(normal(0, 2.5), class = Intercept),
-  prior(normal(0, 2.5),   class = b),
-  prior(lkj(2), class = cor),                # Ω ~ LKJ(2)
-  prior(cauchy(0, 1),   class = sigma)
+  prior(normal(0, 2.5), class = b),
+  prior(lkj(2), class = cor), # Ω ~ LKJ(2)
+  prior(cauchy(0, 1), class = sigma)
 )
 
 vgrp_fit_brm <- brm(
@@ -879,8 +905,8 @@ vgrp_fit_brm <- brm(
   prior = priors,
   refresh = 0, # don't print update
   control = list(
-    adapt_delta  = 0.95,  # default is 0.8
-    max_treedepth = 15    # default is 10
+    adapt_delta = 0.95, # default is 0.8
+    max_treedepth = 15 # default is 10
   )
 )
 ```
@@ -894,7 +920,8 @@ summary(vgrp_fit_brm)
 ```{r group-lme4}
 grp_fit_lme <- lme4::lmer(
   log(h) ~ log(dbh) * wd + (1 + log(dbh) | sp),
-  data = allo_df)
+  data = allo_df
+)
 ```
 
 

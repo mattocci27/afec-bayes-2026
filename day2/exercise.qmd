@@ -16,8 +16,14 @@ execute:
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(message=FALSE, warning=FALSE, fig.align="center",
-                      fig.width=8, fig.height=4.5, comment="#>")
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center",
+  fig.width = 8,
+  fig.height = 4.5,
+  comment = "#>"
+)
 ```
 
 # Seedling survival regression
@@ -42,7 +48,7 @@ library(tidyverse)
 library(posterior)
 library(bayesplot)
 library(here)
-theme_set(theme_bw(base_size=14))
+theme_set(theme_bw(base_size = 14))
 
 ndd <- read_csv(here("data", "ndd.csv"))
 ```
@@ -56,15 +62,17 @@ logit model and independent Normal(0, 2.5) coefficient priors used below.
 library(brms)
 
 fit_brms <- brm(
-  bf(suv | trials(n) ~ cons, center=FALSE),
-  data=ndd,
-  family=binomial(link="logit"),
-  prior=set_prior("normal(0, 2.5)", class="b"),
-  backend="cmdstanr",
-  seed=42,
-  chains=4, cores=1,
-  iter=2000, warmup=1000,
-  refresh=500
+  bf(suv | trials(n) ~ cons, center = FALSE),
+  data = ndd,
+  family = binomial(link = "logit"),
+  prior = set_prior("normal(0, 2.5)", class = "b"),
+  backend = "cmdstanr",
+  seed = 42,
+  chains = 4,
+  cores = 1,
+  iter = 2000,
+  warmup = 1000,
+  refresh = 500
 )
 ```
 
@@ -106,19 +114,21 @@ compiles the model, and `$sample()` runs the chains.
 library(cmdstanr)
 
 stan_data <- list(
-  N=nrow(ndd),
-  n=as.integer(ndd$n),
-  suv=as.integer(ndd$suv),
-  cons=ndd$cons
+  N = nrow(ndd),
+  n = as.integer(ndd$n),
+  suv = as.integer(ndd$suv),
+  cons = ndd$cons
 )
 
 model_stan <- cmdstan_model(here("stan", "logit_reg.stan"))
 fit_stan <- model_stan$sample(
-  data=stan_data,
-  seed=42,
-  chains=4, parallel_chains=1,
-  iter_warmup=1000, iter_sampling=1000,
-  refresh=500
+  data = stan_data,
+  seed = 42,
+  chains = 4,
+  parallel_chains = 1,
+  iter_warmup = 1000,
+  iter_sampling = 1000,
+  refresh = 500
 )
 ```
 
@@ -136,12 +146,12 @@ Do not run all three: each replaces the result used below.
 ### brms result
 
 ```{r draws-brms, eval=FALSE}
-coef_draws <- as_draws_df(fit_brms, variable=c("b_Intercept", "b_cons")) |>
-  rename_variables(alpha="b_Intercept", beta="b_cons")
+coef_draws <- as_draws_df(fit_brms, variable = c("b_Intercept", "b_cons")) |>
+  rename_variables(alpha = "b_Intercept", beta = "b_cons")
 
 sampler_diagnostics <- brms::nuts_params(fit_brms) |>
   filter(Parameter == "divergent__") |>
-  summarise(num_divergent=sum(Value), .by=Chain) |>
+  summarise(num_divergent = sum(Value), .by = Chain) |>
   select(num_divergent)
 ```
 
@@ -159,7 +169,7 @@ sampler_diagnostics <- fit_stan$diagnostic_summary()
 
 ```{r draws-precomputed}
 fit <- readRDS(here("fits", "day2_ndd.rds"))
-coef_draws <- subset_draws(fit$draws, variable=c("alpha", "beta"))
+coef_draws <- subset_draws(fit$draws, variable = c("alpha", "beta"))
 sampler_diagnostics <- fit$diagnostics
 ```
 
@@ -176,8 +186,9 @@ Carlo variation.
 ```{r coefficient-table}
 coefficient_table <- posterior::summarise_draws(
   coef_draws,
-  mean=mean, sd=sd,
-  ~quantile(.x, probs=c(0.025, 0.975))
+  mean = mean,
+  sd = sd,
+  \(x) quantile(x, probs = c(0.025, 0.975))
 )
 coefficient_table
 ```
@@ -202,15 +213,15 @@ sampling before using the estimates.
 ```{r sampling-diagnostics}
 sampling_table <- posterior::summarise_draws(
   coef_draws,
-  rhat=posterior::rhat,
-  ess_bulk=posterior::ess_bulk,
-  ess_tail=posterior::ess_tail
+  rhat = posterior::rhat,
+  ess_bulk = posterior::ess_bulk,
+  ess_tail = posterior::ess_tail
 )
 sampling_table
 
 # One row per chain, recorded when the model was fitted.
 sampler_table <- as_tibble(sampler_diagnostics) |>
-  mutate(chain=row_number(), .before=1)
+  mutate(chain = row_number(), .before = 1)
 sampler_table
 ```
 
@@ -232,7 +243,7 @@ precision for every use. The trace plots provide a complementary view.
 ## Trace plots
 
 ```{r trace-plots}
-bayesplot::mcmc_trace(coef_draws, pars=c("alpha", "beta"))
+bayesplot::mcmc_trace(coef_draws, pars = c("alpha", "beta"))
 ```
 
 The horizontal axis is saved sampling step, the vertical axis is a coefficient,
@@ -250,19 +261,20 @@ We calculate probabilities for every paired draw before summarising them.
 
 ```{r curve-probabilities}
 density_grid <- tibble(
-  cons=seq(min(ndd$cons), max(ndd$cons), length.out=81)
+  cons = seq(min(ndd$cons), max(ndd$cons), length.out = 81)
 )
 curve_draws <- as_tibble(coef_draws) |>
   select(.draw, alpha, beta) |>
   crossing(density_grid) |>
-  mutate(p=plogis(alpha + beta * cons))
+  mutate(p = plogis(alpha + beta * cons))
 
 curve_summary <- curve_draws |>
   group_by(cons) |>
   summarise(
-    median=median(p),
-    lower=quantile(p, 0.025), upper=quantile(p, 0.975),
-    .groups="drop"
+    median = median(p),
+    lower = quantile(p, 0.025),
+    upper = quantile(p, 0.975),
+    .groups = "drop"
   )
 ```
 
@@ -272,12 +284,12 @@ of survival probability. The alpha and beta from each draw stay together.
 ## Regression plot
 
 ```{r regression-plot}
-regression_plot <- ggplot(curve_summary, aes(x=cons)) +
-  geom_ribbon(aes(ymin=lower, ymax=upper), fill="#d95f02", alpha=0.2) +
-  geom_line(aes(y=median), colour="#d95f02", linewidth=1) +
-  geom_point(data=ndd, aes(y=suv/n), alpha=0.6) +
-  scale_y_continuous(limits=c(0, 1)) +
-  labs(x="Conspecific density (scaled)", y="Survival probability")
+regression_plot <- ggplot(curve_summary, aes(x = cons)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "#d95f02", alpha = 0.2) +
+  geom_line(aes(y = median), colour = "#d95f02", linewidth = 1) +
+  geom_point(data = ndd, aes(y = suv / n), alpha = 0.6) +
+  scale_y_continuous(limits = c(0, 1)) +
+  labs(x = "Conspecific density (scaled)", y = "Survival probability")
 regression_plot
 ```
 

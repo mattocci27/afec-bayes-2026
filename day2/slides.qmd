@@ -51,9 +51,9 @@ ndd <- make_ndd_data()
 fit <- course_fit("day2_ndd")
 draws <- fit$draws
 bad_fit <- course_fit("day2_allo_bad")
-low <- plogis(draws$alpha-draws$beta)
-high <- plogis(draws$alpha+draws$beta)
-replicates <- cndd_replicates(draws,ndd,seed=20261023)
+low <- plogis(draws$alpha - draws$beta)
+high <- plogis(draws$alpha + draws$beta)
+replicates <- cndd_replicates(draws, ndd, seed = 20261023)
 ```
 
 ##  {#title-slide background="../images/priors.png" background-size="50%" background-position="50% 20%"}
@@ -125,8 +125,13 @@ teaching data, not the paper's observations or fitted results.
 ## The data and a prediction
 
 ```{r observed-data, fig.width=11, fig.height=4.7}
-ggplot(ndd,aes(cons,suv/n,size=n))+geom_point(alpha=.7)+
-  labs(x="Conspecific density",y="Observed survival\nproportion",size="Seedlings")
+ggplot(ndd, aes(cons, suv / n, size = n)) +
+  geom_point(alpha = .7) +
+  labs(
+    x = "Conspecific density",
+    y = "Observed survival\nproportion",
+    size = "Seedlings"
+  )
 ```
 
 Which way would you expect the fitted curve to go?
@@ -156,13 +161,16 @@ these assumptions. A model-checking example is available in Optional reference.
 ## A straight line and a probability curve
 
 ```{r link-function, fig.width=13, fig.height=4.2}
-link_data <- tibble(x=seq(-3,3,length.out=101)) |>
-  mutate(z=qlogis(.3)-.8*x,p=plogis(z))
-p1 <- ggplot(link_data,aes(x,z))+geom_line(linewidth=1.4,colour=col_like)+
-  labs(x="Conspecific density",y="logit(p)")
-p2 <- ggplot(link_data,aes(x,p))+geom_line(linewidth=1.4,colour=col_like)+
-  ylim(0,1)+labs(x="Conspecific density",y="Survival\nprobability")
-p1+p2
+link_data <- tibble(x = seq(-3, 3, length.out = 101)) |>
+  mutate(z = qlogis(.3) - .8 * x, p = plogis(z))
+p1 <- ggplot(link_data, aes(x, z)) +
+  geom_line(linewidth = 1.4, colour = col_like) +
+  labs(x = "Conspecific density", y = "logit(p)")
+p2 <- ggplot(link_data, aes(x, p)) +
+  geom_line(linewidth = 1.4, colour = col_like) +
+  ylim(0, 1) +
+  labs(x = "Conspecific density", y = "Survival\nprobability")
+p1 + p2
 ```
 
 $$\operatorname{logit}(p_i)=\alpha+\beta x_i,\qquad
@@ -347,33 +355,63 @@ After motivating the prior scales on the next slide, introduce the sampling idea
 ::: columns
 ::: {.column width="55%"}
 ```{r flat-prior-survival-side-by-side, fig.width=8.8, fig.height=5.8, fig.alt="The same observed quadrat survival proportions and illustrative slopes as the earlier link-function example: a green gradual decline for beta=-0.8 and an orange dashed near-step for beta=-100. Point area represents seedling count."}
-prior_density_grid <- seq(-3,3,length.out=2401)
+prior_density_grid <- seq(-3, 3, length.out = 2401)
 slope_examples <- crossing(
-  x=prior_density_grid,
-  effect=factor(c("Previous example","Extreme"),
-                levels=c("Previous example","Extreme"))
+  x = prior_density_grid,
+  effect = factor(
+    c("Previous example", "Extreme"),
+    levels = c("Previous example", "Extreme")
+  )
 ) |>
-  mutate(beta=if_else(effect=="Previous example",-.8,-100),
-         logit_p=qlogis(.3)+beta*x, p=plogis(logit_p))
-effect_colours <- c("Previous example"=col_like,"Extreme"=col_post)
-effect_labels <- expression(paste("Previous example: ",beta==-0.8),
-                            paste("Extreme: ",beta==-100))
-effect_labels_side <- expression(beta==-0.8,beta==-100)
-ggplot(slope_examples,aes(x,p,colour=effect,linetype=effect)) +
-  geom_vline(xintercept=0,colour="grey80",linewidth=.5) +
-  geom_point(data=ndd,aes(cons,suv/n,size=n),inherit.aes=FALSE,
-             shape=21,fill="grey60",colour="grey30",alpha=.65,stroke=.4) +
-  geom_line(linewidth=1.5) +
-  scale_colour_manual(values=effect_colours,labels=effect_labels_side,name=NULL) +
-  scale_linetype_manual(values=c(1,2),labels=effect_labels_side,name=NULL) +
-  scale_size_area(max_size=6,breaks=c(5,10,20),name="Seedlings") +
-  scale_x_continuous(breaks=seq(-3,3)) +
-  scale_y_continuous(limits=c(0,1),breaks=c(0,.25,.5,.75,1)) +
-  labs(x="Conspecific density",y="Survival\nprobability") +
-  guides(colour=guide_legend(order=1),linetype=guide_legend(order=1),
-         size=guide_legend(order=2)) +
-  theme(legend.position="bottom",legend.key.width=grid::unit(1.2,"cm"),
-        legend.text=element_text(size=18),legend.title=element_text(size=18))
+  mutate(
+    beta = if_else(effect == "Previous example", -.8, -100),
+    logit_p = qlogis(.3) + beta * x,
+    p = plogis(logit_p)
+  )
+effect_colours <- c("Previous example" = col_like, "Extreme" = col_post)
+effect_labels <- expression(
+  paste("Previous example: ", beta == -0.8),
+  paste("Extreme: ", beta == -100)
+)
+effect_labels_side <- expression(beta == -0.8, beta == -100)
+ggplot(slope_examples, aes(x, p, colour = effect, linetype = effect)) +
+  geom_vline(xintercept = 0, colour = "grey80", linewidth = .5) +
+  geom_point(
+    data = ndd,
+    aes(cons, suv / n, size = n),
+    inherit.aes = FALSE,
+    shape = 21,
+    fill = "grey60",
+    colour = "grey30",
+    alpha = .65,
+    stroke = .4
+  ) +
+  geom_line(linewidth = 1.5) +
+  scale_colour_manual(
+    values = effect_colours,
+    labels = effect_labels_side,
+    name = NULL
+  ) +
+  scale_linetype_manual(
+    values = c(1, 2),
+    labels = effect_labels_side,
+    name = NULL
+  ) +
+  scale_size_area(max_size = 6, breaks = c(5, 10, 20), name = "Seedlings") +
+  scale_x_continuous(breaks = seq(-3, 3)) +
+  scale_y_continuous(limits = c(0, 1), breaks = c(0, .25, .5, .75, 1)) +
+  labs(x = "Conspecific density", y = "Survival\nprobability") +
+  guides(
+    colour = guide_legend(order = 1),
+    linetype = guide_legend(order = 1),
+    size = guide_legend(order = 2)
+  ) +
+  theme(
+    legend.position = "bottom",
+    legend.key.width = grid::unit(1.2, "cm"),
+    legend.text = element_text(size = 18),
+    legend.title = element_text(size = 18)
+  )
 ```
 
 ::: small
@@ -395,28 +433,63 @@ $$
 
 ```{r slope-prior-relative-density, fig.width=6.8, fig.height=3.8, fig.alt="Zoomed comparison from beta=-120 to 20. Each prior density is divided by its own peak. The very diffuse Normal with SD 10000 is nearly flat across this range. The weakly informative Normal with SD 2.5 is concentrated near zero. An orange dashed line marks beta=-100, where the diffuse prior remains near its peak but the weakly informative density is negligible."}
 prior_comparison <- crossing(
-  beta=sort(unique(c(seq(-120,20,length.out=2801),-100,0))),
-  prior=factor(c("Very diffuse","Weakly informative"),
-               levels=c("Very diffuse","Weakly informative"))
+  beta = sort(unique(c(seq(-120, 20, length.out = 2801), -100, 0))),
+  prior = factor(
+    c("Very diffuse", "Weakly informative"),
+    levels = c("Very diffuse", "Weakly informative")
+  )
 ) |>
-  mutate(prior_sd=if_else(prior=="Very diffuse",sqrt(1e8),2.5),
-         relative_density=exp(-.5*(beta/prior_sd)^2))
-ggplot(prior_comparison,aes(beta,relative_density,colour=prior,linetype=prior)) +
-  geom_line(linewidth=1.3) +
-  geom_vline(xintercept=-100,colour=col_post,linetype=2,linewidth=1) +
-  annotate("text",x=-100,y=.63,label="beta == -100",parse=TRUE,
-           colour=col_post,size=6,hjust=-.12) +
-  geom_vline(xintercept=-.8,colour=col_like,linetype=3,linewidth=1) +
-  annotate("text",x=-.8,y=.35,label="beta == -0.8",parse=TRUE,
-           colour=col_like,size=6,hjust=1.12) +
-  scale_colour_manual(values=c("#006DAE","#562457"),name=NULL) +
-  scale_linetype_manual(values=c("dotted","solid"),name=NULL) +
-  scale_x_continuous(breaks=c(-100,-50,0),expand=expansion(mult=c(.02,.03))) +
-  scale_y_continuous(limits=c(0,1.04),breaks=c(0,.5,1)) +
-  labs(x=expression(beta),y="Relative density") +
-  theme(axis.title=element_text(size=23),axis.text=element_text(size=20),
-        legend.position="bottom",legend.text=element_text(size=18),
-        legend.key.width=grid::unit(.8,"cm"))
+  mutate(
+    prior_sd = if_else(prior == "Very diffuse", sqrt(1e8), 2.5),
+    relative_density = exp(-.5 * (beta / prior_sd)^2)
+  )
+ggplot(
+  prior_comparison,
+  aes(beta, relative_density, colour = prior, linetype = prior)
+) +
+  geom_line(linewidth = 1.3) +
+  geom_vline(
+    xintercept = -100,
+    colour = col_post,
+    linetype = 2,
+    linewidth = 1
+  ) +
+  annotate(
+    "text",
+    x = -100,
+    y = .63,
+    label = "beta == -100",
+    parse = TRUE,
+    colour = col_post,
+    size = 6,
+    hjust = -.12
+  ) +
+  geom_vline(xintercept = -.8, colour = col_like, linetype = 3, linewidth = 1) +
+  annotate(
+    "text",
+    x = -.8,
+    y = .35,
+    label = "beta == -0.8",
+    parse = TRUE,
+    colour = col_like,
+    size = 6,
+    hjust = 1.12
+  ) +
+  scale_colour_manual(values = c("#006DAE", "#562457"), name = NULL) +
+  scale_linetype_manual(values = c("dotted", "solid"), name = NULL) +
+  scale_x_continuous(
+    breaks = c(-100, -50, 0),
+    expand = expansion(mult = c(.02, .03))
+  ) +
+  scale_y_continuous(limits = c(0, 1.04), breaks = c(0, .5, 1)) +
+  labs(x = expression(beta), y = "Relative density") +
+  theme(
+    axis.title = element_text(size = 23),
+    axis.text = element_text(size = 20),
+    legend.position = "bottom",
+    legend.text = element_text(size = 18),
+    legend.key.width = grid::unit(.8, "cm")
+  )
 ```
 
 :::
@@ -548,13 +621,17 @@ Source: https://mc-stan.org/docs/reference-manual/mcmc.html
 ```{r posterior-exploration, fig.width=8, fig.height=4.1}
 ndd_draw_table <- as_tibble(draws)
 chain_excerpt <- ndd_draw_table |>
-  filter(.chain == first(.chain)) |> slice_head(n=25)
-ggplot(ndd_draw_table, aes(alpha,beta)) +
-  geom_point(colour="grey65", alpha=.15, size=1) +
-  geom_path(data=chain_excerpt, colour=col_post, linewidth=.8) +
-  geom_point(data=chain_excerpt, colour=col_post, size=1.8) +
-  labs(x=expression(alpha), y=expression(beta),
-       subtitle="Grey: saved pairs. Orange: part of one chain.")
+  filter(.chain == first(.chain)) |>
+  slice_head(n = 25)
+ggplot(ndd_draw_table, aes(alpha, beta)) +
+  geom_point(colour = "grey65", alpha = .15, size = 1) +
+  geom_path(data = chain_excerpt, colour = col_post, linewidth = .8) +
+  geom_point(data = chain_excerpt, colour = col_post, size = 1.8) +
+  labs(
+    x = expression(alpha),
+    y = expression(beta),
+    subtitle = "Grey: saved pairs. Orange: part of one chain."
+  )
 ```
 :::
 :::
@@ -581,16 +658,17 @@ Compare several chains before using the draws for survival predictions.
 
 ```{r trace, fig.width=12, fig.height=3.9}
 trace_slide_theme <- theme(
-  axis.title=element_text(size=26),
-  axis.text=element_text(size=24),
-  strip.text=element_text(size=26),
-  legend.title=element_text(size=24),
-  legend.text=element_text(size=24),
-  legend.position="bottom"
+  axis.title = element_text(size = 26),
+  axis.text = element_text(size = 24),
+  strip.text = element_text(size = 26),
+  legend.title = element_text(size = 24),
+  legend.text = element_text(size = 24),
+  legend.position = "bottom"
 )
-trace_slide_colours <- scale_colour_viridis_d(option="D",end=.85)
-bayesplot::mcmc_trace(draws,pars=c("alpha","beta")) +
-  trace_slide_colours + trace_slide_theme
+trace_slide_colours <- scale_colour_viridis_d(option = "D", end = .85)
+bayesplot::mcmc_trace(draws, pars = c("alpha", "beta")) +
+  trace_slide_colours +
+  trace_slide_theme
 ```
 
 - Do the coloured chains explore the same range?
@@ -616,10 +694,15 @@ More complex models or problems in model formulation can make posterior sampling
 :::
 
 ```{r failed-trace, fig.width=12, fig.height=3.9}
-bayesplot::mcmc_trace(bad_fit$draws,pars=c("alpha1","alpha2")) +
-  trace_slide_colours + trace_slide_theme +
-  facet_wrap(~parameter,nrow=1,scales="free_y",
-             labeller=as_labeller(c(alpha1="Parameter 1",alpha2="Parameter 2")))
+bayesplot::mcmc_trace(bad_fit$draws, pars = c("alpha1", "alpha2")) +
+  trace_slide_colours +
+  trace_slide_theme +
+  facet_wrap(
+    ~parameter,
+    nrow = 1,
+    scales = "free_y",
+    labeller = as_labeller(c(alpha1 = "Parameter 1", alpha2 = "Parameter 2"))
+  )
 ```
 
 Here, the chains remain in different regions.
@@ -656,30 +739,34 @@ $$p(x)=\operatorname{logit}^{-1}(\alpha+\beta x)$$
 ```{r curve-pairs-setup, include=FALSE}
 # Show the first ten saved paired draws; the table continues beyond this excerpt.
 curve_pairs <- as_tibble(draws) |>
-  slice_head(n=10) |> select(alpha,beta) |>
-  mutate(Draw=1:10,.before=1)
+  slice_head(n = 10) |>
+  select(alpha, beta) |>
+  mutate(Draw = 1:10, .before = 1)
 curve_examples <- curve_pairs |>
-  crossing(density=seq(min(ndd$cons),max(ndd$cons),length.out=101)) |>
-  mutate(p=plogis(alpha+beta*density))
+  crossing(density = seq(min(ndd$cons), max(ndd$cons), length.out = 101)) |>
+  mutate(p = plogis(alpha + beta * density))
 ```
 
 ::: columns
 ::: {.column width="30%"}
 ```{r curve-pairs-table}
 curve_pairs |>
-  mutate(across(c(alpha,beta),~sprintf("%.3f",.x)), Draw=as.character(Draw)) |>
-  bind_rows(tibble(Draw="⋮",alpha="⋮",beta="⋮")) |>
-  knitr::kable(format="html",col.names=c("Draw","α","β")) |>
-  kableExtra::kable_styling(font_size=20,full_width=FALSE) |>
-  kableExtra::row_spec(0:11,extra_css="padding: 4px 8px;")
+  mutate(
+    across(c(alpha, beta), ~ sprintf("%.3f", .x)),
+    Draw = as.character(Draw)
+  ) |>
+  bind_rows(tibble(Draw = "⋮", alpha = "⋮", beta = "⋮")) |>
+  knitr::kable(format = "html", col.names = c("Draw", "α", "β")) |>
+  kableExtra::kable_styling(font_size = 20, full_width = FALSE) |>
+  kableExtra::row_spec(0:11, extra_css = "padding: 4px 8px;")
 ```
 :::
 ::: {.column width="70%"}
 ```{r paired-curves, fig.width=8, fig.height=3.9}
-ggplot(curve_examples,aes(density,p,group=Draw)) +
-  geom_line(linewidth=1.2,colour="grey40") +
-  scale_y_continuous(limits=c(0,1)) +
-  labs(x="Conspecific density",y="Survival\nprobability")
+ggplot(curve_examples, aes(density, p, group = Draw)) +
+  geom_line(linewidth = 1.2, colour = "grey40") +
+  scale_y_continuous(limits = c(0, 1)) +
+  labs(x = "Conspecific density", y = "Survival\nprobability")
 ```
 :::
 :::
@@ -704,14 +791,14 @@ These ten illustrative draws do not define the ribbon.
 ```{r many-survival-curves, fig.width=12, fig.height=4.3}
 set.seed(20261024)
 curve_sample <- as_tibble(draws) |>
-  slice_sample(n=1000) |>
-  select(.draw,alpha,beta) |>
-  crossing(density=seq(min(ndd$cons),max(ndd$cons),length.out=101)) |>
-  mutate(p=plogis(alpha+beta*density))
-ggplot(curve_sample,aes(density,p,group=.draw)) +
-  geom_line(colour="grey40",alpha=.04,linewidth=.5) +
-  scale_y_continuous(limits=c(0,1)) +
-  labs(x="Conspecific density",y="Survival\nprobability")
+  slice_sample(n = 1000) |>
+  select(.draw, alpha, beta) |>
+  crossing(density = seq(min(ndd$cons), max(ndd$cons), length.out = 101)) |>
+  mutate(p = plogis(alpha + beta * density))
+ggplot(curve_sample, aes(density, p, group = .draw)) +
+  geom_line(colour = "grey40", alpha = .04, linewidth = .5) +
+  scale_y_continuous(limits = c(0, 1)) +
+  labs(x = "Conspecific density", y = "Survival\nprobability")
 ```
 
 Each curve comes from one posterior draw.
@@ -729,10 +816,12 @@ uncertainty about p. The next slide uses ALL stored draws to calculate pointwise
 ## All draws give a ribbon of survival curves
 
 ```{r fitted-curve, fig.width=12, fig.height=4.3}
-plot_cndd(draws,ndd) +
-  labs(x="Conspecific density") +
-  labs(y="Survival\nprobability",
-       subtitle="Line: posterior median. Ribbon: 95% credible interval for survival probability.")
+plot_cndd(draws, ndd) +
+  labs(x = "Conspecific density") +
+  labs(
+    y = "Survival\nprobability",
+    subtitle = "Line: posterior median. Ribbon: 95% credible interval for survival probability."
+  )
 ```
 
 Each point represents one quadrat.
@@ -777,7 +866,7 @@ PPC and repeated table slides remain optional. Finish with a brief Day 3 preview
 ## Tomorrow: species may differ
 
 ```{r species-preview, fig.width=10, fig.height=4.1}
-plot_cndd_species() + labs(x="Conspecific density")
+plot_cndd_species() + labs(x = "Conspecific density")
 ```
 
 Some species have few seedlings. How can we estimate their relationships?
@@ -815,10 +904,12 @@ Source: https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.ht
 ## Does the density pattern look compatible? {visibility="uncounted"}
 
 ```{r check-pattern, fig.width=12, fig.height=3.9}
-plot_cndd_check(replicates,ndd) +
-  labs(x="Conspecific density") +
-  labs(y="Survival\nproportion",
-       subtitle="Open: observed. Orange: 95% predictive intervals.")
+plot_cndd_check(replicates, ndd) +
+  labs(x = "Conspecific density") +
+  labs(
+    y = "Survival\nproportion",
+    subtitle = "Open: observed. Orange: 95% predictive intervals."
+  )
 ```
 
 - Does the model reproduce the change in survival across densities?
@@ -838,13 +929,19 @@ The SD-based comparison is an optional reference, not part of this introduction.
 ## Read the regression table {visibility="uncounted"}
 
 ```{r exercise-coefficient-table}
-exercise_coef_draws <- posterior::subset_draws(draws, variable=c("alpha","beta"))
-exercise_coefficients <- posterior::summarise_draws(
-  exercise_coef_draws, mean=mean, sd=sd,
-  ~quantile(.x, probs=c(0.025,0.975))
+exercise_coef_draws <- posterior::subset_draws(
+  draws,
+  variable = c("alpha", "beta")
 )
-exercise_coefficients |> knitr::kable(format="html",digits=3) |>
-  kableExtra::kable_styling(font_size=34)
+exercise_coefficients <- posterior::summarise_draws(
+  exercise_coef_draws,
+  mean = mean,
+  sd = sd,
+  \(x) quantile(x, probs = c(0.025, 0.975))
+)
+exercise_coefficients |>
+  knitr::kable(format = "html", digits = 3) |>
+  kableExtra::kable_styling(font_size = 34)
 ```
 
 - **mean:** posterior mean. **sd:** uncertainty about the coefficient.
@@ -868,10 +965,13 @@ slide before accepting the coefficient interpretation.
 
 ```{r exercise-diagnostic-table}
 posterior::summarise_draws(
-  exercise_coef_draws, rhat=posterior::rhat,
-  ess_bulk=posterior::ess_bulk, ess_tail=posterior::ess_tail
-) |> knitr::kable(format="html",digits=c(0,3,0,0)) |>
-  kableExtra::kable_styling(font_size=34)
+  exercise_coef_draws,
+  rhat = posterior::rhat,
+  ess_bulk = posterior::ess_bulk,
+  ess_tail = posterior::ess_tail
+) |>
+  knitr::kable(format = "html", digits = c(0, 3, 0, 0)) |>
+  kableExtra::kable_styling(font_size = 34)
 ```
 
 Post-warmup divergences: **`r sum(fit$diagnostics$num_divergent)`**.
@@ -897,8 +997,8 @@ computation worked to whether this model can reproduce the observed quadrats.
 **Next question:** how many of 20 new seedlings might survive?
 
 ```{r new-counts, fig.width=12, fig.height=3.8}
-plot_cndd_predictions(cndd_predictions(draws,n=20,seed=20261022)) +
-  labs(y="Simulated\ngroups")
+plot_cndd_predictions(cndd_predictions(draws, n = 20, seed = 20261022)) +
+  labs(y = "Simulated\ngroups")
 ```
 
 Both groups contain 20 seedlings. Density is the only condition that changes.
@@ -919,7 +1019,7 @@ question about new groups rather than the observed quadrats.
 ::: columns
 ::: {.column width="55%"}
 ```{r stan-model, results="asis"}
-show_stan("stan/logit_reg.stan", compact=TRUE)
+show_stan("stan/logit_reg.stan", compact = TRUE)
 ```
 :::
 ::: {.column width="45%"}
@@ -974,19 +1074,26 @@ Compare chain agreement (R-hat), sampling information (ESS), and sampler warning
 ```{r diagnostic-numbers}
 sampling_checks <- course_diagnostics(fit)
 failed_checks <- course_diagnostics(bad_fit)
-format_checks <- function(x) c(
-  sprintf("%.3f",x$max_rhat),
-  sprintf("%.0f / %.0f",x$min_bulk_ess,x$min_tail_ess),
-  as.character(x$divergent),
-  as.character(x$max_treedepth)
-)
+format_checks <- function(x) {
+  c(
+    sprintf("%.3f", x$max_rhat),
+    sprintf("%.0f / %.0f", x$min_bulk_ess, x$min_tail_ess),
+    as.character(x$divergent),
+    as.character(x$max_treedepth)
+  )
+}
 tibble(
-  Check=c("R-hat (maximum)","ESS (minimum bulk / tail)","Divergences",
-          "Maximum treedepth hits"),
-  CNDD=format_checks(sampling_checks),
-  `Failed example`=format_checks(failed_checks)
-) |> knitr::kable(format="html") |>
-  kableExtra::kable_styling(font_size=27)
+  Check = c(
+    "R-hat (maximum)",
+    "ESS (minimum bulk / tail)",
+    "Divergences",
+    "Maximum treedepth hits"
+  ),
+  CNDD = format_checks(sampling_checks),
+  `Failed example` = format_checks(failed_checks)
+) |>
+  knitr::kable(format = "html") |>
+  kableExtra::kable_styling(font_size = 27)
 ```
 
 **Zero divergences does not guarantee reliable sampling.** Read the traces and numbers together.
@@ -1014,10 +1121,10 @@ Source: https://mc-stan.org/learn-stan/diagnostics-warnings.html
 
 ```{r full-diagnostic-numbers}
 course_diagnostics(fit) |>
-  mutate(across(where(is.numeric),~signif(.x,4))) |>
-  pivot_longer(everything(),names_to="Diagnostic",values_to="Value") |>
-  knitr::kable(format="html") |>
-  kableExtra::kable_styling(font_size=25)
+  mutate(across(where(is.numeric), \(x) signif(x, 4))) |>
+  pivot_longer(everything(), names_to = "Diagnostic", values_to = "Value") |>
+  knitr::kable(format = "html") |>
+  kableExtra::kable_styling(font_size = 25)
 ```
 
 Read these with traces and the precision needed for the reported predictions.
@@ -1037,8 +1144,10 @@ Keep the observed $x_i$ and $n_i$ for every quadrat.
 Summarise variation across quadrats with one number: the **standard deviation (SD)**.
 
 ```{r check-spread, fig.width=11, fig.height=3.8}
-plot_cndd_spread_check(replicates,ndd) +
-  labs(subtitle="Black line: observed SD. Orange: SDs from simulated data sets.")
+plot_cndd_spread_check(replicates, ndd) +
+  labs(
+    subtitle = "Black line: observed SD. Orange: SDs from simulated data sets."
+  )
 ```
 
 Is the observed SD within the range the model typically produces?
@@ -1058,11 +1167,17 @@ the simulated predictor makes this illustrative, not an exact calibration experi
 
 ```{r prior-curves, fig.width=11, fig.height=4.4}
 set.seed(20261020)
-prior_lines <- tibble(curve=1:30,alpha=rnorm(30,0,2.5),beta=rnorm(30,0,2.5)) |>
-  crossing(density=seq(-2,2,length.out=81)) |>
-  mutate(p=plogis(alpha+beta*density))
-ggplot(prior_lines,aes(density,p,group=curve))+geom_line(alpha=.4,colour=col_prior)+
-  ylim(0,1)+labs(x="Conspecific density",y="Prior survival probability")
+prior_lines <- tibble(
+  curve = 1:30,
+  alpha = rnorm(30, 0, 2.5),
+  beta = rnorm(30, 0, 2.5)
+) |>
+  crossing(density = seq(-2, 2, length.out = 81)) |>
+  mutate(p = plogis(alpha + beta * density))
+ggplot(prior_lines, aes(density, p, group = curve)) +
+  geom_line(alpha = .4, colour = col_prior) +
+  ylim(0, 1) +
+  labs(x = "Conspecific density", y = "Prior survival probability")
 ```
 
 Are the predicted survival probabilities plausible for this habitat and census period?
@@ -1079,9 +1194,9 @@ variation. Do not label this prior universally weak or ecologically justified.
 ## Probability differences {visibility="uncounted"}
 
 ```{r echo=TRUE, eval=FALSE}
-p_low <- plogis(draws$alpha-draws$beta)
-p_high <- plogis(draws$alpha+draws$beta)
-quantile(p_high-p_low,c(.025,.5,.975))
+p_low <- plogis(draws$alpha - draws$beta)
+p_high <- plogis(draws$alpha + draws$beta)
+quantile(p_high - p_low, c(.025, .5, .975))
 ```
 
 Compute the difference for each paired draw. The comparison holds the two densities fixed.

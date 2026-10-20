@@ -71,7 +71,7 @@ Remember the two rules: **predict before you run**, and **interpret in words**.
 | **Data** | Seedlings (`n`) and survivors (`suv`) under eight mother trees of one species. Simulated: the true survival rates exist, but we hide them until Task 3. |
 
 ```{r trees-data}
-trees_all <- make_tree_data()            # includes the truth
+trees_all <- make_tree_data() # includes the truth
 trees <- select(trees_all, tree, n, suv) # what a field ecologist would have
 trees |> mutate(p_like = round(suv / n, 2))
 ```
@@ -108,26 +108,35 @@ no_pool
 **Partial pooling**: $\mathrm{logit}(p_i) \sim \mathcal{N}(\mu, \sigma)$, with $\mu$ and $\sigma$ estimated from all trees.
 
 ```{r show-logistic, echo=FALSE, results="asis"}
-cat("```stan\n", paste(readLines(here("stan/logistic.stan")), collapse = "\n"), "\n```\n", sep = "")
+cat(
+  "```stan\n",
+  paste(readLines(here("stan/logistic.stan")), collapse = "\n"),
+  "\n```\n",
+  sep = ""
+)
 ```
 
 ```{r partial}
 trees_data <- list(
-  I = nrow(trees),          # number of mother trees
+  I = nrow(trees), # number of mother trees
   ii = seq_len(nrow(trees)),
   suv = trees$suv,
   N = trees$n
 )
 
-trees_fit <- fit_or_load("day3_trees", "stan/logistic.stan", data = trees_data,
-  use_precomputed = TRUE)
+trees_fit <- fit_or_load(
+  "day3_trees",
+  "stan/logistic.stan",
+  data = trees_data,
+  use_precomputed = TRUE
+)
 trees_fit$source
 td <- trees_fit$draws
 
 diagnostic_table(trees_fit)
 td |>
   subset_draws(variable = c("mu", "sigma", "p")) |>
-  summarise_draws(mean, ~quantile(.x, c(0.05, 0.95)), rhat, ess_bulk)
+  summarise_draws(mean, \(x) quantile(x, c(0.05, 0.95)), rhat, ess_bulk)
 ```
 
 ```{r partial-table}
@@ -146,9 +155,15 @@ both <- bind_rows(no_pool, partial) |>
 
 ggplot(both, aes(mean, label, colour = model)) +
   geom_vline(xintercept = mean(p_pool), linetype = 2) +
-  geom_pointrange(aes(xmin = lo, xmax = hi), position = position_dodge(width = 0.5)) +
-  labs(x = "Survival rate (posterior mean and 90% interval)", y = NULL,
-    subtitle = "Dashed line: complete pooling")
+  geom_pointrange(
+    aes(xmin = lo, xmax = hi),
+    position = position_dodge(width = 0.5)
+  ) +
+  labs(
+    x = "Survival rate (posterior mean and 90% interval)",
+    y = NULL,
+    subtitle = "Dashed line: complete pooling"
+  )
 ```
 
 1. Which tree moved the most? Was your prediction right? Which two properties of a tree decide how far it moves?
@@ -279,13 +294,21 @@ are not supplied. These results must not be replaced by the default fit.
 **Predict first:** will the partial pooling estimates be closer to the no pooling estimates or further away? What happens to $\sigma$?
 
 ```{r tenx, eval=FALSE}
-trees_10x <- modifyList(trees_data, list(suv = trees$suv * 10L, N = trees$n * 10L))
-fit_10x <- fit_or_load("day3_trees", "stan/logistic.stan", data = trees_10x,
-  use_precomputed = FALSE, fallback = FALSE)
+trees_10x <- modifyList(
+  trees_data,
+  list(suv = trees$suv * 10L, N = trees$n * 10L)
+)
+fit_10x <- fit_or_load(
+  "day3_trees",
+  "stan/logistic.stan",
+  data = trees_10x,
+  use_precomputed = FALSE,
+  fallback = FALSE
+)
 
 fit_10x$draws |>
   subset_draws(variable = c("sigma", "p")) |>
-  summarise_draws(mean, ~quantile(.x, c(0.05, 0.95)))
+  summarise_draws(mean, \(x) quantile(x, c(0.05, 0.95)))
 ```
 
 ::: {.content-visible when-meta="solutions"}
@@ -293,13 +316,21 @@ fit_10x$draws |>
 ## Solution and notes
 
 ```{r tenx-sol, eval=FALSE}
-trees_10x <- modifyList(trees_data, list(suv = trees$suv * 10L, N = trees$n * 10L))
-fit_10x <- fit_or_load("day3_trees", "stan/logistic.stan", data = trees_10x,
-  use_precomputed = FALSE, fallback = FALSE)
+trees_10x <- modifyList(
+  trees_data,
+  list(suv = trees$suv * 10L, N = trees$n * 10L)
+)
+fit_10x <- fit_or_load(
+  "day3_trees",
+  "stan/logistic.stan",
+  data = trees_10x,
+  use_precomputed = FALSE,
+  fallback = FALSE
+)
 
 fit_10x$draws |>
   subset_draws(variable = c("sigma", "p")) |>
-  summarise_draws(mean, ~quantile(.x, c(0.05, 0.95)))
+  summarise_draws(mean, \(x) quantile(x, c(0.05, 0.95)))
 ```
 
 **Expected observations**: with 160 to 460 seedlings per tree the estimates stay close to the raw proportions (tree H: about 0.48 instead of 0.34), and $\sigma$ is now clearly away from 0 (about 0.55).
@@ -337,21 +368,25 @@ $$
 ```{r vint-fit}
 vint_data <- list(
   N = nrow(allo),
-  J = nlevels(allo$sp),            # number of species
-  sp = as.integer(allo$sp),        # species index of each tree
-  log_dbh = log(allo$dbh / 40),    # centred at DBH = 40 cm, as on Day 2
+  J = nlevels(allo$sp), # number of species
+  sp = as.integer(allo$sp), # species index of each tree
+  log_dbh = log(allo$dbh / 40), # centred at DBH = 40 cm, as on Day 2
   log_h = log(allo$h)
 )
 
-vint_fit <- fit_or_load("day3_vint", "stan/vint.stan", data = vint_data,
-  use_precomputed = TRUE)
+vint_fit <- fit_or_load(
+  "day3_vint",
+  "stan/vint.stan",
+  data = vint_data,
+  use_precomputed = TRUE
+)
 vint_fit$source
 vd <- vint_fit$draws
 
 diagnostic_table(vint_fit)
 vd |>
   subset_draws(variable = c("mu0", "tau", "beta1", "sigma")) |>
-  summarise_draws(mean, ~quantile(.x, c(0.05, 0.95)), rhat, ess_bulk)
+  summarise_draws(mean, \(x) quantile(x, c(0.05, 0.95)), rhat, ess_bulk)
 ```
 
 1. Is the computation fine?
@@ -384,7 +419,10 @@ tibble(
   sp = levels(allo$sp),
   trees = as.integer(table(allo$sp)),
   no_pooling = round(no_pool_int, 2),
-  partial_pooling = round(map_dbl(1:10, \(j) mean(vd[[paste0("log_beta0[", j, "]")]])), 2)
+  partial_pooling = round(
+    map_dbl(1:10, \(j) mean(vd[[paste0("log_beta0[", j, "]")]])),
+    2
+  )
 )
 ```
 
@@ -411,14 +449,25 @@ In the Stan output: `gamma[1,1]`, `gamma[1,2]`, `gamma[2,1]`, `gamma[2,2]`; `tau
 vslope_data <- vslope_stan_data(allo) # see R/course_data.R
 str(vslope_data, give.attr = FALSE)
 
-vslope_fit <- fit_or_load("day3_vslope", "stan/vslope.stan", data = vslope_data,
-  adapt_delta = 0.95, use_precomputed = TRUE)
+vslope_fit <- fit_or_load(
+  "day3_vslope",
+  "stan/vslope.stan",
+  data = vslope_data,
+  adapt_delta = 0.95,
+  use_precomputed = TRUE
+)
 sd3 <- vslope_fit$draws
 
 diagnostic_table(vslope_fit)
 sd3 |>
   subset_draws(variable = c("gamma", "tau", "sigma")) |>
-  summarise_draws(mean, ~quantile(.x, c(0.05, 0.95)), rhat, ess_bulk, ess_tail)
+  summarise_draws(
+    mean,
+    \(x) quantile(x, c(0.05, 0.95)),
+    rhat,
+    ess_bulk,
+    ess_tail
+  )
 ```
 
 1. **Diagnostics first**: `rhat`, ESS, divergences. May we interpret this fit?
@@ -429,7 +478,7 @@ sd3 |>
 g22 <- sd3$`gamma[2,2]`
 mean(g22 > ___)
 
-exp_low  <- sd3$`gamma[2,1]` + sd3$`gamma[2,2]` * ___
+exp_low <- sd3$`gamma[2,1]` + sd3$`gamma[2,2]` * ___
 exp_high <- sd3$`gamma[2,1]` + sd3$`gamma[2,2]` * ___
 mean_qi(exp_low)
 mean_qi(exp_high)
@@ -443,7 +492,7 @@ mean_qi(exp_high)
 mean(sd3$`gamma[2,2]` > 0)
 mean_qi(sd3$`gamma[2,2]`)
 
-exp_low  <- sd3$`gamma[2,1]` + sd3$`gamma[2,2]` * -1
+exp_low <- sd3$`gamma[2,1]` + sd3$`gamma[2,2]` * -1
 exp_high <- sd3$`gamma[2,1]` + sd3$`gamma[2,2]` * 1
 mean_qi(exp_low)
 mean_qi(exp_high)
@@ -470,24 +519,35 @@ Compare the exponent of each species from separate regressions (no pooling) with
 ```{r slopes, fig.height=4.5}
 no_pool_slope <- allo |>
   group_by(sp) |>
-  group_modify(~ tibble(
-    trees = nrow(.x),
-    wd = .x$wd[1],
-    no_pooling = coef(lm(log(h) ~ log(dbh / 40), data = .x))[2]
-  )) |>
+  group_modify(
+    ~ tibble(
+      trees = nrow(.x),
+      wd = .x$wd[1],
+      no_pooling = coef(lm(log(h) ~ log(dbh / 40), data = .x))[2]
+    )
+  ) |>
   ungroup()
 
 slopes <- no_pool_slope |>
-  mutate(map(1:10, \(j) mean_qi(sd3[[paste0("beta[2,", j, "]")]])) |> list_rbind())
+  mutate(
+    map(1:10, \(j) mean_qi(sd3[[paste0("beta[2,", j, "]")]])) |> list_rbind()
+  )
 slopes
 
 ggplot(slopes, aes(wd)) +
-  geom_segment(aes(xend = wd, y = no_pooling, yend = mean), colour = "grey50",
-    arrow = arrow(length = unit(0.2, "cm"))) +
+  geom_segment(
+    aes(xend = wd, y = no_pooling, yend = mean),
+    colour = "grey50",
+    arrow = arrow(length = unit(0.2, "cm"))
+  ) +
   geom_point(aes(y = no_pooling, size = trees), shape = 21, fill = "white") +
   geom_pointrange(aes(y = mean, ymin = lo, ymax = hi), colour = "#d95f02") +
-  labs(x = "Wood density (scaled)", y = "Exponent", size = "Trees",
-    subtitle = "Open: separate regressions. Orange: multilevel model (mean, 90% interval)")
+  labs(
+    x = "Wood density (scaled)",
+    y = "Exponent",
+    size = "Trees",
+    subtitle = "Open: separate regressions. Orange: multilevel model (mean, 90% interval)"
+  )
 ```
 
 1. Which species change the most? What do they have in common?

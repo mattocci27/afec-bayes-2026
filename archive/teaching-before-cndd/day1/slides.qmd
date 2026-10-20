@@ -198,12 +198,14 @@ b1 <- rnorm(n_sp, b1_hat, 0.1)
 
 b0 <- rnorm(n_sp, 0, 0.5)
 y_fun <- function(beta0, beta1) beta0 + beta1 * xx
-xx <- seq(-3, 3, length = n_rep)
+xx <- seq(-3, 3, length.out = n_rep)
 z <- map2(as.list(b0), as.list(b1), y_fun) |> unlist()
 
-tmp <- tibble(z,
-              x = rep(xx, n_sp),
-              sp = rep(paste0("sp", 1:n_sp), each = n_rep))
+tmp <- tibble(
+  z,
+  x = rep(xx, n_sp),
+  sp = rep(paste0("sp", 1:n_sp), each = n_rep)
+)
 
 tmp2 <- tibble(x = trait, y = b1, sp = rep(paste0("sp", 1:n_sp)))
 
@@ -225,9 +227,14 @@ p2 <- tmp |>
 
 p3 <- tmp2 |>
   ggplot(aes(x = x, y = y, col = sp)) +
-  geom_smooth(method = "lm", se = TRUE, lty = 2,
+  geom_smooth(
+    method = "lm",
+    se = TRUE,
+    lty = 2,
     alpha = 0.2,
-    linewidth = 0.5, col = "black") +
+    linewidth = 0.5,
+    col = "black"
+  ) +
   geom_point(size = 3) +
   xlab("Abundance") +
   ylab("Strength of NDD") +
@@ -307,14 +314,22 @@ tibble(x, y) |>
   geom_segment(
     data = normal_observations,
     aes(x = x, xend = x, y = 0, yend = dnorm(x, mean = 0, sd = 1)),
-    inherit.aes = FALSE, linetype = 3
+    inherit.aes = FALSE,
+    linetype = 3
   ) +
   geom_point(
     data = normal_observations,
     aes(x, dnorm(x, mean = 0, sd = 1)),
-    inherit.aes = FALSE, size = 4, colour = col_like
+    inherit.aes = FALSE,
+    size = 4,
+    colour = col_like
   ) +
-  geom_rug(data = normal_observations, aes(x = x), inherit.aes = FALSE, sides = "b") +
+  geom_rug(
+    data = normal_observations,
+    aes(x = x),
+    inherit.aes = FALSE,
+    sides = "b"
+  ) +
   labs(x = "Observed value x", y = "Density", title = "Mean = 0, SD = 1")
 ```
 :::
@@ -354,22 +369,46 @@ normal_comparison <- crossing(x = seq(-5, 5, length.out = 501), mu = c(0, 2)) |>
   mutate(density = dnorm(x, mean = mu, sd = 1), model = factor(mu))
 normal_point_densities <- crossing(normal_observations, mu = c(0, 2)) |>
   mutate(density = dnorm(x, mean = mu, sd = 1), model = factor(mu))
-normal_density_plot <- ggplot(normal_comparison, aes(x, density, colour = model, linetype = model)) +
+normal_density_plot <- ggplot(
+  normal_comparison,
+  aes(x, density, colour = model, linetype = model)
+) +
   geom_line(linewidth = 1.2) +
   geom_point(data = normal_point_densities, size = 3) +
-  geom_rug(data = normal_observations, aes(x = x), inherit.aes = FALSE, sides = "b") +
-  scale_colour_manual(values = c("0" = col_like, "2" = "grey50"), labels = c("Mean = 0", "Mean = 2")) +
-  scale_linetype_manual(values = c("0" = "solid", "2" = "dashed"), labels = c("Mean = 0", "Mean = 2")) +
+  geom_rug(
+    data = normal_observations,
+    aes(x = x),
+    inherit.aes = FALSE,
+    sides = "b"
+  ) +
+  scale_colour_manual(
+    values = c("0" = col_like, "2" = "grey50"),
+    labels = c("Mean = 0", "Mean = 2")
+  ) +
+  scale_linetype_manual(
+    values = c("0" = "solid", "2" = "dashed"),
+    labels = c("Mean = 0", "Mean = 2")
+  ) +
   labs(x = "Observed value x", y = "Density", colour = NULL, linetype = NULL) +
-  theme(legend.position = "top", legend.text = element_text(size = 18),
-        axis.title = element_text(size = 22), axis.text = element_text(size = 18))
+  theme(
+    legend.position = "top",
+    legend.text = element_text(size = 18),
+    axis.title = element_text(size = 22),
+    axis.text = element_text(size = 18)
+  )
 normal_likelihood <- tibble(mu = seq(-5, 5, length.out = 501)) |>
-  mutate(log_likelihood = like_fun(mu), likelihood = exp(log_likelihood - max(log_likelihood)))
+  mutate(
+    log_likelihood = like_fun(mu),
+    likelihood = exp(log_likelihood - max(log_likelihood))
+  )
 normal_likelihood_plot <- ggplot(normal_likelihood, aes(mu, likelihood)) +
   geom_line(linewidth = 1.5, colour = col_like) +
   geom_vline(xintercept = 0, linetype = 3) +
   labs(x = expression("Mean " * mu), y = "Likelihood (rescaled)") +
-  theme(axis.title = element_text(size = 22), axis.text = element_text(size = 18))
+  theme(
+    axis.title = element_text(size = 22),
+    axis.text = element_text(size = 18)
+  )
 normal_density_plot / normal_likelihood_plot
 ```
 :::
@@ -411,7 +450,11 @@ seedling_likelihood <- tibble(p = seq(0, 1, length.out = 501)) |>
   mutate(likelihood = dbinom(2, size = 5, prob = p))
 seedling_likelihood_plot <- ggplot(seedling_likelihood, aes(p, likelihood)) +
   geom_line(linewidth = 1.5, colour = col_like) +
-  labs(x = "Survival probability p", y = "Likelihood", title = "2 survivors out of 5")
+  labs(
+    x = "Survival probability p",
+    y = "Likelihood",
+    title = "2 survivors out of 5"
+  )
 seedling_likelihood_plot +
   geom_vline(xintercept = 0.4, linetype = 3, colour = col_like) +
   annotate("point", x = 0.4, y = dbinom(2, 5, 0.4), size = 4, colour = col_like)
@@ -497,7 +540,12 @@ lens <- bind_rows(
 )
 
 ggplot() +
-  geom_polygon(data = circle(a, 0, radius), aes(x, y), fill = "blue", alpha = 0.3) +
+  geom_polygon(
+    data = circle(a, 0, radius),
+    aes(x, y),
+    fill = "blue",
+    alpha = 0.3
+  ) +
   geom_polygon(data = lens, aes(x, y), fill = "blue", alpha = 0.6) +
   geom_path(data = circle(-a, 0, radius), aes(x, y), linewidth = 1.5) +
   geom_path(data = circle(a, 0, radius), aes(x, y), linewidth = 1.5) +
@@ -710,7 +758,7 @@ plot_update(2, 5, 1, 1, linewidth = 1.8) +
 ::: incremental
 - The answer is a **distribution**, not a number.
 - We summarise it:
-  - mean: `r round(3/7, 2)`
+  - mean: `r round(3 / 7, 2)`
   - 90% interval: `r round(qbeta(0.05, 3, 4), 2)` to `r round(qbeta(0.95, 3, 4), 2)`
   - $P(p > 0.5 \mid \text{data})$ = `r round(1 - pbeta(0.5, 3, 4), 2)`
 - "Given the model and the data, there is a 90% probability that $p$ is between `r round(qbeta(0.05, 3, 4), 2)` and `r round(qbeta(0.95, 3, 4), 2)`."
@@ -730,9 +778,9 @@ plot_update(2, 5, 1, 1, linewidth = 1.8) +
 ::: small
 | | What it is | Seedlings (2 of 5, prior Beta(8, 2)) |
 |---|---|---|
-| **MLE** | the $p$ that maximises the [likelihood]{.teal} | `r round(2/5, 3)` |
-| **MAP** | the $p$ that maximises the [posterior]{.orange} (its peak) | `r round(9/13, 3)` |
-| **Posterior mean** | the average of the [posterior]{.orange} | `r round(10/15, 3)` |
+| **MLE** | the $p$ that maximises the [likelihood]{.teal} | `r round(2 / 5, 3)` |
+| **MAP** | the $p$ that maximises the [posterior]{.orange} (its peak) | `r round(9 / 13, 3)` |
+| **Posterior mean** | the average of the [posterior]{.orange} | `r round(10 / 15, 3)` |
 | **Posterior distribution** | every value of $p$ with its plausibility | Beta(10, 5) |
 :::
 
@@ -749,19 +797,25 @@ plot_update(2, 5, 1, 1, linewidth = 1.8) +
 ```{r, fig.height=5.5, fig.width=15}
 set.seed(1)
 priors <- tribble(
-  ~name, ~a, ~b,
-  "Flat: Beta(1, 1)", 1, 1,
-  "Weakly informative: Beta(2, 2)", 2, 2,
-  "Informative: Beta(3, 7)", 3, 7
+  ~name                            , ~a , ~b ,
+  "Flat: Beta(1, 1)"               ,  1 ,  1 ,
+  "Weakly informative: Beta(2, 2)" ,  2 ,  2 ,
+  "Informative: Beta(3, 7)"        ,  3 ,  7
 ) |>
   mutate(name = fct_inorder(name))
 
 dens <- priors |>
-  mutate(d = map2(a, b, \(a, b) tibble(p = seq(0, 1, length.out = 201), density = dbeta(p, a, b)))) |>
+  mutate(
+    d = map2(a, b, \(a, b) {
+      tibble(p = seq(0, 1, length.out = 201), density = dbeta(p, a, b))
+    })
+  ) |>
   unnest(d)
 
 sims <- priors |>
-  mutate(s = map2(a, b, \(a, b) tibble(y = rbinom(1e4, 5, rbeta(1e4, a, b))))) |>
+  mutate(
+    s = map2(a, b, \(a, b) tibble(y = rbinom(1e4, 5, rbeta(1e4, a, b))))
+  ) |>
   unnest(s) |>
   count(name, y) |>
   group_by(name) |>
@@ -776,7 +830,10 @@ p1 <- ggplot(dens, aes(p, density)) +
 p2 <- ggplot(sims, aes(y, prop)) +
   geom_col(fill = col_prior, alpha = 0.7) +
   facet_wrap(~name) +
-  labs(x = "Survivors out of 5 seedlings, simulated from the prior", y = "Proportion") +
+  labs(
+    x = "Survivors out of 5 seedlings, simulated from the prior",
+    y = "Proportion"
+  ) +
   theme(strip.text = element_blank())
 
 p1 / p2
@@ -820,7 +877,7 @@ Keep the observed proportion at 0.6 and the prior fixed; change the number of to
 
 ::: {.column width="50%"}
 ```{r, fig.height=4}
-tibble(x = seq(0, 1, length = 200)) |>
+tibble(x = seq(0, 1, length.out = 200)) |>
   mutate(prior = dbeta(x, 51, 51)) |>
   ggplot(aes(x, prior)) +
   geom_line(linewidth = 1.5, colour = col_prior) +
@@ -828,7 +885,8 @@ tibble(x = seq(0, 1, length = 200)) |>
   theme(
     legend.position = "none",
     axis.text = element_text(size = 28),
-    axis.title = element_text(size = 32))
+    axis.title = element_text(size = 32)
+  )
 ```
 :::
 
@@ -1009,7 +1067,8 @@ seedling_fit <- read_fit("day1_seedling")
 fit <- fit_or_load(
   "day1_seedling",
   "stan/binomial.stan",
-  data = list(N = 5, y = 2, a = 1, b = 1), use_precomputed = TRUE
+  data = list(N = 5, y = 2, a = 1, b = 1),
+  use_precomputed = TRUE
 )
 fit$draws
 ```
@@ -1032,10 +1091,18 @@ seedling_fit$draws |>
 ::: {.column width="55%"}
 ```{r, fig.height=4, fig.width=8}
 ggplot(as_tibble(seedling_fit$draws), aes(p)) +
-  geom_histogram(aes(y = after_stat(density)), bins = 40, fill = col_post, alpha = 0.5) +
+  geom_histogram(
+    aes(y = after_stat(density)),
+    bins = 40,
+    fill = col_post,
+    alpha = 0.5
+  ) +
   stat_function(fun = dbeta, args = list(3, 4), linewidth = 1.2) +
-  labs(x = "Survival probability p", y = "Density",
-    subtitle = "Histogram: Stan draws. Line: exact posterior Beta(3, 4)")
+  labs(
+    x = "Survival probability p",
+    y = "Density",
+    subtitle = "Histogram: Stan draws. Line: exact posterior Beta(3, 4)"
+  )
 ```
 
 ::: small
@@ -1132,8 +1199,9 @@ tibble(x, y) |>
   ggtitle("N(0, 1)") +
   geom_line(aes(x, y)) +
   theme(
-    axis.title   = element_text(size = 32),
-    axis.text    = element_text(size = 28))
+    axis.title = element_text(size = 32),
+    axis.text = element_text(size = 28)
+  )
 ```
 
 ::: small
@@ -1197,8 +1265,9 @@ tibble(x, y) |>
   ylab("ln L") +
   geom_line(aes(x, y)) +
   theme(
-    axis.title   = element_text(size = 32),
-    axis.text    = element_text(size = 28))
+    axis.title = element_text(size = 32),
+    axis.text = element_text(size = 28)
+  )
 ```
 :::
 

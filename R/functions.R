@@ -5,7 +5,7 @@
 #   beta0 <- rnorm(n_sp, beta0_hat, 0.5)
 
 #   y_fun <- function(beta0, beta1) beta0 + beta1 * xx
-#   xx <- seq(-3, 3, length = n_rep)
+#   xx <- seq(-3, 3, length.out = n_rep)
 #   z <- map(as.list(beta0), y_fun, beta1) |> unlist()
 
 #   tmp <- tibble(z,
@@ -58,8 +58,15 @@ add_p <- function(dummy_simple, summary) {
 
 #' @title ggsave for targets
 #' @inheritParams ggplot2::ggsave
-my_ggsave <- function(filename, plot, units = c("in", "cm",
-        "mm", "px"), height = NA, width = NA, dpi = 600, ...) {
+my_ggsave <- function(
+  filename,
+  plot,
+  units = c("in", "cm", "mm", "px"),
+  height = NA,
+  width = NA,
+  dpi = 600,
+  ...
+) {
   font_add_google("STIX Two Text", "STIX2")
   showtext_auto()
   showtext_opts(dpi = dpi)

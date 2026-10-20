@@ -2173,7 +2173,7 @@ vertical-align: -.125em;
 <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
   <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">Table of contents</h2>
-
+   
   <ul>
   <li><a href="#learning-outcomes-and-connections-across-the-three-days" id="toc-learning-outcomes-and-connections-across-the-three-days" class="nav-link active" data-scroll-target="#learning-outcomes-and-connections-across-the-three-days">Learning outcomes and connections across the three days</a></li>
   <li><a href="#day-1-90-minute-schedule" id="toc-day-1-90-minute-schedule" class="nav-link" data-scroll-target="#day-1-90-minute-schedule">Day 1: 90-minute schedule</a></li>
@@ -2194,11 +2194,11 @@ vertical-align: -.125em;
 
 <div class="quarto-title-meta">
 
-
-
-
+    
+  
+    
   </div>
-
+  
 
 
 </header>
@@ -2449,7 +2449,7 @@ vertical-align: -.125em;
     anchorJS.add('.anchored');
     const isCodeAnnotation = (el) => {
       for (const clz of el.classList) {
-        if (clz.startsWith('code-annotation-')) {
+        if (clz.startsWith('code-annotation-')) {                     
           return true;
         }
       }
@@ -2469,11 +2469,11 @@ vertical-align: -.125em;
         button.setAttribute("data-bs-toggle", "tooltip");
         button.setAttribute("data-bs-placement", "left");
         button.setAttribute("data-bs-title", "Copied!");
-        tooltip = new bootstrap.Tooltip(button,
-          { trigger: "manual",
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
             customClass: "code-copy-button-tooltip",
             offset: [0, -8]});
-        tooltip.show();
+        tooltip.show();    
       }
       setTimeout(function() {
         if (tooltip) {
@@ -2550,7 +2550,7 @@ vertical-align: -.125em;
       if (onUntriggerFn) {
         config.onUntrigger = onUntriggerFn;
       }
-      window.tippy(el, config);
+      window.tippy(el, config); 
     }
     const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
     for (var i=0; i<noterefs.length; i++) {
@@ -2625,7 +2625,7 @@ vertical-align: -.125em;
       tippyHover(xref, undefined, function(instance) {
         instance.disable();
         let url = xref.getAttribute('href');
-        let hash = undefined;
+        let hash = undefined; 
         if (url.startsWith('#')) {
           hash = url;
         } else {
@@ -2653,7 +2653,7 @@ vertical-align: -.125em;
               if (note !== null) {
                 const html = processXRef(id, note);
                 instance.setContent(html);
-              }
+              } 
             }).finally(() => {
               instance.enable();
               instance.show();
@@ -2677,7 +2677,7 @@ vertical-align: -.125em;
               }
               const html = processXRef(null, note);
               instance.setContent(html);
-            }
+            } 
           }).finally(() => {
             instance.enable();
             instance.show();
@@ -2717,7 +2717,7 @@ vertical-align: -.125em;
               height = bottom - top;
             }
             if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it
+              // cook up a div (if necessary) and position it 
               let div = window.document.getElementById("code-annotation-line-highlight");
               if (div === null) {
                 div = window.document.createElement("div");

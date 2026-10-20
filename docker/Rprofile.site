@@ -1,7 +1,14 @@
 # Classroom only. No renv activation, host proxies or dependency installation.
 .libPaths(c("/opt/afec/library", .Library))
-options(mc.cores = 1L, Ncpus = 1L, future.availableCores.fallback = 1L,
-        future.availableCores.methods = "fallback")
-if (dir.exists(Sys.getenv("CMDSTAN")) && requireNamespace("cmdstanr", quietly = TRUE)) {
+options(
+  mc.cores = 1L,
+  Ncpus = 1L,
+  future.availableCores.fallback = 1L,
+  future.availableCores.methods = "fallback"
+)
+if (
+  dir.exists(Sys.getenv("CMDSTAN")) &&
+    requireNamespace("cmdstanr", quietly = TRUE)
+) {
   suppressMessages(cmdstanr::set_cmdstan_path(Sys.getenv("CMDSTAN")))
 }

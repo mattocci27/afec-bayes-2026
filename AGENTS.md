@@ -81,3 +81,7 @@ Build on the existing ecological examples. Help participants understand model as
 - Clearly distinguish exercises that run new inference from exercises that analyze precomputed results.
 - Account for classroom connectivity, available computing resources, and measured execution time when designing exercises.
 - Keep local installation instructions optional and separate from the core classroom workflow.
+
+
+Follow this R style guide:
+https://style.tidyverse.org/

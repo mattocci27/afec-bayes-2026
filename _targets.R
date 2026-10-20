@@ -39,7 +39,6 @@ list(
     dummy_simple_stan,
     generate_dummy_simple_stan(dummy_simple)
   ),
-
   tar_stan_mcmc(
     simple,
     "stan/logistic.stan",

@@ -16,8 +16,14 @@ execute:
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(message=FALSE, warning=FALSE, fig.align="center",
-                      fig.width=8, fig.height=4.5, comment="#>")
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center",
+  fig.width = 8,
+  fig.height = 4.5,
+  comment = "#>"
+)
 ```
 
 ## Before you begin
@@ -44,18 +50,20 @@ y <- 2
 N <- 5
 p <- seq(0, 1, length.out = 101)
 
-prior <- dbeta(p, shape1 = 1, shape2 = 1)  # flat prior
-likelihood <- dbinom(x = y, size = N, prob = p)  # likelihood
+prior <- dbeta(p, shape1 = 1, shape2 = 1) # flat prior
+likelihood <- dbinom(x = y, size = N, prob = p) # likelihood
 posterior <- prior * likelihood
-posterior <- posterior / sum(posterior)  # weights sum to 1
+posterior <- posterior / sum(posterior) # weights sum to 1
 
 tibble(p = p, posterior = posterior) |>
   ggplot(aes(x = p, y = posterior)) +
   geom_line(linewidth = 1.2, colour = "#d95f02") +
   coord_cartesian(xlim = c(0, 1)) +
-  labs(x = "Survival probability p",
-       y = "Posterior probability per grid point",
-       title = paste(y, "survivors out of", N, "seedlings"))
+  labs(
+    x = "Survival probability p",
+    y = "Posterior probability per grid point",
+    title = paste(y, "survivors out of", N, "seedlings")
+  )
 ```
 
 1. Choose a small survey and a larger survey, both with an observed survival proportion of 0.4. Write down the number surveyed (`N`) and the number surviving (`y`) for each.

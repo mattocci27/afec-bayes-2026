@@ -16,8 +16,14 @@ execute:
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(message=FALSE, warning=FALSE, fig.align="center",
-                      fig.width=8, fig.height=4.5, comment="#>")
+knitr::opts_chunk$set(
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center",
+  fig.width = 8,
+  fig.height = 4.5,
+  comment = "#>"
+)
 ```
 
 ## Before you begin
@@ -41,7 +47,7 @@ source(here("R/functions.R"))
 source(here("R/course_data.R"))
 source(here("R/course_utils.R"))
 source(here("R/course_visuals.R"))
-theme_set(theme_bw(base_size=14))
+theme_set(theme_bw(base_size = 14))
 ```
 
 # Core exercise: which mother-tree estimates will move?
@@ -60,7 +66,9 @@ Mother trees and species are different kinds of groups.
 
 ```{r core-trees}
 trees <- make_tree_data()
-trees |> select(tree, n, suv) |> mutate(observed_proportion=suv/n)
+trees |>
+  select(tree, n, suv) |>
+  mutate(observed_proportion = suv / n)
 ```
 
 Choose two trees whose estimates you expect to change when they share information.
@@ -76,9 +84,9 @@ survival proportion.
 ```{r core-comparison}
 fit <- course_fit("day3_trees")
 fit$source
-comparison <- mother_comparison(fit, seed=20261024)
+comparison <- mother_comparison(fit, seed = 20261024)
 plot_mother_comparison(comparison)
-plot_mother_truth(comparison,trees)
+plot_mother_truth(comparison, trees)
 ```
 
 Purple open points show separate estimates; orange filled points show partial
@@ -110,15 +118,17 @@ differences among mother trees? Give a reason.
 ## Solution and instructor notes
 
 ```{r solution-movement, echo=FALSE}
-movement <- comparison |> select(tree,n,model,mean) |>
-  pivot_wider(names_from=model,values_from=mean) |>
-  mutate(change=Partial-Separate) |> arrange(desc(abs(change)))
+movement <- comparison |>
+  select(tree, n, model, mean) |>
+  pivot_wider(names_from = model, values_from = mean) |>
+  mutate(change = Partial - Separate) |>
+  arrange(desc(abs(change)))
 ```
 
 The largest movement in this data set is tree `r movement$tree[1]`, with
 `r movement$n[1]` seedlings. Its separate posterior mean is
-`r round(movement$Separate[1],2)` and its partial-pooling mean is
-`r round(movement$Partial[1],2)`. Ask participants to connect the movement to both
+`r round(movement$Separate[1], 2)` and its partial-pooling mean is
+`r round(movement$Partial[1], 2)`. Ask participants to connect the movement to both
 sample size and position relative to the inferred group distribution.
 
 Less information within a group often gives the shared distribution more influence.
@@ -158,7 +168,12 @@ hypothetical probabilities, not posterior estimates for our eight trees.
 ## Completed Stan model
 
 ```{r demo-stan, echo=FALSE, results="asis"}
-cat("```stan\n",paste(readLines(here("stan/logistic.stan")),collapse="\n"),"\n```\n",sep="")
+cat(
+  "```stan\n",
+  paste(readLines(here("stan/logistic.stan")), collapse = "\n"),
+  "\n```\n",
+  sep = ""
+)
 ```
 
 :::
@@ -167,7 +182,7 @@ cat("```stan\n",paste(readLines(here("stan/logistic.stan")),collapse="\n"),"\n``
 
 ```{r demo-diagnostics}
 course_diagnostics(fit)
-bayesplot::mcmc_trace(fit$draws, pars=c("mu","sigma"))
+bayesplot::mcmc_trace(fit$draws, pars = c("mu", "sigma"))
 plot_mother_check(fit)
 ```
 
