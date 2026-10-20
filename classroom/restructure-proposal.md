@@ -1,79 +1,128 @@
-# AFEC 2026：授業の再構成計画（合意済み方針）
+# AFEC 2026: course restructuring plan (agreed direction)
 
-2026-10-16更新
+Updated 2026-10-16; subsequent Day 2 decisions are recorded in Section 4.
 
-本書は講師との合意を反映した再構成案。考え方・図の解釈・研究への接続を優先し、Day 1の操作演習は一つ、Day 2の主例はCNDD、Day 3は母樹で理解して研究例へつなぐ。Stanは完成済みモデルと結果を読むところまでを共通とする。この方針に沿って、各日のスライド・演習、講師用進行表、解答を除いた配布版とオフライン結果シートを改訂する。
+This proposal reflects the agreed direction: prioritize concepts, figure
+interpretation and connections to research. Day 1 has one practical activity,
+Day 2 uses CNDD as its main example, and Day 3 develops understanding through
+mother trees before connecting to research examples. Reading supplied Stan
+models and results is the common goal. Revise each day's slides and activities,
+the instructor schedule, participant versions without solutions, and offline
+result sheets accordingly.
 
-## 1. 戻したい授業の軸
+## 1. Teaching priorities to restore
 
-対象は、統計を専門にしていないEcologist。
-授業の目的は「なぜベイズ推定が役に立つか」「なぜ階層モデルを使うか」を、生態学の問いと図を通して理解し、自分の研究で使う入口を得ることとする。
+The audience is ecologists who do not specialize in statistics. The course
+should help them understand why Bayesian inference and hierarchical models are
+useful through ecological questions and figures, providing a starting point for
+their own research.
 
-元の `main.qmd` の目標にはStan・Rの利用も含まれるが、講師ノートには「coding exercises are not the focus」「idea of Bayesian in ecology」とある。この位置づけを中心に戻す。
+The original `main.qmd` includes using Stan and R among its objectives, but its
+instructor notes say “coding exercises are not the focus” and “idea of Bayesian
+in ecology.” Restore that emphasis.
 
-説明の深さと授業の思想は、なるべく `main.qmd` を基準にする。尤度と苗木、生態学の問いによる階層モデルの動機づけ、身近な例によるBayesの理解、事前分布の役割、母樹での階層モデル再訪、というつながりを3日間に分ける。診断用語や実装手順の習得を新たな中心にしない。
+Use `main.qmd` as the reference for depth and teaching approach. Across the three
+days, connect likelihood and seedlings, ecological motivation for hierarchical
+models, familiar examples of Bayes, the role of priors, and a return to
+hierarchical models through mother trees. Do not make learning diagnostic
+terminology or implementation procedures the new focus.
 
-図に対応する短い数式は残し、説明の順序をそろえる。
+Keep short equations that correspond to the figures, using a consistent order:
 
-**身近な例・生態学の問い → まず予想する → 図を見る → 必要な数式で説明する → 生態学的に解釈する**
+**Familiar example or ecological question → predict → inspect a figure → explain
+with the necessary equations → interpret ecologically.**
 
-紹介する内容のすべてを、その場で計算・実装できることまでは求めない。
-Stanのコードはモデルを具体化するために見せる。共通の到達点は、完成済みコードのどこがデータ・未知量・仮定に対応するかを講師と確認し、結果の図を読めることとする。編集・実装は希望者向けの発展とする。
+Participants need not calculate or implement everything introduced during class.
+Show Stan code to make the model concrete. The common goal is to identify data,
+unknowns and assumptions in supplied code with the instructor, and to interpret
+resulting figures. Editing and implementation are optional extensions.
 
-## 2. 前提と全体像
+## 2. Assumptions and overview
 
-以下は未確認事項を含む、設計上の仮定。
+These are design assumptions, some still awaiting confirmation.
 
-- 3日間、各90分、受講者約30名。
-- R経験・GLM習得を前提にしない。完成済みコードか配布図を選び、同じ比較と解釈を行う。
-- 10月15日版時間割では10月20日に50分のR動作確認、10月21–26日に日中7時間のR・統計、その最初の3日間の夜が本講習。日別内容は不明なので、必要な回帰・確率の考え方は講師が図で説明する。疲労も考慮し、学生全員の新規推定を必須にしない。
-- ベイズ推定の経験は前提にしない。対数・確率・回帰も必要なところで短く説明する。
-- 授業・受講者用教材は英語。講師用の本案は日本語。
-- 相談はペアで行えるようにし、講師1名でも進められる構成を想定する。
-- 必須の宿題は設けない案。発展資料は授業後にも参照できるようにする。
-- ブラウザ環境を標準とし、事前確認済みのローカル利用も可能とする案。環境の最終決定は別途行う。
+- Three 90-minute sessions for approximately 30 participants.
+- Do not assume R experience or knowledge of GLMs. Supplied code and supplied
+  figures provide routes to the same comparisons and interpretations.
+- The October 15 timetable assigns 50 minutes on October 20 to checking R and
+  seven daytime hours on October 21–26 to R and statistics. This course occupies
+  the evenings of the first three days. As daily content is unknown, explain
+  necessary regression and probability concepts through figures. Allow for
+  fatigue; new inference by every participant is not required.
+- Do not assume prior Bayesian experience. Briefly explain logarithms,
+  probability and regression as needed.
+- Instruction and participant materials are in English. This instructor-facing
+  plan is also available in English.
+- Allow discussion in pairs and design activities for one instructor.
+- No required homework is proposed; extension materials remain available later.
+- The initial proposal uses a browser environment with prechecked local use as
+  an alternative. The final computing arrangement is a separate decision.
 
-| 日 | 中心となる問い | 終了時にできてほしいこと | 受講者の演習 |
+| Day | Central question | Intended outcome | Participant activity |
 |---|---|---|---|
-| Day 1 | データを見たら、考えはどう変わる？ | 事前・尤度・事後の役割と、データ量による変化を図と言葉で説明する | 短い図の比較を1回 |
-| Day 2 | 同種個体の密度によって、苗木の生存率はどう変わる？ | 低密度・高密度での生存確率と不確実性を説明し、モデルと観測を比較する | 完成済みコードでCNDDの結果を読む演習を1回 |
-| Day 3 | データの少ない種や母樹を、どう扱える？ | partial poolingの意味と、研究で使う理由を説明する | 母樹の推定を比較する演習を1回 |
+| Day 1 | How do our beliefs change after seeing data? | Explain prior, likelihood, posterior and the effect of sample size through figures and words | One short figure-comparison activity |
+| Day 2 | How does seedling survival change with conspecific density? | Explain survival probabilities and uncertainty at low and high densities; compare the model with observations | One activity reading CNDD results with supplied code |
+| Day 3 | How can we handle species or mother trees with little data? | Explain partial pooling and why it is useful in research | One comparison of mother-tree estimates |
 
-3日間を「苗木の生存率を推定する → 密度による生存率の変化を推定する → 母樹・種による違いを情報共有しながら推定する」でつなぐ。CNDD（conspecific negative density dependence）を、本授業では「同種個体の密度が高いほど苗木の生存率が低い関係」として扱い、`main.qmd` でNDDとして紹介している研究例へ戻る。
+Connect the sessions as estimating seedling survival, estimating its change with
+density, and estimating mother-tree/species differences while sharing
+information. Here, CNDD (conspecific negative density dependence) means lower
+seedling survival at higher conspecific density. Connect this to the research
+example introduced as NDD in `main.qmd`.
 
-演習は減らすが、講義中の参加機会は残す。結果を見せる前の予想、隣の人への説明、全体への短い問いかけを入れる。
+Reduce the number of activities while retaining participation: ask for
+predictions before revealing results, explanations to a neighbour and brief
+whole-class responses.
 
-## 3. Day 1：ベイズの考え方に慣れる
+## 3. Day 1: becoming familiar with Bayesian reasoning
 
-### 説明の流れ
+### Explanation sequence
 
-1. **生態学の入口**：苗木の生存率を知りたい。5個体のうち2個体が生き残ったとき、何が言えて、何がまだ分からないか。CNDDや種間差は授業の行き先として短く見せる。
-2. **尤度**：元のNormalの図で「あるパラメータなら、このデータはどの程度もっともらしいか」を見る。データを固定してパラメータを動かす。苗木に戻り、2/5という推定値だけでは不確実性が分からないことにつなぐ。
-3. **順問題・逆問題**：条件付き確率、`fip_1`〜`fip_6`、PCRの例を使う。分かっている条件から結果を予想することと、結果から未知の条件を考えることを区別する。
-4. **Bayesの定理**：「事後 ∝ 尤度 × 事前」を、それまでの例に対応づける。式の導出や記号の暗記は求めない。
-5. **コイントスと苗木**：同じ事前分布でも、データ量によって事後の変化が違うことを見せる。比較は3/5と60/100として観測比率をそろえる。コイントスの表の数と苗木の生存数は同じ二項モデルだと明示する。
-6. **短い演習**：苗木の図を比較し、変化を言葉で説明する。
-7. **Stanへの入口**：同じ苗木モデルのコードと保存済み結果を講師が見せる。「事後分布をサンプルで近似する道具」として紹介し、コードのデータ・未知量・仮定と、事後サンプルの分布図を対応づける。
+1. **Ecological starting point:** estimate seedling survival. With two survivors
+   out of five, what can we say, and what remains uncertain? Briefly show CNDD
+   and species differences as the destination of the course.
+2. **Likelihood:** use the original Normal figures to ask how plausible these
+   data are for a particular parameter. Hold data fixed and vary the parameter.
+   Return to seedlings: the estimate 2/5 alone does not describe uncertainty.
+3. **Forward and inverse problems:** use conditional probability, `fip_1` through
+   `fip_6`, and PCR. Distinguish predicting outcomes from known conditions from
+   reasoning about unknown conditions after observing outcomes.
+4. **Bayes' theorem:** connect posterior ∝ likelihood × prior to the examples.
+   Do not require derivation or memorization of notation.
+5. **Coin tosses and seedlings:** show how the same prior has different effects
+   with different amounts of data. Compare 3/5 and 60/100, holding the observed
+   proportion fixed. Explicitly connect heads and seedling survivors through
+   the same binomial model.
+6. **Short activity:** compare seedling figures and describe changes in words.
+7. **Introduction to Stan:** show code and supplied results for the same
+   seedling model. Present Stan as a tool for approximating the posterior with
+   samples. Identify data, unknowns and assumptions in code and connect them
+   to a plot of posterior samples.
 
-### 90分の配分案
+### Proposed 90-minute schedule
 
-| 時間 | 内容 |
+| Time | Content |
 |---|---|
-| 0–8分 | 接続確認、授業の行き先、苗木の問い |
-| 8–23分 | 尤度の図、苗木の推定と不確実性 |
-| 23–43分 | 条件付き確率、順問題・逆問題、PCR、Bayesの定理 |
-| 43–58分 | 事前・事後、コイントス比較、苗木への対応づけ |
-| 58–70分 | 図を比べる演習：8分の相談・操作＋4分の解説 |
-| 70–80分 | Stanと事後サンプルの講師デモ |
-| 80–85分 | 今日の考え方を受講者の言葉で振り返る |
-| 85–90分 | 質問・遅延の余裕 |
+| 0–8 min | Connection check, course destination and seedling question |
+| 8–23 min | Likelihood figures, seedling estimation and uncertainty |
+| 23–43 min | Conditional probability, forward/inverse problems, PCR and Bayes' theorem |
+| 43–58 min | Priors and posteriors, coin comparison and connection to seedlings |
+| 58–70 min | Figure-comparison activity: 8 minutes of discussion/work and 4 minutes of explanation |
+| 70–80 min | Instructor demonstration of Stan and posterior samples |
+| 80–85 min | Participants recap the day's ideas in their own words |
+| 85–90 min | Questions and buffer |
 
-時間は設計上の見積もり。順問題・逆問題の連続画像は説明を段階的に見せるためのもので、各画像を独立した新概念として長く扱わない。
+Times are planning estimates. The forward/inverse problem image sequence
+reveals an explanation step by step; do not treat every image as a separate
+concept requiring a lengthy explanation.
 
-### 演習案：データや事前を変えると、図はどう変わる？
+### Proposed activity: how do figures change with data or priors?
 
-- **目的・時間**：事前分布とデータの役割を、自分の言葉で説明する。8分の予想・操作・相談と4分の解説を、一つの演習として行う。
-- **スターター**：準備済み環境で以下の完成済みコードを配る。入力欄の穴埋めや図の作成コードの記述は求めない。
+- **Purpose and duration:** explain the roles of prior and data in one's own
+  words. Use one activity with 8 minutes for predictions, code and discussion,
+  followed by 4 minutes of explanation.
+- **Starter:** supply this completed code in the prepared environment. Do not
+  require filling blanks or writing plotting code.
 
 ```r
 plot_update(2, 5, 1, 1)
@@ -81,163 +130,320 @@ plot_update(40, 100, 1, 1)
 plot_update(2, 5, 8, 2)
 ```
 
-- **問い1**：最初の2枚では、事前分布と観測比率0.4を固定し、データ数だけを変える。どちらの事後分布が狭くなると予想するか。
-- **問い2**：1枚目と3枚目では、データを2/5に固定して事前分布を変える。事後分布はどちらへ動くか。
-- **提出する答え**：図から分かったことを一文ずつ。コードが動いたことだけを完了条件にしない。
-- **期待する観察**：この比較ではデータが多いと事後分布が狭くなる。データを2/5に固定すると、Beta(8,2)の事前では事後が高い生存率の側へ動く。
-- **講師用解説の要点**：最初の2枚はデータ量、1枚目と3枚目は事前分布の影響を比べている。「事後分布のピーク＝観測割合」「事前はいつでも同じ強さで効く」という誤解を確認する。事前分布にも生態学的な理由が必要であり、「生存率が高い」という事前が、その生息環境で妥当かを尋ねる。
+- **Question 1:** the first two plots hold the prior and observed proportion 0.4
+  fixed and change only sample size. Which posterior should be narrower?
+- **Question 2:** the first and third plots hold the data at 2/5 and change the
+  prior. In which direction does the posterior move?
+- **Response:** one sentence about each observation. Running code alone is not
+  the completion criterion.
+- **Expected observations:** more data give a narrower posterior in this
+  comparison. With data fixed at 2/5, the Beta(8,2) prior moves the posterior
+  toward higher survival probabilities.
+- **Instructor explanation:** the first comparison isolates sample size; the
+  second isolates the prior. Check misconceptions that the posterior peak
+  always equals the observed proportion or that a prior always has the same
+  influence. Priors need ecological justification: ask whether expecting high
+  survival is reasonable in this habitat.
 
-**本文に残す**：Normalの直感的な図、苗木、条件付き確率、`fip`、PCR、コイントス、事後分布の図。
+**Keep in the main sequence:** intuitive Normal figures, seedlings, conditional
+probability, `fip`, PCR, coin tosses and posterior figures.
 
-**補足へ移す候補**：MLEの微分、Beta更新式の計算練習、MLE・MAP・事後平均の一覧表、Stan各ブロックの細かい読み解き、事後サンプルからの確率計算、新しい50個体の事後予測、MH/HMCの仕組み。
+**Candidates for optional reference:** MLE differentiation, numerical Beta-update
+practice, comparisons of MLE/MAP/posterior mean, detailed Stan-block reading,
+posterior probability calculations, posterior predictions for 50 new
+individuals, and MH/HMC mechanics.
 
-コイントスの事後ピークはMAPと明記し、事後平均やMLEとは区別する。計算は講師ノートで扱う。Beta(51,51)は意図的に強い事前分布であり、100回のデータでもその影響は残る。推奨設定として提示しない。
+Label the coin-toss posterior peak as MAP, distinct from posterior mean or MLE.
+Calculations belong in instructor notes. Beta(51,51) is deliberately strong and
+still matters after 100 observations; do not present it as a recommended default.
 
-**遅れた場合**：Stanデモを短縮し、演習の解説と最後の質問時間を確保する。MCMCの説明を追加して埋めない。
+**If running late:** shorten the Stan demonstration and preserve activity
+explanation and final questions. Do not fill time with an additional MCMC lesson.
 
-## 4. Day 2：CNDDを例に、推定・予測・モデルチェックを読む
+## 4. Day 2: Linear regression and MCMC
 
-**2026-10-19更新（現行）:** 以下の旧15分比較案を、20分の回帰結果解析に更新した。
-完成済みの標準Rコードで、結果表→数値診断→trace→回帰曲線を順に読み、
-独自関数に処理を隠さない。40–60分を演習・解説、60–70分を講義の予測・PPCとする。
-新規推定は行わず、低・高密度の比較は回帰図の解釈に含める。
-**2026-10-20更新:** PPCと新規集団の生存数予測は補足へ移し、本編の生態学的一般論のスライドも削除。「Your research question」も削除し、演習後は翌日の短い予告と質問だけにする。計算診断はモデルの適切さを保証しない、という一文を演習に残す。空いた時間は進度差と質問の余裕に使う。
-**同日追記:** Day2の学生資料はrootの `exercise.qmd` に寄せたコード・出力・解説の順とし、Time・Questions・回答欄を撤去。独立した時間制の課題や答え合わせを設けず、標準R関数を見ながら講師が解説する。
-現行の具体的な進行・解答は `classroom/instructor.md` と `day2/exercise.qmd` を参照。
-旧案の補足課題や長い操作説明を学生版に戻さない。
+**Update, 2026-10-19:** replace the earlier 15-minute comparison below with a
+20-minute regression-results walkthrough. Use completed standard R code to
+follow the coefficient table, numerical diagnostics, traces and regression
+curve; do not hide processing in custom functions. This revision assigned
+40–60 minutes to the activity/explanation and 60–70 minutes to prediction/PPC,
+using supplied fits and interpreting low/high density in the regression plot.
 
+**Update, 2026-10-20:** PPC and predictions of survivor counts for a new group
+are now optional reference. Remove the general ecological-interpretation slide
+and “Your research question.” After the walkthrough, retain only a brief preview
+of tomorrow and questions. Keep the sentence that sampling diagnostics do not
+establish ecological model appropriateness. Use remaining time for questions
+and different working speeds.
 
-主例はCNDDの二項ロジスティック回帰に確定する。Day 1と同じ苗木の生存を扱い、「一つの生存率」から「密度によって変わる生存率」へ進む。Day 2では共通の一本の生存曲線までを扱い、種ごとの密度効果はDay 3の講師デモへつなぐ。アロメトリーはDay 3の別の研究例とし、独立した解析演習は発展資料へ置く。
+**Further update, same day:** follow the root `exercise.qmd` style: code,
+output, then explanation. Remove Time, Questions and response blanks from the
+Day 2 student material. Use an instructor-led explanation of standard R code,
+without separate timed tasks or an answer-checking session. For the current
+detailed sequence and explanations, see `classroom/instructor.md` and
+`day2/exercise.qmd`. The earlier proposal below is retained as design history;
+do not restore its extra activities or lengthy instructions to the student copy.
 
-### 説明の流れ
+The main example is binomial logistic regression for CNDD. Keep the seedling
+survival context from Day 1 while moving from a single survival probability to
+one that changes with density. Day 2 covers a single shared survival curve;
+species-specific density effects lead into the Day 3 instructor demonstration.
+Allometry is a separate Day 3 research example; its analysis activity belongs
+in extension material.
 
-1. **問いと予想**：「同種の近隣個体が多い場所では、苗木は生き残りにくいか？」を考える。密度と観測された生存割合の散布図を見て予想する。点ごとの苗木数も示す。
-2. **Day 1からモデルへ**：生存数を二項分布で表す点は共通で、場所ごとの生存確率が密度によって変わることを図で示す。既存の60調査区のシミュレーションデータを使う。
-3. **logitと事前分布のスケール**：生存確率が0–1に収まる曲線と、logit上の直線を対応づける。prior scaleは `main.qmd` のNormal回帰の図で、xとyの単位・範囲に対して傾き100が極端かを考える導入とする。その後CNDDに戻り、同じ数値の事前SDでもlogit上では意味が異なり、生存確率で確認する必要があるとつなぐ。Normalの例は3分程度の講師説明とし、別の推定・演習は追加しない。logitの導出やodds ratioの計算、CNDDの事前曲線の詳しい比較は補足へ置く。
-4. **推定と計算の確認**：完成済みStanモデルと保存済み結果を対応づける。診断の概要を確認してから、生存曲線と不確実性の幅を読む。係数表の数値だけで説明を終えない。
-5. **予測と短い演習**：低密度・高密度での生存確率と区間を比較する。生存確率を知る不確実性と、新しい苗木集団の生存数がばらつくことを区別する。
-6. **モデルチェック**：観測された密度と苗木数を固定し、事後分布から生存数を生成する。密度に対する生存割合のパターンと、調査区間のばらつきを観測と比べる。「図のどこが合っていないか？」を話す。
-7. **解釈とDay 3への問い**：密度との関連だけで原因を断定しない。光環境など他の条件や、種による違いがありそうか考え、翌日のグループ間の違いへつなぐ。
+### Explanation sequence in the earlier proposal
 
-数式は図に対応する次の形を示す。$i$は調査区、$s_i$は生存数、$n_i$は苗木数、$x_i$は標準化した同種密度とする。
+1. **Question and prediction:** “Are seedlings less likely to survive where
+   conspecific neighbours are more numerous?” Predict from a scatterplot of
+   density and observed survival proportions. Show seedling counts per point.
+2. **From Day 1 to the model:** survivor counts remain binomial, but survival
+   probability changes with density across quadrats. Use the existing simulated
+   data for 60 quadrats.
+3. **Logit and prior scale:** connect a probability curve constrained to 0–1
+   with a straight line on the logit scale. Introduce prior scale using the
+   Normal-regression figure from `main.qmd`: is a slope of 100 extreme given
+   the units and ranges of x and y? Return to CNDD and explain that the same
+   numerical prior SD means something different on the logit scale and should
+   be examined on the probability scale. Keep the Normal example to about
+   three minutes of explanation, without another fit or activity. Logit
+   derivation, odds-ratio calculations and detailed CNDD prior-curve comparisons
+   are optional reference.
+4. **Estimation and computational checks:** connect the supplied Stan model
+   with stored results. Check diagnostics before interpreting the survival
+   curve and its uncertainty; do not stop at coefficient values.
+5. **Prediction and a short activity:** compare survival probabilities and
+   intervals at low and high density. Distinguish uncertainty about probability
+   from variation in survivor counts for a new seedling group.
+6. **Model checks:** hold observed densities and seedling counts fixed and
+   simulate survivor counts from the posterior. Compare density patterns and
+   between-quadrat variability with observations. Discuss where the figure
+   disagrees with the data.
+7. **Interpretation and connection to Day 3:** do not infer causation from a
+   density association alone. Consider light, other conditions and species
+   differences before moving to differences among groups tomorrow.
+
+Use equations that correspond to the figures. Let i index quadrats, s_i be
+survivors, n_i be seedlings and x_i be scaled conspecific density.
 
 $$
 s_i \sim \operatorname{Binomial}(n_i, p_i), \qquad
 \operatorname{logit}(p_i) = \alpha + \beta x_i.
 $$
 
-既存の `stan/logit_reg.stan` に合わせ、$\alpha,\beta$の事前分布はそれぞれ平均0・標準偏差2.5の正規分布とする。$\beta<0$なら密度の増加に伴って生存確率が低下するが、$\beta$自体は確率の差ではない。結果の説明は確率のスケールへ戻す。
+Match `stan/logit_reg.stan`: independent Normal priors with mean 0 and SD 2.5
+for alpha and beta. Negative beta means survival probability decreases with
+density; beta itself is not a difference in probabilities. Interpret results
+back on the probability scale.
 
-この二項モデルでは、同じ調査区内の苗木は共通の生存確率をもち、その確率を条件とすると生存は独立と仮定する。この仮定や密度だけで説明することが妥当かを、モデルチェックと生態学的な知識の両方から考える。
+The binomial model assumes seedlings within a quadrat share a survival
+probability and survive independently conditional on that probability. Assess
+this assumption and the use of density alone through model checks and ecological
+knowledge.
 
-### 90分の配分案
+### Earlier proposed 90-minute schedule
 
-| 時間 | 内容 |
+| Time | Content |
 |---|---|
-| 0–10分 | Day 1の振り返り、CNDDの問いと予想 |
-| 10–25分 | 二項モデルから密度依存の生存曲線へ、logitとNormal回帰によるprior scaleの図 |
-| 25–40分 | 完成済みモデル・保存済み結果、計算の確認、生存確率と予測を読む |
-| 40–55分 | 低密度・高密度を比べる演習：10分の相談・操作＋5分の解説 |
-| 55–70分 | 講師デモ：観測とモデルから生成した生存数・割合を比較する |
-| 70–80分 | 解釈の注意点、種による違いとDay 3への接続 |
-| 80–85分 | 自分の研究なら何を予測・確認するか、全体で話す |
-| 85–90分 | 質問・遅延の余裕 |
+| 0–10 min | Day 1 recap, CNDD question and predictions |
+| 10–25 min | From the binomial model to density-dependent survival; logit and Normal-regression prior-scale figures |
+| 25–40 min | Supplied model and results, computational checks, probabilities and predictions |
+| 40–55 min | Low/high-density activity: 10 minutes of discussion/work and 5 minutes of explanation |
+| 55–70 min | Instructor demonstration comparing observed and model-generated survivor counts/proportions |
+| 70–80 min | Interpretation, species differences and connection to Day 3 |
+| 80–85 min | Discuss what participants would predict or check in their research |
+| 85–90 min | Questions and buffer |
 
-### 演習案：低密度と高密度で、生存確率はどれくらい違う？
+### Earlier activity: how different are low- and high-density survival probabilities?
 
-- **目的・時間**：密度による生存確率の違いと不確実性を、生態学的な言葉で説明する。10分の予想・操作・相談と5分の解説。
-- **スターターの案**：既存の `day2/exercise.qmd` のCNDD部分、`make_ndd_data()`、`stan/logit_reg.stan` と対応する保存済みfit `day2_ndd` を使い、データ準備・読み込み・描画を完成済みの短い実行ブロックにまとめる。各事後サンプルを `plogis(alpha + beta * x)` で確率に変換し、曲線と低密度・高密度での区間を表示する。受講者にStan用データリストや作図処理の記述は求めない。配布図だけでも同じ問いを完了できる。
-- **固定する条件**：同じデータ・モデル・事前分布・事後サンプルを使い、予測する密度だけを $x=-1$（平均より1標準偏差低い）と $x=1$（1標準偏差高い）で比べる。再推定は行わない。
-- **手順**：どちらの生存確率が高そうか予想する → 完成済みコードで曲線と95%区間を表示する → 二つの密度での確率を読む → 数値・区間と一文の解釈を書く。
-- **答える問い**：「低密度と高密度で、生存確率はどう違うか」「予測された確率が分かれば、次の苗木集団の生存数も確定するか」。
-- **期待する観察**：この教材データでは高密度ほど生存確率が低くなるが、推定には幅がある。同じ密度でも、次に観測する生存数はばらつく。値は対応する保存済み結果から読み、研究論文の推定値とは区別する。
-- **講師用解説の要点**：$\beta$を生存確率の減少量や減少率として読まない。確率の区間は各事後サンプルを変換して求める。新しい集団の予測は、両密度で苗木数を20に固定して生存数を生成した図で説明し、確率の区間と区別する。密度との関連から因果関係を断定しない。
+- **Purpose and duration:** explain survival differences and uncertainty in
+  ecological terms; 10 minutes of prediction/work/discussion and 5 minutes of
+  explanation.
+- **Starter proposal:** use the CNDD section of `day2/exercise.qmd`,
+  `make_ndd_data()`, `stan/logit_reg.stan` and the matching stored `day2_ndd` fit.
+  Supply short completed blocks for data preparation, loading and plotting.
+  Transform each posterior sample with `plogis(alpha + beta * x)` to show the
+  curve and low/high-density intervals. Do not require writing Stan data lists
+  or plotting code. Supplied figures provide the same comparison.
+- **Fixed conditions:** hold data, model, priors and posterior samples fixed.
+  Change only prediction density: x=-1 (one SD below the reference mean) and
+  x=1 (one SD above). Do not refit.
+- **Steps:** predict which probability is higher, display the curve and 95%
+  intervals, read probabilities at both densities, then write values, intervals
+  and one sentence of interpretation.
+- **Questions:** how do probabilities differ between low and high density?
+  Does knowing the probability determine the next group's survivor count?
+- **Expected observations:** survival probability decreases with density in
+  these teaching data, with uncertainty. Future counts vary even at the same
+  density. Read values from the matching stored results and distinguish them
+  from published research estimates.
+- **Instructor explanation:** beta is neither an absolute nor a percentage
+  reduction in survival probability. Calculate probability intervals after
+  transforming each posterior draw. Explain prediction using survivor counts
+  for 20 new seedlings at each density and distinguish their variation from
+  probability intervals. Do not infer causation from a density association.
 
-**モデルチェックの講師デモ**：元の各調査区の $x_i,n_i$ を固定し、各事後サンプルから $s_i^{\mathrm{rep}}$ を二項分布で生成する。確率曲線の幅と、生成した生存割合のばらつきを別の図で示す。密度に沿ったパターンと全体のばらつきを確認し、一つの図が合うだけで妥当としない。既存データはこのモデルからのシミュレーションなので、不一致が出ることを前提にしない。合っていても現実のCNDDが実証されたことにはならない。
+**Earlier model-check demonstration:** hold the original x_i and n_i fixed,
+then draw replicated survivor counts from the binomial model for every posterior
+sample. Use separate figures for uncertainty in the probability curve and
+variation in generated survival proportions. Check density patterns and overall
+variation; agreement in one figure is insufficient. These data were simulated
+from the model, so do not promise a discrepancy. Agreement does not demonstrate
+CNDD in a real forest.
 
-**本文に残す**：CNDDの問い、Day 1と共通する二項モデル、確率曲線とlogitの対応、事前分布と変数のスケール、生存確率と区間、簡単なモデルチェック、計算上の警告を見る必要性。
+**Main content in the earlier proposal:** the CNDD question, the binomial model
+shared with Day 1, probability curves and logit, priors and variable scale,
+survival probabilities and intervals, simple model checks and the need to
+inspect computational warnings.
 
-**補足へ移す候補**：アロメトリーの解析演習、logitの導出・odds ratioの詳細、事前予測の実装課題、壊れたモデルの実演・修正課題、診断指標の計算や閾値を覚える課題、brmsとのコード比較・新規推定。brmsは事前実行済み結果を使う3分以内の講師デモか、準備済みの人の任意課題とし、宿題や基本パッケージ要件には含めない。確率差の事後分布は早く終わった人向けとし、同じ事後サンプルごとに $p(1)-p(-1)$ を求める。
+**Candidates for optional reference in the earlier proposal:** allometry
+analysis, logit derivation and odds ratios, prior-predictive implementation,
+repairing a failed model, calculating diagnostics or memorizing thresholds,
+and comparisons with brms or new inference. The earlier brms plan was a
+precomputed instructor demonstration of at most three minutes, or optional work
+in a prepared environment, outside homework and basic package requirements.
+A posterior distribution of the probability difference is an extension:
+calculate p(1)-p(-1) for each paired draw from the same posterior.
 
-R-hat・ESS・divergenceなどは、何を確認する道具かを短く紹介する。受講者には「計算に問題はないか」と「生態学のデータを説明できているか」の両方を確認する姿勢を伝える。講師側では既存の複数診断とモデルチェックを継続して確認し、受講者向けの簡略化を検証の省略にはしない。
+Briefly introduce what R-hat, ESS and divergences help check. Encourage attention
+to both computational reliability and whether the ecological model explains
+the data. The instructor should continue using multiple diagnostics and model
+checks; simplifying student material is not a reason to omit validation.
 
-**遅れた場合**：Stanコードの説明と種差への予告を短くし、診断は要点と配布資料で示す。低密度・高密度の確率比較、モデルチェック、演習の解説を残す。
+**Earlier contingency if running late:** shorten Stan-code explanation and the
+species preview; use concise diagnostic explanations and supplied material.
+Preserve the low/high-density comparison, model checks and activity explanation.
+The updates at the start of this section supersede this earlier contingency.
 
-## 5. Day 3：階層モデルを使う理由をつかむ
+## 5. Day 3: Hierarchical models
 
-### 説明の流れ
+### Explanation sequence
 
-1. **問い**：母樹ごとに苗木の数も生存率も違う。少数の苗木しかない母樹の0%・100%を、そのまま信じてよいか。
-2. **両極端を見る**：すべて同じ生存率とする場合と、母樹ごとに完全に別々に推定する場合を比べる。
-3. **partial poolingを見る**：母樹ごとの違いを認めながら、共通する情報も使うモデルとして説明する。Day 1の事前分布に戻り、母樹間の共通性を表す分布の中心とばらつきもデータから推定することを示す。`main.qmd` の群間のばらつきを変えた図を使い、情報共有の強さが変わることを見る。
-4. **短い演習**：どの母樹の推定が動くかを予想し、結果図と比べる。
-5. **研究の例へ広げる（講師デモ）**：Day 2の共通の生存曲線を種ごとに広げ、「個体の生存と同種密度」「種ごとの密度効果と種の多さ」という二つの段階を `main.qmd` の図で示す。種別の図はシミュレーションによる概念説明として扱い、種別CNDDを再推定する演習は追加しない。続いて別の研究例として「DBHと高さ」「種ごとの傾きとwood density」を図で紹介する。アロメトリーの対数変換や係数計算は発展資料へ置き、二つの階層モデルに共通する構造を示す。
-6. **自分の研究へ**：何をグループと考えるか、どんな違いを知りたいかを話す。
+1. **Question:** mother trees differ in seedling numbers and survival. Should
+   we trust 0% or 100% survival based on very few seedlings?
+2. **Two extremes:** compare one shared survival probability with completely
+   separate estimation for each mother tree.
+3. **Partial pooling:** allow differences while using shared information.
+   Return to Day 1 priors and show that the centre and spread of the distribution
+   describing similarities among mother trees are also estimated from data.
+   Use the group-spread figures from `main.qmd` to show changes in information
+   sharing.
+4. **Short activity:** predict which estimates move, then compare with plots.
+5. **Research connections, instructor demonstration:** extend Day 2's shared
+   survival curve to species. Use `main.qmd` to show two levels: individual
+   survival versus conspecific density, then species density effects versus
+   abundance. Species plots are conceptual simulations; do not add a new
+   species-level CNDD fitting activity. Next show a separate research example:
+   DBH versus height, then species slopes versus wood density. Put allometric
+   log transformations and coefficient calculations in extension material;
+   emphasize the shared hierarchical structure.
+6. **Participants' research:** discuss possible groups and differences of interest.
 
-### 90分の配分案
+### Proposed 90-minute schedule
 
-| 時間 | 内容 |
+| Time | Content |
 |---|---|
-| 0–10分 | Day 2の生存曲線を振り返り、母樹の問いへ |
-| 10–25分 | 全体を同じとする推定／別々の推定を図で比較 |
-| 25–40分 | partial poolingの意味と、推定が動く理由 |
-| 40–55分 | 母樹の演習：10分の相談・操作＋5分の解説 |
-| 55–70分 | 講師デモ：種ごとのCNDDへ（10分）、アロメトリー・wood densityの研究例（5分） |
-| 70–80分 | モデルの前提と注意点、自分の研究での使い方 |
-| 80–85分 | 3日間の振り返り |
-| 85–90分 | 質問・遅延の余裕 |
+| 0–10 min | Revisit Day 2's survival curve and introduce the mother-tree question |
+| 10–25 min | Compare shared and separate estimates through figures |
+| 25–40 min | Meaning of partial pooling and why estimates move |
+| 40–55 min | Mother-tree activity: 10 minutes of discussion/work and 5 minutes of explanation |
+| 55–70 min | Instructor demonstration: species CNDD, 10 minutes; allometry/wood-density research example, 5 minutes |
+| 70–80 min | Model assumptions, limitations and research applications |
+| 80–85 min | Three-day recap |
+| 85–90 min | Questions and buffer |
 
-母樹演習はDay 2とは別のシミュレーションデータで、密度の説明変数を含めず母樹間の違いに集中する。同じ二項の生存モデルを使うが、母樹と種は別のグループであり、研究デモでは種ごとの密度効果を考える。アロメトリーは連続値の観測モデルに替わるが、グループ間で情報を共有する構造は共通だと説明する。
+The mother-tree activity uses different simulated data from Day 2 and no density
+predictor, focusing on differences among mother trees. Both examples use a
+binomial survival model, but mother trees and species are different grouping
+units; the research demonstration considers species-specific density effects.
+Allometry uses a continuous observation model while sharing the same idea of
+information sharing across groups.
 
-### 演習案：どの母樹の推定が、どちらへ動く？
+### Proposed activity: which mother-tree estimates move, and in which direction?
 
-- **目的・時間**：情報共有によって推定が変わる意味を、母樹のデータに結びつける。10分の予想・操作・相談と5分の解説。
-- **スターターの案**：既存の `day3/exercise.qmd` の三つの推定を比較する完成済み図と、保存済み結果からその図を表示するコードを配る。三つのモデルをそれぞれ実装する課題にはしない。配布図だけでも同じ問いを完了できる。
-- **手順**：各母樹の苗木数と生存割合を見る → 動きそうな母樹を二つ選び理由を書く → 結果を表示する → 予想と違ったところを話す。
-- **期待する観察**：データの少ない母樹の推定は共通する情報の影響を受けやすい。群間差が大きいとモデルが推定すれば、情報共有による動きは弱くなる。
-- **講師用解説の要点**：partial poolingは、すべての母樹で必ず誤差を減らす保証ではない。推定は単純に全個体の生存割合へ一律に動くわけではなく、各母樹の情報量と群間のばらつきに依存する。母樹間に共通性を仮定することが、生態学的に妥当かを考える。
+- **Purpose and duration:** connect changes caused by information sharing to
+  mother-tree data; 10 minutes of predictions/work/discussion and 5 minutes of
+  explanation.
+- **Starter proposal:** supply the three comparison plots from
+  `day3/exercise.qmd` and code to display them from stored results. Do not require
+  implementing three models. Supplied figures allow the same comparison.
+- **Steps:** examine seedling counts and survival proportions, choose two mother
+  trees whose estimates may move and explain why, display results, then discuss
+  differences from predictions.
+- **Expected observations:** estimates for trees with less data are more
+  sensitive to shared information. When the model estimates large differences
+  among groups, sharing has less influence.
+- **Instructor explanation:** partial pooling does not guarantee a smaller
+  error for every mother tree. Estimates do not all shift uniformly toward
+  overall observed survival; movement depends on each tree's information and
+  between-group variation. Consider whether similarity among trees is an
+  ecologically reasonable assumption.
 
-**本文に残す**：元の母樹の例、三つの推定の比較、群間のばらつきの図、情報共有の意味、元の研究例への接続。CNDD・wood densityは「問い → 図 → モデルの二つの段階 → 研究で何が分かるか」を講師が見せる。
+**Keep in the main sequence:** the original mother-tree example, comparison of
+three estimates, group-spread figures, meaning of information sharing and
+connections to the research examples. For CNDD and wood density, show the
+question, figure, two model levels and what can be learned in research.
 
-**補足へ移す候補**：varying interceptとvarying slopeを別々に実装する演習、階層標準偏差の計算課題、新しい母樹・種の予測課題、共分散・Cholesky・LKJ、non-centered化の詳細、ソフトウェア間比較。
+**Candidates for optional reference:** separate varying-intercept/slope
+implementation activities, hierarchical-SD calculations, predictions for new
+mother trees or species, covariance/Cholesky/LKJ, non-centering details and
+software comparisons.
 
-**遅れた場合**：研究モデルの数式・コードの説明を短くし、アロメトリー・wood densityの別例は配布資料で示す。母樹の図の比較と、Day 2のCNDDを種ごとに広げるつながりを残す。
+**If running late:** shorten research-model equations and code; show the
+allometry/wood-density example through supplied figures. Preserve the
+mother-tree comparison and the connection from Day 2 CNDD to species differences.
 
-## 6. 既存教材をどう扱うか
+## 6. Use of existing materials
 
-| 内容 | 本案での扱い |
+| Content | Treatment in this plan |
 |---|---|
-| `main.qmd` の身近な説明・図 | 説明の入口として優先的に使う |
-| `fip_1`〜`fip_6`、PCR、コイントス | Day 1の本文に残す。別々の計算演習にはしない |
-| 尤度のNormal例・苗木の例 | 残す。分布の違いを説明し、対数尤度・微分の詳細は補足へ |
-| 既存の細かい必須課題 | 保存した上で、講師デモ・任意課題・補足へ振り分ける |
-| CNDDの二項ロジスティック回帰 | Day 2の主例とする。既存データと対応する保存済みfitで推定・解釈・チェックを一巡する |
-| アロメトリーの解析演習 | 発展資料へ。Day 3ではwood densityと併せ、別の研究例として図で紹介する |
-| 母樹・種間差・NDDの動機 | 現場で何を知りたいかを先に話す。母樹で仕組みを理解し、種別CNDD・wood densityは講師デモで研究へつなぐ |
-| 論文由来の問いと教材データ | 実際の研究の紹介と、教材のシミュレーションを区別する |
-| Stanモデル・データ・保存済みfit | 既存資源を使い、完成済みモデルと結果を読む。編集・実装は任意の発展とする |
-| 解説・診断結果の詳細 | 講師用資料と発展資料に残し、理解のために必要な範囲を本文に出す |
+| Familiar explanations and figures in `main.qmd` | Prioritize them as entry points |
+| `fip_1`–`fip_6`, PCR and coin tosses | Keep in Day 1; no separate calculation activities |
+| Normal and seedling likelihood examples | Retain and explain distribution differences; detailed log-likelihoods and differentiation are optional |
+| Existing detailed required tasks | Preserve them, then assign to demonstrations, optional tasks or reference |
+| CNDD binomial logistic regression | Main Day 2 example; use existing data and matching stored fits to complete estimation, interpretation and checking |
+| Allometry analysis activity | Extension material; introduce it with wood density as a separate Day 3 research example |
+| Motivation from mother trees, species differences and NDD | Start with field questions; understand the mechanism through mother trees, then connect species CNDD and wood density to research |
+| Published research questions and teaching data | Distinguish actual research from teaching simulations |
+| Stan models, data and stored fits | Reuse existing resources; read complete models and results; editing and implementation are optional |
+| Detailed explanations and diagnostics | Keep in instructor/extension material; show what is needed for understanding in the main sequence |
 
-## 7. 準備と実施の考え方
+## 7. Preparation and delivery
 
-- 授業前に接続・図の表示まで確認する。授業中のインストールやコンパイルを必須にしない。
-- コードを動かせない場合も、配布済みの図・表を使って同じ問いに答えられるようにする。
-- 必須演習は保存済み結果か軽い計算を使う。新しく推定する実演は環境と時間の確認後に選ぶ。
-- Day 2は既存のCNDDデータとfitを対応づけて使い、低密度・高密度の予測図、診断結果、モデルチェックの図を事前に用意する。追加の予測シミュレーションにはseedを設定し、オフラインでも同じ問いに答えられる図を配る。
-- 各演習では、受講者用の予想・操作・解釈の指示と、講師用の解答・図の読み方・よくある誤解を分ける。実装課題は任意資料へ置く。
-- 時間配分は未計測。実機での実行確認と、説明を含めた通し練習で調整する。
-- 発展内容は90分に追加しない。授業後の任意資料、または基本部分を終えた人向けとして扱う。
+- Check connectivity and figure display before class. Installation or compilation
+  during class is not required.
+- Ensure participants without working code can address the same questions using
+  supplied figures and tables.
+- Required activities use supplied results or lightweight calculations. Choose
+  new-inference demonstrations after checking environment and timing.
+- Match Day 2 CNDD data to their fit. Prepare low/high-density probability plots,
+  diagnostics and model-check figures. Seed any additional predictive simulation
+  and supply figures for offline participation.
+- Separate participant instructions for prediction, execution and interpretation
+  from instructor explanations, figure-reading guidance and common misconceptions.
+  Implementation tasks belong in optional material. Follow the current Day 2
+  walkthrough decisions above rather than restoring its earlier worksheet.
+- Pacing has not been measured. Adjust after testing on actual machines and
+  rehearsing the explanations.
+- Do not add extensions to the 90-minute core. Offer them after class or to
+  participants who have completed the essentials.
 
-## 8. 確認済みの方針と残る判断
+## 8. Agreed direction and remaining decisions
 
-| 項目 | 方針 | 状態 |
+| Item | Direction | Status |
 |---|---|---|
-| 到達点 | 考え方・図の解釈・研究への接続を優先する。説明の深さと思想は `main.qmd` を基準にする | 合意済み |
-| Day 1 | `fip`・PCR・コイントスを残し、受講者が操作する演習は一つに絞る | 合意済み |
-| Day 2 | CNDDの二項ロジスティック回帰を主例とし、低密度・高密度での生存確率とモデルチェックを読む。アロメトリーの解析演習は発展資料へ置く | 合意済み |
-| Day 3 | 母樹で理解し、種別CNDD、アロメトリー・wood densityは研究への接続として講師が見せる | 合意済み |
-| Stan | 完成済みモデルと結果を読むところまでを共通とし、編集・実装は希望者向けとする | 合意済み |
+| Learning goals | Prioritize concepts, figure interpretation and research connections; use `main.qmd` for depth and approach | Agreed |
+| Day 1 | Retain fip, PCR and coin tosses; one practical activity | Agreed |
+| Day 2 | CNDD binomial logistic regression; read survival probabilities and checks; allometry analysis is extension material; current scope is defined by the Section 4 updates | Agreed |
+| Day 3 | Understand through mother trees; instructor connects species CNDD and allometry/wood density to research | Agreed |
+| Stan | Read supplied models and results; editing and implementation are optional | Agreed |
 
-残る設計上の確認は、日中の統計授業の具体的な内容との接続、授業言語、宿題の有無、受講者環境。現時点の仮定は第2節のとおりとする。
+Remaining design questions concern alignment with the daytime statistics
+programme, teaching language, homework and participant computing arrangements.
+Current assumptions are listed in Section 2.
 
-対応する教材は `dayN/slides.qmd`、講師解答付きの `dayN/exercise.qmd`、自動生成する `dayN/exercise-student.qmd`、オフライン用の `dayN/results.qmd`。進行は `classroom/instructor.md`、配布物は `dist/afec-classroom-materials.zip` にそろえる。Day 2はCNDDを中心に、Normal回帰の短いprior scaleの説明、講師デモ、一つの演習、モデルチェックを配置する。
+The corresponding materials are `dayN/slides.qmd`, instructor exercises with
+solutions in `dayN/exercise.qmd`, generated `dayN/exercise-student.qmd`, and offline
+results in `dayN/results.qmd`. Keep the schedule in `classroom/instructor.md` and
+distribution in `dist/afec-classroom-materials.zip`. Day 2 is centred on CNDD,
+a short Normal-regression prior-scale explanation and a guided regression
+walkthrough; PPC remains optional under the latest decisions.

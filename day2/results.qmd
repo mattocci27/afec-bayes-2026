@@ -1,5 +1,5 @@
 ---
-title: "Day 2: results for offline discussion"
+title: "Day 2: Linear regression and MCMC — Results"
 author: "Masatoshi Katabuchi"
 date: "2026-10-22"
 format:

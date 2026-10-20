@@ -1,6 +1,6 @@
 ---
-title: "AFEC-X 2026 授業運営メモ"
-lang: ja
+title: "AFEC-X 2026 Instructor Guide"
+lang: en
 format:
   html:
     theme: coderpro
@@ -8,182 +8,244 @@ format:
     embed-resources: true
 ---
 
-10月21〜23日、中国時間19:00〜20:30、各90分・約30人。合意済みの軸は、
-`main.qmd` と同程度の説明で考え方・図の解釈・研究への接続を優先すること。
-Stanは完成済みコードのデータ・未知量・仮定と結果を一緒に読む。編集・実装は任意。
+October 21–23, 19:00–20:30 China time: three 90-minute sessions for approximately
+30 participants. The agreed priority is conceptual understanding, interpreting
+figures and connecting the material to research, at a depth comparable to
+`main.qmd`. Read the data, unknowns, assumptions and results alongside supplied
+Stan code. Editing or implementing models is optional.
 
-10月15日版の時間割では、10月20日17:10–18:00が統計予習・R動作確認、
-10月21–26日の日中（9–12時、14–18時）がRによる実験計画・統計、
-その最初の3日間の夜が本講習となる。日中の各日の内容は不明で、
-Rの実行経験・GLM習得を前提にしない。日中7時間の実習後であることも考慮する。
+According to the October 15 timetable, October 20, 17:10–18:00 is reserved for
+statistics preparation and checking R. Daytime sessions on October 21–26
+(09:00–12:00 and 14:00–18:00) cover experimental design and statistics in R.
+This course occupies the evenings of the first three days. The content of each
+daytime session is unknown; do not assume experience running R or knowledge of
+GLMs. Allow for fatigue after seven hours of practical work.
 
-到達目標はベイズの考え方、生態学的な解釈、不確実性、モデルを確認する姿勢。
-英語、必須宿題なし、講師1名・約30人を仮定する。各日一つの短い比較課題を
-各自で進め、相談は任意。完成済みコードの実行と、配布図を読む方法を同等に扱う。
-R操作で止まっても同じ問いに答えられるようにする。授業言語とブラウザ環境は確認が必要。
+The learning goals are Bayesian reasoning, ecological interpretation, uncertainty
+and a habit of checking models. Planning assumptions are English instruction,
+no required homework, one instructor and approximately 30 participants. Use one
+short comparison activity per day, with discussion optional. Running supplied
+code and reading supplied figures are equally valid ways to participate. R
+problems should not prevent participants from addressing the same question.
+Confirm the teaching language and computing environment before class.
 
-## 到達点と3日間の接続
+## Learning outcomes and connections across the three days
 
-| 日 | 終了時に確認する説明 | 必須演習 |
+| Day | Explanation to check at the end | Core activity |
 |---|---|---|
-| 1 | 事前・尤度・事後を図に対応づけ、データ数・事前の変更でどう変わるか説明する | 苗木の更新計算を読み、個体数を変えて図を比較、12分 |
-| 2 | 回帰表・計算診断・trace・生存曲線を読み、モデルチェックと区別する | 保存済み回帰結果を標準R関数で読む・診断する・描く、20分 |
-| 3 | 情報量と群間差に依存するpartial poolingを説明し、自分の研究のグループを挙げる | 母樹の推定比較、15分 |
+| 1 | Identify prior, likelihood and posterior in figures; explain changes caused by sample size or the prior | Read the seedling update calculation, change sample size and compare figures; 12 minutes |
+| 2 | Read a regression table, computational diagnostics, traces and a survival curve; distinguish sampling checks from checking the ecological model | Read, diagnose and plot regression results with standard R functions; 20 minutes |
+| 3 | Explain how partial pooling depends on information and differences among groups; identify groups in one's own research | Compare mother-tree estimates; 15 minutes |
 
-「一つの生存率」から「密度による変化」、そして「母樹・種の違い」へつなぐ。
-母樹演習はDay 2とは別のデータで、密度を説明変数に含めない。
-Day 3の種別CNDDは概念図、アロメトリー・wood densityは別の観測モデルを用いる研究紹介。
+Connect a single survival probability to change with density, then to differences
+among mother trees and species. The mother-tree activity uses different data
+from Day 2 and has no density predictor. Species-level CNDD on Day 3 is a
+conceptual illustration. Allometry and wood density introduce a research example
+with a different observation model.
 
-## Day 1：90分の進行
+## Day 1: 90-minute schedule
 
-演習の解答、詳しい説明、Stan・brmsデモは[Day 1講師ノート](../day1/instructor-notes.html)にまとめる。
+Solutions, detailed explanations and Stan/brms demonstrations are collected in
+the [Day 1 instructor notes](../day1/instructor-notes.html).
 
-| 経過時間 | 内容・講師の問い | 受講者の行動 |
+| Elapsed time | Content and instructor prompts | Participant activity |
 |---|---|---|
-| 0–8分 | 接続の最終確認、研究の行き先、2/5の苗木 | 生存率と不確実性を予想する |
-| 8–23分 | Normalの図と苗木の尤度。データを固定してパラメータを動かす | 尤度曲線の違いを言葉で述べる |
-| 23–43分 | 条件付き確率、fip全6枚、PCR、Bayes | 結果から条件を考えると何が変わるか予想する |
-| 43–58分 | 事前・事後とコイントス。比率0.6、同じ強い事前で3/5と60/100 | どの事後がデータに近づくか答える |
-| 58–70分 | 一つの演習：8分作業＋4分解説・結果共有 | 生存割合0.4の大小二つの調査を自分で作り、事後の幅を予想・実行・説明する（事前変更は任意） |
-| 70–80分 | 同じ苗木の事後分布を保存済みdrawのヒストグラムで表し、平均と95%区間を示す | drawは生存確率pの値だと理解し、分布の位置と幅を要約に対応づける |
-| 80–85分 | Day 1のまとめとDay 2への接続 | 事後分布と不確実性の説明を振り返り、翌日の密度依存の問いを確認する |
-| 85–90分 | 質問・遅延の余裕 | 質問・振り返り |
+| 0–8 min | Final connection check, research motivation, two survivors among five seedlings | Predict survival probability and uncertainty |
+| 8–23 min | Normal figures and the seedling likelihood: hold data fixed and vary the parameter | Describe differences between likelihood curves |
+| 23–43 min | Conditional probability, all six fip figures, PCR and Bayes | Predict what changes when reasoning from outcomes to conditions |
+| 43–58 min | Priors, posteriors and coin tosses: 3/5 versus 60/100, both with proportion 0.6 and the same strong prior | Identify which posterior moves closer to the data |
+| 58–70 min | One activity: 8 minutes of work and 4 minutes of explanation and sharing | Choose small and large surveys with survival proportion 0.4; predict, run and explain their posterior widths; changing the prior is optional |
+| 70–80 min | Show the same seedling posterior as a histogram of supplied draws, with a mean and 95% interval | Recognize draws as values of survival probability p; connect distribution location and width to the summaries |
+| 80–85 min | Day 1 recap and connection to Day 2 | Review the posterior and uncertainty; preview the density-dependence question |
+| 85–90 min | Questions and buffer | Ask questions and reflect |
 
-Day 1は軽い直接計算、Day 2–3は保存済みdrawを使う。全日、配布図だけでも同じ問いを完了できる。
-Day 1でR操作が難しければ、結果シートの4/10と20/50を比較する。
-演習直後の解説で数人の結果を共有し、事後分布をdrawで表す2枚の短いデモから、そのまままとめに進む。
-デモの章扉や、演習に戻る独立した振り返りスライドは置かない。
-コインのスライドは強い事前の影響を説明する。演習は一様事前を固定し、受講者が更新の各行を読み、数値を変えて確かめる。
-演習4分時点で受講者が大小二つの調査を決め、両方の生存割合が0.4であることと幅の予想を確認する。図が出なければ `day1/results.html`。
-講義の図は連続密度、演習の図は格子点ごとの確率なので、「高さではなく横幅を比べる」と口頭で一言添える。
-授業前に、新しいチャンクへのコピーから二つの図の表示まで参加者用コピーで確認する。
-尤度の15分枠には、Normalの平均0と2を比べる約3分の問いかけを含める。
-データ3点とSD=1を固定して予想し、`dnorm(..., log=TRUE)` の和を比較した後に
-尤度曲線を見せる。コードの実行は任意で、短い比較課題は58–70分の一つとする。コード実行は選択できる。
-事後平均・MAP・MLEを混同しない。計算を必須にせず、図のピークがMAPだと短く述べる。
-Beta(51,51)は意図的に強い事前で、100回でも影響が残る。PCRの割合は仮想的な教材設定。
+Day 1 uses lightweight direct calculations; Days 2–3 can use supplied draws.
+The figures alone provide a route through the same questions on every day.
+If R is difficult on Day 1, compare 4/10 and 20/50 in the result sheet.
+Share a few participants' results immediately after the activity. Follow with
+the two short demonstrations of posterior draws and proceed directly to the
+recap. Do not add a demonstration title slide or a separate return-to-exercise
+debrief.
 
-**遅れたら**drawのデモを短縮し、平均と区間は口頭で示す。演習の解説と質問を残す。
-本編のデモは2枚に絞る。Stanコード、chain・iterationの表、事後確率の計算、
-MLE微分、Beta更新式の導出、MH/HMCは補足。
+The coin slides illustrate the influence of a strong prior. The activity holds
+a uniform prior fixed while participants read each update step and change the
+numbers. Four minutes into the activity, check that participants have chosen
+small and large surveys, that both proportions are 0.4, and that they have
+predicted the widths. If plots do not appear, use `day1/results.html`.
+Lecture figures show continuous densities; activity figures show probability
+at grid points. Briefly say, “Compare widths, not heights.” Before class, test
+copying the code to a new chunk and displaying both plots in a participant copy.
 
-## Day 2：90分の進行
+The 15-minute likelihood segment includes about three minutes comparing Normal
+means of 0 and 2. Hold the three observations and SD=1 fixed, ask for a
+prediction, compare sums of `dnorm(..., log=TRUE)`, then show the likelihood
+curve. Running this code is optional; the single practical comparison activity
+remains at 58–70 minutes.
 
-| 経過時間 | 内容・講師の問い | 受講者の行動 |
+Distinguish posterior mean, MAP and MLE. Briefly identify the posterior peak as
+the MAP without requiring calculations. Beta(51,51) is deliberately strong and
+still influences the posterior after 100 observations. PCR proportions are
+hypothetical teaching values.
+
+**If running late:** shorten the draw demonstration and explain the mean and
+interval verbally. Preserve the activity explanation and questions. Keep only
+two demonstration slides in the main sequence. Stan code, chain/iteration
+tables, posterior probability calculations, MLE differentiation, derivation of
+the Beta update, and MH/HMC are optional reference material.
+
+## Day 2: Linear regression and MCMC — 90-minute schedule
+
+| Elapsed time | Content and instructor prompts | Participant activity |
 |---|---|---|
-| 0–10分 | Day 1からCNDDへ。「密度が高いと生存は？」 | 関係の向きを予想する |
-| 10–25分 | 同じ二項モデル、logitと確率曲線、事前分布のスケール | 観測データ・未知係数・事前・尤度を対応づける |
-| 25–40分 | シミュレーションで事後分布を近似する。正常・失敗のtrace、drawから曲線とribbonへ | 一つの係数ペアが一つの曲線になると説明する |
-| 40–60分 | rootのexercise.qmdと同じ方向のRコード解説 | 結果表→診断値→trace→回帰図をコードと出力で追う |
-| 60–70分 | 演習への質問・進度差の余裕 | 必要な人はコードと解釈を確認。新しい講義内容を足さない |
-| 70–90分 | 翌日の短い予告、質問・遅延の余裕 | 演習内容への質問。「自分の研究への問い」は課さない |
+| 0–10 min | From Day 1 to CNDD: “What happens to survival at higher density?” | Predict the direction of the relationship |
+| 10–25 min | The same binomial model, logit and probability curves, and prior scale | Identify observations, unknown coefficients, priors and likelihood |
+| 25–40 min | Approximate the posterior by simulation; healthy and failed traces; from paired draws to curves and a ribbon | Explain how one coefficient pair produces one curve |
+| 40–60 min | Explain R code in the style of the root exercise.qmd | Follow code and output: coefficient table, diagnostics, traces and regression plot |
+| 60–70 min | Questions about the walkthrough and buffer for different working speeds | Revisit code and interpretation as needed; add no new lecture content |
+| 70–90 min | Brief preview of tomorrow, questions and buffer | Ask about the walkthrough; no additional “Your research question” task |
 
-Day2資料はrootの `exercise.qmd` と同様、Rコードと出力を講師が順に解説する構成とする。
-学生用の時間指定・Questions・回答欄・独立した課題や答え合わせは置かない。
-学生版は標準関数で処理を明示し、`source()` や講座独自の作図関数を使わない。
-`read_csv()` と `readRDS()` でデータと保存結果を読み、`summarise_draws()` で
-平均・SD・95% credible interval、R-hat・bulk/tail ESSを表示する。
-用意済みの結果ファイルはdrawと診断を持つlistなので、CmdStanの `$summary()` や
-brmsの `summary()` を直接呼ぶ形式ではないことを講師は理解しておく。
-学生にこのオブジェクト形式の違いを覚えさせる必要はない。
+As in the root `exercise.qmd`, guide participants through code and output in
+order. Do not add student-facing time limits, Questions sections, response
+blanks, separate assignments or an answer-checking session. Show processing
+with standard functions rather than `source()` or course-specific plot helpers.
+`read_csv()` and `readRDS()` load data and supplied results; `summarise_draws()`
+shows means, SDs, 95% credible intervals, R-hat and bulk/tail ESS. The supplied
+result file is a list of draws and diagnostics, not an object on which to call
+CmdStan's `$summary()` or brms's `summary()` directly. The instructor should
+understand this distinction; students need not memorize the object formats.
 
-係数表の説明は、行（alphaとbeta）→mean→SD→区間の順とする。
-meanは事後平均でMLE・MAPではなく、SDは事後の不確実性でMonte Carlo誤差ではない。
-betaはlogit上の係数で、生存確率や減少率そのものではない。符号を暫定的に解釈し、
-診断とtraceを確認してから結論に使う。係数の符号と最後の回帰図の向きを対応づけて解説する。
+Explain the coefficient table in this order: rows (alpha and beta), mean, SD,
+interval. The mean is a posterior mean, not an MLE or MAP. SD describes posterior
+uncertainty, not Monte Carlo error. Beta is a coefficient on the logit scale,
+not a probability or a percentage reduction. Interpret its sign provisionally,
+then check diagnostics and traces before using the estimates. Connect that sign
+to the direction of the final regression curve.
 
-`mcmc_trace()` で4チェーンの重なり・持続的な分離・ドリフトを確認する。
-R-hatが1に近いこと、十分なESS、発散数を合わせて読む。4チェーンでR-hat >1.01や
-ESS <400は調査の目安であり、自動判定や閾値暗記を課さない。
-講師はtreedepth・E-BFMI・lp__・必要なMonte Carlo精度も確認する。
-root資料のE-BFMIの三段階判定や、診断一つでgood/badとする表現は引き継がない。
+Use `mcmc_trace()` to inspect four chains for overlap, persistent separation and
+drift. Read R-hat, ESS and divergence counts together. For four chains,
+R-hat >1.01 or ESS <400 are reasons to investigate, not automatic classifications
+or thresholds to memorize. The instructor should also inspect treedepth,
+E-BFMI, lp__ and Monte Carlo precision for the quantities of interest. Do not
+carry over the root handout's three-level E-BFMI rating or classifications based
+on a single diagnostic.
 
-回帰図は各drawの `plogis(alpha + beta * cons)` から、密度ごとのmedianと
-2.5%・97.5%点を求め、`geom_ribbon()`・`geom_line()`・`geom_point()` で描く。
-係数を別々に要約してから変換しない。グラフの透過度 `alpha` とモデルの切片alphaは
-別物で、透過度だけを変えても推定や区間は変わらない。
-10組の灰色の曲線→1000組→全drawのribbonという講義の流れにつなぐ。
-種ごとに色を変えた概念図とは区別する。
+For the regression plot, apply `plogis(alpha + beta * cons)` to every paired
+draw. At each density, calculate the median and 2.5th/97.5th percentiles; draw
+these with `geom_ribbon()`, `geom_line()` and `geom_point()`. Do not summarize
+coefficients separately before transforming. The `alpha` argument controlling
+plot transparency is different from the regression intercept alpha; changing
+transparency changes neither estimates nor intervals. Connect the calculation
+to the lecture progression from 10 grey curves to 1,000 curves to a ribbon
+using all draws. Distinguish these from the conceptual species-coloured curves.
 
-新規推定・Stan編集は必須にしない。R操作が2分で解消しなければ
-`day2/results.html` の同じ表・診断・図で課題を続ける。
-学生版でもData and posterior drawsの前にbrms・Stanの推定コードを示す。
-学生の様子と準備済み環境に応じて、どちらかで実際に推定して説明してもよい。
-brms・Stan・用意済み結果の読み込みチャンクから一つだけ実行すると、以降の
-表・診断・trace・回帰図は同じ結果を使う。新規推定の診断を保存結果で代用しない。
-推定チャンクは `eval=FALSE` なので、HTMLの再生成では推定を走らせない。
-CmdStan/C++/Dockerの学生インストールを求めない。
+New inference and Stan editing are optional. If an R problem cannot be resolved
+within two minutes, continue with the same tables, diagnostics and plots in
+`day2/results.html`. Both fitting sections, brms and Stan, appear before Data
+and posterior draws in the student handout. Demonstrate either fit if the
+prepared environment and class pace permit. Run only one of the brms, Stan or
+prepared-result loading chunks; all later tables, diagnostics, traces and plots
+then use that result. Do not use stored diagnostics to assess a new fit.
+Fitting chunks have `eval=FALSE`, so rendering the HTML does not run inference.
+Do not require students to install CmdStan, a C++ toolchain or Docker.
 
-表・trace・回帰図は資料上でコードと出力を一緒に見ながら説明する。スライドへの
-再掲は補足だけとし、別の答え合わせのために戻らない。
-PPCの2枚と20個体の新規予測は補足だけに置き、本編では扱わない。
-「Interpretation in a real forest」は削除し、独立した生態学的一般論の講義を足さない。
-演習の最後に「計算診断は計算を確認するもので、生態学的なモデルの適切さを保証しない」
-という一文だけ残す。実例のPPCは講師用の参考であり、必須到達点ではない。
+Explain tables, traces and the regression plot alongside their code in the
+handout. Repeated slides are optional reference; do not return for a separate
+answer-checking session. The two PPC slides and predictions for 20 new seedlings
+are optional, outside the main sequence. “Interpretation in a real forest” has
+been removed; do not add a separate general ecology lecture. Retain only the
+sentence explaining that sampling diagnostics check computation and do not
+establish ecological model appropriateness. The PPC example is instructor
+reference, not a required learning outcome.
 
-「Your research question」も削除し、演習資料に同じ追加課題を残さない。
-種差の概念図は翌日の短い予告とし、新しい推定や数式を導入しない。
-20分は講師の進行上の目安で、学生用資料には書かない。空いた時間は質問・
-進度差の余裕に使い、内容を増やさない。
-**遅れたら**種差の予告とMCMC機構の細部を短くする。
-係数表・診断とtrace・回帰図の読み取りを残す。
+“Your research question” has also been removed; do not retain the same extra
+assignment in the handout. The species-difference illustration is a brief
+preview of tomorrow, without new inference or equations. Twenty minutes is an
+instructor planning allowance, not text for the student handout. Use remaining
+time for questions and differences in working speed rather than extra content.
 
-## Day 3：90分の進行
+**If running late:** shorten the species preview and details of MCMC mechanics.
+Preserve reading the coefficient table, diagnostics, traces and regression plot.
 
-| 経過時間 | 内容・講師の問い | 受講者の行動 |
+## Day 3: Hierarchical models — 90-minute schedule
+
+| Elapsed time | Content and instructor prompts | Participant activity |
 |---|---|---|
-| 0–10分 | 生存曲線を振り返り、母樹の別データへ。全体の生存割合を計算する | 8母樹をまとめた0.284が何を隠すか考える |
-| 10–25分 | 母樹別の割合0.19〜0.50を読み、全部同じ／完全に別々の仮定へ | 本当の母樹差と標本変動を区別し、情報共有の必要性を考える |
-| 25–40分 | 階層事前分布と群間SD。Stanコードは補足 | 共通する情報と群差を図で見る |
-| 40–55分 | 一つの演習：10分作業＋5分解説 | 動きそうな母樹を予想し、三つの推定図と比較する |
-| 55–70分 | 種別CNDDへの接続10分、wood density・アロメトリーの研究紹介5分 | 個体とグループの二つの問いを読む |
-| 70–80分 | 計算・母樹別の予測チェックと共通性の仮定 | 情報共有が妥当なグループか考える |
-| 80–85分 | 3日間と自分の研究への接続 | グループと知りたい違いを一つ挙げる |
-| 85–90分 | 質問・遅延の余裕 | 質問・振り返り |
+| 0–10 min | Revisit the survival curve, introduce separate mother-tree data and calculate overall survival | Consider what the pooled proportion 0.284 hides across eight mother trees |
+| 10–25 min | Read mother-tree proportions from 0.19 to 0.50; introduce assumptions of one shared probability or fully separate probabilities | Distinguish real differences from sampling variation and consider sharing information |
+| 25–40 min | Hierarchical priors and between-group SD; Stan code is optional reference | See shared information and group differences in figures |
+| 40–55 min | One activity: 10 minutes of work and 5 minutes of explanation | Predict which mother-tree estimates will move and compare three estimation plots |
+| 55–70 min | Species-level CNDD connection, 10 minutes; wood-density/allometry research example, 5 minutes | Read the individual-level and group-level questions |
+| 70–80 min | Computational and mother-tree predictive checks; assumptions of similarity | Consider whether these groups can reasonably share information |
+| 80–85 min | Connect the three days to participants' research | Identify one grouping structure and a difference of interest |
+| 85–90 min | Questions and buffer | Ask questions and reflect |
 
-main.qmdの具体的な導入（全体の割合→母樹別の割合→どこまで情報を共有するか）を使う。
-実際の表にない0/2・2/2の問いは挟まない。導入の割合はMLEで、演習後の事後平均とは区別する。
-真値との比較は演習後の短い説明とし、時間がなければ省く。真値は小数2桁に丸めた生成確率である。
-演習5分時点で母樹二つと予想の理由を確認する。三つの図の点は事後平均、区間は95%。
-完全・独立モデルはpにBeta(1,1)、部分プーリングはlogit(p)に階層正規分布を使う。
-したがって同じ周辺事前分布の下でプーリングだけを変えた比較ではないと説明する。
-既存 `stan/logistic.stan` はmuにNormal(0,5)、sigmaにhalf-Normal(0,1)。SDと分散を区別する。
-母樹が常に同じ割合だけ全体の観測生存割合へ動く、区間が必ず狭まる、各母樹で必ず改善する、
-とは説明しない。真値はシミュレーションだから分かるもので、実データにはない。
+Use the concrete introduction in `main.qmd`: overall proportion, mother-tree
+proportions, then how much information to share. Do not insert the 0/2 and 2/2
+questions, which are absent from the actual table. Introductory proportions are
+MLEs, distinct from posterior means shown after the activity. Compare with true
+values only in a short explanation after the activity; omit this if time is
+short. The displayed true values are generating probabilities rounded to two
+decimal places.
 
-種別CNDDは `main.qmd` と同じseedの概念シミュレーションであり、Day 2の種別推定ではない。
-wood density図は既存 `day3_vslope` のシミュレーションデータへのfitを使う。
-研究論文の動機・概念図・教材の推定値を明確に区別する。`mv_logistic.stan` は参照用の
-未完成コードでコンパイルできないため、授業で実行しない。
+Five minutes into the activity, check the two mother trees participants chose
+and their reasons. Points in the three plots are posterior means; intervals are
+95%. Complete and separate models use Beta(1,1) priors on p, while partial
+pooling uses a hierarchical Normal distribution on logit(p). Explain that this
+comparison changes more than pooling alone under identical marginal priors.
+The existing `stan/logistic.stan` uses Normal(0,5) for mu and half-Normal(0,1)
+for sigma. Distinguish SD from variance. Do not claim all estimates move by the
+same fraction toward overall observed survival, intervals always narrow, or
+every mother tree improves. True values are known because the data are simulated;
+they are unavailable for real observations.
 
-**遅れたら**研究モデルのコードを短くし、アロメトリーは配布図へ移す。
-母樹の解説とCNDDへの接続を残す。新しい母樹の予測、Cholesky/LKJ、非中心化の詳細は任意。
+Species-level CNDD is a conceptual simulation with the same seed as `main.qmd`,
+not species-level inference from Day 2. The wood-density figure uses the existing
+`day3_vslope` fit to simulated data. Distinguish research motivation, conceptual
+figures and teaching-data estimates. `mv_logistic.stan` is incomplete reference
+code that cannot compile; do not run it in class.
 
-## 準備・支援・配布
+**If running late:** shorten research-model code and move allometry to the
+supplied figures. Preserve the mother-tree explanation and connection to CNDD.
+Predictions for new mother trees, Cholesky/LKJ and details of non-centering are
+optional.
 
-授業数日前に `readiness.html` の10分確認を行う。参加者にCmdStan・C++・Dockerの
-インストールを要求しない。全日の必須課題は軽い計算か保存済み結果を使い、
-図を読むだけでも完了できる。学生用案内は[PACKAGES.md](PACKAGES.md)。
-ローカルの基本パッケージと任意のbrms推定環境を分け、学生にコンパイル・推定の事前課題を出さない。
-講師は新規アカウントで基本の図表示・保存済みfit読み込みを確認する。
-brmsまたはStanで新規推定を行う場合、講師環境でコンパイル・推定・診断・作図と時間を確認し、結果を先に用意する。
-新しい推定と、既存drawからの予測シミュレーションを区別する。必須宿題は設けない案。
+## Preparation, support and distribution
 
-接続・操作問題が2分で解消しなければローカルの `exercise-student.html` と `results.html`
-で同じ問いを続ける。予想を書いてから結果を見せる。講師解答は `exercise.qmd/html` のみ。
-参加者QMDには解答のコード・文章を物理的に残さない。
+Several days before class, use `readiness.html` for a ten-minute check. Do not
+require participants to install CmdStan, a C++ toolchain or Docker. Required
+activities use lightweight calculations or supplied results and can also be
+completed by reading figures. The student package guide is
+[PACKAGES.md](PACKAGES.md). Separate basic local R packages from the optional
+brms fitting environment; do not assign compilation or sampling as preparation.
+Test basic plotting and loading supplied fits in a fresh participant account.
+If demonstrating new brms or Stan inference, check compilation, sampling,
+diagnostics, plotting and runtime in the instructor environment, and prepare
+results in advance. Distinguish new inference from predictive simulation using
+existing draws. The current plan has no required homework.
 
-講師環境で `Rscript R/build_classroom_materials.R` を実行し、スライド、講師版と参加者版、
-結果シート、事前確認、講師進行表を生成する。再推定は行わない。
-参加者用は `dist/afec-classroom-materials.zip`。事前に配布し、展開・オフライン表示を確認する。
-旧教材の詳細課題は `archive/teaching-before-cndd/` に保管し、現在の必須課題として配布しない。
+If connection or R problems cannot be resolved within two minutes, use local
+`exercise-student.html` and `results.html` to continue with the same question.
+Ask for predictions before showing results. Instructor solutions belong only
+in `exercise.qmd/html`; solution code and prose are physically removed from
+participant QMD files.
 
-保存済みfitと現行seedデータ・モデル名を確認する。元のfitには生成時のStanソースhashがなく、
-生成時のソースと現行ソースが厳密に同一であることまでは証明できない。モデルやデータを
-変更する場合は、既定fitを代用せず講師側で再推定・診断・図の更新を行う。
+Run `Rscript R/build_classroom_materials.R` in the instructor environment to
+build slides, instructor and participant handouts, result sheets, the readiness
+check and this guide without refitting models. Distribute
+`dist/afec-classroom-materials.zip` before class and check extraction and offline
+viewing. Earlier detailed activities are retained in
+`archive/teaching-before-cndd/`, outside current required work.
 
-講師用のローカル検証と、教室の新規参加者アカウントでの受入確認は別に行う。
-会場からの接続、ブラウザRStudio、30人負荷、通し練習と時間配分の実測は実地確認事項。
-ライブ推定は必須にせず、実施する場合はサーバー性能を測定して講師が調整する。
-既存Dockerイメージ・参加者volumeはソース編集では更新されない。新版ZIPは新しい教材
-ディレクトリへ展開し、イメージ更新と既存作業の移行は別途計画する。
+Check supplied fits against current seeded data and model names. Original fit
+files lack the Stan source hash from generation, so exact identity between the
+original and current source cannot be proved. If changing a model or its data,
+refit, diagnose and update figures on the instructor side rather than reusing
+a default fit.
+
+Keep local instructor validation separate from acceptance testing in a fresh
+classroom participant account. Venue connectivity, browser RStudio, load for
+30 participants, a full rehearsal and measured pacing require classroom testing.
+Live inference is optional; if used, measure server capacity and adjust the
+session accordingly. Editing source does not update existing Docker images or
+participant volumes. Extract the new ZIP into a new materials directory; plan
+image updates and migration of existing participant work separately.

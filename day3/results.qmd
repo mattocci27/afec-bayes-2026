@@ -1,5 +1,5 @@
 ---
-title: "Day 3: results for offline discussion"
+title: "Day 3: Hierarchical models — Results"
 author: "Masatoshi Katabuchi"
 date: "2026-10-23"
 format:

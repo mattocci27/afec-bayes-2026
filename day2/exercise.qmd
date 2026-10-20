@@ -1,5 +1,5 @@
 ---
-title: "Day 2: seedling survival and CNDD"
+title: "Day 2: Linear regression and MCMC"
 author: "Masatoshi Katabuchi"
 date: "2026-10-22"
 solutions: true

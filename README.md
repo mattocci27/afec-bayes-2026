@@ -41,8 +41,8 @@ The restructured course lives in:
 | | Slides | Exercises | Theme |
 |---|---|---|---|
 | Day 1 | `day1/slides.qmd` | `day1/exercise.qmd` | Bayesian foundations and an explicit R update: change sample size and interpret uncertainty |
-| Day 2 | `day2/slides.qmd` | `day2/exercise.qmd` | CNDD: regression tables, sampling diagnostics and survival curves |
-| Day 3 | `day3/slides.qmd` | `day3/exercise.qmd` | Mother-tree partial pooling and instructor demonstrations of ecological applications |
+| Day 2 | `day2/slides.qmd` | `day2/exercise.qmd` | Linear regression and MCMC, illustrated with seedling survival |
+| Day 3 | `day3/slides.qmd` | `day3/exercise.qmd` | Hierarchical models, illustrated with mother trees and ecological applications |
 
 Shared resources:
 

@@ -1,5 +1,5 @@
 ---
-title: "Day 3: mother trees and information sharing"
+title: "Day 3: Hierarchical models"
 author: "Masatoshi Katabuchi"
 date: "2026-10-23"
 solutions: true

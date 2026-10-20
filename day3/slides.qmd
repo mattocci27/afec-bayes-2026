@@ -1,5 +1,5 @@
 ---
-pagetitle: "Bayesian statistics for ecology: Day 3"
+pagetitle: "Bayesian statistics for ecology: Day 3 — Hierarchical models"
 author: "Masatoshi Katabuchi"
 institute: "XTBG, CAS"
 strip-comments: true
@@ -49,7 +49,7 @@ comparison <- mother_comparison(fit,seed=20261024)
 
 ::: title-box
 <h2>Bayesian statistics for ecology</h2>
-<h3>Day 3: Mother trees and information sharing</h3>
+<h3>Day 3: Hierarchical models</h3>
 <p>AFEC-X 2026 · 23 October</p>
 <h3>Masatoshi Katabuchi @ XTBG, CAS</h3>
 :::
