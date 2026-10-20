@@ -30,16 +30,12 @@ execute:
 ---
 
 <!--
-DAY 3 SESSION PLAN: 90 minutes. Explain partial pooling with mother trees.
-Outcomes: compare complete/separate/partial estimates; explain dependence on group
-information and inferred variation; name a grouping and justify sharing in own work.
-0-10 review/mother question; 10-25 two extremes; 25-40 hierarchical prior/group SD;
-40-55 ONE exercise (10 work + 5 debrief); 55-70 CNDD demo (10), wood density (5);
-70-80 assumptions and checking; 80-85 reflection; 85-90 questions/buffer.
-Stored results only. CNDD species curves are conceptual simulations. Wood density
-uses the existing saved allometry fit. No participant hierarchical programming.
-If delayed, shorten research equations/code and put allometry in optional reading.
+DAY 3 SEQUENCE: lecture results -> intercept-only model/code -> model checking
+-> regression. Explain pooling and connect equations to supplied Stan code.
+Code execution is optional. Stored results support the offline route.
+CNDD regression curves/code are conceptual; allometry is optional reference.
 -->
+
 
 ```{r setup, include=FALSE}
 source(here::here("R/slides_setup.R"))
@@ -95,6 +91,7 @@ its own simulated data and saved hierarchical regression fit.
 **Understanding Bayesian hierarchical models**
 
 - Explain how data from other groups can help estimate each group's survival.
+- Identify the likelihood, shared prior and survival probabilities in supplied code.
 - Compare survival estimates and their uncertainty with and without information sharing.
 - Explain how the same idea extends to species-specific regression relationships.
 
@@ -190,12 +187,12 @@ ggplot(trees, aes(tree, suv / n, size = n)) +
 Can data from other trees help us estimate each tree's survival probability?
 
 ::: notes
-10-25 minutes. Each point is one mother tree; point size is its seedling count.
+Each point is one mother tree; point size is its seedling count.
 The dashed line is the pooled observed proportion, not a fitted regression line.
 Neither all differences being real nor all trees being identical follows from
 this plot. Use this question to motivate the two extreme models and their
-hierarchical alternative. Hide generating probabilities and fitted comparisons
-until participants have made their predictions in the exercise.
+hierarchical alternative. Show fitted comparisons and generating probabilities
+later in the lecture, before the model-reading activity.
 :::
 
 ## Complete pooling
@@ -256,7 +253,7 @@ Each mother tree can differ. Their shared distribution describes the commonality
 :::
 
 ::: notes
-25-40 minutes. A hierarchical prior connects group parameters.
+A hierarchical prior connects group parameters.
 The model estimates mu and sigma from all eight trees, with hyperpriors.
 The Normal second argument is SD, on the logit scale.
 :::
@@ -321,7 +318,7 @@ We estimate $\sigma$ from the data, with a prior.
 :::
 
 ::: notes
-25-40 minutes. Read both figures together: the three dashed lines in the prior
+Read both figures together: the three dashed lines in the prior
 plot mark sigma = 0.1, 1 and 3, the values used for the three panels on the left.
 The prior is a distribution over sigma, not a fourth mother-tree curve or a
 posterior. A sigma value and a prior distribution for sigma are different things.
@@ -341,7 +338,7 @@ Keep alternative priors in the optional reference. Do not replace the saved mode
 half-Normal prior with main.qmd's older half-Cauchy prior.
 :::
 
-## Which estimates might move?
+## What information does each tree provide?
 
 ```{r prediction-table}
 trees |>
@@ -351,25 +348,13 @@ trees |>
   kableExtra::kable_styling(font_size = 25)
 ```
 
-Choose two mother trees and explain your prediction to your partner.
+Read the seedling counts and survival proportions together.
 
 ::: notes
-Begin the 40-55 minute exercise. Display only observed data before revealing
-fitted comparisons. Participants can write predictions on paper.
-:::
-
-## Exercise: mother trees and shared information {background-color="#f3e8f5"}
-
-`day3/exercise-student.qmd`
-
-- Predict which estimates will move and why.
-- Run the completed figure code.
-- Compare the prediction with the figure and explain one tree.
-- Consider what would change if the trees differed much more.
-
-::: notes
-10 minutes pair work and 5 minutes debrief. At 5 minutes, check that all pairs
-have chosen trees and a reason. Use results.html if needed. No other core exercise.
+Lecture comparison, before the model/code walkthrough.
+Ask which trees have little information and which observed proportions are
+extreme. Use these observations to interpret the next two figures together.
+This is a brief lecture prompt, not the participant activity.
 :::
 
 ## Three ways of estimating survival {.mother-story}
@@ -425,17 +410,81 @@ Separate points remain posterior means under independent Beta(1,1) priors,
 not observed proportions or MLEs. Do not claim that sharing information always
 improves every estimate or that one simulated data set
 establishes general performance. In real data, truth is unknown. Use this comparison as a visual illustration, not an exact error calculation.
-This reveal remains optional if the exercise debrief is running late.
+Read these results before the activity. If short of time, focus on Tree A
+and the point that information sharing does not guarantee improvement.
 :::
 
-## Species differences in CNDD
+## Read the model behind these results {background-color="#f3e8f5"}
 
-```{r species-cndd, fig.width=11, fig.height=4.5}
+`day3/exercise-student.qmd`
+
+- Connect the observed counts to Stan's data.
+- Find the likelihood and the shared distribution of intercepts.
+- Connect posterior intercepts to survival probabilities.
+- Explain the information-sharing assumption in one sentence.
+
+Read supplied code; running the R chunks is optional.
+
+::: notes
+The lecture has already shown the comparison and truth figures. Use the
+handout to connect those results to the full model and analysis code.
+The handout shows compilation/sampling as well as a saved-result route;
+participants can read either without running a new fit. Then read diagnostics
+and explain the replicated-count check before returning to regression.
+:::
+
+## Can the model reproduce the observed counts?
+
+$$\widetilde{s}_j\sim\operatorname{Binomial}(n_j,p_j),\qquad
+p_j\text{ drawn from the posterior}$$
+
+```{r mother-check, fig.width=12, fig.height=4.0}
+plot_mother_check(fit)
+```
+
+Keep each tree's seedling count fixed.<br>
+Orange intervals describe replicated **counts**, not uncertainty in a probability.
+
+::: notes
+This is the mother-tree intercept-only model from the handout, before adding
+a density predictor. For each posterior draw, generate binomial survivor counts
+using the observed n_j and sampled p_j. Open circles are observed survivor counts;
+orange points/intervals show replicated-count medians and 95% predictive intervals.
+Read the generation and plotting code in the handout alongside this figure.
+It checks compatibility with observations, not MCMC convergence. Numerical
+sampling diagnostics and traces are covered separately in the same handout.
+Inspect which trees look poorly reproduced, while recognizing that agreement
+in this in-sample check does not establish adequacy of every model assumption.
+:::
+
+## From an intercept-only model to regression
+
+::: columns
+::: {.column width="45%"}
+
+**So far: intercept only**
+
+$$\operatorname{logit}(p_j)=\alpha_j$$
+
+One survival probability per group, with no density predictor.
+
+**Now: intercept + density effect**
+
+$$\operatorname{logit}(p_{ij})=\alpha_j+{\color{#d95f02}{\beta_j x_{ij}}}$$
+
+Adding density lets survival probability change within each group.
+
+:::
+::: {.column width="55%"}
+
+```{r species-cndd, fig.width=8, fig.height=5.1}
 plot_cndd_species()
 ```
 
-Day 2's common curve becomes a set of species curves.
-How could rare species borrow information?
+:::
+:::
+
+**We can share information about these coefficients, too.**
 
 ::: footer
 Conceptual simulation inspired by [Comita et al. 2010](https://doi.org/10.1126/science.1190772)
@@ -443,26 +492,110 @@ and [Song & Katabuchi et al. 2024](https://doi.org/10.1002/ecy.4382).
 :::
 
 ::: notes
-55-65 minutes. This is the seeded conceptual example from main.qmd, not fitted
-species effects for Day 2's data or a numerical reproduction of either paper.
-Mother trees and species are different groups. Individual predictors may also differ.
+Model progression and selected code. The main transition is from a model without a density predictor
+to a regression that includes density, not from mother trees to species.
+Strictly, the earlier model is already an intercept-only logistic regression.
+
+So far, each group had one survival probability. We did not include a predictor
+that could explain variation in survival within a group. Now bring back Day 2's
+question: how does survival change with conspecific density? Adding density
+gives each group a curve, with an intercept and a density coefficient.
+The orange term is the addition to the model. i indexes observations within
+group j, and x_ij is scaled conspecific density. Both models retain a binomial
+observation model (or Bernoulli for individual seedlings).
+
+The information-sharing idea still applies: group regression coefficients can
+be connected through shared distributions. Their hyperparameters also need
+priors in a full model. The curves alone do not demonstrate fitted pooling.
+
+For this application the groups are species rather than mother trees. Each
+coloured curve represents a species. This is the seeded conceptual example
+from main.qmd, not fitted species effects for Day 2's data or a numerical
+reproduction of either paper. It uses a different simulated data set, and does
+not add density to the eight mother-tree data.
 :::
 
-## Individual and species questions
+## First: varying intercepts, a common slope
 
-**Individual level:** how does survival vary with conspecific density?
+Species can differ in baseline survival while sharing a density coefficient.
+
+$$\operatorname{logit}(p_{ij})=\alpha_j+\beta x_{ij}$$
+
+Selected model lines:
+
+```stan
+alpha ~ normal(mu_alpha, sigma_alpha);
+suv[i] ~ binomial_logit(
+  n[i], alpha[group[i]] + beta * x[i]
+);
+```
+
+The index on `alpha` changes the intercept used for each observation.
+`beta` is shared by all species.
+
+::: notes
+A conceptual CNDD extension, not executable code for the saved mother-tree fit.
+Declarations, loops and the remaining priors are omitted from these selected
+lines. group[i] maps observation i to species j, x is scaled density, n is the
+seedling count and suv is the survivor count. The likelihood is still binomial.
+The Normal group prior is shown in centered form so the model structure is easy
+to read; an equivalent non-centered representation can also be used.
+These curves need not be parallel on the probability scale. The shared slope
+is a common change in log-odds per unit density. Do not introduce a new fit.
+This is the idea in section 4 of the original exercise.qmd, adapted from
+Normal log-height regression to binomial survival regression.
+:::
+
+## Then: varying intercepts and slopes
+
+Species may also differ in their response to density.
 
 $$\operatorname{logit}(p_{ij})=\alpha_j+\beta_j x_{ij}$$
 
-**Species level:** do density coefficients vary with species abundance?
+```stan
+alpha ~ normal(mu_alpha, sigma_alpha);
+beta ~ normal(mu_beta, sigma_beta);
+suv[i] ~ binomial_logit(
+  n[i], alpha[group[i]] + beta[group[i]] * x[i]
+);
+```
 
-$$\beta_j\sim\mathcal{N}(\gamma_0+\gamma_1 a_j,\tau)$$
+Both coefficients vary by species and have shared group distributions.
+
+::: notes
+Selected conceptual model lines, with declarations, loops and hyperpriors
+omitted. For this first explanation, the intercept and slope distributions are
+conditionally independent given their hyperparameters. Correlated group effects
+are an optional extension; do not claim this excerpt is identical to vslope.stan,
+which uses a multivariate, non-centered parameterization with correlations.
+Ask: what changed from beta to beta[group[i]], and where is information shared?
+No participant implementation is required. This is the model idea in original
+exercise.qmd section 6; Cholesky/LKJ derivations are outside the core session.
+:::
+
+## Can abundance explain slope differences?
+
+The expected density coefficient can depend on species abundance $a_j$.
+
+$$\beta_j\sim\mathcal{N}(\gamma_0+\gamma_1 a_j,\tau_\beta)$$
+
+```stan
+beta[j] ~ normal(
+  gamma0 + gamma1 * abundance[j], tau_beta
+);
+```
+
+Density varies among observations. Abundance describes the species.
+The group model still allows unexplained differences among species.
 
 ::: notes
 i indexes seedlings and j species here. The response is Bernoulli per seedling,
 or binomial when counts share the same predictors. a_j is scaled species abundance.
-The group SD tau and all coefficients require priors in a full analysis.
-These equations explain structure. They are not another implementation exercise.
+The group SD tau_beta and all coefficients require priors in a full analysis.
+This extends the varying-slope model: a group-level predictor explains its
+expected slope, while tau_beta describes remaining between-species variation.
+This is the model idea in original exercise.qmd section 7. The code is a
+conceptual excerpt, not a new fitted research model or implementation exercise.
 :::
 
 ## A species-level relationship
@@ -478,64 +611,6 @@ Simulated coefficients, with the generating line shown. Higher coefficients
 here mean less negative slopes. A logit coefficient is not a fixed probability
 difference, which also depends on baseline survival and the densities compared.
 The model asks about an association. It alone does not establish the cause of rarity.
-:::
-
-## Allometry and wood density
-
-::: columns
-::: {.column width="52%"}
-```{r allometry-curves, fig.width=8, fig.height=4.6}
-allo <- make_allometry_data()
-ggplot(allo, aes(dbh, h, colour = sp)) +
-  geom_point(alpha = .6) +
-  labs(x = "DBH (cm)", y = "Height (m)") +
-  guides(colour = "none")
-```
-:::
-::: {.column width="48%"}
-
-**Individual level:** DBH predicts height.
-
-**Species level:** wood density may predict the allometric exponent.
-
-$$h=a\,\mathrm{DBH}^{b}$$
-:::
-:::
-
-::: notes
-65-70 minutes: optional second research connection, 5 minutes total for two slides.
-The data are simulated. Explain the power-law shape visually, without a new
-transformation or coefficient exercise. Inspiration follows main.qmd's research
-example; its unpublished citation status has not been independently established.
-:::
-
-## The same structure with a different response
-
-```{r wood-density, fig.width=11, fig.height=4.5}
-plot_wood_density()
-```
-
-The response changes to log height. Species still share information through a group model.
-
-::: notes
-The figure uses day3_vslope, fitted to the existing simulated allometry data.
-Points summarise species exponents and the line summarises their expected value
-at each wood density, with 95% intervals. It is not evidence from a real forest.
-Skip these two slides if delayed. Detailed transformation and implementation are optional.
-:::
-
-## Computation and observations both matter
-
-```{r mother-check, fig.width=12, fig.height=4.5}
-plot_mother_check(fit)
-```
-
-Does the model reproduce survival counts by mother tree?
-
-::: notes
-70-80 minutes. First inspect stored R-hat, bulk/tail ESS, traces, divergences,
-treedepth and E-BFMI in the result sheet. Then discuss this predictive check.
-Draws use observed n_j and posterior p_j. A good fit is one part of assessment.
 :::
 
 ## Ecological reasons to share information
@@ -558,8 +633,8 @@ Name a grouping and a quantity that may vary among its groups.
 What would justify sharing information, and what predicted pattern would you check?
 
 ::: notes
-80-85 minutes: pairs explain one application in words. Ask two pairs to share.
-This is reflection rather than another code exercise. Keep 85-90 for questions.
+pairs explain one application in words. Ask two pairs to share.
+This is reflection rather than another implementation exercise.
 :::
 
 ## Three days of Bayesian thinking
@@ -570,6 +645,50 @@ This is reflection rather than another code exercise. Keep 85-90 for questions.
 - Computation, model-generated data and ecological context all inform interpretation.
 
 # Optional reference {visibility="uncounted"}
+
+## Allometry and wood density {visibility="uncounted"}
+
+::: columns
+::: {.column width="52%"}
+```{r allometry-curves, fig.width=8, fig.height=4.6}
+allo <- make_allometry_data()
+ggplot(allo, aes(dbh, h, colour = sp)) +
+  geom_point(alpha = .6) +
+  labs(x = "DBH (cm)", y = "Height (m)") +
+  guides(colour = "none")
+```
+:::
+::: {.column width="48%"}
+
+**Individual level:** DBH predicts height.
+
+**Species level:** wood density may predict the allometric exponent.
+
+$$h=a\,\mathrm{DBH}^{b}$$
+:::
+:::
+
+::: notes
+Optional second research connection.
+The data are simulated. Explain the power-law shape visually, without a new
+transformation or coefficient exercise. Inspiration follows main.qmd's research
+example; its unpublished citation status has not been independently established.
+:::
+
+## The same structure with a different response {visibility="uncounted"}
+
+```{r wood-density, fig.width=11, fig.height=4.5}
+plot_wood_density()
+```
+
+The response changes to log height. Species still share information through a group model.
+
+::: notes
+The figure uses day3_vslope, fitted to the existing simulated allometry data.
+Points summarise species exponents and the line summarises their expected value
+at each wood density, with 95% intervals. It is not evidence from a real forest.
+Skip these two slides if delayed. Detailed transformation and implementation are optional.
+:::
 
 ## Alternative priors for group variation {visibility="uncounted"}
 

@@ -43,5 +43,37 @@ check_course_fits <- function(root) {
     )
     # Deliberately do NOT refit or reject the intentionally bad diagnostics fit.
   }
-  invisible(list(allometry = allo, ndd = ndd, trees = trees))
+  # Use the exact visible CNDD data code, not a second simulation implementation.
+  regression <- new.env(parent = environment())
+  lines <- readLines(file.path(root, "day3", "exercise.qmd"))
+  for (label in c("regression-data", "regression-stan-data")) {
+    start <- grep(paste0("^```\\{r ", label, "[,}]"), lines)
+    stopifnot(length(start) == 1L)
+    end <- start + match("```", lines[(start + 1L):length(lines)])
+    eval(parse(text = lines[(start + 1L):(end - 1L)]), regression)
+  }
+  for (name in names(regression$regression_inputs)) {
+    fit <- readRDS(file.path(root, "fits", paste0("day3_cndd_", name, ".rds")))
+    stopifnot(
+      isTRUE(all.equal(fit$data, regression$regression_inputs[[name]])),
+      nrow(fit$draws) == 4000L,
+      posterior::nchains(fit$draws) == 4L,
+      inherits(fit$draws, "draws_df"),
+      fit$meta$stan_file == "stan/cndd_hierarchical.stan",
+      fit$meta$stan_md5 ==
+        unname(tools::md5sum(
+          file.path(root, "stan", "cndd_hierarchical.stan")
+        )),
+      all(
+        c("num_divergent", "num_max_treedepth", "ebfmi") %in%
+          names(fit$diagnostics)
+      )
+    )
+  }
+  invisible(list(
+    allometry = allo,
+    ndd = ndd,
+    trees = trees,
+    cndd = regression$reg_data
+  ))
 }

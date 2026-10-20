@@ -1,0 +1,33 @@
+Day 3 CNDD extension validation
+R version 4.6.1 (2026-06-24) 
+posterior: 1.7.0 
+Quarto: 1.10.19 
+
+intercepts : CmdStan 2.38.0 seed 20261027 
+4 chains, 1000 warmup + 1000 retained per chain, adapt_delta 0.98
+max Rhat 1.006219 min bulk ESS 933.095 min tail ESS 1303.83 
+divergences 0 treedepth hits 0 min E-BFMI 0.7002847 
+
+slopes : CmdStan 2.38.0 seed 20261028 
+4 chains, 1000 warmup + 1000 retained per chain, adapt_delta 0.98
+max Rhat 1.003439 min bulk ESS 1028.54 min tail ESS 1510.43 
+divergences 0 treedepth hits 0 min E-BFMI 0.7374342 
+
+traits : CmdStan 2.38.0 seed 20261029 
+4 chains, 1000 warmup + 1000 retained per chain, adapt_delta 0.98
+max Rhat 1.002383 min bulk ESS 1374.117 min tail ESS 1901.147 
+divergences 0 treedepth hits 0 min E-BFMI 0.6696609 
+
+Instructor precompute: Rscript R/precompute_day3_regression.R
+Executed in existing mattocci/cmdstan-zsh:4.5.3 image, CmdStan 2.38.0; package versions: fits/day3-cndd-sessionInfo.txt
+The precompute script evaluates the exact regression-data and regression-stan-data chunks in day3/exercise.qmd.
+During warmup, CmdStan rejected some numerical proposals; final retained draws passed all diagnostic thresholds.
+No other models were refitted.
+
+Rscript R/build_classroom_materials.R: all HTML, data export and participant ZIP rebuilt, no sampling.
+Rscript R/check_classroom_materials.R: 3 / 8 / 26 executable participant chunks passed for Days 1 / 2 / 3.
+All 10 saved fits checked; legacy deliberately bad fit exempt from healthy thresholds.
+Fresh participant ZIP copy: 26 Day 3 executable chunks passed using supplied files only.
+Verified saved input/model MD5 matches, x*u design expansion, shared Model 1 slopes, joint-draw predictions, probability/count bounds and changed-data rejection.
+Visual QA: HTML in Chrome; all added plots inspected as rendered PNGs. Fixed overlapping legend labels.
+Optional brms/glmer new-inference chunks are not executed or claimed tested; primary workflow uses the tested saved Stan fits.

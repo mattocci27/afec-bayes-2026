@@ -26,227 +26,838 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Before you begin
+# Mother-tree survival
 
-Work individually, with nearby discussion if useful. Predict before each
-comparison. No R or GLM experience is required. You may run the supplied code or
-read the figures and result sheet; both routes answer the same questions.
+We observed seedling survival under eight mother trees of one species. A
+hierarchical binomial model gives each tree its own survival probability and
+connects the tree intercepts through a shared distribution.
 
-Use the prepared browser R environment. If access fails, open this HTML and
-[the result sheet](results.html) locally and answer the same questions.
-There is one core exercise today. Demonstrations and optional extensions are labelled.
-No installation, independent Stan programming or homework is required.
+$$
+s_j \sim \operatorname{Binomial}(n_j,p_j), \qquad
+\operatorname{logit}(p_j)=z_j, \qquad
+z_j\sim\mathcal{N}(\mu,\sigma).
+$$
+
+There is no density predictor in this model: each tree has one intercept and
+one survival probability. The shared centre $\mu$ and between-tree SD $\sigma$
+are estimated along with the tree intercepts. The priors are
+$\mu\sim\mathcal{N}(0,5)$ and
+$\sigma\sim\operatorname{HalfNormal}(0,1)$, on the logit scale.
+Univariate Normal distributions use standard deviations as their second arguments.
+
+## Packages and data
 
 ```{r setup}
 library(tidyverse)
 library(posterior)
 library(bayesplot)
-library(patchwork)
 library(here)
-source(here("R/functions.R"))
-source(here("R/course_data.R"))
-source(here("R/course_utils.R"))
-source(here("R/course_visuals.R"))
 theme_set(theme_bw(base_size = 14))
-```
 
-# Core exercise: which mother-tree estimates will move?
-
-| | |
-|---|---|
-| **Purpose** | Explain information sharing using each mother tree's data and the model's assumptions. |
-| **Computation** | Supplied partial-pooling fit plus exact Beta updating for the two comparison models. No new Stan inference. |
-| **Data** | Eight mother trees of one species. Simulated, and different from the Day 2 quadrats. |
-
-This example leaves out the density predictor so that we can focus on differences
-among mother trees. The binomial survival model is shared with Days 1 and 2.
-Mother trees and species are different kinds of groups.
-
-## 1. Predict before seeing the fitted results
-
-```{r core-trees}
-trees <- make_tree_data()
+trees <- read_csv(here("data", "trees.csv"))
 trees |>
   select(tree, n, suv) |>
   mutate(observed_proportion = suv / n)
 ```
 
-Choose two trees whose estimates you expect to change when they share information.
-Write their letters and your reasons. Consider both seedling count and the observed
-survival proportion.
+`n` is the number of seedlings and `suv` the number of survivors. These are the
+same counts used in the lecture's comparison plots.
 
-## 2. Compare three ways of estimating survival
+## Stan model
 
-- **Complete pooling** assumes one shared survival probability.
-- **Separate estimates** give each mother tree an independent probability.
-- **Partial pooling** gives trees their own probabilities and estimates a shared distribution.
+The file `stan/logistic.stan` contains the full model:
 
-```{r core-comparison}
-fit <- course_fit("day3_trees")
-fit$source
-comparison <- mother_comparison(fit, seed = 20261024)
-plot_mother_comparison(comparison)
-plot_mother_truth(comparison, trees)
+```stan
+data {
+  int<lower=1> I; // number of species
+  array[I] int<lower=0> suv; // number of survivors
+  array[I] int<lower=0> N; // number of individuals
+  array[I] int<lower=1, upper=I> ii; // integer
+}
+
+parameters {
+  real mu;
+  real<lower=0> sigma;
+  vector[I] z_tilde;
+}
+
+transformed parameters {
+  vector[I] z;
+  z = mu + sigma * z_tilde;
+}
+
+model {
+  mu ~ normal(0, 5);
+  z_tilde ~ std_normal();
+  sigma ~ std_normal();
+  for (i in 1:I)
+    suv[i] ~ binomial_logit(N[i], z[ii[i]]);
+}
+
+generated quantities {
+  vector[I] log_lik;
+  vector[I] p = inv_logit(z);
+  for (i in 1:I)
+    log_lik[i] = binomial_logit_lpmf(suv[i] | N[i], z[ii[i]]);
+}
 ```
 
-Purple open points show separate estimates; orange filled points show partial
-pooling. The grey vertical line shows the complete-pooling posterior mean,
-and the grey ribbon shows its 95% credible interval. Coloured bars are also
-95% credible intervals. Rows are ordered by the separate posterior means, and
-`n` is the seedling count. Separate and partial intervals are offset vertically
-within each tree to keep them distinct. The grey line is a comparison reference,
-not the exact target of hierarchical shrinkage.
+The file's legacy comment says species; here each group is a mother tree.
+`I` is the number of trees, `N` their seedling counts and `ii` the group index.
+`binomial_logit(N, z)` is a binomial model with probability `inv_logit(z)`.
 
-The second plot compares estimates (y) with the generating probabilities
-(x). The dashed diagonal marks equality with the truth. Vertical connections
-show movement from Separate to Partial pooling. Tree H (n = 50) changes only slightly,
-towards its generating probability of 0.29. Not every tree moves
-closer to the truth; in real data, the truth is unknown.
+The pair `z_tilde ~ std_normal()` and `z = mu + sigma * z_tilde` implies
+$z_j\sim\mathcal{N}(\mu,\sigma)$ conditional on the shared parameters. This is a
+**non-centered parameterization** of the same group model. All trees inform
+`mu` and `sigma`, connecting their intercept estimates. Non-centering changes
+how the model is represented for computation; it does not add a density effect.
 
-The complete and separate models use the Day 1 flat Beta(1,1) prior on each probability. The partial model uses
-Normal group effects on the logit scale, with their centre and SD estimated from
-all trees. Thus the prior specifications also differ across these comparisons.
+Because `sigma` is constrained to be positive, `sigma ~ std_normal()` specifies
+the half-Normal prior. Its scale describes between-tree variation in logit
+intercepts, not variation in the observed survivor counts.
+`p = inv_logit(z)` returns tree survival probabilities for each posterior draw.
 
-## 3. Interpret the movement
+## Fit the model with Stan
 
-Did your predictions agree with the figures? Explain one tree's change in words.
-Would information sharing have the same strength if the data supported large
-differences among mother trees? Give a reason.
+The data list connects the observed counts to Stan's data block.
 
-::: {.content-visible when-meta="solutions"}
-::: {.callout-tip collapse="true"}
-## Solution and instructor notes
-
-```{r solution-movement, echo=FALSE}
-movement <- comparison |>
-  select(tree, n, model, mean) |>
-  pivot_wider(names_from = model, values_from = mean) |>
-  mutate(change = Partial - Separate) |>
-  arrange(desc(abs(change)))
+```{r stan-data}
+stan_data <- list(
+  I = nrow(trees),
+  ii = seq_len(nrow(trees)),
+  suv = as.integer(trees$suv),
+  N = as.integer(trees$n)
+)
+stan_data
 ```
 
-The largest movement in this data set is tree `r movement$tree[1]`, with
-`r movement$n[1]` seedlings. Its separate posterior mean is
-`r round(movement$Separate[1], 2)` and its partial-pooling mean is
-`r round(movement$Partial[1], 2)`. Ask participants to connect the movement to both
-sample size and position relative to the inferred group distribution.
+`cmdstan_model()` compiles the supplied file and `$sample()` runs the chains.
+This chunk runs new inference in a prepared environment. It is shown but not
+executed when this handout is rendered; the saved-result route below skips
+compilation and sampling.
 
-Less information within a group often gives the shared distribution more influence.
-Greater inferred between-group variation generally weakens sharing. It does not
-move every estimate by a fixed amount or guarantee improvement for every tree.
-The target is an inferred distribution on the logit scale, not mechanically the
-pooled observed proportion. The comparison also changes the prior formulation.
+```{r fit-stan, eval=FALSE}
+library(cmdstanr)
 
-The true rates are known only because the data are simulated. If revealing them,
-use `trees$p_true`. Similar true rates make complete pooling competitive here.
-This does not make exact equality a justified assumption for all ecological data.
-
-:::
-:::
-
-# Instructor demonstrations
-
-## Shared information as a hierarchical prior
-
-$$
-s_j \sim \operatorname{Binomial}(n_j,p_j), \qquad
-\operatorname{logit}(p_j) \sim \mathcal{N}(\mu,\sigma).
-$$
-
-Here $j$ indexes mother trees and $\sigma$ is a **standard deviation on the logit
-scale**. The supplied `stan/logistic.stan` uses $\mu\sim\mathcal{N}(0,5)$ and
-$\sigma\sim\operatorname{HalfNormal}(0,1)$. All Normal second arguments are SDs.
-
-```{r demo-group-spread}
-plot_group_spread()
-```
-
-The centre is fixed in this illustration. Only the group SD changes. These are
-hypothetical probabilities, not posterior estimates for our eight trees.
-
-::: {.callout-note collapse="true"}
-## Completed Stan model
-
-```{r demo-stan, echo=FALSE, results="asis"}
-cat(
-  "```stan\n",
-  paste(readLines(here("stan/logistic.stan")), collapse = "\n"),
-  "\n```\n",
-  sep = ""
+model_stan <- cmdstan_model(here("stan", "logistic.stan"))
+fit_stan <- model_stan$sample(
+  data = stan_data,
+  seed = 123,
+  chains = 4,
+  parallel_chains = 1,
+  iter_warmup = 1000,
+  iter_sampling = 1000,
+  refresh = 500
 )
 ```
 
+## Posterior draws
+
+Use **one** of the following chunks, then continue to Summary. Use the Stan
+result after fitting, or the prepared result to skip fitting. The later code
+uses the draws and diagnostics from the chosen result.
+
+### Stan result
+
+```{r draws-stan, eval=FALSE}
+draws <- as_draws_df(fit_stan$draws())
+sampler_diagnostics <- fit_stan$diagnostic_summary()
+```
+
+### Prepared result
+
+```{r draws-precomputed}
+fit <- readRDS(here("fits", "day3_trees.rds"))
+stopifnot(
+  isTRUE(all.equal(stan_data, fit$data, check.attributes = FALSE)),
+  identical(fit$meta$stan_file, "stan/logistic.stan")
+)
+draws <- fit$draws
+sampler_diagnostics <- fit$diagnostics
+```
+
+The checks confirm that the saved result belongs to these data and this model.
+Changing the counts or model requires a new fit. New inference can differ
+slightly from the prepared result because of Monte Carlo variation.
+
+## Summary
+
+The shared parameters and the tree-specific intercepts are on the logit scale.
+
+```{r intercept-summary}
+intercept_draws <- subset_draws(
+  draws,
+  variable = c("mu", "sigma", paste0("z[", stan_data$ii, "]"))
+)
+intercept_table <- summarise_draws(
+  intercept_draws,
+  mean = mean,
+  sd = sd,
+  \(x) quantile(x, probs = c(0.025, 0.975))
+)
+intercept_table
+```
+
+`mu` describes the shared centre and `sigma` the between-tree SD. Neither is
+a tree's survival probability. The `z[j]` rows describe each tree's intercept.
+
+Stan already saves the corresponding probability draws as `p[j]`.
+
+```{r probability-summary}
+probability_variables <- paste0("p[", stan_data$ii, "]")
+probability_draws <- subset_draws(draws, variable = probability_variables)
+probability_table <- summarise_draws(
+  probability_draws,
+  mean = mean,
+  sd = sd,
+  \(x) quantile(x, probs = c(0.025, 0.975))
+) |>
+  mutate(
+    tree = trees$tree[match(variable, probability_variables)],
+    .before = 1
+  )
+probability_table
+```
+
+The mean and 2.5th/97.5th percentiles are the partial-pooling point and 95%
+credible interval shown in the lecture. Here `sd` describes posterior uncertainty
+about a probability; it is different from the group parameter `sigma`.
+
+For Tree A, we can also calculate the transformation directly in R:
+
+```{r tree-a-probability}
+alpha_a <- draws[["z[1]"]]
+p_a <- plogis(alpha_a)
+survival_summary <- tibble(
+  tree = "A",
+  mean = mean(p_a),
+  lower = unname(quantile(p_a, 0.025)),
+  upper = unname(quantile(p_a, 0.975))
+)
+survival_summary
+```
+
+`plogis()` in R is `inv_logit()` in Stan. Transform each draw before summarizing:
+`plogis(mean(alpha_a))` is generally not the posterior mean of the probability.
+These are draws of a probability, not future survivor counts.
+
+## Sampling diagnostics
+
+```{r sampling-diagnostics}
+sampling_table <- summarise_draws(
+  intercept_draws,
+  rhat = posterior::rhat,
+  ess_bulk = posterior::ess_bulk,
+  ess_tail = posterior::ess_tail
+)
+sampling_table
+
+sampler_table <- as_tibble(sampler_diagnostics) |>
+  mutate(chain = row_number(), .before = 1)
+sampler_table
+```
+
+- `rhat` compares chains; values above 1.01 warrant investigation.
+- `ess_bulk` and `ess_tail` describe effective sample sizes for central values
+  and tails. For these four chains, values below about 400 warrant investigation.
+- `num_divergent` counts divergent transitions after warmup; investigate any
+  nonzero count. Also inspect `num_max_treedepth` and `ebfmi`.
+
+Read these checks alongside the traces. Encouraging numbers do not prove
+convergence or that the ecological model is appropriate. If a new fit was run,
+use its own diagnostics rather than the prepared result's diagnostics.
+
+## Trace plots
+
+```{r trace-plots}
+bayesplot::mcmc_trace(draws, pars = c("mu", "sigma"))
+```
+
+The horizontal axis is the saved post-warmup sampling step, and colours identify
+chains. Look for persistent separation, drift or poor exploration. Overlap alone
+is not enough; interpret the traces with the numerical diagnostics.
+
+## Can the model reproduce the observed counts?
+
+Use the posterior probability for each mother tree to generate another survivor
+count. Keep the observed number of seedlings fixed:
+
+$$
+\widetilde{s}_j^{(m)}\sim\operatorname{Binomial}(n_j,p_j^{(m)}).
+$$
+
+Here $m$ indexes posterior draws. The replicated counts include both uncertainty
+in survival probability and binomial sampling variation.
+
+```{r replicated-counts}
+set.seed(20261025)
+probability_matrix <- as_draws_matrix(probability_draws)
+replicated_counts <- matrix(
+  NA_integer_,
+  nrow = nrow(probability_matrix),
+  ncol = nrow(trees)
+)
+for (j in seq_len(nrow(trees))) {
+  replicated_counts[, j] <- rbinom(
+    nrow(probability_matrix),
+    size = trees$n[j],
+    prob = probability_matrix[, probability_variables[j]]
+  )
+}
+
+replicated_summary <- tibble(
+  tree = trees$tree,
+  observed = trees$suv,
+  lower = apply(replicated_counts, 2, quantile, probs = 0.025),
+  median = apply(replicated_counts, 2, median),
+  upper = apply(replicated_counts, 2, quantile, probs = 0.975)
+)
+replicated_summary
+```
+
+```{r predictive-plot}
+predictive_plot <- ggplot(replicated_summary, aes(tree, median)) +
+  geom_pointrange(
+    aes(ymin = lower, ymax = upper),
+    colour = "#d95f02"
+  ) +
+  geom_point(aes(y = observed), shape = 1, size = 3) +
+  labs(
+    x = "Mother tree",
+    y = "Survivors",
+    subtitle = paste(
+      "Open: observed.",
+      "Orange: median and 95% interval for replicated counts"
+    )
+  )
+predictive_plot
+```
+
+The orange intervals describe **replicated survivor counts**, whereas the earlier
+credible intervals described **survival probabilities**. Ask whether the observed
+counts look compatible with the replicated counts, and whether any trees show a
+systematic discrepancy. These are checks at the observed seedling counts, not
+predictions for a new mother tree.
+
+This plot checks the observations, not the sampler. Assess it together with the
+sampling checks and the ecological reasons for sharing information. Agreement
+alone does not establish that all model assumptions are adequate.
+
+# From intercepts to regression
+
+The mother-tree model estimated one probability per group. Now ask: **how does
+survival change with local conspecific density, and does the response differ
+among species?** Adding a predictor turns the intercept-only model into a
+regression. We use species as groups for this new question.
+
+## Data
+
+Use one simulated data set for all three models: 12 species with 3–24 quadrats
+each. Each row records `suv` survivors out of `n` seedlings. Local density varies
+within species; wood density is a species-level trait, constant within species.
+The lecture uses abundance in the same role as wood density here. The original
+allometry examples use the same hierarchy with a Normal observation model.
+
+| Variable | Meaning |
+|---|---|
+| `x` | (Conspecific neighbours − 20) / 10; zero means 20 neighbours |
+| `u` | Wood density (g/cm³), standardized across the 12 species |
+| `species` | Group label |
+
+The code below creates the data. Expand it to inspect or run the full simulation.
+The known `_true` values are used only to simulate observations, never for fitting.
+
+```{r regression-data}
+#| code-fold: true
+#| code-summary: "Show R code"
+set.seed(20261026)
+species_info <- tibble(
+  species = LETTERS[1:12],
+  quadrats = c(24L, 20L, 16L, 12L, 10L, 8L, 7L, 6L, 5L, 4L, 3L, 3L),
+  wood_density = c(0.52, 0.77, 0.39, 0.66, 0.43, 0.81,
+                   0.58, 0.35, 0.71, 0.48, 0.63, 0.74)
+) |>
+  mutate(u = as.numeric(scale(wood_density)))
+
+# Correlated residual intercept and slope deviations.
+z_alpha <- rnorm(nrow(species_info))
+z_beta <- rnorm(nrow(species_info))
+species_info <- species_info |>
+  mutate(
+    alpha_true = -0.3 + 0.3 * u + 0.45 * z_alpha,
+    beta_true = -1 +
+      0.6 * u +
+      0.3 * (0.25 * z_alpha + sqrt(1 - 0.25^2) * z_beta)
+  )
+
+reg_data <- species_info |>
+  uncount(quadrats, .id = "quadrat") |>
+  mutate(
+    species = factor(species, levels = species_info$species),
+    density = runif(n(), min = 5, max = 35),
+    x = (density - 20) / 10,
+    n = sample(12:30, n(), replace = TRUE),
+    p_true = plogis(alpha_true + beta_true * x),
+    suv = rbinom(n(), size = n, prob = p_true)
+  )
+reg_data |>
+  select(species, quadrat, density, x, wood_density, u, n, suv) |>
+  head(6)
+```
+
+All three models use the same binomial likelihood and logit link, with quadrat
+$i$ in species $j$:
+
+$$
+s_{ij}\sim\operatorname{Binomial}(n_{ij},p_{ij}),\qquad
+\operatorname{logit}(p_{ij})=\eta_{ij}.
+$$
+
+## Model 1: Varying intercepts
+
+$$
+\eta_{ij}=\alpha_j+\beta x_{ij},\qquad
+\alpha_j\sim\mathcal N(\mu_\alpha,\sigma_\alpha).
+$$
+
+Species differ in survival at the reference density: `plogis(alpha_j)`.
+Their intercepts receive partial pooling through the shared mean $\mu_\alpha$
+and SD $\sigma_\alpha$. The density slope $\beta$ is common to all species;
+a negative slope represents conspecific negative density dependence (CNDD).
+The lines are parallel on the logit scale, not necessarily on the probability scale.
+
+```{r formula-intercepts}
+f_intercepts <- suv | trials(n) ~ x + (1 | species)
+```
+
+Use this and the following formulas with `family = binomial(link = "logit")`.
+`(1 | species)` adds a species intercept deviation to the population intercept.
+
+## Model 2: Varying intercepts and slopes
+
+$$
+\eta_{ij}=\alpha_j+\beta_jx_{ij},\qquad
+\alpha_j\sim\mathcal N(\mu_\alpha,\sigma_\alpha),\qquad
+\beta_j\sim\mathcal N(\mu_\beta,\sigma_\beta).
+$$
+
+Now the response to density can differ among species. **Slopes also receive
+partial pooling** toward the shared mean $\mu_\beta$. Weakly informed species
+borrow more information; the number of quadrats, density range and survival
+outcomes all affect how well a slope is estimated.
+
+```{r formula-slopes}
+f_slopes <- suv | trials(n) ~ x + (1 + x | species)
+```
+
+The Normal statements describe the marginal distributions. The single bar in
+`(1 + x | species)` also models the correlation between intercept and slope
+deviations; `||` would omit it. See the
+[brms formula documentation](https://paulbuerkner.com/brms/reference/brmsformula.html).
+
+## Model 3: Group-level predictors
+
+Can wood density explain differences in CNDD? Let the mean slope depend on
+species trait $u_j$:
+
+$$
+\beta_j\sim\mathcal N(\gamma_0+\gamma_1u_j,\sigma_\beta).
+$$
+
+$\gamma_0$ is the expected slope at average wood density. A positive $\gamma_1$
+means that a negative density response becomes less negative as wood density
+increases. Allow the trait to predict the intercept too:
+
+$$
+\begin{aligned}
+\alpha_j&=\delta_0+\delta_1u_j+a_j,\\
+\beta_j&=\gamma_0+\gamma_1u_j+b_j.
+\end{aligned}
+$$
+
+The residual deviations $(a_j,b_j)$ have a joint Normal distribution with mean
+zero, SDs $\sigma_\alpha,\sigma_\beta$ and correlation $\rho$. Substituting gives
+
+$$
+\eta_{ij}=\underbrace{\delta_0+\gamma_0x_{ij}+\delta_1u_j+
+\gamma_1x_{ij}u_j}_{\text{population effects}}
++\underbrace{a_j+b_jx_{ij}}_{\text{species deviations}}.
+$$
+
+The product $x_{ij}u_j$ appears because the density slope depends on a species
+trait: a **cross-level interaction**. In R, `x * u` expands to `x + u + x:u`:
+
+```{r formula-traits}
+f_traits <- suv | trials(n) ~ x * u + (1 + x | species)
+# x * u expands to x + u + x:u (with an intercept by default).
+```
+
+The `u` main effect comes from the intercept equation; a trait-dependent slope
+alone would give `x + x:u`. Slopes now pool toward the trait-dependent mean
+$\gamma_0+\gamma_1u_j$. Repeated quadrats help estimate slopes, but do not add
+independent species trait values.
+
+## Read the saved results
+
+Load the three prepared Stan fits; no compilation or new sampling is needed.
+Population coefficients have Normal(0, 1.5) priors on the logit scale; group SDs
+have HalfNormal(0, 0.7) priors. Models 2–3 use LKJ(2) for the residual correlation.
+These scales are tied to `x` and `u` above and should be reconsidered for new data.
+
+```{r regression-saved-fits}
+regression_fits <- list(
+  intercepts = readRDS(here("fits", "day3_cndd_intercepts.rds")),
+  slopes = readRDS(here("fits", "day3_cndd_slopes.rds")),
+  traits = readRDS(here("fits", "day3_cndd_traits.rds"))
+)
+```
+
+::: {.callout-note collapse="true"}
+### Check that the saved fits match the data and model
+
+The switches `K` and `T` select varying coefficients and trait predictors in the
+shared Stan file. These checks stop if you change inputs or the model; changing
+data requires a new fit.
+
+```{r regression-stan-data}
+regression_base <- list(
+  N = nrow(reg_data),
+  J = nrow(species_info),
+  species = as.integer(reg_data$species),
+  n = as.integer(reg_data$n),
+  suv = as.integer(reg_data$suv),
+  x = reg_data$x,
+  u = species_info$u
+)
+regression_inputs <- list(
+  intercepts = c(regression_base, list(K = 1L, T = 1L)),
+  slopes = c(regression_base, list(K = 2L, T = 1L)),
+  traits = c(regression_base, list(K = 2L, T = 2L))
+)
+```
+
+```{r regression-check-fits}
+for (model_name in names(regression_fits)) {
+  saved <- regression_fits[[model_name]]
+  stopifnot(
+    isTRUE(all.equal(saved$data, regression_inputs[[model_name]])),
+    saved$meta$stan_file == "stan/cndd_hierarchical.stan",
+    saved$meta$stan_md5 ==
+      unname(tools::md5sum(here("stan", "cndd_hierarchical.stan")))
+  )
+}
+```
 :::
 
-## Computation and ecological checking
+For Model 3, the saved coefficient names map to the equations as follows:
 
-```{r demo-diagnostics}
-course_diagnostics(fit)
-bayesplot::mcmc_trace(fit$draws, pars = c("mu", "sigma"))
-plot_mother_check(fit)
+| Variable | Meaning |
+|---|---|
+| `gamma[1,1]`, `gamma[1,2]` | Intercept mean: $\delta_0$, trait effect $\delta_1$ |
+| `gamma[2,1]`, `gamma[2,2]` | Slope mean: $\gamma_0$, interaction $\gamma_1$ |
+| `tau[1]`, `tau[2]` | Residual between-species intercept and slope SDs |
+
+```{r regression-summary}
+trait_coefficients <- regression_fits$traits$draws
+summarise_draws(
+  subset_draws(trait_coefficients, variable = c("gamma", "tau")),
+  mean, sd, ~quantile(.x, c(0.025, 0.975)), rhat, ess_bulk
+)
 ```
 
-Do the sampler diagnostics agree? Does the model reproduce the observed counts
-by mother tree? Is sharing information among these trees ecologically plausible?
-A good answer considers all three questions.
-
-## Species differences in CNDD
-
-```{r demo-cndd-species}
-plot_cndd_species()
-plot_cndd_abundance()
+```{r regression-interpretation}
+interaction_draws <- trait_coefficients[["gamma[2,2]"]]
+interaction_summary <- tibble(
+  median = median(interaction_draws),
+  lower = quantile(interaction_draws, 0.025),
+  upper = quantile(interaction_draws, 0.975)
+)
 ```
 
-These are conceptual simulations from the example in `main.qmd`, not fitted
-research results. The individual-level question is survival versus conspecific
-density. The group-level question is whether density coefficients vary with
-species abundance. The full research analysis is an instructor explanation.
-A negative coefficient means declining survival on the probability scale.
-More negative logit coefficients do not imply a fixed probability drop at every baseline.
+The median interaction is `r sprintf("%.2f", interaction_summary$median)`
+(95% credible interval [`r sprintf("%.2f", interaction_summary$lower)`,
+`r sprintf("%.2f", interaction_summary$upper)`]). A one-SD increase in wood density
+changes the expected density slope by this amount on the log-odds scale.
+This simulated example supports a weaker negative density response at higher
+wood density; it is not evidence about a real forest.
 
-## Another research example: allometry and wood density
+## Compare survival curves
 
-The individual-level relationship is height versus DBH. The group-level question
-is whether species' allometric exponents vary with wood density. The observation
-model changes from binomial survival to Normal log height. Information sharing
-among groups is the common structure.
+For each draw, calculate `plogis(alpha[j] + beta[j] * x)` before summarizing.
+The saved `alpha[j]` and `beta[j]` are total species coefficients. Using paired
+draws preserves their uncertainty and correlation.
 
-```{r demo-wood-density}
-plot_wood_density()
+```{r regression-curves}
+#| code-fold: true
+#| code-summary: "Show R code"
+curve_grid <- seq(-1.5, 1.5, length.out = 61)
+regression_curves <- list()
+row_id <- 0L
+for (model_name in names(regression_fits)) {
+  reg_draws <- regression_fits[[model_name]]$draws
+  for (j in seq_len(nrow(species_info))) {
+    alpha_draws <- reg_draws[[paste0("alpha[", j, "]")]]
+    beta_draws <- reg_draws[[paste0("beta[", j, "]")]]
+    eta_draws <- outer(beta_draws, curve_grid)
+    eta_draws <- sweep(eta_draws, 1, alpha_draws, "+")
+    probability_draws_grid <- plogis(eta_draws)
+    row_id <- row_id + 1L
+    regression_curves[[row_id]] <- tibble(
+      model = model_name,
+      species = species_info$species[j],
+      x = curve_grid,
+      median = apply(probability_draws_grid, 2, median),
+      lower = apply(probability_draws_grid, 2, quantile, probs = 0.025),
+      upper = apply(probability_draws_grid, 2, quantile, probs = 0.975)
+    )
+  }
+}
+regression_curves <- bind_rows(regression_curves) |>
+  mutate(model = factor(model, levels = names(regression_fits)))
 ```
 
-This figure uses the existing saved fit to simulated tree data. It illustrates
-interpretation, not an empirical conclusion about wood density in a real forest.
-No additional participant analysis is required.
-
-# Optional extension: a new mother tree
-
-What can we predict about a ninth mother tree before counting its seedlings?
-Keep the model and fitted data fixed. Add variation among mother trees for each draw.
-
-```{r optional-new-tree}
-set.seed(20261026)
-draws <- fit$draws
-p_new <- plogis(rnorm(nrow(draws), draws$mu, draws$sigma))
-course_interval(p_new)
+```{r regression-curves-plot, fig.height=4.8}
+#| code-fold: true
+#| code-summary: "Show R code"
+shown_species <- c("A", "L")
+regression_plot <- regression_curves |>
+  filter(species %in% shown_species) |>
+  ggplot(aes(x, median)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "#56b4e9", alpha = 0.25) +
+  geom_line(colour = "#0072b2", linewidth = 1) +
+  geom_point(
+    data = filter(reg_data, species %in% shown_species),
+    aes(y = suv / n, size = n),
+    inherit.aes = TRUE,
+    alpha = 0.7
+  ) +
+  facet_grid(
+    species ~ model,
+    labeller = labeller(
+      model = c(
+        intercepts = "1: Intercepts",
+        slopes = "2: Slopes",
+        traits = "3: Trait interaction"
+      )
+    )
+  ) +
+  coord_cartesian(ylim = c(0, 1)) +
+  labs(
+    x = "Local density: (neighbours - 20) / 10",
+    y = "Survival probability",
+    subtitle = "Lines: posterior medians; bands: 95% credible intervals for p"
+  ) +
+  theme(legend.position = "bottom")
+regression_plot
 ```
 
-Does this describe a survival probability or a future number of survivors?
+A has 24 quadrats; L has three. Compare the common slope in Model 1 with the
+varying slopes in Models 2–3. Bands are 95% credible intervals for probabilities
+of these observed species, not intervals for future counts. Check the observed
+density range before interpreting the ends of a curve.
+
+The next figure shows **where slopes pool toward**. Points and intervals summarize
+species slopes; point size indicates quadrat count. The dashed line and grey band
+show the group-mean slope and its uncertainty. Model 2 shares one mean; Model 3
+shares a trait-dependent mean. This does not display no-pooling estimates, so it
+does not measure each species' amount of shrinkage.
+
+```{r regression-slopes, fig.height=4.8}
+#| code-fold: true
+#| code-summary: "Show R code"
+slope_rows <- list()
+mean_rows <- list()
+u_grid <- seq(min(species_info$u), max(species_info$u), length.out = 61)
+row_id <- 0L
+for (model_name in c("slopes", "traits")) {
+  reg_draws <- regression_fits[[model_name]]$draws
+  for (j in seq_len(nrow(species_info))) {
+    slope_draws <- reg_draws[[paste0("beta[", j, "]")]]
+    row_id <- row_id + 1L
+    slope_rows[[row_id]] <- tibble(
+      model = model_name,
+      species = species_info$species[j],
+      u = species_info$u[j],
+      quadrats = species_info$quadrats[j],
+      median = median(slope_draws),
+      lower = quantile(slope_draws, 0.025),
+      upper = quantile(slope_draws, 0.975)
+    )
+  }
+  trait_slope <- rep(0, nrow(reg_draws))
+  if (model_name == "traits") {
+    trait_slope <- reg_draws[["gamma[2,2]"]]
+  }
+  mean_draws <- outer(trait_slope, u_grid)
+  mean_draws <- sweep(mean_draws, 1, reg_draws[["gamma[2,1]"]], "+")
+  mean_rows[[model_name]] <- tibble(
+    model = model_name,
+    u = u_grid,
+    median = apply(mean_draws, 2, median),
+    lower = apply(mean_draws, 2, quantile, probs = 0.025),
+    upper = apply(mean_draws, 2, quantile, probs = 0.975)
+  )
+}
+species_slopes <- bind_rows(slope_rows)
+mean_slopes <- bind_rows(mean_rows)
+ggplot(species_slopes, aes(u, median)) +
+  geom_ribbon(
+    data = mean_slopes,
+    aes(ymin = lower, ymax = upper),
+    fill = "grey75",
+    alpha = 0.5
+  ) +
+  geom_line(data = mean_slopes, linetype = "dashed") +
+  geom_linerange(aes(ymin = lower, ymax = upper, colour = u)) +
+  geom_point(aes(colour = u, size = quadrats)) +
+  geom_text(aes(label = species), nudge_x = 0.08, hjust = 0, size = 3) +
+  facet_wrap(
+    ~model,
+    nrow = 1,
+    labeller = labeller(
+      model = c(slopes = "2: Slopes", traits = "3: Trait interaction")
+    )
+  ) +
+  scale_colour_viridis_c(guide = "none") +
+  labs(
+    x = "Wood density (standardized)",
+    y = "Density slope (log-odds per 10 neighbours)"
+  ) +
+  theme(legend.position = "bottom")
+```
+
+Explain how Model 3 changes the expected slope for a weakly informed species.
+Then identify an observation-level predictor, a grouping variable and a
+possible group-level predictor in your own research.
+
+::: {.callout-note collapse="true"}
+## Optional: model checks and fitting
+
+### Sampling and predictive checks
+
+Use the same checks as for the mother-tree model. Inspect R-hat, effective sample
+sizes, divergences, treedepth and E-BFMI together. These are checks of computation;
+compare observations with predictions to assess the model as well.
+
+```{r regression-diagnostics}
+for (model_name in names(regression_fits)) {
+  print(model_name)
+  print(regression_fits[[model_name]]$diagnostics)
+}
+```
+
+This Model 3 check replicates counts at each observed quadrat's density and
+seedling count, then compares species totals. It includes binomial variation;
+the curve bands above do not. Totals can miss within-species density patterns,
+so also inspect points against the curves.
+
+```{r regression-predictive-check, fig.height=4.5}
+set.seed(20261030)
+trait_draws <- regression_fits$traits$draws
+replicated_species <- matrix(
+  0,
+  nrow = nrow(trait_draws),
+  ncol = nrow(species_info)
+)
+for (i in seq_len(nrow(reg_data))) {
+  j <- as.integer(reg_data$species[i])
+  p_draws <- plogis(
+    trait_draws[[paste0("alpha[", j, "]")]] +
+      trait_draws[[paste0("beta[", j, "]")]] * reg_data$x[i]
+  )
+  replicated_species[, j] <- replicated_species[, j] +
+    rbinom(length(p_draws), size = reg_data$n[i], prob = p_draws)
+}
+regression_ppc <- reg_data |>
+  group_by(species) |>
+  summarise(observed = sum(suv), .groups = "drop") |>
+  mutate(
+    median = apply(replicated_species, 2, median),
+    lower = apply(replicated_species, 2, quantile, probs = 0.025),
+    upper = apply(replicated_species, 2, quantile, probs = 0.975)
+  )
+ggplot(regression_ppc, aes(species, median)) +
+  geom_pointrange(aes(ymin = lower, ymax = upper), colour = "#d95f02") +
+  geom_point(aes(y = observed), shape = 1, size = 3) +
+  labs(
+    x = "Species",
+    y = "Total survivors across observed quadrats",
+    subtitle = "Open: observed; orange: replicated-count median and 95% interval"
+  )
+```
+
+Counts are assumed conditionally independent given predictors and species
+effects. Overdispersion or shared spatial effects may require extending the model.
+
+### New inference in a prepared environment
+
+This optional `brms` fit matches Model 3's structure and priors. `center = FALSE`
+keeps the intercept prior at `x = u = 0`. Use the saved results for the walkthrough;
+participants do not need to install a toolchain.
+
+```{r regression-fit-brms, eval=FALSE}
+library(brms)
+trait_fit_brms <- brm(
+  bf(f_traits, center = FALSE),
+  data = reg_data,
+  family = binomial(link = "logit"),
+  prior = c(
+    prior(normal(0, 1.5), class = "Intercept"),
+    prior(normal(0, 1.5), class = "b"),
+    prior(normal(0, 0.7), class = "sd"),
+    prior(lkj(2), class = "cor")
+  ),
+  backend = "cmdstanr",
+  seed = 20261029,
+  chains = 4,
+  cores = 1,
+  iter = 2000,
+  warmup = 1000,
+  control = list(adapt_delta = 0.98)
+)
+summary(trait_fit_brms)
+pp_check(trait_fit_brms)
+```
+
+The instructor can regenerate all three saved fits with
+`Rscript R/precompute_day3_regression.R`. The full implementation is in
+`stan/cndd_hierarchical.stan`; matrix-factorization details are not required here.
+
+In a frequentist fit, limited information can yield a singular covariance estimate
+(a near-zero variance or extreme correlation). Priors can help regularize these
+parameters, but do not create information or guarantee reliable inference.
+See [lme4's discussion](https://lme4.github.io/lme4/reference/isSingular.html).
+:::
 
 ::: {.content-visible when-meta="solutions"}
 ::: {.callout-tip collapse="true"}
 ## Solution and instructor notes
 
-It describes the survival probability of a new mother tree under the inferred
-group distribution. It includes uncertainty about the group parameters and
-variation among mother trees. Predicting a survivor count would also require
-specifying a seedling count and generating binomial survival.
+Ask readers to identify the count likelihood, the pair of lines implementing
+the shared Normal prior, and the inverse-logit transformation. The code can be
+read together without running a new fit. Do not repeat the lecture's three-model
+comparison as another plotting task.
+
+All trees inform the shared parameters `mu` and `sigma`; this connects their
+posterior intercept estimates. Independent standardized priors for `z_tilde`
+do not imply independent posterior tree estimates. `plogis(mu)` is not generally
+the mean survival probability across groups. Non-centering is an equivalent
+representation with the stated priors, not a guarantee of better sampling.
+
+For the prepared result, Tree A's mean survival probability is
+`r sprintf("%.2f", survival_summary$mean)`, with a 95% credible interval of
+[`r sprintf("%.2f", survival_summary$lower)`,
+`r sprintf("%.2f", survival_summary$upper)`]. The predictive intervals for survivor
+counts answer a different question. The same seed, probabilities and seedling
+counts are used in the lecture's mother-tree predictive check.
+
+For regression, Model 1 shares a slope; Models 2–3 allow slopes to vary.
+Model 3 pools toward the trait-dependent mean, not one common slope. A positive
+interaction implies weaker negative density responses as wood density increases.
+Compare uncertainty in A and L without assuming every small group shrinks equally.
+The saved fits allow residual intercept–slope correlation; the lecture's short
+Stan examples omit it. The original allometry model uses a different likelihood
+but the same hierarchy. No singular-fit outcome is claimed for this example.
 
 :::
 :::
-
-# Connection to your research
-
-Name a grouping in your data and one quantity that may differ among groups.
-What would justify sharing information? Which predicted pattern would you compare
-with observations before reporting the result?

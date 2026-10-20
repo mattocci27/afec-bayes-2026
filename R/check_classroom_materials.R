@@ -173,15 +173,93 @@ check_exercises <- function() {
     }
     if (day == "day3") {
       stopifnot(
-        nrow(env$comparison) == 24L,
-        length(env$p_new) == 4000L,
-        all(env$comparison$lower <= env$comparison$mean),
-        all(env$comparison$mean <= env$comparison$upper)
+        identical(env$stan_data, env$fit$data),
+        identical(env$stan_data$ii, seq_len(env$stan_data$I)),
+        length(env$p_a) == 4000L,
+        posterior::nchains(env$fit$draws) == 4L,
+        max(abs(env$p_a - env$fit$draws[["p[1]"]])) < 1e-5,
+        env$survival_summary$lower < env$survival_summary$mean,
+        env$survival_summary$mean < env$survival_summary$upper,
+        identical(env$sampler_diagnostics, env$fit$diagnostics),
+        nrow(env$probability_table) == 8L,
+        nrow(env$sampler_table) == 4L,
+        max(abs(env$replicated_counts - mother_replicates(env$fit))) == 0,
+        all(env$replicated_counts >= 0),
+        all(sweep(env$replicated_counts, 2, env$trees$n, "/") <= 1),
+        !any(grepl("plot_mother_comparison|plot_mother_truth", lines)),
+        !any(grepl(
+          "source\\(|course_fit\\(|make_tree_data\\(|tree_stan_data\\(",
+          lines
+        ))
+      )
+      stan_start <- match("```stan", lines)
+      stan_end <- stan_start +
+        match("```", lines[(stan_start + 1L):length(lines)])
+      stopifnot(
+        identical(
+          lines[(stan_start + 1L):(stan_end - 1L)],
+          readLines(here("stan", "logistic.stan"))
+        ),
+        all(grepl("eval=FALSE", lines[grepl("^```\\{r fit-stan", lines)]))
+      )
+      # One data set, three distinct hierarchies, joint-draw predictions.
+      stopifnot(
+        nrow(env$reg_data) == 118L,
+        nrow(env$species_info) == 12L,
+        all(env$reg_data$suv <= env$reg_data$n),
+        all(table(env$reg_data$species) == env$species_info$quadrats),
+        abs(mean(env$species_info$u)) < 1e-12,
+        abs(sd(env$species_info$u) - 1) < 1e-12,
+        !any(grepl("_true", names(env$regression_base))),
+        nrow(env$regression_curves) == 3L * 12L * 61L,
+        all(env$regression_curves$lower <= env$regression_curves$median),
+        all(env$regression_curves$upper >= env$regression_curves$median),
+        all(env$regression_curves$lower >= 0),
+        all(env$regression_curves$upper <= 1)
+      )
+      for (model_name in names(env$regression_fits)) {
+        saved <- env$regression_fits[[model_name]]
+        stopifnot(identical(saved$data, env$regression_inputs[[model_name]]))
+        # Recover an individual grid prediction independently.
+        expected <- plogis(
+          saved$draws[["alpha[1]"]] +
+            saved$draws[["beta[1]"]] * env$curve_grid[10]
+        )
+        actual <- env$regression_curves |>
+          filter(model == model_name, species == "A", x == env$curve_grid[10])
+        stopifnot(abs(actual$median - median(expected)) < 1e-12)
+      }
+      shared <- env$regression_fits$intercepts$draws
+      stopifnot(identical(shared[["beta[1]"]], shared[["beta[12]"]]))
+      # x*u has two main effects and an interaction; the trait is constant by species.
+      design <- model.matrix(~ x * u, env$reg_data)
+      stopifnot(
+        identical(colnames(design), c("(Intercept)", "x", "u", "x:u")),
+        max(abs(design[, "x:u"] - env$reg_data$x * env$reg_data$u)) < 1e-12,
+        all(
+          tapply(env$reg_data$u, env$reg_data$species, function(x) {
+            length(unique(x))
+          }) ==
+            1L
+        ),
+        ncol(env$replicated_species) == 12L,
+        all(env$replicated_species >= 0),
+        all(
+          sweep(
+            env$replicated_species,
+            2,
+            as.numeric(tapply(env$reg_data$n, env$reg_data$species, sum)),
+            "/"
+          ) <=
+            1
+        )
       )
     }
     core <- grep(
       if (day == "day2") {
         "^# Seedling survival regression$"
+      } else if (day == "day3") {
+        "^# Mother-tree survival$"
       } else {
         "^# Core exercise:"
       },
@@ -264,5 +342,5 @@ for (file in list.files(here("fits"), "\\.rds$", full.names = TRUE)) {
   }
 }
 cat(
-  "Seven fits checked; the deliberately bad fit is exempt from healthy-fit thresholds.\n"
+  "Ten fits checked; the deliberately bad fit is exempt from healthy-fit thresholds.\n"
 )

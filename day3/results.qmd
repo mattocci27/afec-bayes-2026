@@ -14,7 +14,10 @@ execute:
   cache: false
 ---
 
-Use this sheet with [the exercise](exercise-student.html). Predict before reading the results, then explain in words. These figures use exact updating or supplied fits, with no new Stan inference.
+Use this sheet as an offline reference for the lecture and
+[the code-reading activity](exercise-student.html). The comparison figures are
+explained before the activity; they are not a second exercise. All summaries
+use exact updating or supplied fits, with no new Stan inference.
 
 ```{r setup, include=FALSE}
 library(tidyverse)
@@ -34,7 +37,7 @@ knitr::opts_chunk$set(
 theme_set(theme_bw(base_size = 14))
 ```
 
-## The core comparison: mother trees
+## Lecture reference: mother-tree comparison
 
 ```{r core-results}
 fit <- course_fit("day3_trees")
@@ -43,9 +46,9 @@ knitr::kable(
   trees |> select(tree, n, suv) |> mutate(observed = suv / n),
   digits = 3
 )
-comparison <- mother_comparison(fit, seed = 20261024)
+comparison <- mother_comparison(fit, seed = 42)
 plot_mother_comparison(comparison)
-plot_mother_truth(comparison, trees)
+plot_mother_truth(comparison, trees, highlight = "A", limits = c(.2, .5))
 knitr::kable(
   comparison |> select(tree, n, model, mean, lower, upper),
   digits = 3
@@ -59,9 +62,10 @@ is a comparison reference, not the exact target of hierarchical shrinkage.
 Rows are ordered by separate posterior means, with seedling counts `n` shown;
 the two sets of intervals are offset vertically within each tree.
 The second plot uses the generating probabilities on x and posterior
-means on y, with a dashed 1:1 reference. Vertical connections show movement
-from Separate to Partial pooling. Tree H (n = 50) changes only slightly,
-towards its generating probability of 0.29. Truth is matched by tree ID.
+means on y, with a dashed 1:1 reference. Arrows show movement
+from Separate to Partial pooling. As in the lecture, Tree A is highlighted and
+both axes run from 0.2 to 0.5. Tree G falls below this window; its estimates
+remain in the full table. Truth is matched by tree ID.
 
 The complete and separate models use flat Beta(1,1) priors on the probabilities.
 The partial model uses a shared Normal distribution on the logit scale, with its
@@ -69,19 +73,66 @@ centre and SD estimated. Prior formulations also differ in this comparison.
 Movement depends on group information and the inferred differences among trees.
 It does not guarantee smaller error for every tree.
 
-## Instructor demonstrations and research connections
+## Activity reference: Tree A's partial-pooling probability
 
-```{r demonstrations}
-plot_group_spread()
+Transform the saved logit-intercept draws before summarizing them. These are
+probability draws, not future survivor counts.
+
+```{r intercept-summary}
+alpha_a <- fit$draws[["z[1]"]]
+p_a <- plogis(alpha_a)
+knitr::kable(
+  tibble(
+    tree = "A",
+    mean = mean(p_a),
+    lower = unname(quantile(p_a, 0.025)),
+    upper = unname(quantile(p_a, 0.975))
+  ),
+  digits = 3
+)
+```
+
+The mean and interval match Tree A's partial-pooling estimate in the lecture.
+The activity asks readers to find the data, likelihood, shared prior and
+probability transformation in the supplied code.
+
+## Lecture reference: computational and predictive checks
+
+```{r diagnostics}
 knitr::kable(course_diagnostics(fit), digits = 2)
 bayesplot::mcmc_trace(fit$draws, pars = c("mu", "sigma"))
 plot_mother_check(fit)
+```
+
+Read sampler diagnostics and traces together. The predictive check generates
+counts at the observed seedling numbers. Neither these checks nor the presence
+of a grouping label alone establishes that sharing information is ecologically
+appropriate.
+
+## Lecture reference: return to regression
+
+```{r regression-reference}
 plot_cndd_species()
 plot_cndd_abundance()
+```
+
+The lecture adds density, then allows intercepts and slopes to vary, then
+introduces species abundance as a group-level predictor. These curves and
+coefficients are conceptual simulations, not a fitted extension of the eight
+mother trees or empirical results from the cited research.
+
+The [expanded handout](exercise-student.html#from-intercepts-to-regression)
+also contains an executed example with a new simulated CNDD data set, three
+matching saved fits, fitted survival curves and an optional posterior predictive check.
+It uses wood density as an alternative species-level predictor. Those fitted
+results are separate from the conceptual lecture figures above.
+
+## Optional reference: allometry and wood density
+
+```{r allometry-reference}
 plot_wood_density()
 ```
 
-CNDD species curves and the abundance relationship are conceptual simulations.
-The wood-density plot uses a saved fit to simulated allometry data. Neither is
-an empirical result from the cited research. The shared structure is an individual
-model plus group differences. The response distribution changes between examples.
+This plot uses a saved fit to simulated allometry data. The observation model
+changes to Normal log height; information sharing among coefficients is the
+common structure. It is outside the main activity.

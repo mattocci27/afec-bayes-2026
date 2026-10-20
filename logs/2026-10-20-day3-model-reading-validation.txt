@@ -1,0 +1,46 @@
+Day 3: results -> intercept-only model/code reading -> regression
+2026-10-20
+
+Changes
+- Kept the lecture comparison and truth figures; moved the activity after them.
+- Replaced the duplicated plotting/prediction exercise with one 12-minute guided
+  reading: 2 min data, 5 model/code, 3 posterior results, 2 explanation.
+- Participant code uses standard package/base functions only: read_csv, an
+  explicit Stan data list, readRDS and plogis. No project helper/source calls.
+- Model excerpts are read from stan/logistic.stan; the full program is available
+  as a collapsed reference. Solutions are excluded from the participant source.
+- Lecture resumes with intercept-only -> density regression -> varying
+  intercepts -> varying slopes -> group-level predictors, using selected
+  conceptual Stan lines. No new models were fitted.
+- Allometry moved to optional reference. The 90-minute schedule retains checks,
+  research reflection, questions and buffer.
+- Comparison seeds, Tree A highlight and truth-plot ranges match in slides and
+  the offline result sheet. All comparison summaries use seed 42.
+- Updated instructor schedule, course proposal, README and integration checks.
+- Existing user changes in AGENTS.md were preserved.
+
+Validation (local instructor environment: R 4.6.1, Quarto 1.10.19)
+- Rscript R/generate_student_sources.R day3: passed.
+- Rscript R/check_classroom_materials.R: passed for all three days, including
+  six Day 3 chunks and seven stored model/data/diagnostic checks.
+- Day 3 code constructs the exact saved Stan data list. Four posterior chains
+  and 4,000 draws retained. plogis(z[1]) matches saved Stan p[1] to < 1e-5.
+- Displayed selected code consists of six lines from the actual Stan file.
+- No comparison plots or unexplained project helper/source calls remain in
+  the current participant exercise sources.
+- make day3: passed; slides, instructor/participant exercise and results built.
+- quarto render classroom/instructor.md: passed.
+- Browser checks: new varying-slope slide, model-reading handout, equations,
+  Stan excerpts and explicit saved-draw code are readable without overflow.
+- Rscript R/build_classroom_materials.R --package-only: passed; refreshed
+  dist/afec-classroom-materials.zip. The packaging script also trims upstream
+  trailing whitespace in existing generated HTML, including Days 1 and 2.
+- Fresh ZIP extraction: all six Day 3 R chunks executed successfully from that
+  copy without project helper/source dependencies. Tree A probability summary:
+  mean 0.339, 95% credible interval [0.187, 0.544] (rounded for this record).
+- Source git diff --check: passed.
+
+Limits
+- No compilation, model refitting, targets run or new Docker image build.
+- Regression snippets are conceptual model excerpts, not standalone programs.
+- Local ZIP validation does not establish browser account/server capacity.

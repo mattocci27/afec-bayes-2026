@@ -50,7 +50,9 @@ Shared resources:
 - `R/course_data.R`: seeded simulated data; `R/course_utils.R`: stored-fit helpers;
   `R/course_visuals.R`: shared figures and strict data/model matching; `R/slides_setup.R`: slide setup
 - `R/precompute_fits.R`: fits every course model once and stores the results in `fits/`
-- `fits/`: seven stored posterior draw/diagnostic files. Core exercises explicitly
+- `R/precompute_day3_regression.R`: refits only the three CNDD regression models,
+  using the exact simulation code shown in the Day 3 handout.
+- `fits/`: ten stored posterior draw/diagnostic files. Core exercises explicitly
   load the matching fit; changing inputs requires new inference.
 - `dayN/results.qmd`: tables, diagnostic figures and predictions for offline discussion.
 - `classroom/readiness.qmd`: 5–10-minute reading-copy check, with optional browser/R check.
@@ -62,6 +64,8 @@ Shared resources:
 # Only after model/data/sampling changes: refit all models in instructor environment.
 # Do not refit merely to rebuild handouts.
 Rscript R/precompute_fits.R
+# Or refit only the Day 3 CNDD extension:
+Rscript R/precompute_day3_regression.R
 
 # Normal build: use existing fits; no CmdStan compilation/sampling.
 Rscript R/build_classroom_materials.R
@@ -111,9 +115,13 @@ by running one of three short result-loading chunks. Fitting chunks have `eval=F
 CNDD predictions and
 checks generate observations from existing draws without refitting. Day 2 holds
 the fit fixed while reading its table/diagnostics and plotting the survival curve;
-low/high-density interpretation is part of reading that graph. Day 3 uses separate mother-tree
-data, then connects to species CNDD with conceptual simulations and to wood density
-with the existing simulated-allometry fit. Optional calculations are labelled.
+low/high-density interpretation is part of reading that graph. Day 3 first
+explains the mother-tree result comparisons, then reads the full intercept-only
+analysis: Stan model, fitting code, saved-result loading, summaries, diagnostics
+and posterior predictive checks. Running new inference is optional; the handout
+does not repeat the comparison plots. The lecture then
+adds density, varying regression coefficients and species-level predictors,
+using conceptual CNDD examples. Allometry/wood density is optional reference.
 Participants do not need to install CmdStan, a C++ toolchain or Docker.
 
 The revised course uses derivatives of the existing theme (`assets/course.scss`

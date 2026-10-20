@@ -1,0 +1,51 @@
+Day 3 full analysis and presentation alignment — 2026-10-20
+
+Supersedes the earlier short code-reading activity plan.
+
+Changes
+- Day 3 starts directly with the ecological model, following Day 2's format.
+- Removed Before you begin, activity metadata and time allocations from Day 3.
+  Also removed the remaining Before you begin prose from Day 1, preserving its
+  package-loading chunk. Instructor sequence tables no longer allocate times.
+- Restored the full Stan program as visible code, explicit data preparation,
+  compilation/sampling code, live/prepared draws, all-tree posterior summaries,
+  numerical diagnostics, traces, replicated counts and plotting code.
+- New fitting and reference chunks remain eval=FALSE. No refit is required to
+  use the handout. There are no unexplained project-defined helper calls.
+- Kept the lecture's estimation comparisons and placed model/code reading after
+  them. Moved the mother-tree predictive check before the return to regression.
+- Renamed the check slide to Can the model reproduce the observed counts? and
+  added the binomial replication equation, fixed seedling counts and an explicit
+  distinction between replicated-count intervals and probability intervals.
+- Retained conceptual regression-formula references and the existing lecture
+  progression. Correlated brms group terms versus the simple independent Stan
+  group distributions are explicitly distinguished.
+- Corrected mother_replicates() to set its chosen seed after make_tree_data(),
+  which sets its own seed. This prevents data generation from overriding the
+  replication seed and makes lecture/handout replicated counts identical.
+- Updated README, instructor guide, design proposal and integration checks.
+- Preserved existing user edits to AGENTS.md and the Stan model source.
+
+Validation
+- Local R 4.6.1, posterior 1.7.0, Quarto 1.10.19.
+- Rscript R/generate_student_sources.R: passed.
+- Rscript R/check_classroom_materials.R: passed for all days; 11 safe Day 3
+  chunks and all seven stored fit/data/diagnostic checks passed.
+- Full displayed Stan program equals stan/logistic.stan. Fitting chunks are
+  excluded from rendering. Saved data match the explicit Stan data list.
+- Explicit handout replicated counts exactly match mother_replicates() with
+  the corrected seed placement; counts remain between zero and observed N.
+- Rscript R/build_classroom_materials.R: passed. Rebuilt course HTML, instructor
+  guide, solution-free sources and dist/afec-classroom-materials.zip.
+- Browser spot checks: full Stan program is visible, handout contents follow
+  Day 2's structure, and the renamed predictive-check slide fits without overflow.
+- Fresh participant ZIP: 11 R chunks passed, three optional inference/reference
+  chunks skipped. No project helper source was needed. Tree A probability
+  summary remains mean 0.339, 95% credible interval [0.187, 0.544].
+- Source git diff --check passed. No Before you begin or numeric activity-duration
+  text remains in the current participant exercises.
+
+Limits
+- Optional new inference was shown, not run; existing fitted draws are reused.
+- No model refits, targets runs or Docker image rebuild. Browser participant
+  account provisioning and concurrent classroom capacity remain separate checks.

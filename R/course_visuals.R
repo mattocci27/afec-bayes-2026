@@ -596,8 +596,8 @@ plot_group_sd_priors <- function() {
 }
 
 mother_replicates <- function(fit = course_fit("day3_trees"), seed = 20261025) {
-  set.seed(seed)
   trees <- make_tree_data()
+  set.seed(seed)
   p <- as.matrix(as.data.frame(fit$draws)[, paste0("p[", 1:8, "]")])
   vapply(
     seq_len(8),

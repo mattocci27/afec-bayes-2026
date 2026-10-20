@@ -26,16 +26,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Before you begin
-
-No prior R or GLM experience is required. The instructor will explain the example.
-You may run the supplied code and change only the two counts, or use
-[the two-survey result sheet](results.html) to compare the prepared figures.
-Both routes complete the same exercise: predict, compare uncertainty, and explain
-what you see. Allow **12 minutes**, including discussion. No installation,
-independent programming or homework is required. For optional local code execution,
-see [packages and setup](../classroom/PACKAGES.md).
-
 ```{r participant-setup}
 library(tidyverse)
 theme_set(theme_bw(base_size = 14))

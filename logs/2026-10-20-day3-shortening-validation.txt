@@ -1,0 +1,26 @@
+Day 3 handout shortening
+
+Reference: preserved root exercise.qmd, varying-intercept/slope/trait sections.
+day3/exercise.qmd: 1128 -> 863 lines, including optional and instructor content.
+Regression prose (code fences excluded): 2579 -> 1127 whitespace-separated words.
+Regression second-level headings: 14 -> 7 (including the folded optional section).
+Main regression figures: two; fitted curves show species A and L.
+Full simulation and plotting code retained in four closed code folds.
+Additional diagnostics, the CNDD predictive check and brms fitting are optional.
+Mother-tree code, simulated counts, model source, priors and saved fits unchanged.
+No model was refitted.
+
+Validation:
+- Rscript R/generate_student_sources.R day3
+- Rscript R/check_classroom_materials.R: Days 1/2/3 passed 3/8/25 safe chunks;
+  all ten saved-fit diagnostic checks passed, with the existing bad-fit exemption.
+- Rscript R/build_classroom_materials.R: HTML and participant ZIP rebuilt.
+- Fresh ZIP extraction: 25 executable Day 3 chunks passed; all three fits matched,
+  model expansion and changed-data rejection retained.
+- HTML: four code folds closed by default, no duplicated conceptual figure,
+  optional model checks folded, instructor solutions excluded from participant copy.
+- Chrome visual inspection: model equations, main figures, TOC and collapsed code.
+- git diff --check passed.
+
+Validation environment: local R 4.6.1, posterior 1.7.0, Quarto 1.10.19.
+Browser classroom setup/capacity was not changed or revalidated by this edit.

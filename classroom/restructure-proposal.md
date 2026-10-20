@@ -1,6 +1,9 @@
 # AFEC 2026: course restructuring plan (agreed direction)
 
-Updated 2026-10-16; subsequent Day 2 decisions are recorded in Section 4.
+Updated 2026-10-20. The current pacing review and cross-day advancement rules are
+in [the instructor guide](instructor.html#revised-pacing-and-advancing-across-days).
+They supersede older fixed timing tables below; participant materials retain no
+time allocations. Subsequent Day 2 content decisions are recorded in Section 4.
 
 This proposal reflects the agreed direction: prioritize concepts, figure
 interpretation and connections to research. Day 1 has one practical activity,
@@ -62,7 +65,7 @@ These are design assumptions, some still awaiting confirmation.
 |---|---|---|---|
 | Day 1 | How do our beliefs change after seeing data? | Explain prior, likelihood, posterior and the effect of sample size through figures and words | One short figure-comparison activity |
 | Day 2 | How does seedling survival change with conspecific density? | Explain survival probabilities and uncertainty at low and high densities; compare the model with observations | One activity reading CNDD results with supplied code |
-| Day 3 | How can we handle species or mother trees with little data? | Explain partial pooling and why it is useful in research | One comparison of mother-tree estimates |
+| Day 3 | How can we handle species or mother trees with little data? | Explain partial pooling in model code and extend it to regression | Read the mother-tree analysis code after the lecture comparison |
 
 Connect the sessions as estimating seedling survival, estimating its change with
 density, and estimating mother-tree/species differences while sharing
@@ -71,8 +74,8 @@ seedling survival at higher conspecific density. Connect this to the research
 example introduced as NDD in `main.qmd`.
 
 Reduce the number of activities while retaining participation: ask for
-predictions before revealing results, explanations to a neighbour and brief
-whole-class responses.
+predictions where appropriate, explanations to a neighbour and brief
+whole-class responses. Day 3 reads model code after the lecture results.
 
 ## 3. Day 1: becoming familiar with Bayesian reasoning
 
@@ -316,81 +319,63 @@ The updates at the start of this section supersede this earlier contingency.
 
 ## 5. Day 3: Hierarchical models
 
-### Explanation sequence
+### Sequence: results, model/code, model checking, regression
 
-1. **Question:** mother trees differ in seedling numbers and survival. Should
-   we trust 0% or 100% survival based on very few seedlings?
-2. **Two extremes:** compare one shared survival probability with completely
-   separate estimation for each mother tree.
-3. **Partial pooling:** allow differences while using shared information.
-   Return to Day 1 priors and show that the centre and spread of the distribution
-   describing similarities among mother trees are also estimated from data.
-   Use the group-spread figures from `main.qmd` to show changes in information
-   sharing.
-4. **Short activity:** predict which estimates move, then compare with plots.
-5. **Research connections, instructor demonstration:** extend Day 2's shared
-   survival curve to species. Use `main.qmd` to show two levels: individual
-   survival versus conspecific density, then species density effects versus
-   abundance. Species plots are conceptual simulations; do not add a new
-   species-level CNDD fitting activity. Next show a separate research example:
-   DBH versus height, then species slopes versus wood density. Put allometric
-   log transformations and coefficient calculations in extension material;
-   emphasize the shared hierarchical structure.
-6. **Participants' research:** discuss possible groups and differences of interest.
+1. Introduce mother-tree counts, complete/separate estimation and the
+   hierarchical prior without a density predictor.
+2. Keep both lecture comparison figures, including the Tree A truth comparison.
+   Explain posterior means and probability credible intervals. Prior
+   formulations also differ across the compared models.
+3. Open the handout's complete analysis in the same presentation style as Day 2.
+   In class, select the likelihood, shared prior, probability transformation and
+   prepared summaries; keep fitting arguments and repeated diagnostic details
+   available for reference rather than narrating every line.
+4. Generate posterior replicated counts at the observed seedling numbers.
+   Explain the count intervals and observed circles in the predictive figure.
+   Distinguish this check of observations from checks of MCMC exploration.
+5. Return to regression: varying intercepts, varying slopes and group-level
+   predictors, including the interaction. Connect ecological questions, equations
+   and selected code. A second fitted-analysis walkthrough is an extension when
+   time permits, not another required exercise.
+6. Discuss ecological grouping assumptions and participants' research.
 
-### Proposed 90-minute schedule
+### Handout and code
 
-| Time | Content |
-|---|---|
-| 0–10 min | Revisit Day 2's survival curve and introduce the mother-tree question |
-| 10–25 min | Compare shared and separate estimates through figures |
-| 25–40 min | Meaning of partial pooling and why estimates move |
-| 40–55 min | Mother-tree activity: 10 minutes of discussion/work and 5 minutes of explanation |
-| 55–70 min | Instructor demonstration: species CNDD, 10 minutes; allometry/wood-density research example, 5 minutes |
-| 70–80 min | Model assumptions, limitations and research applications |
-| 80–85 min | Three-day recap |
-| 85–90 min | Questions and buffer |
+Start directly with the ecological example; omit "Before you begin", activity
+metadata tables and fixed time allocations. Keep analysis code even when its
+execution is optional. Full Stan code is visible in the document, not confined
+to a collapsed callout. Show standard CSV/data-list/readRDS code explicitly;
+do not call project-defined helpers without displaying their definitions.
 
-The mother-tree activity uses different simulated data from Day 2 and no density
-predictor, focusing on differences among mother trees. Both examples use a
-binomial survival model, but mother trees and species are different grouping
-units; the research demonstration considers species-specific density effects.
-Allometry uses a continuous observation model while sharing the same idea of
-information sharing across groups.
+The sampling chunk is visible with eval=FALSE. The prepared result supplies the
+same model/data without requiring compilation. Both paths supply corresponding
+draws and diagnostics. Summary and checking code uses the chosen result.
+The handout shows probability summaries, numerical diagnostics, traces and the
+replicated-count simulation/plot. It does not repeat the lecture's three-model
+comparison as another participant plotting task.
 
-### Proposed activity: which mother-tree estimates move, and in which direction?
+Readers should be able to identify observed data, the count likelihood, the
+shared prior and the inverse-logit probability transformation. Explain that
+probability credible intervals and replicated-count predictive intervals answer
+different questions. Solutions remain instructor-only.
 
-- **Purpose and duration:** connect changes caused by information sharing to
-  mother-tree data; 10 minutes of predictions/work/discussion and 5 minutes of
-  explanation.
-- **Starter proposal:** supply the three comparison plots from
-  `day3/exercise.qmd` and code to display them from stored results. Do not require
-  implementing three models. Supplied figures allow the same comparison.
-- **Steps:** examine seedling counts and survival proportions, choose two mother
-  trees whose estimates may move and explain why, display results, then discuss
-  differences from predictions.
-- **Expected observations:** estimates for trees with less data are more
-  sensitive to shared information. When the model estimates large differences
-  among groups, sharing has less influence.
-- **Instructor explanation:** partial pooling does not guarantee a smaller
-  error for every mother tree. Estimates do not all shift uniformly toward
-  overall observed survival; movement depends on each tree's information and
-  between-group variation. Consider whether similarity among trees is an
-  ecologically reasonable assumption.
+### Original exercise.qmd sections 4–7
 
-**Keep in the main sequence:** the original mother-tree example, comparison of
-three estimates, group-spread figures, meaning of information sharing and
-connections to the research examples. For CNDD and wood density, show the
-question, figure, two model levels and what can be learned in research.
+Keep the model ideas: varying intercepts, varying intercepts/slopes and
+species-level predictors. Explain the simple non-centered transformation as a
+model/code correspondence; detailed computation and derivations are optional.
+Non-centering changes representation with appropriate priors, not the intended
+model, and is not always more efficient.
 
-**Candidates for optional reference:** separate varying-intercept/slope
-implementation activities, hierarchical-SD calculations, predictions for new
-mother trees or species, covariance/Cholesky/LKJ, non-centering details and
-software comparisons.
-
-**If running late:** shorten research-model equations and code; show the
-allometry/wood-density example through supplied figures. Preserve the
-mother-tree comparison and the connection from Day 2 CNDD to species differences.
+Use CNDD as the thread after the mother-tree analysis. Lecture species curves
+are conceptual illustrations. The expanded handout adds one simulated species
+data set, three matching saved fits, coefficient interpretation and two fitted
+figures. Additional checks and fitting are folded optional references.
+It shows intercept pooling, slope pooling and a
+trait-dependent pooling target. The lecture uses abundance; the fitted example
+uses wood density in the same role. Allometry is an optional example with a
+different observation model. The course assumptions of English,
+optional code execution and no required homework remain unchanged.
 
 ## 6. Use of existing materials
 
@@ -434,8 +419,9 @@ mother-tree comparison and the connection from Day 2 CNDD to species differences
 | Learning goals | Prioritize concepts, figure interpretation and research connections; use `main.qmd` for depth and approach | Agreed |
 | Day 1 | Retain fip, PCR and coin tosses; one practical activity | Agreed |
 | Day 2 | CNDD binomial logistic regression; read survival probabilities and checks; allometry analysis is extension material; current scope is defined by the Section 4 updates | Agreed |
-| Day 3 | Understand through mother trees; instructor connects species CNDD and allometry/wood density to research | Agreed |
+| Day 3 | Lecture results, intercept-only analysis code and model checking, then hierarchical regression; allometry optional | Agreed |
 | Stan | Read supplied models and results; editing and implementation are optional | Agreed |
+| Pacing | Complete each day's core, then advance the next core block if it fits; resume from the completed boundary rather than repeat it. The no-advance route must still fit 90 min. | Agreed |
 
 Remaining design questions concern alignment with the daytime statistics
 programme, teaching language, homework and participant computing arrangements.

@@ -84,4 +84,7 @@ save_fit(
   adapt_delta = 0.95
 )
 
+# Day 3: the three CNDD regression models used in the expanded handout.
+source(here("R/precompute_day3_regression.R"))
+
 writeLines(capture.output(sessionInfo()), here("fits", "sessionInfo.txt"))
