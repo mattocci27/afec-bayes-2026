@@ -125,7 +125,7 @@ plot_cndd_spread_check <- function(replicates,data=make_ndd_data()) {
       subtitle="Line: observed spread. Histogram: model-generated spread")
 }
 
-mother_comparison <- function(fit=course_fit("day3_trees"),seed=20261024) {
+mother_comparison <- function(fit=course_fit("day3_trees"), seed=42) {
   trees <- make_tree_data()
   set.seed(seed)
   total <- sum(trees$suv); N <- sum(trees$n)
@@ -139,21 +139,88 @@ mother_comparison <- function(fit=course_fit("day3_trees"),seed=20261024) {
 }
 
 plot_mother_comparison <- function(comparison=mother_comparison()) {
-  ggplot2::ggplot(comparison,ggplot2::aes(mean,tree,colour=model)) +
-    ggplot2::geom_pointrange(ggplot2::aes(xmin=lower,xmax=upper),position=ggplot2::position_dodge(width=.6)) +
-    ggplot2::scale_colour_manual(values=c(Complete="grey40",Separate="#7570b3",Partial="#d95f02")) +
-    ggplot2::labs(x="Survival probability (posterior mean and 95% interval)",y="Mother tree",colour=NULL)
+  tree_order <- comparison |>
+    dplyr::filter(model=="Separate") |>
+    dplyr::arrange(mean,tree) |>
+    dplyr::pull(tree) |>
+    as.character()
+  estimates <- comparison |>
+    dplyr::filter(model!="Complete") |>
+    dplyr::mutate(tree=factor(tree,levels=tree_order))
+  pooled <- comparison |>
+    dplyr::filter(model=="Complete") |>
+    dplyr::distinct(mean,lower,upper)
+  rows <- estimates |> dplyr::distinct(tree,n)
+  row_labels <- stats::setNames(paste0(rows$tree," (n = ",rows$n,")"),rows$tree)
+  dodge <- ggplot2::position_dodge(width=.5,orientation="y")
+  ggplot2::ggplot(estimates,ggplot2::aes(mean,tree,colour=model,fill=model,shape=model)) +
+    ggplot2::annotate("rect",xmin=pooled$lower,xmax=pooled$upper,
+      ymin=-Inf,ymax=Inf,fill="grey60",alpha=.14) +
+    ggplot2::geom_vline(xintercept=pooled$mean,colour="grey45",
+      linetype="dashed",linewidth=.6) +
+    ggplot2::geom_errorbar(ggplot2::aes(xmin=lower,xmax=upper),
+      orientation="y",position=dodge,width=.18,linewidth=.6,show.legend=FALSE) +
+    ggplot2::geom_point(position=dodge,size=3.5,stroke=.8) +
+    ggplot2::scale_colour_manual(values=c(Separate="#7570b3",Partial="#d95f02"),
+      labels=c(Separate="Separate",Partial="Partial pooling")) +
+    ggplot2::scale_fill_manual(values=c(Separate="white",Partial="#d95f02"),
+      labels=c(Separate="Separate",Partial="Partial pooling")) +
+    ggplot2::scale_shape_manual(values=c(Separate=21,Partial=16),
+      labels=c(Separate="Separate",Partial="Partial pooling")) +
+    ggplot2::scale_x_continuous(breaks=seq(0,1,.2),expand=ggplot2::expansion(mult=0)) +
+    ggplot2::coord_cartesian(xlim=c(0,max(comparison$upper)+.025)) +
+    ggplot2::scale_y_discrete(limits=tree_order,labels=row_labels,
+      expand=ggplot2::expansion(add=.55)) +
+    ggplot2::labs(x="Survival probability",y="Mother tree",colour=NULL,fill=NULL,shape=NULL,
+      subtitle="Complete pooling: grey line and 95% ribbon") +
+    ggplot2::theme(legend.position="top",legend.justification="left",
+      panel.grid.minor=ggplot2::element_blank())
 }
 
-plot_mother_movement <- function(comparison=mother_comparison()) {
-  d <- comparison |> dplyr::select(tree,n,model,mean) |>
+plot_mother_truth <- function(comparison=mother_comparison(),trees=make_tree_data(),
+                              highlight="H", limits=c(0,.55)) {
+  # Match truth to estimates by ID, independently of row or factor order.
+  estimates <- comparison |>
+    dplyr::filter(model!="Complete") |>
+    dplyr::mutate(tree=as.character(tree)) |>
+    dplyr::left_join(trees |> dplyr::transmute(tree=as.character(tree),p_true),
+      by="tree",relationship="many-to-one")
+  stopifnot(!anyNA(estimates$p_true))
+  movement <- estimates |>
+    dplyr::select(tree,n,p_true,model,mean) |>
     tidyr::pivot_wider(names_from=model,values_from=mean)
-  ggplot2::ggplot(d,ggplot2::aes(y=paste0(tree," (n = ",n,")"))) +
-    ggplot2::geom_segment(ggplot2::aes(x=Separate,xend=Partial,yend=paste0(tree," (n = ",n,")")),colour="grey50") +
-    ggplot2::geom_point(ggplot2::aes(x=Separate),shape=1,size=4) +
-    ggplot2::geom_point(ggplot2::aes(x=Partial),colour="#d95f02",size=4) +
-    ggplot2::labs(x="Posterior mean survival probability",y=NULL,
-      subtitle="Open: separate. Orange: partial pooling")
+  # Leave space around each point so arrowheads remain visible.
+  movement <- movement |>
+    dplyr::mutate(direction=sign(Partial-Separate),
+      inset=pmin(abs(Partial-Separate)/4,diff(limits)*.025),
+      arrow_start=Separate+direction*inset,
+      arrow_end=Partial-direction*inset)
+  highlight_tree <- movement |> dplyr::filter(tree==highlight)
+  ggplot2::ggplot(estimates,ggplot2::aes(p_true,mean)) +
+    ggplot2::geom_abline(intercept=0,slope=1,linetype="dashed",
+      colour="grey45",linewidth=.6) +
+    ggplot2::geom_segment(data=movement,
+      ggplot2::aes(x=p_true,xend=p_true,y=arrow_start,yend=arrow_end),
+      inherit.aes=FALSE,colour="grey35",linewidth=1.1,
+      arrow=grid::arrow(length=grid::unit(.12,"inches"),type="closed")) +
+    ggplot2::geom_point(ggplot2::aes(colour=model,fill=model,shape=model),
+      size=7,stroke=1.2) +
+    ggplot2::geom_text(data=highlight_tree,
+      ggplot2::aes(x=p_true-.012,y=Separate,label=paste0("Tree ",tree,"\n(n = ",n,")")),
+      inherit.aes=FALSE,hjust=1,vjust=.5,size=6.5,colour="grey20") +
+    ggplot2::scale_colour_manual(values=c(Separate="#7570b3",Partial="#d95f02"),
+      labels=c(Separate="Separate",Partial="Partial pooling")) +
+    ggplot2::scale_fill_manual(values=c(Separate="white",Partial="#d95f02"),
+      labels=c(Separate="Separate",Partial="Partial pooling")) +
+    ggplot2::scale_shape_manual(values=c(Separate=21,Partial=16),
+      labels=c(Separate="Separate",Partial="Partial pooling")) +
+    ggplot2::scale_x_continuous(breaks=seq(0,.5,.1)) +
+    ggplot2::scale_y_continuous(breaks=seq(0,.5,.1)) +
+    ggplot2::coord_fixed(ratio=1,xlim=limits,ylim=limits,expand=FALSE) +
+    ggplot2::labs(x="True probability",y="Survival estimate",
+      colour=NULL,fill=NULL,shape=NULL) +
+    ggplot2::theme(legend.position="top",legend.justification="center",
+      panel.grid.minor=ggplot2::element_blank())
 }
 
 plot_group_spread <- function() {

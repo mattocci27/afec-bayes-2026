@@ -61,10 +61,10 @@ make_ndd_data <- function(seed = 11, n_quadrat = 60, truth = ndd_truth) {
 
 #' Seedling survival under eight mother trees (Day 3)
 #'
-#' Same data as the "Eight mother trees problem" in main.qmd
-#' (generate_dummy_simple() in R/functions.R, as called in _targets.R).
+#' Same generator as the "Eight mother trees problem" in main.qmd,
+#' with seed 42 for the Day 3 materials.
 make_tree_data <- function() {
-  generate_dummy_simple(n_sp = 8, sig = 0.2, seed = 500) |>
+  generate_dummy_simple(n_sp = 8, sig = 0.2, seed = 42) |>
     dplyr::rename(tree = sp)
 }
 

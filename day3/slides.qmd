@@ -21,6 +21,9 @@ format:
     include-after: |
       <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
       <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
+      <style>
+      .reveal .mother-story > p { height: 2.6em; line-height: 1.3; }
+      </style>
 callout-icon: false
 execute:
   echo: false
@@ -42,7 +45,11 @@ If delayed, shorten research equations/code and put allometry in optional readin
 source(here::here("R/slides_setup.R"))
 trees <- make_tree_data()
 fit <- course_fit("day3_trees")
-comparison <- mother_comparison(fit,seed=20261024)
+comparison <- mother_comparison(fit, seed=42)
+tree_a <- comparison |> filter(tree=="A") |>
+  select(tree,n,model,mean) |>
+  pivot_wider(names_from=model,values_from=mean) |>
+  left_join(trees |> select(tree,p_true),by="tree")
 ```
 
 ##  {#title-slide background="../images/priors.png" background-size="50%" background-position="50% 20%"}
@@ -115,8 +122,8 @@ One overall observed survival proportion: **`r round(sum(trees$suv)/sum(trees$n)
 :::
 
 ::: notes
-Start with the concrete calculation from main.qmd. These are the same seeded
-simulated mother-tree data, different from Day 2's quadrats. The result is a
+Start with the concrete calculation from main.qmd, using newly simulated
+mother-tree data (seed 42), different from Day 2's quadrats. The result is a
 pooled observed proportion, also the common-probability binomial MLE; it is not
 a posterior mean. Ask what differences among trees this one number hides.
 Do not introduce the hypothetical 0/2 and 2/2 cases here.
@@ -322,68 +329,60 @@ fitted comparisons. Participants can write predictions on paper.
 have chosen trees and a reason. Use results.html if needed. No other core exercise.
 :::
 
-## Three ways of estimating survival
+## Three ways of estimating survival {.mother-story}
 
-```{r fitted-trees, fig.width=12, fig.height=4.7}
+```{r fitted-trees, fig.width=12, fig.height=5.1, dev.args=list(bg="white")}
 plot_mother_comparison(comparison)
 ```
 
-Points: posterior means. Bars: 95% intervals.
+Points: posterior means. Intervals: 95% credible.<br>
+Rows ordered by Separate estimates; n = seedlings.
 
 ::: notes
 Complete and separate models use Beta(1,1) probability priors, whereas partial
 pooling uses the Normal logit group prior with estimated centre and SD.
 State this difference. It is an illustrative model comparison, not an isolation
 of pooling under identical marginal priors. All code and priors are in the handout.
+The grey line and ribbon show the single complete-pooling posterior, shared by
+all trees. Only separate and partial estimates are repeated by tree. The grey
+line is a comparison reference, not the exact target of hierarchical shrinkage.
+Rows are ordered by the separate posterior means, with the largest at the top.
+n is the seedling count. Separate and Partial pooling are vertically dodged
+within each tree so their 95% intervals can be compared. Separate is always an
+open purple circle; Partial pooling is always a filled orange circle. The next
+slide retains those encodings and reveals the generating probabilities on a
+1:1 scatterplot. The separate model is the no-pooling model from earlier.
 :::
 
-## Why estimates move by different amounts
+## Does sharing information improve the estimates? {#in-a-simulation-we-can-check-against-the-truth .mother-story}
 
-```{r movement, fig.width=12, fig.height=4.5}
-plot_mother_movement(comparison)
+```{r tree-truth-comparison, fig.width=8, fig.height=6.4, out.width="588px", out.height="470px", dev.args=list(bg="white")}
+plot_mother_truth(comparison,trees,highlight="A",limits=c(.2,.5))
 ```
 
-Consider information within a tree, its position in the group distribution, and inferred group variation.
+**Tree A: `r sprintf("%.2f",tree_a$Separate)` → `r sprintf("%.2f",tree_a$Partial)`; true probability = `r sprintf("%.2f",tree_a$p_true)`.**<br>
+Arrows: Separate → Partial pooling. Dashed diagonal: estimate = truth.
 
 ::: notes
-Debrief. Avoid saying every estimate moves to the pooled proportion or has a
-narrower interval. Shrinkage depends on assumptions and data. It cannot guarantee
-smaller estimation error for each group.
-:::
+Read x as the generating probability and y as the posterior mean.
+The square panel has identical axis scales; its dashed 1:1 line represents
+agreement with the truth. Vertical connections show the direction and amount
+of movement from Separate to Partial pooling. The connections are drawn behind
+the points. Each tree's true probability is explicitly joined by tree ID,
+not by row order. F has true p=0.25 and D has true p=0.36. Several trees share
+the same true probability, so some trajectories overlap.
+Both axes are restricted to 0.2–0.5; Tree G estimates fall below this window.
 
-## In a simulation, we can check against the truth
-
-```{r tree-truth-comparison, fig.width=8, fig.height=4.4, dev.args=list(bg="white")}
-tree_truth <- trees |>
-  transmute(tree,p_true,observed=suv/n) |>
-  left_join(comparison |> filter(model=="Partial") |> select(tree,partial=mean),by="tree") |>
-  pivot_longer(c(observed,partial),names_to="Estimate",values_to="estimate") |>
-  mutate(Estimate=factor(Estimate,levels=c("observed","partial"),
-                         labels=c("Observed","Partial-pooling mean")))
-ggplot(tree_truth,aes(p_true,estimate,colour=Estimate)) +
-  geom_abline(slope=1,intercept=0,linetype="dashed",colour="grey40") +
-  geom_line(aes(group=tree),colour="grey65",linewidth=.7) +
-  geom_point(size=3) +
-  scale_colour_manual(values=c("grey40","#d95f02")) +
-  coord_equal(xlim=c(.15,.55),ylim=c(.15,.55)) +
-  labs(x="True probability\n(rounded)",y="Survival\nestimate",colour=NULL) +
-  theme(legend.position="bottom")
-```
-
-Here we know the generating probabilities; in real data, we do not.
-
-::: notes
-Optional within the exercise debrief: shorten or omit if time is tight. This
-restores main.qmd's truth comparison after participants have interpreted their
-results. Each connected pair represents one mother tree. Points on the dashed
-1:1 line would match the generating probability. Generating probabilities in
-make_tree_data() are stored rounded to two decimals, so treat this as a visual
-illustration, not an exact error calculation. Grey points are observed proportions
-(MLEs); orange points are posterior means from the actual saved partial-pooling
-fit. They differ in both estimation method and model assumptions. Some estimates
-can move away from their generating values; do not claim universal improvement
-or that this one simulation establishes general performance. The model estimates
-its group distribution from all trees under the specified hyperpriors.
+Follow labelled Tree A: n=`r tree_a$n`, separate posterior mean
+`r sprintf("%.2f",tree_a$Separate)`, partial-pooling mean
+`r sprintf("%.2f",tree_a$Partial)` and generating probability
+`r sprintf("%.2f",tree_a$p_true)`.
+Movement depends on n, extremity and the inferred group distribution.
+Separate points remain posterior means under independent Beta(1,1) priors,
+not observed proportions or MLEs. Do not claim that sharing information always
+improves every estimate or that one simulated data set
+establishes general performance. In real data, truth is unknown. Use this comparison as a visual illustration, not an exact error calculation.
+This reveal remains optional if the exercise debrief is running late.
 :::
 
 ## Species differences in CNDD

@@ -36,9 +36,20 @@ trees <- make_tree_data()
 knitr::kable(trees |> select(tree,n,suv) |> mutate(observed=suv/n),digits=3)
 comparison <- mother_comparison(fit,seed=20261024)
 plot_mother_comparison(comparison)
-plot_mother_movement(comparison)
+plot_mother_truth(comparison,trees)
 knitr::kable(comparison |> select(tree,n,model,mean,lower,upper),digits=3)
 ```
+
+Purple open points show separate estimates; orange filled points show partial
+pooling. The grey line and ribbon show the complete-pooling posterior mean and
+95% credible interval; coloured bars are also 95% credible intervals. The line
+is a comparison reference, not the exact target of hierarchical shrinkage.
+Rows are ordered by separate posterior means, with seedling counts `n` shown;
+the two sets of intervals are offset vertically within each tree.
+The second plot uses the generating probabilities on x and posterior
+means on y, with a dashed 1:1 reference. Vertical connections show movement
+from Separate to Partial pooling. Tree H (n = 50) changes only slightly,
+towards its generating probability of 0.29. Truth is matched by tree ID.
 
 The complete and separate models use flat Beta(1,1) priors on the probabilities.
 The partial model uses a shared Normal distribution on the logit scale, with its

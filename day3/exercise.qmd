@@ -78,11 +78,24 @@ fit <- course_fit("day3_trees")
 fit$source
 comparison <- mother_comparison(fit, seed=20261024)
 plot_mother_comparison(comparison)
-plot_mother_movement(comparison)
+plot_mother_truth(comparison,trees)
 ```
 
-Points are posterior means and bars are 95% intervals. The complete and separate
-models use the Day 1 flat Beta(1,1) prior on each probability. The partial model uses
+Purple open points show separate estimates; orange filled points show partial
+pooling. The grey vertical line shows the complete-pooling posterior mean,
+and the grey ribbon shows its 95% credible interval. Coloured bars are also
+95% credible intervals. Rows are ordered by the separate posterior means, and
+`n` is the seedling count. Separate and partial intervals are offset vertically
+within each tree to keep them distinct. The grey line is a comparison reference,
+not the exact target of hierarchical shrinkage.
+
+The second plot compares estimates (y) with the generating probabilities
+(x). The dashed diagonal marks equality with the truth. Vertical connections
+show movement from Separate to Partial pooling. Tree H (n = 50) changes only slightly,
+towards its generating probability of 0.29. Not every tree moves
+closer to the truth; in real data, the truth is unknown.
+
+The complete and separate models use the Day 1 flat Beta(1,1) prior on each probability. The partial model uses
 Normal group effects on the logit scale, with their centre and SD estimated from
 all trees. Thus the prior specifications also differ across these comparisons.
 

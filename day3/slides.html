@@ -31,7 +31,7 @@
     ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
       width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
@@ -150,12 +150,12 @@
     }
     .reveal .footnotes ol {
       counter-reset: ol;
-      list-style-type: none;
+      list-style-type: none; 
       margin-left: 0;
     }
     .reveal .footnotes ol li:before {
       counter-increment: ol;
-      content: counter(ol) ". ";
+      content: counter(ol) ". "; 
     }
     .reveal .footnotes ol li > p:first-child {
       display: inline-block;
@@ -197,19 +197,19 @@
     .reveal .slide > img.r-stretch.quarto-figure-center {
       display: block;
       margin-left: auto;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .reveal .slide > img.stretch.quarto-figure-left,
     .reveal .slide > img.r-stretch.quarto-figure-left  {
       display: block;
       margin-left: 0;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .reveal .slide > img.stretch.quarto-figure-right,
     .reveal .slide > img.r-stretch.quarto-figure-right  {
       display: block;
       margin-left: auto;
-      margin-right: 0;
+      margin-right: 0; 
     }
   </style>
   <script src="slides_files/libs/kePrint-0.0.1/kePrint.js"></script>
@@ -305,43 +305,43 @@ Masatoshi Katabuchi @ XTBG, CAS
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">A</td>
-<td style="text-align: right;">41</td>
-<td style="text-align: right;">9</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">6</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">B</td>
-<td style="text-align: right;">45</td>
+<td style="text-align: right;">39</td>
 <td style="text-align: right;">18</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">C</td>
-<td style="text-align: right;">32</td>
+<td style="text-align: right;">24</td>
 <td style="text-align: right;">6</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">D</td>
-<td style="text-align: right;">18</td>
-<td style="text-align: right;">5</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">19</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">E</td>
-<td style="text-align: right;">33</td>
-<td style="text-align: right;">8</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">6</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">F</td>
-<td style="text-align: right;">26</td>
-<td style="text-align: right;">8</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">12</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">G</td>
-<td style="text-align: right;">46</td>
-<td style="text-align: right;">11</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">1</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">H</td>
-<td style="text-align: right;">16</td>
-<td style="text-align: right;">8</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">12</td>
 </tr>
 </tbody>
 </table>
@@ -353,13 +353,13 @@ Masatoshi Katabuchi @ XTBG, CAS
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="" aria-label="1"></a><span class="fu">sum</span>(trees<span class="sc">$</span>suv) <span class="sc">/</span> <span class="fu">sum</span>(trees<span class="sc">$</span>n)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>  [1] 0.2840467</code></pre>
+<pre><code>  [1] 0.2973978</code></pre>
 </div>
 </div>
-<p>One overall observed survival proportion: <strong>0.284</strong>.</p>
+<p>One overall observed survival proportion: <strong>0.297</strong>.</p>
 </div></div>
 <aside class="notes">
-<p>Start with the concrete calculation from main.qmd. These are the same seeded simulated mother-tree data, different from Day 2’s quadrats. The result is a pooled observed proportion, also the common-probability binomial MLE; it is not a posterior mean. Ask what differences among trees this one number hides. Do not introduce the hypothetical 0/2 and 2/2 cases here.</p>
+<p>Start with the concrete calculation from main.qmd, using newly simulated mother-tree data (seed 42), different from Day 2’s quadrats. The result is a pooled observed proportion, also the common-probability binomial MLE; it is not a posterior mean. Ask what differences among trees this one number hides. Do not introduce the hypothetical 0/2 and 2/2 cases here.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -390,51 +390,51 @@ Masatoshi Katabuchi @ XTBG, CAS
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">A</td>
-<td style="text-align: right;">41</td>
-<td style="text-align: right;">9</td>
-<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.40</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">B</td>
-<td style="text-align: right;">45</td>
+<td style="text-align: right;">39</td>
 <td style="text-align: right;">18</td>
-<td style="text-align: right;">0.40</td>
+<td style="text-align: right;">0.46</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">C</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.25</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">D</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">0.38</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">E</td>
 <td style="text-align: right;">32</td>
 <td style="text-align: right;">6</td>
 <td style="text-align: right;">0.19</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">D</td>
-<td style="text-align: right;">18</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0.28</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">E</td>
-<td style="text-align: right;">33</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">0.24</td>
-</tr>
-<tr class="even">
 <td style="text-align: left;">F</td>
-<td style="text-align: right;">26</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">0.31</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0.32</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">G</td>
-<td style="text-align: right;">46</td>
-<td style="text-align: right;">11</td>
-<td style="text-align: right;">0.24</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.05</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">H</td>
-<td style="text-align: right;">16</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0.24</td>
 </tr>
 </tbody>
 </table>
@@ -443,7 +443,7 @@ Masatoshi Katabuchi @ XTBG, CAS
 </div><div class="column" style="width:52%;">
 <p>For each mother tree:</p>
 <p>Survival proportion = survivors / seedlings.</p>
-<p>The proportions range from <strong>0.19</strong> to <strong>0.5</strong>.</p>
+<p>The proportions range from <strong>0.05</strong> to <strong>0.46</strong>.</p>
 <p>Do these differences reflect real tree differences, sampling variation, or both?</p>
 </div></div>
 <aside class="notes">
@@ -605,51 +605,51 @@ Masatoshi Katabuchi @ XTBG, CAS
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">A</td>
-<td style="text-align: right;">41</td>
-<td style="text-align: right;">9</td>
-<td style="text-align: right;">0.22</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.40</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">B</td>
-<td style="text-align: right;">45</td>
+<td style="text-align: right;">39</td>
 <td style="text-align: right;">18</td>
-<td style="text-align: right;">0.40</td>
+<td style="text-align: right;">0.46</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">C</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.25</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">D</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">0.38</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">E</td>
 <td style="text-align: right;">32</td>
 <td style="text-align: right;">6</td>
 <td style="text-align: right;">0.19</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">D</td>
-<td style="text-align: right;">18</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0.28</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">E</td>
-<td style="text-align: right;">33</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">0.24</td>
-</tr>
-<tr class="even">
 <td style="text-align: left;">F</td>
-<td style="text-align: right;">26</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">0.31</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0.32</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">G</td>
-<td style="text-align: right;">46</td>
-<td style="text-align: right;">11</td>
-<td style="text-align: right;">0.24</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.05</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">H</td>
-<td style="text-align: right;">16</td>
-<td style="text-align: right;">8</td>
-<td style="text-align: right;">0.50</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0.24</td>
 </tr>
 </tbody>
 </table>
@@ -693,12 +693,12 @@ Masatoshi Katabuchi @ XTBG, CAS
           display:block!important;
       }</style></aside>
 </section>
-<section id="three-ways-of-estimating-survival" class="slide level2">
+<section id="three-ways-of-estimating-survival" class="slide level2 mother-story">
 <h2>Three ways of estimating survival</h2>
 
-<img data-src="slides_files/figure-revealjs/fitted-trees-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Points: posterior means. Bars: 95% intervals.</p>
+<img data-src="slides_files/figure-revealjs/fitted-trees-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Points: posterior means. Intervals: 95% credible.<br> Rows ordered by Separate estimates; n = seedlings.</p>
 <aside class="notes">
-<p>Complete and separate models use Beta(1,1) probability priors, whereas partial pooling uses the Normal logit group prior with estimated centre and SD. State this difference. It is an illustrative model comparison, not an isolation of pooling under identical marginal priors. All code and priors are in the handout.</p>
+<p>Complete and separate models use Beta(1,1) probability priors, whereas partial pooling uses the Normal logit group prior with estimated centre and SD. State this difference. It is an illustrative model comparison, not an isolation of pooling under identical marginal priors. All code and priors are in the handout. The grey line and ribbon show the single complete-pooling posterior, shared by all trees. Only separate and partial estimates are repeated by tree. The grey line is a comparison reference, not the exact target of hierarchical shrinkage. Rows are ordered by the separate posterior means, with the largest at the top. n is the seedling count. Separate and Partial pooling are vertically dodged within each tree so their 95% intervals can be compared. Separate is always an open purple circle; Partial pooling is always a filled orange circle. The next slide retains those encodings and reveals the generating probabilities on a 1:1 scatterplot. The separate model is the no-pooling model from earlier.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -711,30 +711,21 @@ Masatoshi Katabuchi @ XTBG, CAS
           display:block!important;
       }</style></aside>
 </section>
-<section id="why-estimates-move-by-different-amounts" class="slide level2">
-<h2>Why estimates move by different amounts</h2>
-
-<img data-src="slides_files/figure-revealjs/movement-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Consider information within a tree, its position in the group distribution, and inferred group variation.</p>
+<section id="in-a-simulation-we-can-check-against-the-truth" class="slide level2 mother-story">
+<h2>Does sharing information improve the estimates?</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/tree-truth-comparison-1.png" class="quarto-figure quarto-figure-center" width="588" height="470"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Tree A: 0.41 → 0.34; true probability = 0.30.</strong><br> Arrows: Separate → Partial pooling. Dashed diagonal: estimate = truth.</p>
 <aside class="notes">
-<p>Debrief. Avoid saying every estimate moves to the pooled proportion or has a narrower interval. Shrinkage depends on assumptions and data. It cannot guarantee smaller estimation error for each group.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="in-a-simulation-we-can-check-against-the-truth" class="slide level2">
-<h2>In a simulation, we can check against the truth</h2>
-
-<img data-src="slides_files/figure-revealjs/tree-truth-comparison-1.png" class="quarto-figure quarto-figure-center r-stretch" width="768"><p>Here we know the generating probabilities; in real data, we do not.</p>
-<aside class="notes">
-<p>Optional within the exercise debrief: shorten or omit if time is tight. This restores main.qmd’s truth comparison after participants have interpreted their results. Each connected pair represents one mother tree. Points on the dashed 1:1 line would match the generating probability. Generating probabilities in make_tree_data() are stored rounded to two decimals, so treat this as a visual illustration, not an exact error calculation. Grey points are observed proportions (MLEs); orange points are posterior means from the actual saved partial-pooling fit. They differ in both estimation method and model assumptions. Some estimates can move away from their generating values; do not claim universal improvement or that this one simulation establishes general performance. The model estimates its group distribution from all trees under the specified hyperpriors.</p>
+<p>Read x as the generating probability and y as the posterior mean. The square panel has identical axis scales; its dashed 1:1 line represents agreement with the truth. Vertical connections show the direction and amount of movement from Separate to Partial pooling. The connections are drawn behind the points. Each tree’s true probability is explicitly joined by tree ID, not by row order. F has true p=0.25 and D has true p=0.36. Several trees share the same true probability, so some trajectories overlap. Both axes are restricted to 0.2–0.5; Tree G estimates fall below this window.</p>
+<p>Follow labelled Tree A: n=15, separate posterior mean 0.41, partial-pooling mean 0.34 and generating probability 0.30. Movement depends on n, extremity and the inferred group distribution. Separate points remain posterior means under independent Beta(1,1) priors, not observed proportions or MLEs. Do not claim that sharing information always improves every estimate or that one simulated data set establishes general performance. In real data, truth is unknown. Use this comparison as a visual illustration, not an exact error calculation. This reveal remains optional if the exercise debrief is running late.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -1007,7 +998,7 @@ Masatoshi Katabuchi @ XTBG, CAS
   <script src="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
   <script src="slides_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="slides_files/libs/revealjs/plugin/quarto-support/support.js"></script>
-
+  
 
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
@@ -1029,7 +1020,7 @@ Masatoshi Katabuchi @ XTBG, CAS
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
 'smaller': false,
-
+ 
         // Display controls in the bottom right corner
         controls: true,
 
@@ -1191,7 +1182,7 @@ Masatoshi Katabuchi @ XTBG, CAS
         ]
       });
     </script>
-
+    
     <script>
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
@@ -1237,7 +1228,7 @@ Masatoshi Katabuchi @ XTBG, CAS
         });
         const isCodeAnnotation = (el) => {
           for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {
+            if (clz.startsWith('code-annotation-')) {                     
               return true;
             }
           }
@@ -1257,11 +1248,11 @@ Masatoshi Katabuchi @ XTBG, CAS
             button.setAttribute("data-bs-toggle", "tooltip");
             button.setAttribute("data-bs-placement", "left");
             button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button,
-              { trigger: "manual",
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
                 customClass: "code-copy-button-tooltip",
                 offset: [0, -8]});
-            tooltip.show();
+            tooltip.show();    
           }
           setTimeout(function() {
             if (tooltip) {
@@ -1340,7 +1331,7 @@ Masatoshi Katabuchi @ XTBG, CAS
           }
             config['offset'] = [0,0];
             config['maxWidth'] = 700;
-          window.tippy(el, config);
+          window.tippy(el, config); 
         }
         const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
         for (var i=0; i<noterefs.length; i++) {
@@ -1399,6 +1390,9 @@ Masatoshi Katabuchi @ XTBG, CAS
       </script>
     <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
     <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
-
+    <style>
+    .reveal .mother-story > p { height: 2.6em; line-height: 1.3; }
+    </style>
+    
 
 </body></html>
