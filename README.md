@@ -27,6 +27,9 @@ AFEC-X 2026: **21–23 October, 19:00–20:30 China time (UTC+8)**, about 30
 participants. The agreed plan prioritises Bayesian thinking, figure interpretation
 and connections to ecological research at the level of `main.qmd`. Participants run
 complete supplied R code, with one core exercise per day. Stan editing is optional.
+The aim is to build an understanding of Bayesian thinking and a foundation for
+further learning. Core and optional material are labelled in each day's slides
+and handout; questions can be discussed naturally during the lecture.
 The design assumes English, individual work with optional nearby discussion, and
 no homework. It does not assume previous R or GLM experience. The 15 October
 schedule places these evening sessions on the first three days of the daytime
@@ -140,10 +143,16 @@ walkthrough with live or supplied results: read coefficient means/SDs/95% credib
 inspect sampling diagnostics and traces, and draw the survival regression.
 The student source uses explicit standard R functions rather than course-specific
 wrappers. Detailed sampler repair remains instructor reference;
-posterior predictive checking is optional instructor reference.
-The core finishes with the regression walkthrough and a brief Day 3 preview.
+one existing posterior predictive-check figure follows the regression walkthrough.
+Predictive simulation details remain optional reference; the figure adds no code
+or exercise. The core finishes with this figure and a brief Day 3 preview.
 The student handout follows code, output and interpretation; it has no timed
 tasks, separate questions or written-answer prompts.
+
+Day 3's core covers mother-tree pooling and model reading, its count check, and
+the three regression structures. The full second fitted-analysis walkthrough,
+new fitting and allometry remain optional reference. The instructor guide uses
+these scope choices rather than a detailed lesson timetable.
 
 Validation commands: `RENV_CONFIG_SANDBOX_ENABLED=FALSE Rscript R/check_classroom_materials.R`
 and `Rscript R/build_classroom_materials.R` (R 4.6.1, Quarto 1.10.19).

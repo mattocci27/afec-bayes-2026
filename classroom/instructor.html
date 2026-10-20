@@ -2215,7 +2215,7 @@ vertical-align: -.125em;
 
 <p>October 21–23, 19:00–20:30 China time: three 90-minute sessions for approximately 30 participants. The agreed priority is conceptual understanding, interpreting figures and connecting the material to research, at a depth comparable to <code>main.qmd</code>. Read the data, unknowns, assumptions and results alongside supplied Stan code. Editing or implementing models is optional.</p>
 <p>According to the October 15 timetable, October 20, 17:10–18:00 is reserved for statistics preparation and checking R. Daytime sessions on October 21–26 (09:00–12:00 and 14:00–18:00) cover experimental design and statistics in R. This course occupies the evenings of the first three days. The content of each daytime session is unknown; do not assume experience running R or knowledge of GLMs. Allow for fatigue after seven hours of practical work.</p>
-<p>The learning goals are Bayesian reasoning, ecological interpretation, uncertainty and a habit of checking models. Planning assumptions are English instruction, no required homework, one instructor and approximately 30 participants. Use one short comparison activity per day, with discussion optional. Running supplied code and reading supplied figures are equally valid ways to participate. R problems should not prevent participants from addressing the same question. Confirm the teaching language and computing environment before class.</p>
+<p>The learning goals are Bayesian reasoning, ecological interpretation, uncertainty and a habit of checking models: a foundation for further independent learning. Use natural questions during the lecture to follow understanding; no additional written questions, assessment criteria or detailed lesson timetable are required. Planning assumptions are English instruction, no required homework, one instructor and approximately 30 participants. Use one short comparison activity per day, with discussion optional. Running supplied code and reading supplied figures are equally valid ways to participate. R problems should not prevent participants from addressing the same question. Confirm the teaching language and computing environment before class.</p>
 <section id="learning-outcomes-and-connections-across-the-three-days" class="level2">
 <h2 class="anchored" data-anchor-id="learning-outcomes-and-connections-across-the-three-days">Learning outcomes and connections across the three days</h2>
 <table class="caption-top table">
@@ -2239,8 +2239,8 @@ vertical-align: -.125em;
 </tr>
 <tr class="even">
 <td>2</td>
-<td>Read a regression table, computational diagnostics, traces and a survival curve; distinguish sampling checks from checking the ecological model</td>
-<td>Read, diagnose and plot regression results with standard R functions</td>
+<td>Read a regression table, computational diagnostics, traces and a survival curve; distinguish sampling checks from a predictive check</td>
+<td>Read regression results and briefly inspect one supplied PPC figure</td>
 </tr>
 <tr class="odd">
 <td>3</td>
@@ -2253,42 +2253,7 @@ vertical-align: -.125em;
 </section>
 <section id="revised-pacing-and-advancing-across-days" class="level2">
 <h2 class="anchored" data-anchor-id="revised-pacing-and-advancing-across-days">Revised pacing and advancing across days</h2>
-<p>These are instructor planning estimates from the current slides and handouts, not measured rehearsal times or participant deadlines. Assume English teaching, approximately 30 ecology researchers, limited prior GLM experience, supplied fits, no new compilation/sampling, and an evening class after daytime practical work. Allow time for explaining code, interpreting output, transitions and questions; slide count or script execution time alone is not a teaching-time estimate. The full route excludes appendices and new fitting; on Day 3 it includes both the mother-tree and CNDD handout analyses.</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Day</th>
-<th>Full route</th>
-<th>Selected content</th>
-<th>Questions / buffer</th>
-<th>Limit</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1</td>
-<td>About 85–110 min</td>
-<td>About 75 min</td>
-<td>About 15 min</td>
-<td>90 min</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>About 95–125 min</td>
-<td>About 75 min</td>
-<td>About 15 min</td>
-<td>90 min</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td>About 120–160 min</td>
-<td>About 80 min</td>
-<td>About 10 min</td>
-<td>90 min</td>
-</tr>
-</tbody>
-</table>
-<p>The full route needs approximately 300–395 minutes, beyond the 270 available. Advancing early helps redistribute work; it does not make every item compulsory. The working allowances below select a shorter route rather than assuming that every explanation will fit at its lower estimate. Keep timing in this instructor guide, not in participant slides or handouts.</p>
+<p>Each session is limited to 90 minutes, including discussion, questions and buffer. Use the core route below; the complete reference material is not a script to narrate in full. Code execution and new fitting are optional throughout.</p>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 33%">
@@ -2298,67 +2263,35 @@ vertical-align: -.125em;
 <thead>
 <tr class="header">
 <th>Day</th>
-<th>Working route (rough allowances, not fixed clock slots)</th>
-<th>Shorten or leave as reference</th>
+<th>Core in class</th>
+<th>Optional reference</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>1</td>
-<td>Opening 5; likelihood 15; conditional probability / Bayes 15; priors 10; seedling comparison including discussion 20; draws and recap 10 = 75 min</td>
-<td>Detailed Normal-code arithmetic, MLE/MAP calculations, prior-change extension, optional inference and algorithms</td>
+<td>Likelihood, Bayes, prior/posterior, the seedling sample-size comparison and posterior summaries</td>
+<td>Extra calculations, changing the prior, Stan code and sampler algorithms</td>
 </tr>
 <tr class="even">
 <td>2</td>
-<td>Recall 5; regression / link / priors 20; MCMC and exploration checks 15; paired draws to curves 10; saved-result code walkthrough 25 = 75 min</td>
-<td>Explaining both fitting interfaces, Stan syntax line by line, repeated slide-and-handout explanations, optional PPC and algorithm details</td>
+<td>Binomial regression, coefficient interpretation, sampling checks, survival curves and one existing PPC figure</td>
+<td>New fitting, repeated tables, sampler details, predictive simulation code and further prediction examples</td>
 </tr>
 <tr class="odd">
 <td>3</td>
-<td>Recall 5; mother-tree pooling and comparison figures 20; selected mother-tree analysis code and interpretation 20; count check 10; regression Models 1–3 including interaction 20; synthesis 5 = 80 min</td>
-<td>Repeated Day 2 diagnostics, compilation bookkeeping, detailed plotting loops, a second full regression-fit walkthrough, optional inference / allometry / covariance implementation</td>
+<td>Mother-tree pooling and model reading, its count check, and the three regression structures including the interaction</td>
+<td>A complete second fitted-analysis walkthrough, new fitting, allometry and covariance implementation</td>
 </tr>
 </tbody>
 </table>
-<p>Day 3’s essential extension is the three regression structures and why a trait changes the expected slope. Preserve the interaction explanation. The CNDD saved-fit coefficient table and two fitted figures can support that explanation; reading the entire second analysis code is an extension, not a second required exercise. Without an early lead, use selected figures and model/formula lines. With time recovered from earlier sessions, add a short reading of the saved trait coefficient and its fitted curve. Protect roughly the final half-hour for the regression connection, synthesis and questions; shorten repeated code explanation before dropping this connection.</p>
+<p>Day 3’s essential extension is the three regression structures and why a trait changes the expected slope. Preserve the interaction explanation. The CNDD saved-fit coefficient table and two fitted figures can support that explanation; reading the entire second analysis code is an extension, not a second required exercise. Use selected figures and model/formula lines. Shorten repeated code explanation before dropping the regression connection or questions.</p>
 <section id="advance-completed-teaching-blocks-not-the-daily-workload" class="level3">
 <h3 class="anchored" data-anchor-id="advance-completed-teaching-blocks-not-the-daily-workload">Advance completed teaching blocks, not the daily workload</h3>
-<p>First complete the day’s core explanation, its discussion and a brief check of understanding. Keep a closing question/buffer allowance. Use a remaining block of at least about ten minutes to start the next topic; a few minutes alone are better used for questions. Do not fill spare time with optional material before advancing the next core topic. Individual early finishers do not determine the pace for the whole class.</p>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>When a complete block fits</th>
-<th>Advance to</th>
-<th>Stop / resume boundary</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>After Day 1, about 10–15 min available beyond closing questions</td>
-<td>Day 2’s CNDD question, observed data, the same binomial model, and density-dependent probability curves</td>
-<td>Stop after “A straight line and a probability curve”; on Day 2 briefly recall the curve, then continue at “Our model: seedling survival”</td>
-</tr>
-<tr class="even">
-<td>After Day 2, about 12–18 min available beyond closing questions</td>
-<td>Day 3’s mother-tree counts, common versus separate probabilities, and the shared group prior</td>
-<td>Stop after “Information sharing through a prior”; on Day 3 briefly retrieve the idea, then continue at “How much can mother trees differ?”</td>
-</tr>
-<tr class="odd">
-<td>On Day 3, after the essential model progression</td>
-<td>Read Model 3’s saved trait coefficient and the fitted figures</td>
-<td>Extra diagnostics and fitting remain optional; do not start a new live fit to fill the remaining time</td>
-</tr>
-</tbody>
-</table>
-<p>If less of a block fits, stop at an earlier complete concept and record that boundary. Before moving ahead, ask for a brief explanation: on Day 1, what the posterior width means; on Day 2, what the survival curve and ribbon mean and what sampling checks do. Use the existing discussion, not another worksheet.</p>
+<p>Complete the day’s core and leave room for questions. If the class is ready and a complete next concept fits, it can be introduced early. Otherwise finish with discussion. Individual early finishers do not determine the pace for the class.</p>
 <p>Record the last completed slide title and any handout section actually discussed. At the next meeting, retrieve that idea briefly and resume from the recorded point; do not repeat the completed block in full or keep the recovered time as another recap. Deck titles and file locations need not match the day taught. Do not change the model data or require participants to run new inference.</p>
 <p>If no advance happens, all three days must still have a viable core route. If a core block overruns, carry unfinished material forward and use the next day’s shortening choices. An unresolved core question takes priority over advancement; the second CNDD analysis and existing appendices are the first material to defer.</p>
-<p>Instructor record after each class: completed title/section; unresolved question; where to resume. Revise these estimates after observing the actual Day 1 pace.</p>
+<p>Record the completed title/section and where to resume, using the actual class pace.</p>
 </section>
 </section>
 <section id="day-1-teaching-sequence" class="level2">
@@ -2385,7 +2318,7 @@ vertical-align: -.125em;
 <td>Describe differences between likelihood curves</td>
 </tr>
 <tr class="odd">
-<td>Conditional probability, all six fip figures, PCR and Bayes</td>
+<td>Conditional probability, all six fip figures and Bayes</td>
 <td>Predict what changes when reasoning from outcomes to conditions</td>
 </tr>
 <tr class="even">
@@ -2447,10 +2380,14 @@ vertical-align: -.125em;
 <td>Follow code and output: coefficient table, diagnostics, traces and regression plot</td>
 </tr>
 <tr class="odd">
+<td>Briefly show the existing density-pattern PPC figure</td>
+<td>Compare observed proportions with replicated data; no additional exercise</td>
+</tr>
+<tr class="even">
 <td>Questions about the walkthrough and buffer for different working speeds</td>
 <td>Revisit code and interpretation as needed</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Brief preview of tomorrow, questions and buffer</td>
 <td>If core understanding is secure and a full block fits, advance the mother-tree introduction using the rule above; no additional worksheet</td>
 </tr>
@@ -2461,9 +2398,9 @@ vertical-align: -.125em;
 <p>Use <code>mcmc_trace()</code> to inspect four chains for overlap, persistent separation and drift. Read R-hat, ESS and divergence counts together. For four chains, R-hat &gt;1.01 or ESS &lt;400 are reasons to investigate, not automatic classifications or thresholds to memorize. The instructor should also inspect treedepth, E-BFMI, lp__ and Monte Carlo precision for the quantities of interest. Do not carry over the root handout’s three-level E-BFMI rating or classifications based on a single diagnostic.</p>
 <p>For the regression plot, apply <code>plogis(alpha + beta * cons)</code> to every paired draw. At each density, calculate the median and 2.5th/97.5th percentiles; draw these with <code>geom_ribbon()</code>, <code>geom_line()</code> and <code>geom_point()</code>. Do not summarize coefficients separately before transforming. The <code>alpha</code> argument controlling plot transparency is different from the regression intercept alpha; changing transparency changes neither estimates nor intervals. Connect the calculation to the lecture progression from 10 grey curves to 1,000 curves to a ribbon using all draws. Distinguish these from the conceptual species-coloured curves.</p>
 <p>New inference and Stan editing are optional. If an R problem cannot be resolved within two minutes, continue with the same tables, diagnostics and plots in <code>day2/results.html</code>. Both fitting sections, brms and Stan, appear before Data and posterior draws in the student handout. Demonstrate either fit if the prepared environment and class pace permit. Run only one of the brms, Stan or prepared-result loading chunks; all later tables, diagnostics, traces and plots then use that result. Do not use stored diagnostics to assess a new fit. Fitting chunks have <code>eval=FALSE</code>, so rendering the HTML does not run inference. Do not require students to install CmdStan, a C++ toolchain or Docker.</p>
-<p>Explain tables, traces and the regression plot alongside their code in the handout. Repeated slides are optional reference; do not return for a separate answer-checking session. The two PPC slides and predictions for 20 new seedlings are optional, outside the main sequence. “Interpretation in a real forest” has been removed; do not add a separate general ecology lecture. Retain only the sentence explaining that sampling diagnostics check computation and do not establish ecological model appropriateness. The PPC example is instructor reference, not a required learning outcome.</p>
+<p>Explain tables, traces and the regression plot alongside their code in the handout. Repeated slides are optional reference; do not return for a separate answer-checking session. After the walkthrough, show only the existing slide “Does the density pattern look compatible?” as a brief PPC example. Its intervals describe replicated proportions at the observed densities and seedling counts, including binomial variation. Agreement does not prove the model correct. Predictive simulation details and predictions for 20 new seedlings remain optional. Keep this to reading the figure; no code walkthrough or additional exercise is needed.</p>
 <p>“Your research question” has also been removed; do not retain the same extra assignment in the handout. The species-difference illustration is a brief preview of tomorrow, without new inference. Resolve questions and differences in working speed first; advance a complete mother-tree block only when the conditions above are met.</p>
-<p><strong>If running late:</strong> shorten the species preview and details of MCMC mechanics. Preserve reading the coefficient table, diagnostics, traces and regression plot.</p>
+<p><strong>If running late:</strong> shorten the species preview and details of MCMC mechanics. Preserve reading the coefficient table, diagnostics, traces, regression plot and the single PPC figure.</p>
 </section>
 <section id="day-3-hierarchical-models" class="level2">
 <h2 class="anchored" data-anchor-id="day-3-hierarchical-models">Day 3: Hierarchical models</h2>

@@ -256,6 +256,10 @@ Masatoshi Katabuchi @ XTBG, CAS
 <li>Check sampling with numerical diagnostics and trace plots.</li>
 <li>Draw and interpret the fitted survival curve and its credible interval.</li>
 </ul>
+<div class="small">
+<p><strong>Core:</strong> regression results, sampling checks and one predictive-check figure.<br>
+<strong>Optional reference:</strong> new fitting and further computational or predictive details.</p>
+</div>
 <aside class="notes">
 <p>Read completed models and results together. Coding is optional. Use the handout for an instructor-led R walkthrough. Show code, output and interpretation together. Participants can follow the rendered copy or run the complete code alongside the explanation.</p>
 <style type="text/css">
@@ -325,7 +329,7 @@ Masatoshi Katabuchi @ XTBG, CAS
 </ul>
 <p>Now let conspecific density <span class="math inline">x_i</span> predict <span class="math inline">p_i</span>.</p>
 <aside class="notes">
-<p>10-25 minutes: the same count model as Day 1. Within a quadrat assume a common probability and conditional independence. Missing shared conditions can violate these assumptions. A model-checking example is available in Optional reference.</p>
+<p>The same count model as Day 1. Within a quadrat assume a common probability and conditional independence. Missing shared conditions can violate these assumptions. A single PPC figure follows the regression walkthrough.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -459,10 +463,10 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
 <p>Prior — Before seeing data</p>
 </div>
 <div class="updating-body">
-<p><span class="math display">\textcolor{#d95f02}{\alpha}\sim\operatorname{Normal}(0,2.5^2)</span></p>
-<p><span class="math display">\textcolor{#d95f02}{\beta}\sim\operatorname{Normal}(0,2.5^2)</span></p>
+<p><span class="math display">\textcolor{#d95f02}{\alpha}\sim\operatorname{Normal}(0,2.5)</span></p>
+<p><span class="math display">\textcolor{#d95f02}{\beta}\sim\operatorname{Normal}(0,2.5)</span></p>
 <div class="independent-note">
-<p>The priors are independent.</p>
+<p>The priors are independent. The second argument is the SD.</p>
 </div>
 </div>
 </div>
@@ -488,7 +492,7 @@ likelihood</p>
 </div>
 </div>
 <aside class="notes">
-<p>Alpha and beta are the unknown coefficients. Alpha is log-odds at reference density x=0; beta changes log-odds per one SD of density. Neither coefficient is itself a probability or a percentage reduction. Here Normal(0,2.5^2) uses a variance as its second argument: SD is 2.5. The two independent priors are unchanged and match stan/logit_reg.stan and the stored fit, whose normal(0,2.5) syntax uses an SD. Do not square the Stan SD. Read left to right: the priors describe uncertainty before seeing data; the observed data update them to the joint posterior for alpha and beta. Data enter the update through the likelihood from the preceding model slide. Independence is a prior assumption, not a claim that the posterior coefficients are independent. Day 1 calculated a posterior over a grid of p values; today we approximate the posterior for pairs using simulated draws. Do not imply simulation finds true parameters or that a grid is impossible for this two-parameter model. After motivating the prior scales on the next slide, introduce the sampling idea.</p>
+<p>Alpha and beta are the unknown coefficients. Alpha is log-odds at reference density x=0; beta changes log-odds per one SD of density. Neither coefficient is itself a probability or a percentage reduction. Here Normal(0,2.5) uses the SD as its second argument, as throughout the course. The two independent priors are unchanged and match stan/logit_reg.stan and the stored fit, whose normal(0,2.5) syntax uses an SD. Do not square the Stan SD. Read left to right: the priors describe uncertainty before seeing data; the observed data update them to the joint posterior for alpha and beta. Data enter the update through the likelihood from the preceding model slide. Independence is a prior assumption, not a claim that the posterior coefficients are independent. Day 1 calculated a posterior over a grid of p values; today we approximate the posterior for pairs using simulated draws. Do not imply simulation finds true parameters or that a grid is impossible for this two-parameter model. After motivating the prior scales on the next slide, introduce the sampling idea.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -522,8 +526,8 @@ likelihood</p>
 <div class="small">
 <p><span class="math display">
 \begin{aligned}
-\text{Very diffuse:}\quad &amp;\beta\sim\mathcal N(0,10^8)\\[6pt]
-\text{Weakly informative:}\quad &amp;\beta\sim\mathcal N(0,2.5^2)
+\text{Very diffuse:}\quad &amp;\beta\sim\mathcal N(0,10^4)\\[6pt]
+\text{Weakly informative:}\quad &amp;\beta\sim\mathcal N(0,2.5)
 \end{aligned}
 </span></p>
 </div>
@@ -541,7 +545,7 @@ likelihood</p>
 <p>We use simulation to approximate the posterior.</p>
 </div>
 <aside class="notes">
-<p>The right figure compares prior shapes, before using observed outcomes. Normal(0,10^8) means variance 10^8 and SD 10000, not SD 10^8. Normal(0,2.5^2) means SD 2.5, matching the unchanged fitted-model slope prior. The horizontal range [-120,20] is deliberately zoomed in: most of the diffuse prior lies outside this window. These are relative densities f(beta)/f(0), not probability densities that integrate to one over the shown range. At beta=-100 the diffuse relative density is exp(-0.00005), about 0.99995; the weak relative density is exp(-800), positive but below plotting precision. Thus the diffuse prior gives equal-width neighbourhoods near -100 and 0 almost the same prior weight; the weak prior greatly downweights -100. Do not compare absolute density heights across priors from this peak-normalised plot. The diffuse Normal is proper and is not literally a flat prior; it illustrates locally almost flat weighting across the slopes being discussed. Keep that separate from the binomial likelihood evidence in the left observations.</p>
+<p>The right figure compares prior shapes, before using observed outcomes. Normal(0,10^4) means SD 10000 and variance 10^8. Normal(0,2.5) means SD 2.5, matching the unchanged fitted-model slope prior. The horizontal range [-120,20] is deliberately zoomed in: most of the diffuse prior lies outside this window. These are relative densities f(beta)/f(0), not probability densities that integrate to one over the shown range. At beta=-100 the diffuse relative density is exp(-0.00005), about 0.99995; the weak relative density is exp(-800), positive but below plotting precision. Thus the diffuse prior gives equal-width neighbourhoods near -100 and 0 almost the same prior weight; the weak prior greatly downweights -100. Do not compare absolute density heights across priors from this peak-normalised plot. The diffuse Normal is proper and is not literally a flat prior; it illustrates locally almost flat weighting across the slopes being discussed. Keep that separate from the binomial likelihood evidence in the left observations.</p>
 <p>Allow about 2 minutes, following the model and prior/posterior recap. These are illustrative curves, not fits. Keep alpha=logit(0.3), x in [-3,3] SD units, the binomial observation model and the link fixed. The green curve is exactly slide 7’s alpha and beta. The dashed orange curve changes only beta to -100. At x=0 both curves have p=0.3. Negative scaled density means below-average density, not a negative number of neighbours. The large logit slope becomes a near-step on the probability scale: the 99%-to-1% transition spans (qlogis(.99)-qlogis(.01))/100 = 0.0919024 SD of density. It is the abrupt transition across such a small density change that we judge implausible for this teaching setting, not merely that p approaches 0 or 1. Some ecological thresholds may be sharp; this is a contextual judgment, not a universal prohibition on steep slopes or a conclusion estimated from these data. Ask the before-data question first: would such an almost all-or-none change across a tiny density difference be ecologically credible in this setting? Then use the grey observations to show the additional evidence from the data.</p>
 <p>The points reuse ndd=make_ndd_data() from the preceding data slide: all 60 simulated quadrats, with observed survival proportions suv/n.&nbsp;Point AREA is proportional to n (5-20 seedlings); larger samples give more precise proportions at a fixed underlying p.&nbsp;No jitter, filtering or new data were introduced. Individual proportions fluctuate under the binomial model; points need not lie on a probability curve. The two curves are not posterior estimates or fitted alternatives. The green curve reuses the illustrative generating values; do not claim its visual agreement is independent validation of the model.</p>
 <p>For these observations the extreme curve also receives a much smaller binomial likelihood: it predicts near-certain survival for many quadrats with deaths and near-zero survival for many quadrats with survivors. These are count likelihoods, not unweighted distances from the plotted proportions. The likelihood and prior make distinct contributions. The observed mismatch is evidence from these data; it is not the justification for choosing a prior after looking at the same data. A flat prior leaves the likelihood to do the penalizing here. Weakly informative priors can express the separate ecological judgment before observing outcomes, which is especially useful when data are sparse. The preceding slide specifies the full model’s independent coefficient priors. Next explain how simulation approximates the posterior.</p>
@@ -810,7 +814,25 @@ likelihood</p>
 </ol>
 <p>Offline outputs: <code>day2/results.html</code>.</p>
 <aside class="notes">
-<p>Guide the class through the handout, showing code and output together. Follow the root exercise.qmd style: explain the table columns and actual results, then the diagnostics, traces and graph. No timed student tasks, separate questions, written responses or debrief cycle. Running code alongside the instructor is optional; the rendered copy and result sheet contain the outputs. Planning allowance is 40-60 minutes, with 60-70 available for pace/questions. Keep read_csv(), readRDS(), summarise_draws(), mcmc_trace(), plogis(), quantile() and ggplot() visible rather than hiding analysis in course-specific helpers. PPC and repeated table slides remain optional. Finish with a brief Day 3 preview.</p>
+<p>Guide the class through the handout, showing code and output together. Follow the root exercise.qmd style: explain the table columns and actual results, then the diagnostics, traces and graph. No timed student tasks, separate questions, written responses or debrief cycle. Running code alongside the instructor is optional; the rendered copy and result sheet contain the outputs. Keep read_csv(), readRDS(), summarise_draws(), mcmc_trace(), plogis(), quantile() and ggplot() visible rather than hiding analysis in course-specific helpers. Return to the single PPC figure after the walkthrough. Repeated table slides and predictive simulation details remain optional. Keep time for questions.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="does-the-density-pattern-look-compatible" class="slide level2">
+<h2>Does the density pattern look compatible?</h2>
+
+<img data-src="slides_files/figure-revealjs/check-pattern-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Compare observed proportions with replicated data at the same density and seedling count.</p>
+<aside class="notes">
+<p>A brief figure-reading example after the regression walkthrough. Use the existing figure without an additional exercise or a predictive-code demonstration. The intervals concern replicated proportions at observed n_i, not uncertainty about p_i alone. Binomial variation is included. Inspect the density pattern and variation; an occasional point outside an interval is not by itself a failure. These are simulated teaching data. Similar patterns do not prove the model correct, and this check is separate from MCMC diagnostics.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -856,28 +878,7 @@ likelihood</p>
 </ol>
 <p>Repeat across posterior draws: <strong>posterior predictive checking</strong>.</p>
 <aside class="notes">
-<p>Use one paired draw for ALL quadrats in a replicated data set, then repeat with other draws. Replicated survivor counts include binomial variation at the observed n_i. Optional instructor reference only; omit from the core lecture. Use this if a later discussion specifically calls for a posterior predictive example. Generate binomial survivor counts directly at each observed density and seedling count. This includes binomial variation as well as uncertainty about probability. It checks the data model, not whether the sampler mixed. No new inference is run. The equations are available in the appendix. Source: https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="does-the-density-pattern-look-compatible" class="slide level2" data-visibility="uncounted">
-<h2>Does the density pattern look compatible?</h2>
-
-<img data-src="slides_files/figure-revealjs/check-pattern-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><ul>
-<li>Does the model reproduce the change in survival across densities?</li>
-<li>Are observations consistently higher or lower than predicted in part of the density range?</li>
-</ul>
-<aside class="notes">
-<p>The intervals concern replicated proportions at observed n_i, not uncertainty about p_i alone. Some points can lie outside a 95% interval without indicating a systematic failure; do not count every outside point as a model failure. Look across the density range for a pattern the model misses. These data were generated from the simple model, so do not promise a visible mismatch. Similar patterns do not prove that the model is correct. Ask what omitted conditions, such as light or soil, might matter if using this optional example. The SD-based comparison is an optional reference, not part of this introduction.</p>
+<p>Use one paired draw for ALL quadrats in a replicated data set, then repeat with other draws. Replicated survivor counts include binomial variation at the observed n_i. Optional explanation of the generation behind the single core PPC figure. Use this only if a later discussion calls for more detail. Generate binomial survivor counts directly at each observed density and seedling count. This includes binomial variation as well as uncertainty about probability. It checks the data model, not whether the sampler mixed. No new inference is run. The equations are available in the appendix. Source: https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;

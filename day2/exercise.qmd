@@ -41,6 +41,12 @@ $$s_i\sim\operatorname{Binomial}(n_i,p_i),\qquad
 The independent priors for $\alpha$ and $\beta$ are Normal with mean 0 and
 **SD 2.5**. The model can be fitted below or analysed using a prepared result.
 
+**Core:** read the coefficient table, sampling checks and survival curve using
+the prepared result. Running the supplied analysis code is optional. For this
+route, skip both fitting sections and continue at [Prepared result](#prepared-result).
+
+**Optional:** fit a new model with brms or Stan in a prepared environment.
+
 ## Packages and data
 
 ```{r setup}
@@ -53,7 +59,7 @@ theme_set(theme_bw(base_size = 14))
 ndd <- read_csv(here("data", "ndd.csv"))
 ```
 
-## Fit the model with brms
+## Optional: fit the model with brms
 
 `brms` translates the regression formula into Stan. This fits the same binomial
 logit model and independent Normal(0, 2.5) coefficient priors used below.
@@ -81,7 +87,7 @@ scale. The intercept is included automatically. `center=FALSE` keeps its prior
 at `cons = 0`, matching the Stan model. The coefficient names in brms are
 `b_Intercept` and `b_cons`.
 
-## Fit the model with Stan
+## Optional: fit the model with Stan
 
 The supplied file `stan/logit_reg.stan` contains:
 
@@ -333,7 +339,8 @@ is changed, fit the changed model rather than reusing the prepared result.
 Also check parameter-level diagnostics including `lp__`, treedepth, E-BFMI and
 Monte Carlo precision for the intended quantities. Do not copy the root file's
 automatic good/bad classifications or its E-BFMI quality scale. Computation and
-ecological model appropriateness are different issues. PPC stays optional.
+ecological model appropriateness are different issues. The lecture includes one
+existing PPC figure; predictive simulation details remain optional reference.
 
 ## Choosing the fitting route
 

@@ -2295,8 +2295,8 @@ window.Quarto = {
   <li><a href="#seedling-survival-regression" id="toc-seedling-survival-regression" class="nav-link active" data-scroll-target="#seedling-survival-regression">Seedling survival regression</a>
   <ul class="collapse">
   <li><a href="#packages-and-data" id="toc-packages-and-data" class="nav-link" data-scroll-target="#packages-and-data">Packages and data</a></li>
-  <li><a href="#fit-the-model-with-brms" id="toc-fit-the-model-with-brms" class="nav-link" data-scroll-target="#fit-the-model-with-brms">Fit the model with brms</a></li>
-  <li><a href="#fit-the-model-with-stan" id="toc-fit-the-model-with-stan" class="nav-link" data-scroll-target="#fit-the-model-with-stan">Fit the model with Stan</a></li>
+  <li><a href="#optional-fit-the-model-with-brms" id="toc-optional-fit-the-model-with-brms" class="nav-link" data-scroll-target="#optional-fit-the-model-with-brms">Optional: fit the model with brms</a></li>
+  <li><a href="#optional-fit-the-model-with-stan" id="toc-optional-fit-the-model-with-stan" class="nav-link" data-scroll-target="#optional-fit-the-model-with-stan">Optional: fit the model with Stan</a></li>
   <li><a href="#data-and-posterior-draws" id="toc-data-and-posterior-draws" class="nav-link" data-scroll-target="#data-and-posterior-draws">Data and posterior draws</a></li>
   <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
   <li><a href="#sampling-diagnostics" id="toc-sampling-diagnostics" class="nav-link" data-scroll-target="#sampling-diagnostics">Sampling diagnostics</a></li>
@@ -2355,6 +2355,8 @@ window.Quarto = {
 <li><code>cons</code>: scaled conspecific density.</li>
 </ul>
 <p>The independent priors for <span class="math inline">\alpha</span> and <span class="math inline">\beta</span> are Normal with mean 0 and <strong>SD 2.5</strong>. The model can be fitted below or analysed using a prepared result.</p>
+<p><strong>Core:</strong> read the coefficient table, sampling checks and survival curve using the prepared result. Running the supplied analysis code is optional. For this route, skip both fitting sections and continue at <a href="#prepared-result">Prepared result</a>.</p>
+<p><strong>Optional:</strong> fit a new model with brms or Stan in a prepared environment.</p>
 <section id="packages-and-data" class="level2">
 <h2 class="anchored" data-anchor-id="packages-and-data">Packages and data</h2>
 <div class="cell" data-layout-align="center">
@@ -2367,8 +2369,8 @@ window.Quarto = {
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>ndd <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;ndd.csv&quot;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="fit-the-model-with-brms" class="level2">
-<h2 class="anchored" data-anchor-id="fit-the-model-with-brms">Fit the model with brms</h2>
+<section id="optional-fit-the-model-with-brms" class="level2">
+<h2 class="anchored" data-anchor-id="optional-fit-the-model-with-brms">Optional: fit the model with brms</h2>
 <p><code>brms</code> translates the regression formula into Stan. This fits the same binomial logit model and independent Normal(0, 2.5) coefficient priors used below.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(brms)</span>
@@ -2389,8 +2391,8 @@ window.Quarto = {
 </div>
 <p><code>trials(n)</code> supplies the seedling count. <code>cons</code> predicts survival on the logit scale. The intercept is included automatically. <code>center=FALSE</code> keeps its prior at <code>cons = 0</code>, matching the Stan model. The coefficient names in brms are <code>b_Intercept</code> and <code>b_cons</code>.</p>
 </section>
-<section id="fit-the-model-with-stan" class="level2">
-<h2 class="anchored" data-anchor-id="fit-the-model-with-stan">Fit the model with Stan</h2>
+<section id="optional-fit-the-model-with-stan" class="level2">
+<h2 class="anchored" data-anchor-id="optional-fit-the-model-with-stan">Optional: fit the model with Stan</h2>
 <p>The supplied file <code>stan/logit_reg.stan</code> contains:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;               <span class="co">// number of quadrats</span></span>
@@ -2631,7 +2633,7 @@ window.Quarto = {
 <p>Follow the code and outputs in order: summary, diagnostics, traces, probability calculation and plotting. This is a guided walkthrough, not a worksheet with separate questions, written answers or timed tasks. Explain the coefficient rows and table columns directly, then connect beta’s sign to the curve.</p>
 <p>The coefficient mean is not MLE or MAP, and posterior SD is not Monte Carlo standard error. The plot uses a posterior median; neither summary needs to represent one sampled coefficient pair. Its credible intervals are pointwise, not a simultaneous interval for the entire curve or a predictive interval for survivor counts. Do not summarise alpha and beta separately before transforming.</p>
 <p>The root exercise uses CmdStan <code>$summary()</code> and brms <code>summary()</code>. Our stored file is a list of posterior draws and diagnostics, so <code>summarise_draws()</code> supplies the corresponding coefficient table. <code>summary(fit)</code> would describe the list. The prepared result corresponds to the supplied CSV and Stan model. If either is changed, fit the changed model rather than reusing the prepared result.</p>
-<p>Also check parameter-level diagnostics including <code>lp__</code>, treedepth, E-BFMI and Monte Carlo precision for the intended quantities. Do not copy the root file’s automatic good/bad classifications or its E-BFMI quality scale. Computation and ecological model appropriateness are different issues. PPC stays optional.</p>
+<p>Also check parameter-level diagnostics including <code>lp__</code>, treedepth, E-BFMI and Monte Carlo precision for the intended quantities. Do not copy the root file’s automatic good/bad classifications or its E-BFMI quality scale. Computation and ecological model appropriateness are different issues. The lecture includes one existing PPC figure; predictive simulation details remain optional reference.</p>
 <section id="choosing-the-fitting-route" class="level2">
 <h2 class="anchored" data-anchor-id="choosing-the-fitting-route">Choosing the fitting route</h2>
 <p>Use either live fitting section when the prepared environment and class pace permit. Run just one of the three result-loading chunks. Only the prepared result is executed when rendering the handout; live-result chunks have <code>eval=FALSE</code>. Do not use stored diagnostics to validate a new fit.</p>

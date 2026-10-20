@@ -45,6 +45,11 @@ $\mu\sim\mathcal{N}(0,5)$ and
 $\sigma\sim\operatorname{HalfNormal}(0,1)$, on the logit scale.
 Univariate Normal distributions use standard deviations as their second arguments.
 
+**Core:** read the mother-tree model and prepared results, then follow the three
+regression structures. Running the supplied code is optional.
+
+**Optional reference:** new fitting and the complete second regression analysis.
+
 ## Packages and data
 
 ```{r setup}
@@ -117,7 +122,7 @@ the half-Normal prior. Its scale describes between-tree variation in logit
 intercepts, not variation in the observed survivor counts.
 `p = inv_logit(z)` returns tree survival probabilities for each posterior draw.
 
-## Fit the model with Stan
+## Optional: fit the model with Stan
 
 The data list connects the observed counts to Stan's data block.
 
@@ -358,6 +363,9 @@ within species; wood density is a species-level trait, constant within species.
 The lecture uses abundance in the same role as wood density here. The original
 allometry examples use the same hierarchy with a Normal observation model.
 
+**In class:** focus on the three model equations and formulas below. The simulation
+code and the complete saved-fit walkthrough are reference material for later reading.
+
 | Variable | Meaning |
 |---|---|
 | `x` | (Conspecific neighbours − 20) / 10; zero means 20 neighbours |
@@ -497,7 +505,7 @@ alone would give `x + x:u`. Slopes now pool toward the trait-dependent mean
 $\gamma_0+\gamma_1u_j$. Repeated quadrats help estimate slopes, but do not add
 independent species trait values.
 
-## Read the saved results
+## Optional walkthrough: read the saved regression results
 
 Load the three prepared Stan fits; no compilation or new sampling is needed.
 Population coefficients have Normal(0, 1.5) priors on the logit scale; group SDs
@@ -581,7 +589,7 @@ changes the expected density slope by this amount on the log-odds scale.
 This simulated example supports a weaker negative density response at higher
 wood density; it is not evidence about a real forest.
 
-## Compare survival curves
+## Optional walkthrough: compare fitted survival curves
 
 For each draw, calculate `plogis(alpha[j] + beta[j] * x)` before summarizing.
 The saved `alpha[j]` and `beta[j]` are total species coefficients. Using paired

@@ -31,17 +31,13 @@ DAY 2 SESSION PLAN: 90 minutes. Agreed CNDD example.
 Outcomes: read regression estimates and credible intervals; check sampling with
 numerical diagnostics and traces; draw and interpret the survival curve.
 Sampling diagnostics alone do not establish ecological model appropriateness.
-0-10 review/question; 10-25 binomial/logit/prior-implied survival curves; 25-40 model recap/MCMC/sampling purpose/draw-to-curve bridge;
-40-60 guided R walkthrough (summary/diagnostics/traces/regression plot);
-60-90 exercise questions/pace buffer and a brief Day 3 species preview. PPC and optional brms are instructor reference only.
+Core: binomial regression, sampling checks, paired draws and survival curves,
+the guided R walkthrough, and one existing PPC figure.
 No R or GLM prerequisites. Core uses supplied draws/figures; code execution is optional. brms fitting is optional instructor reference.
-Allow about 2 minutes within 25-40 for the MH idea, and about 2 minutes for the
-brief visual failed-chain comparison. Keep the model recap and joint-path
-discussion brief so the exercise still begins at 40 minutes.
-Explain the R code and outputs in the handout, then finish with a brief Day 3
-preview and questions. Coefficient/diagnostic recaps, new-group count
-prediction and PPC are optional reference only; do not refill the freed time
-with additional lecture content.
+Keep the MH idea and failed-chain contrast brief. Explain the R code and outputs
+in the handout, then read the existing PPC figure without a code walkthrough or
+additional exercise. Coefficient/diagnostic recaps, new-group count prediction,
+predictive simulation details and new fitting remain optional reference.
 If delayed, shorten the joint-posterior path discussion and species preview; Stan code is optional. Preserve the failed-chain contrast and interpretation of the regression outputs.
 -->
 
@@ -88,6 +84,11 @@ We keep the binomial model and add a predictor.
 - Read coefficient estimates and their credible intervals.
 - Check sampling with numerical diagnostics and trace plots.
 - Draw and interpret the fitted survival curve and its credible interval.
+
+::: small
+**Core:** regression results, sampling checks and one predictive-check figure.\
+**Optional reference:** new fitting and further computational or predictive details.
+:::
 
 ::: notes
 Read completed models and results together. Coding is optional.
@@ -153,9 +154,9 @@ $$s_i \sim \operatorname{Binomial}(n_i,p_i)$$
 Now let conspecific density $x_i$ predict $p_i$.
 
 ::: notes
-10-25 minutes: the same count model as Day 1. Within a quadrat assume a common
+The same count model as Day 1. Within a quadrat assume a common
 probability and conditional independence. Missing shared conditions can violate
-these assumptions. A model-checking example is available in Optional reference.
+these assumptions. A single PPC figure follows the regression walkthrough.
 :::
 
 ## A straight line and a probability curve
@@ -297,12 +298,12 @@ Prior — Before seeing data
 :::
 
 ::: updating-body
-$$\textcolor{#d95f02}{\alpha}\sim\operatorname{Normal}(0,2.5^2)$$
+$$\textcolor{#d95f02}{\alpha}\sim\operatorname{Normal}(0,2.5)$$
 
-$$\textcolor{#d95f02}{\beta}\sim\operatorname{Normal}(0,2.5^2)$$
+$$\textcolor{#d95f02}{\beta}\sim\operatorname{Normal}(0,2.5)$$
 
 ::: independent-note
-The priors are independent.
+The priors are independent. The second argument is the SD.
 :::
 :::
 :::
@@ -337,7 +338,7 @@ $$p(\textcolor{#d95f02}{\alpha,\beta}\mid\mathrm{data})$$
 Alpha and beta are the unknown coefficients. Alpha is log-odds at reference
 density x=0; beta changes log-odds per one SD of density. Neither coefficient
 is itself a probability or a percentage reduction.
-Here Normal(0,2.5^2) uses a variance as its second argument: SD is 2.5.
+Here Normal(0,2.5) uses the SD as its second argument, as throughout the course.
 The two independent priors are unchanged and match stan/logit_reg.stan and the
 stored fit, whose normal(0,2.5) syntax uses an SD. Do not square the Stan SD.
 Read left to right: the priors describe uncertainty before seeing data; the
@@ -425,8 +426,8 @@ ggplot(slope_examples, aes(x, p, colour = effect, linetype = effect)) +
 ::: small
 $$
 \begin{aligned}
-\text{Very diffuse:}\quad &\beta\sim\mathcal N(0,10^8)\\[6pt]
-\text{Weakly informative:}\quad &\beta\sim\mathcal N(0,2.5^2)
+\text{Very diffuse:}\quad &\beta\sim\mathcal N(0,10^4)\\[6pt]
+\text{Weakly informative:}\quad &\beta\sim\mathcal N(0,2.5)
 \end{aligned}
 $$
 :::
@@ -501,8 +502,8 @@ We use simulation to approximate the posterior.
 
 ::: notes
 The right figure compares prior shapes, before using observed outcomes.
-Normal(0,10^8) means variance 10^8 and SD 10000, not SD 10^8.
-Normal(0,2.5^2) means SD 2.5, matching the unchanged fitted-model slope prior.
+Normal(0,10^4) means SD 10000 and variance 10^8.
+Normal(0,2.5) means SD 2.5, matching the unchanged fitted-model slope prior.
 The horizontal range [-120,20] is deliberately zoomed in: most of the diffuse
 prior lies outside this window. These are relative densities f(beta)/f(0),
 not probability densities that integrate to one over the shown range.
@@ -857,10 +858,33 @@ the root exercise.qmd style: explain the table columns and actual results,
 then the diagnostics, traces and graph. No timed student tasks, separate
 questions, written responses or debrief cycle. Running code alongside the
 instructor is optional; the rendered copy and result sheet contain the outputs.
-Planning allowance is 40-60 minutes, with 60-70 available for pace/questions.
 Keep read_csv(), readRDS(), summarise_draws(), mcmc_trace(), plogis(), quantile()
 and ggplot() visible rather than hiding analysis in course-specific helpers.
-PPC and repeated table slides remain optional. Finish with a brief Day 3 preview.
+Return to the single PPC figure after the walkthrough. Repeated table slides and
+predictive simulation details remain optional. Keep time for questions.
+:::
+
+## Does the density pattern look compatible?
+
+```{r check-pattern, fig.width=12, fig.height=3.9}
+plot_cndd_check(replicates, ndd) +
+  labs(x = "Conspecific density") +
+  labs(
+    y = "Survival\nproportion",
+    subtitle = "Open: observed. Orange: 95% predictive intervals."
+  )
+```
+
+Compare observed proportions with replicated data at the same density and seedling count.
+
+::: notes
+A brief figure-reading example after the regression walkthrough. Use the existing
+figure without an additional exercise or a predictive-code demonstration.
+The intervals concern replicated proportions at observed n_i, not uncertainty
+about p_i alone. Binomial variation is included. Inspect the density pattern and
+variation; an occasional point outside an interval is not by itself a failure.
+These are simulated teaching data. Similar patterns do not prove the model
+correct, and this check is separate from MCMC diagnostics.
 :::
 
 ## Tomorrow: species may differ
@@ -892,38 +916,13 @@ Repeat across posterior draws: **posterior predictive checking**.
 ::: notes
 Use one paired draw for ALL quadrats in a replicated data set, then repeat with
 other draws. Replicated survivor counts include binomial variation at the observed n_i.
-Optional instructor reference only; omit from the core lecture. Use this if
-a later discussion specifically calls for a posterior predictive example.
+Optional explanation of the generation behind the single core PPC figure.
+Use this only if a later discussion calls for more detail.
 Generate binomial survivor counts directly at each observed density and seedling
 count. This includes binomial variation as well as uncertainty about probability.
 It checks the data model, not whether the sampler mixed.
 No new inference is run. The equations are available in the appendix.
 Source: https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html
-:::
-
-## Does the density pattern look compatible? {visibility="uncounted"}
-
-```{r check-pattern, fig.width=12, fig.height=3.9}
-plot_cndd_check(replicates, ndd) +
-  labs(x = "Conspecific density") +
-  labs(
-    y = "Survival\nproportion",
-    subtitle = "Open: observed. Orange: 95% predictive intervals."
-  )
-```
-
-- Does the model reproduce the change in survival across densities?
-- Are observations consistently higher or lower than predicted in part of the density range?
-
-::: notes
-The intervals concern replicated proportions at observed n_i, not uncertainty
-about p_i alone. Some points can lie outside a 95% interval without indicating a
-systematic failure; do not count every outside point as a model failure.
-Look across the density range for a pattern the model misses. These data were
-generated from the simple model, so do not promise a visible mismatch. Similar
-patterns do not prove that the model is correct. Ask what omitted conditions,
-such as light or soil, might matter if using this optional example.
-The SD-based comparison is an optional reference, not part of this introduction.
 :::
 
 ## Read the regression table {visibility="uncounted"}

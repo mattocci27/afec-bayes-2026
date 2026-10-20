@@ -1,9 +1,16 @@
 # AFEC 2026: course restructuring plan (agreed direction)
 
-Updated 2026-10-20. The current pacing review and cross-day advancement rules are
+Updated 2026-10-20. The current core/optional scope and cross-day advancement rules are
 in [the instructor guide](instructor.html#revised-pacing-and-advancing-across-days).
 They supersede older fixed timing tables below; participant materials retain no
 time allocations. Subsequent Day 2 content decisions are recorded in Section 4.
+
+The latest decision limits this revision to consistent Normal(mean, SD) notation,
+one existing Day 2 PPC figure in the main lecture, and clear core/optional labels.
+The course builds understanding of Bayesian thinking and a foundation for further
+learning. Understanding can be followed through natural lecture questions;
+additional written prompts, assessment criteria and a detailed lesson timetable
+are not part of this revision. The PPC figure adds no code or exercise.
 
 This proposal reflects the agreed direction: prioritize concepts, figure
 interpretation and connections to research. Day 1 has one practical activity,
@@ -186,6 +193,12 @@ without separate timed tasks or an answer-checking session. For the current
 detailed sequence and explanations, see `classroom/instructor.md` and
 `day2/exercise.qmd`. The earlier proposal below is retained as design history;
 do not restore its extra activities or lengthy instructions to the student copy.
+
+**Final scope decision, same day:** include only the existing density-pattern PPC
+figure in the main lecture. Read it briefly after the regression walkthrough;
+no predictive code, additional exercise or written understanding-check task is
+added. The other PPC material stays optional. This supersedes the earlier
+decision above to keep every PPC slide outside the main sequence.
 
 The main example is binomial logistic regression for CNDD. Keep the seedling
 survival context from Day 1 while moving from a single survival probability to
@@ -432,4 +445,4 @@ solutions in `dayN/exercise.qmd`, generated `dayN/exercise-student.qmd`, and off
 results in `dayN/results.qmd`. Keep the schedule in `classroom/instructor.md` and
 distribution in `dist/afec-classroom-materials.zip`. Day 2 is centred on CNDD,
 a short Normal-regression prior-scale explanation and a guided regression
-walkthrough; PPC remains optional under the latest decisions.
+walkthrough and one existing PPC figure; predictive simulation details remain optional.

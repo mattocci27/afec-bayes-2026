@@ -97,7 +97,7 @@ source(here::here("R/slides_setup.R"))
 ::: fragment
 ::: small
 - Each day: short lectures + one exercise in the browser-based R environment.
-- The goal is to explain Bayesian ideas, read figures and connect models to ecological questions.
+- The goal is to understand Bayesian ideas in ecology and build a foundation for further learning.
 - Day 1: calculate a posterior directly. Days 2–3: use supplied posterior draws.
   The instructor may demonstrate live sampling.
 :::
@@ -174,6 +174,11 @@ On Day 3, survival rates vary among mother trees and species.
 
 - Explain how the prior and likelihood combine to give the posterior.
 - Describe how the data and prior affect the estimate and its uncertainty.
+
+::: small
+**Core:** Bayesian updating and the seedling comparison.\
+**Optional reference:** extra calculations, Stan code and sampler algorithms.
+:::
 
 ::: notes
 Ask for explanations in words. Independent implementation is an optional extension.
@@ -1062,7 +1067,7 @@ If time is short, show the histogram and state the summaries orally.
 
 ::: fragment
 **Day 2**: does survival probability change with conspecific density?
-We will read a fitted survival curve, make predictions and check the model.
+We will read a fitted survival curve and compare the model with observations.
 :::
 
 ::: notes

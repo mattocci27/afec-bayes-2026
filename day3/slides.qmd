@@ -77,6 +77,11 @@ idea of information sharing easier to see. We return to species CNDD later.
 
 A **hierarchical model** uses data from all groups to estimate each group's parameters.
 
+::: small
+**Core:** mother-tree pooling and the three regression structures.\
+**Optional reference:** a full second analysis, new fitting and allometry.
+:::
+
 ::: notes
 First use the mother-tree binomial model with no density predictor to focus on
 information sharing. Later extend the hierarchy to regression coefficients.
@@ -466,13 +471,9 @@ in this in-sample check does not establish adequacy of every model assumption.
 
 $$\operatorname{logit}(p_j)=\alpha_j$$
 
-One survival probability per group, with no density predictor.
-
 **Now: intercept + density effect**
 
 $$\operatorname{logit}(p_{ij})=\alpha_j+{\color{#d95f02}{\beta_j x_{ij}}}$$
-
-Adding density lets survival probability change within each group.
 
 :::
 ::: {.column width="55%"}
@@ -615,26 +616,15 @@ The model asks about an association. It alone does not establish the cause of ra
 
 ## Ecological reasons to share information
 
-Which trees or species belong in a common group distribution?
+Which trees or species should share information in a hierarchical model?
 
-- Similarity needs an ecological argument.
-- Measured group differences can help explain systematic variation.
-- Checking by group can reveal patterns hidden in overall summaries.
+- Groups should be biologically comparable.
+- Species traits can explain systematic differences among groups.
+- Partial pooling depends on assumptions about how groups vary.
 
 ::: notes
 A hierarchical model is not automatically appropriate because a grouping label
 exists. Discuss shared habitat, census interval and missing predictors.
-:::
-
-## Your own research
-
-Name a grouping and a quantity that may vary among its groups.
-
-What would justify sharing information, and what predicted pattern would you check?
-
-::: notes
-pairs explain one application in words. Ask two pairs to share.
-This is reflection rather than another implementation exercise.
 :::
 
 ## Three days of Bayesian thinking

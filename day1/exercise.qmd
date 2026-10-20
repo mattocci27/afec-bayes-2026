@@ -33,6 +33,9 @@ theme_set(theme_bw(base_size = 14))
 
 # Core exercise: more seedlings, how much uncertainty?
 
+**Core:** compare posterior uncertainty for two survey sizes using the supplied
+code or result figures. Changing the prior and fitting models are optional extensions.
+
 The code below is a starting example: 2 survivors out of 5 seedlings.
 
 ```{r core-data-comparison, fig.height=3.4}

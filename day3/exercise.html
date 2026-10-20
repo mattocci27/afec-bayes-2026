@@ -2296,7 +2296,7 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#packages-and-data" id="toc-packages-and-data" class="nav-link" data-scroll-target="#packages-and-data">Packages and data</a></li>
   <li><a href="#stan-model" id="toc-stan-model" class="nav-link" data-scroll-target="#stan-model">Stan model</a></li>
-  <li><a href="#fit-the-model-with-stan" id="toc-fit-the-model-with-stan" class="nav-link" data-scroll-target="#fit-the-model-with-stan">Fit the model with Stan</a></li>
+  <li><a href="#optional-fit-the-model-with-stan" id="toc-optional-fit-the-model-with-stan" class="nav-link" data-scroll-target="#optional-fit-the-model-with-stan">Optional: fit the model with Stan</a></li>
   <li><a href="#posterior-draws" id="toc-posterior-draws" class="nav-link" data-scroll-target="#posterior-draws">Posterior draws</a></li>
   <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
   <li><a href="#sampling-diagnostics" id="toc-sampling-diagnostics" class="nav-link" data-scroll-target="#sampling-diagnostics">Sampling diagnostics</a></li>
@@ -2309,8 +2309,8 @@ window.Quarto = {
   <li><a href="#model-1-varying-intercepts" id="toc-model-1-varying-intercepts" class="nav-link" data-scroll-target="#model-1-varying-intercepts">Model 1: Varying intercepts</a></li>
   <li><a href="#model-2-varying-intercepts-and-slopes" id="toc-model-2-varying-intercepts-and-slopes" class="nav-link" data-scroll-target="#model-2-varying-intercepts-and-slopes">Model 2: Varying intercepts and slopes</a></li>
   <li><a href="#model-3-group-level-predictors" id="toc-model-3-group-level-predictors" class="nav-link" data-scroll-target="#model-3-group-level-predictors">Model 3: Group-level predictors</a></li>
-  <li><a href="#read-the-saved-results" id="toc-read-the-saved-results" class="nav-link" data-scroll-target="#read-the-saved-results">Read the saved results</a></li>
-  <li><a href="#compare-survival-curves" id="toc-compare-survival-curves" class="nav-link" data-scroll-target="#compare-survival-curves">Compare survival curves</a></li>
+  <li><a href="#optional-walkthrough-read-the-saved-regression-results" id="toc-optional-walkthrough-read-the-saved-regression-results" class="nav-link" data-scroll-target="#optional-walkthrough-read-the-saved-regression-results">Optional walkthrough: read the saved regression results</a></li>
+  <li><a href="#optional-walkthrough-compare-fitted-survival-curves" id="toc-optional-walkthrough-compare-fitted-survival-curves" class="nav-link" data-scroll-target="#optional-walkthrough-compare-fitted-survival-curves">Optional walkthrough: compare fitted survival curves</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -2357,6 +2357,8 @@ s_j \sim \operatorname{Binomial}(n_j,p_j), \qquad
 z_j\sim\mathcal{N}(\mu,\sigma).
 </span></p>
 <p>There is no density predictor in this model: each tree has one intercept and one survival probability. The shared centre <span class="math inline">\mu</span> and between-tree SD <span class="math inline">\sigma</span> are estimated along with the tree intercepts. The priors are <span class="math inline">\mu\sim\mathcal{N}(0,5)</span> and <span class="math inline">\sigma\sim\operatorname{HalfNormal}(0,1)</span>, on the logit scale. Univariate Normal distributions use standard deviations as their second arguments.</p>
+<p><strong>Core:</strong> read the mother-tree model and prepared results, then follow the three regression structures. Running the supplied code is optional.</p>
+<p><strong>Optional reference:</strong> new fitting and the complete second regression analysis.</p>
 <section id="packages-and-data" class="level2">
 <h2 class="anchored" data-anchor-id="packages-and-data">Packages and data</h2>
 <div class="cell" data-layout-align="center">
@@ -2425,8 +2427,8 @@ z_j\sim\mathcal{N}(\mu,\sigma).
 <p>The pair <code>z_tilde ~ std_normal()</code> and <code>z = mu + sigma * z_tilde</code> implies <span class="math inline">z_j\sim\mathcal{N}(\mu,\sigma)</span> conditional on the shared parameters. This is a <strong>non-centered parameterization</strong> of the same group model. All trees inform <code>mu</code> and <code>sigma</code>, connecting their intercept estimates. Non-centering changes how the model is represented for computation; it does not add a density effect.</p>
 <p>Because <code>sigma</code> is constrained to be positive, <code>sigma ~ std_normal()</code> specifies the half-Normal prior. Its scale describes between-tree variation in logit intercepts, not variation in the observed survivor counts. <code>p = inv_logit(z)</code> returns tree survival probabilities for each posterior draw.</p>
 </section>
-<section id="fit-the-model-with-stan" class="level2">
-<h2 class="anchored" data-anchor-id="fit-the-model-with-stan">Fit the model with Stan</h2>
+<section id="optional-fit-the-model-with-stan" class="level2">
+<h2 class="anchored" data-anchor-id="optional-fit-the-model-with-stan">Optional: fit the model with Stan</h2>
 <p>The data list connects the observed counts to Stan’s data block.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>stan_data <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
@@ -2710,6 +2712,7 @@ z_j\sim\mathcal{N}(\mu,\sigma).
 <section id="data" class="level2">
 <h2 class="anchored" data-anchor-id="data">Data</h2>
 <p>Use one simulated data set for all three models: 12 species with 3–24 quadrats each. Each row records <code>suv</code> survivors out of <code>n</code> seedlings. Local density varies within species; wood density is a species-level trait, constant within species. The lecture uses abundance in the same role as wood density here. The original allometry examples use the same hierarchy with a Normal observation model.</p>
+<p><strong>In class:</strong> focus on the three model equations and formulas below. The simulation code and the complete saved-fit walkthrough are reference material for later reading.</p>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -2839,8 +2842,8 @@ s_{ij}\sim\operatorname{Binomial}(n_{ij},p_{ij}),\qquad
 </div>
 <p>The <code>u</code> main effect comes from the intercept equation; a trait-dependent slope alone would give <code>x + x:u</code>. Slopes now pool toward the trait-dependent mean <span class="math inline">\gamma_0+\gamma_1u_j</span>. Repeated quadrats help estimate slopes, but do not add independent species trait values.</p>
 </section>
-<section id="read-the-saved-results" class="level2">
-<h2 class="anchored" data-anchor-id="read-the-saved-results">Read the saved results</h2>
+<section id="optional-walkthrough-read-the-saved-regression-results" class="level2">
+<h2 class="anchored" data-anchor-id="optional-walkthrough-read-the-saved-regression-results">Optional walkthrough: read the saved regression results</h2>
 <p>Load the three prepared Stan fits; no compilation or new sampling is needed. Population coefficients have Normal(0, 1.5) priors on the logit scale; group SDs have HalfNormal(0, 0.7) priors. Models 2–3 use LKJ(2) for the residual correlation. These scales are tied to <code>x</code> and <code>u</code> above and should be reconsidered for new data.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>regression_fits <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
@@ -2947,8 +2950,8 @@ s_{ij}\sim\operatorname{Binomial}(n_{ij},p_{ij}),\qquad
 </div>
 <p>The median interaction is 0.48 (95% credible interval [0.13, 0.84]). A one-SD increase in wood density changes the expected density slope by this amount on the log-odds scale. This simulated example supports a weaker negative density response at higher wood density; it is not evidence about a real forest.</p>
 </section>
-<section id="compare-survival-curves" class="level2">
-<h2 class="anchored" data-anchor-id="compare-survival-curves">Compare survival curves</h2>
+<section id="optional-walkthrough-compare-fitted-survival-curves" class="level2">
+<h2 class="anchored" data-anchor-id="optional-walkthrough-compare-fitted-survival-curves">Optional walkthrough: compare fitted survival curves</h2>
 <p>For each draw, calculate <code>plogis(alpha[j] + beta[j] * x)</code> before summarizing. The saved <code>alpha[j]</code> and <code>beta[j]</code> are total species coefficients. Using paired draws preserves their uncertainty and correlation.</p>
 <div class="cell" data-layout-align="center">
 <details class="code-fold">

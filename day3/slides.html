@@ -265,6 +265,10 @@ Masatoshi Katabuchi @ XTBG, CAS
 <li><strong>Regression relationships:</strong> extend the same idea to differences in intercepts and slopes among species.</li>
 </ol>
 <p>A <strong>hierarchical model</strong> uses data from all groups to estimate each group’s parameters.</p>
+<div class="small">
+<p><strong>Core:</strong> mother-tree pooling and the three regression structures.<br>
+<strong>Optional reference:</strong> a full second analysis, new fitting and allometry.</p>
+</div>
 <aside class="notes">
 <p>First use the mother-tree binomial model with no density predictor to focus on information sharing. Later extend the hierarchy to regression coefficients. This is a progression in model structure, not a claim that the first model falls outside the regression framework. Mother-tree data are different from Day 2’s quadrats. Species CNDD is a conceptual illustration; the allometry example uses its own simulated data and saved hierarchical regression fit.</p>
 <style type="text/css">
@@ -766,10 +770,8 @@ p_j\text{ drawn from the posterior}</span></p>
 <div class="column" style="width:45%;">
 <p><strong>So far: intercept only</strong></p>
 <p><span class="math display">\operatorname{logit}(p_j)=\alpha_j</span></p>
-<p>One survival probability per group, with no density predictor.</p>
 <p><strong>Now: intercept + density effect</strong></p>
 <p><span class="math display">\operatorname{logit}(p_{ij})=\alpha_j+{\color{#d95f02}{\beta_j x_{ij}}}</span></p>
-<p>Adding density lets survival probability change within each group.</p>
 </div><div class="column" style="width:55%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -892,32 +894,14 @@ p_j\text{ drawn from the posterior}</span></p>
 </section>
 <section id="ecological-reasons-to-share-information" class="slide level2">
 <h2>Ecological reasons to share information</h2>
-<p>Which trees or species belong in a common group distribution?</p>
+<p>Which trees or species should share information in a hierarchical model?</p>
 <ul>
-<li>Similarity needs an ecological argument.</li>
-<li>Measured group differences can help explain systematic variation.</li>
-<li>Checking by group can reveal patterns hidden in overall summaries.</li>
+<li>Groups should be biologically comparable.</li>
+<li>Species traits can explain systematic differences among groups.</li>
+<li>Partial pooling depends on assumptions about how groups vary.</li>
 </ul>
 <aside class="notes">
 <p>A hierarchical model is not automatically appropriate because a grouping label exists. Discuss shared habitat, census interval and missing predictors.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="your-own-research" class="slide level2">
-<h2>Your own research</h2>
-<p>Name a grouping and a quantity that may vary among its groups.</p>
-<p>What would justify sharing information, and what predicted pattern would you check?</p>
-<aside class="notes">
-<p>pairs explain one application in words. Ask two pairs to share. This is reflection rather than another implementation exercise.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
