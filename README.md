@@ -12,8 +12,6 @@ uncertainty and build a foundation for further learning.
 **Website:** <https://mattocci27.github.io/afec-bayes-2026/>\
 **Participant download:** [All materials, code, data and prepared results (ZIP)](https://mattocci27.github.io/afec-bayes-2026/downloads/afec-classroom-materials.zip)
 
-*Website activation is in progress; use the supplied participant ZIP until it is live.*
-
 | Session | Topic | Source materials |
 |---|---|---|
 | Day 1 | Prior, likelihood and posterior; sample size and uncertainty | [day1/](day1/) |
