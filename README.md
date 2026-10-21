@@ -59,11 +59,25 @@ or Docker on participants' computers is not required.
 ```bash
 make day1       # Render one day's materials using existing fits (or day2 / day3).
 make materials  # Render all days and refresh dist/afec-classroom-materials.zip.
-python3 scripts/build_pages.py --output /path/to/empty-directory
+make site       # Rebuild materials/ZIP and stage the website in dist/site/.
+make publish    # Rebuild, commit website changes and push origin/gh-pages.
 ```
 
-Publish the staged website to the `gh-pages` branch. Website staging uses existing
-HTML and the participant ZIP. Daily builds do not refresh that ZIP. Model refitting
+`make site` is local only. Inspect `dist/site/index.html` before publishing if
+desired. `make publish` uses your Git identity and access to `origin`; the
+`gh-pages` branch must already exist. It preserves that branch's history and
+pushes normally, so a concurrent update is rejected rather than overwritten.
+GitHub Pages deploys after the push; deployment may take a little time.
+No commit is created when the staged website matches the published branch.
+
+Both commands use saved fits and include current working-tree edits in the
+rendered materials. They leave source commits and pushes to you, and do not
+use or change the existing `_site/` checkout. The public website includes the
+participant pages and ZIP, with instructor documents excluded.
+
+For staging an already-built participant ZIP without rendering, use
+`python3 scripts/build_pages.py --output /path/to/empty-directory`.
+Daily builds do not refresh the all-days ZIP. Model refitting
 is only needed when the model, data or sampling settings change; see
 `R/precompute_fits.R`. `_targets.R` is reserved for legacy animation generation.
 

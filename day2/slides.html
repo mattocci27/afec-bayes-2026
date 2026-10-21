@@ -321,13 +321,24 @@ Masatoshi Katabuchi @ XTBG, CAS
 </section>
 <section id="the-same-binomial-observation-model" class="slide level2">
 <h2>The same binomial observation model</h2>
+<div class="columns">
+<div class="column" style="width:55%;">
 <p><span class="math display">s_i \sim \operatorname{Binomial}(n_i,p_i)</span></p>
 <ul>
 <li><span class="math inline">i</span>: a quadrat.</li>
-<li><span class="math inline">n_i</span>: number of seedlings, <span class="math inline">s_i</span>: survivors.</li>
-<li><span class="math inline">p_i</span>: survival probability in that quadrat.</li>
+<li><span class="math inline">n_i</span>: number of seedlings of the focal species.</li>
+<li><span class="math inline">s_i</span>: number of survivors.</li>
+<li><span class="math inline">p_i</span>: survival probability in quadrat <span class="math inline">i</span>.</li>
 </ul>
 <p>Now let conspecific density <span class="math inline">x_i</span> predict <span class="math inline">p_i</span>.</p>
+</div><div class="column" style="width:45%;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../images/panama_seedlings.jpg" style="width:100.0%" alt="Seedlings growing among leaf litter on a forest floor in Panama."></p>
+<figcaption>Seedlings in a forest understory</figcaption>
+</figure>
+</div>
+</div></div>
 <aside class="notes">
 <p>The same count model as Day 1. Within a quadrat assume a common probability and conditional independence. Missing shared conditions can violate these assumptions. A single PPC figure follows the regression walkthrough.</p>
 <style type="text/css">
@@ -387,7 +398,7 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
 <ul>
 <li><span class="math inline">n_i</span>: number of seedlings</li>
 <li><span class="math inline">s_i</span>: number of survivors</li>
-<li><span class="math inline">x_i</span>: scaled conspecific density</li>
+<li><span class="math inline">x_i</span>: conspecific density</li>
 </ul>
 </div><div class="column" style="width:58%;">
 <p><strong>Statistical model</strong></p>
@@ -400,7 +411,7 @@ p_i=\operatorname{logit}^{-1}(\alpha+\beta x_i)</span></p>
 </div>
 </div></div>
 <div class="model-takeaway">
-<p>Survival probability depends on conspecific density.</p>
+
 </div>
 <aside class="notes">
 <p>25-40 minutes: model recap, MCMC introduction, sampling checks and curve interpretation. Focus on the observed/unknown distinction: n_i, s_i and x_i are observed in each quadrat. The orange alpha and beta determine the survival curve. p_i is calculated from those coefficients and x_i. The likelihood assumes common p and conditional independence within each quadrat. Introduce the unknowns and priors on the next slide. Connect to Day 1: hold the observed data fixed and compare coefficient pairs. The binomial probabilities across quadrats, with p_i supplied by the logit relation, define the likelihood as a function of alpha and beta. The link equation alone is not the likelihood.</p>
@@ -588,8 +599,8 @@ likelihood</p>
           display:block!important;
       }</style></aside>
 </section>
-<section id="mcmc-samples-pairs-of-coefficients" class="slide level2">
-<h2>MCMC samples pairs of coefficients</h2>
+<section id="mcmc-samples-multiple-parameters-jointly" class="slide level2">
+<h2>MCMC samples multiple parameters jointly</h2>
 <div class="columns">
 <div class="column" style="width:45%;">
 <p><strong>One parameter:</strong> save a value of <span class="math inline">p</span>.</p>
@@ -625,8 +636,7 @@ likelihood</p>
 <p>Compare several chains before using the draws for survival predictions.</p>
 
 <img data-src="slides_files/figure-revealjs/trace-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><ul>
-<li>Do the coloured chains explore the same range?</li>
-<li>Is there a lasting drift or separation?</li>
+<li>Are the chains mixing well?</li>
 </ul>
 <aside class="notes">
 <p>First identify the horizontal axis (saved sampling step), vertical axis (coefficient value), and colours (chains). These are the actual post-warmup stored draws. Look for persistent drift or between-chain offsets, rather than interpreting any single jump. Overlap is encouraging but does not establish convergence by itself. The instructor also checks numerical diagnostics; overlap alone is insufficient. The diagnostic comparison is in Optional reference for later questions. Transition orally: more complex models or problems in model formulation can make sampling difficult. Show a separate teaching failure as a short caution; it does not replace the CNDD fit and is not a test of ecological correctness. Source: https://mc-stan.org/learn-stan/diagnostics-warnings.html</p>
@@ -802,6 +812,78 @@ likelihood</p>
           display:block!important;
       }</style></aside>
 </section>
+<section id="stan-a-modern-languagesoftware-for-bayesian-modeling" class="slide level2">
+<h2>Stan: A modern language/software for Bayesian modeling</h2>
+<style>
+#stan-a-modern-languagesoftware-for-bayesian-modeling pre code {
+  font-size: 0.8em;
+  line-height: 1.2;
+}
+</style>
+<div class="columns">
+<div class="column" style="width:35%;">
+<p><img src="../images/stan_logo.png" width="180" alt="Stan Logo"></p>
+<div class="cell" data-layout-align="center" data-output.var="bernoulli">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
+<span id="cb1-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb1-3"><a href="" aria-label="3"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; y;</span>
+<span id="cb1-4"><a href="" aria-label="4"></a>}</span>
+<span id="cb1-5"><a href="" aria-label="5"></a><span class="kw">parameters</span> {</span>
+<span id="cb1-6"><a href="" aria-label="6"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; theta;</span>
+<span id="cb1-7"><a href="" aria-label="7"></a>}</span>
+<span id="cb1-8"><a href="" aria-label="8"></a><span class="kw">model</span> {</span>
+<span id="cb1-9"><a href="" aria-label="9"></a>  <span class="co">// uniform prior on interval 0,1</span></span>
+<span id="cb1-10"><a href="" aria-label="10"></a>  theta ~ beta(<span class="dv">1</span>, <span class="dv">1</span>);</span>
+<span id="cb1-11"><a href="" aria-label="11"></a>  <span class="co">// likelihood</span></span>
+<span id="cb1-12"><a href="" aria-label="12"></a>  y ~ bernoulli(theta);</span>
+<span id="cb1-13"><a href="" aria-label="13"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div><div class="column" style="width:65%;">
+<ul>
+<li class="fragment"><p>🧑🏻‍💻 <strong>Bayesian Modeling</strong></p>
+<ul>
+<li class="fragment">Stan uses the No-U-Turn sampler (NUTS), a variant of Hamiltonian Monte Carlo (HMC), which is efficient for complex models with many parameters.</li>
+</ul></li>
+<li class="fragment"><p>⚙️ <strong>Flexible and Scalable</strong></p>
+<ul>
+<li class="fragment">You can use Stan for many types of models, from simple regressions to multi-level models including time-series, spatial, SEM, and more.</li>
+</ul></li>
+<li class="fragment"><p>💻 <strong>Multiplatform</strong></p>
+<ul>
+<li class="fragment">Stan works with R, Python, Julia, and more. It also has tools for checking models and making visualizations.</li>
+</ul></li>
+</ul>
+</div></div>
+<aside class="notes">
+<p>Brief introduction (about 1 minute); no compilation or live sampling. The small Stan example records each seedling as a 0/1 outcome, with a common survival probability theta. Summing those independent Bernoulli outcomes gives the binomial count model from Day 1. Today’s regression extends the survival probability to depend on density. Do not walk through every code line here.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="stan-from-r" class="slide level2" data-background-image="../images/cmdstanr_brms.png" data-background-size="contain" data-background-color="white">
+<h2></h2>
+<aside class="notes">
+<p>Brief interface comparison (about 1 minute). cmdstanr uses handwritten Stan; brms generates Stan code from an R model specification. Both use Stan for sampling. The diagram’s brm(y ~ x) is schematic; our binomial survival model also needs survivor/trial counts, the binomial family and priors. Use the supplied handout for the actual course model, not the schematic call as executable course code. If short of time, state the interface distinction briefly and continue to the walkthrough. No participant installation or new inference is required.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
 <section id="r-walkthrough-survival-regression" class="slide level2" data-background-color="#f3e8f5">
 <h2>R walkthrough: survival regression</h2>
 <p><code>day2/exercise-student.qmd</code></p>
@@ -863,371 +945,7 @@ likelihood</p>
           display:block!important;
       }</style></aside>
 </section>
-<section>
-<section id="optional-reference" class="title-slide slide level1 center" data-visibility="uncounted">
-<h1>Optional reference</h1>
-
-</section>
-<section id="can-our-fitted-model-reproduce-the-observed-data" class="slide level2" data-visibility="uncounted">
-<h2>Can our fitted model reproduce the observed data?</h2>
-<p>We checked the sampling. Now check the model against observations.</p>
-<ol type="1">
-<li>Keep each quadrat’s <strong>observed density and seedling count</strong>.</li>
-<li>Use a posterior curve to calculate its survival probability.</li>
-<li>Simulate survivors and compare the patterns with the observations.</li>
-</ol>
-<p>Repeat across posterior draws: <strong>posterior predictive checking</strong>.</p>
-<aside class="notes">
-<p>Use one paired draw for ALL quadrats in a replicated data set, then repeat with other draws. Replicated survivor counts include binomial variation at the observed n_i. Optional explanation of the generation behind the single core PPC figure. Use this only if a later discussion calls for more detail. Generate binomial survivor counts directly at each observed density and seedling count. This includes binomial variation as well as uncertainty about probability. It checks the data model, not whether the sampler mixed. No new inference is run. The equations are available in the appendix. Source: https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="read-the-regression-table" class="slide level2" data-visibility="uncounted">
-<h2>Read the regression table</h2>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<table class="table caption-top" style="font-size: 34px; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">variable</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">mean</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">sd</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">2.5%</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">97.5%</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">alpha</td>
-<td style="text-align: right;">-0.750</td>
-<td style="text-align: right;">0.085</td>
-<td style="text-align: right;">-0.918</td>
-<td style="text-align: right;">-0.587</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">beta</td>
-<td style="text-align: right;">-0.837</td>
-<td style="text-align: right;">0.105</td>
-<td style="text-align: right;">-1.045</td>
-<td style="text-align: right;">-0.631</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<ul>
-<li><strong>mean:</strong> posterior mean. <strong>sd:</strong> uncertainty about the coefficient.</li>
-<li><strong>2.5%–97.5%:</strong> 95% credible interval.</li>
-</ul>
-<p>The density coefficient is negative. Does the survival curve agree?</p>
-<aside class="notes">
-<p>Optional reference only. Complete the core debrief in the exercise handout; use this slide only if a question requires revisiting the coefficient table. The negative beta interval excludes zero in this supplied fit. Alpha is baseline log-odds at density zero; beta changes log-odds per one SD of density, not a percent reduction. The means are not MLE or MAP. Posterior SD differs from Monte Carlo error and variation among seedlings. The interval is for the coefficient, not observations. Students should connect beta’s sign to their downward survival curve. This association does not establish a causal mechanism. Show the next diagnostic slide before accepting the coefficient interpretation.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="read-diagnostics-together-with-the-traces" class="slide level2" data-visibility="uncounted">
-<h2>Read diagnostics together with the traces</h2>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<table class="table caption-top" style="font-size: 34px; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">variable</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">rhat</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">ess_bulk</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">ess_tail</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">alpha</td>
-<td style="text-align: right;">1.001</td>
-<td style="text-align: right;">1854</td>
-<td style="text-align: right;">2260</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">beta</td>
-<td style="text-align: right;">1.001</td>
-<td style="text-align: right;">2066</td>
-<td style="text-align: right;">2228</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p>Post-warmup divergences: <strong>0</strong>.</p>
-<ul>
-<li>Do the chains agree, with enough sampling information?</li>
-<li>Do the trace plots support the numerical checks?</li>
-</ul>
-<p>Good sampling still needs a model check against observations.</p>
-<aside class="notes">
-<p>Optional reference only, not an extra debrief after the exercise. If needed, ask participants to name one visible feature alongside a numerical check. R-hat close to 1 and adequate bulk/tail ESS are encouraging; zero divergences alone is insufficient. For these four chains, R-hat &gt;1.01 or ESS &lt;400 are investigation guides, not automatic acceptance criteria. Instructor also checks treedepth, E-BFMI and Monte Carlo precision, including parameter-level lp__ diagnostics. No threshold memorisation or sampler repair is required. Now move from whether computation worked to whether this model can reproduce the observed quadrats.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="a-probability-still-allows-different-survivor-counts" class="slide level2" data-visibility="uncounted">
-<h2>A probability still allows different survivor counts</h2>
-<p><strong>Next question:</strong> how many of 20 new seedlings might survive?</p>
-
-<img data-src="slides_files/figure-revealjs/new-counts-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Both groups contain 20 seedlings. Density is the only condition that changes.</p>
-<aside class="notes">
-<p>Optional extension about predicting a new group. Omit from the main sequence. Both new-group prediction and posterior predictive checking are optional reference only. The core lecture ends with the exercise and a brief Day 3 preview. For each posterior pair, calculate p at each density and generate a Binomial(20,p) count. This incorporates uncertainty about p AND variation in counts given p. The saved fit is unchanged. Explain the two sources of uncertainty orally. This uses the same binomial generation as the optional PPC, but answers a different question about new groups rather than the observed quadrats.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="the-completed-model-in-stan" class="slide level2" data-visibility="uncounted">
-<h2>The completed model in Stan</h2>
-<div class="columns">
-<div class="column" style="width:55%;">
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb1-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
-<span id="cb1-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
-<span id="cb1-3"><a href="" aria-label="3"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n;</span>
-<span id="cb1-4"><a href="" aria-label="4"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; suv;</span>
-<span id="cb1-5"><a href="" aria-label="5"></a>  <span class="dt">vector</span>[N] cons;</span>
-<span id="cb1-6"><a href="" aria-label="6"></a>}</span>
-<span id="cb1-7"><a href="" aria-label="7"></a><span class="kw">parameters</span> {</span>
-<span id="cb1-8"><a href="" aria-label="8"></a>  <span class="dt">real</span> alpha;</span>
-<span id="cb1-9"><a href="" aria-label="9"></a>  <span class="dt">real</span> beta;</span>
-<span id="cb1-10"><a href="" aria-label="10"></a>}</span>
-<span id="cb1-11"><a href="" aria-label="11"></a><span class="kw">model</span> {</span>
-<span id="cb1-12"><a href="" aria-label="12"></a>  suv ~ binomial_logit(n, alpha + beta * cons);</span>
-<span id="cb1-13"><a href="" aria-label="13"></a>  alpha ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
-<span id="cb1-14"><a href="" aria-label="14"></a>  beta ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
-<span id="cb1-15"><a href="" aria-label="15"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div><div class="column" style="width:45%;">
-<ul>
-<li><strong>Data:</strong> seedlings, survivors and density.</li>
-<li><strong>Unknowns:</strong> intercept and density coefficient.</li>
-<li><strong>Assumptions:</strong> binomial survival, logit relationship and priors.</li>
-</ul>
-<p><code>binomial_logit</code> uses the straight line on the logit scale.</p>
-</div></div>
-<aside class="notes">
-<p>Optional reference for the model recap. Do not ask participants to edit or compile it. The stored fit has the same seeded data, model name and prior specification.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="when-sampling-fails-investigate-before-interpreting" class="slide level2" data-visibility="uncounted">
-<h2>When sampling fails, investigate before interpreting</h2>
-<p>In the failed example:</p>
-<p><span class="math display">\log(H_i)\sim\mathcal{N}(\alpha_1+\alpha_2+\beta x_i,\sigma)</span></p>
-<p>Adding 10 to <span class="math inline">\alpha_1</span> and subtracting 10 from <span class="math inline">\alpha_2</span> gives the same prediction.</p>
-<ul>
-<li><strong>Revise:</strong> use one intercept for this model; review scales and priors.</li>
-<li><strong>Refit and check:</strong> inspect traces and numerical diagnostics again.</li>
-<li><strong>Then:</strong> interpret estimates and check predictions against observations.</li>
-</ul>
-<aside class="notes">
-<p>Optional reference for questions after the core flow. H is tree height in metres, x=log(DBH / 40 cm), and sigma is the residual SD on the log-height scale. The independent intercept priors are Normal(0,1000), beta has Normal(0,2.5), and sigma has a positive-constrained Normal(0,1) prior. The likelihood is unchanged by the offset, although the prior density need not be. The data alone cannot distinguish the two intercepts. Removing the redundancy addresses this example’s cause. No corrected refit is shown here; do not claim that a repair has already passed diagnostics. More iterations alone are not a general solution. Other failures need their own investigation (coding, scaling, priors, parameterisation and sampler settings). Return to the original CNDD fit for all following survival curves and exercises. Sampling checks do not establish ecological adequacy. A posterior predictive example is available in Optional reference, outside the core session. Source: https://mc-stan.org/docs/stan-users-guide/problematic-posteriors.html</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="read-the-sampling-checks-together" class="slide level2" data-visibility="uncounted">
-<h2>Read the sampling checks together</h2>
-<p>Compare chain agreement (R-hat), sampling information (ESS), and sampler warnings.</p>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<table class="table caption-top" style="font-size: 27px; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">Check</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">CNDD</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">Failed example</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">R-hat (maximum)</td>
-<td style="text-align: left;">1.001</td>
-<td style="text-align: left;">2.543</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">ESS (minimum bulk / tail)</td>
-<td style="text-align: left;">1698 / 2123</td>
-<td style="text-align: left;">5 / 12</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Divergences</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: left;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Maximum treedepth hits</td>
-<td style="text-align: left;">0</td>
-<td style="text-align: left;">3693</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><strong>Zero divergences does not guarantee reliable sampling.</strong> Read the traces and numbers together.</p>
-<aside class="notes">
-<p>Optional instructor reference after the core exercise or in response to questions. Introduce each check in words before showing its values. Revisit both trace plots with this table; no single diagnostic is sufficient. Do not add this table as a required participant task or interrupt the first draw-to-curve explanation. R-hat compares within- and between-chain behavior. ESS accounts for dependence among draws; bulk and tail ESS address different aspects of the distribution. Divergences after warmup require investigation rather than being assumed harmless. Do not turn this into a threshold-memorisation task. Before class, also inspect parameter-level diagnostics, treedepth, E-BFMI and accuracy for quantities of interest. The failed run has high R-hat, very small ESS and many maximum-treedepth hits, despite zero divergences. Treedepth hits indicate the trajectory-length limit was reached; they are not divergent transitions. Do not simply increase the limit without investigating the model. These are different models/data, so the table illustrates warning patterns, not a controlled comparison of sampler settings. The full CNDD stored-fit summary is in the appendix and the result sheet. Source: https://mc-stan.org/learn-stan/diagnostics-warnings.html</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="full-computation-diagnostics" class="slide level2" data-visibility="uncounted">
-<h2>Full computation diagnostics</h2>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<table class="table caption-top" style="font-size: 25px; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">Diagnostic</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">Value</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">max_rhat</td>
-<td style="text-align: right;">1.001</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">min_bulk_ess</td>
-<td style="text-align: right;">1698.000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">min_tail_ess</td>
-<td style="text-align: right;">2123.000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">divergent</td>
-<td style="text-align: right;">0.000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">max_treedepth</td>
-<td style="text-align: right;">0.000</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">min_ebfmi</td>
-<td style="text-align: right;">1.030</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p>Read these with traces and the precision needed for the reported predictions.</p>
-</section>
-<section id="posterior-predictive-calculation" class="slide level2" data-visibility="uncounted">
-<h2>Posterior predictive calculation</h2>
-<p>For every paired posterior draw:</p>
-<p><span class="math display">p_i^{(m)}=\operatorname{logit}^{-1}(\alpha^{(m)}+\beta^{(m)}x_i),\qquad
-s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
-<p>Keep the observed <span class="math inline">x_i</span> and <span class="math inline">n_i</span> for every quadrat.</p>
-</section>
-<section id="optional-compare-variation-using-sd" class="slide level2" data-visibility="uncounted">
-<h2>Optional: compare variation using SD</h2>
-<p>Summarise variation across quadrats with one number: the <strong>standard deviation (SD)</strong>.</p>
-
-<img data-src="slides_files/figure-revealjs/check-spread-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>Is the observed SD within the range the model typically produces?</p>
-<aside class="notes">
-<p>Optional extension after explaining SD. The black line is ONE SD calculated from the observed survival proportions across quadrats, not the observed data themselves. For each replicated data set, calculate the same SD across the same quadrats; the orange histogram collects those simulated SDs. This compares one feature of the data and complements the main density-pattern check. It is not a posterior for the observed SD. These data were generated from the simple model; do not promise a mismatch or claim that agreement proves the model correct. Rounding the simulated predictor makes this illustrative, not an exact calibration experiment.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="optional-cndd-prior-curves" class="slide level2" data-visibility="uncounted">
-<h2>Optional: CNDD prior curves</h2>
-
-<img data-src="slides_files/figure-revealjs/prior-curves-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>Are the predicted survival probabilities plausible for this habitat and census period?</p>
-<aside class="notes">
-<p>The independent alpha and beta priors are Normal(0,2.5), with SD 2.5, as in stan/logit_reg.stan. They allow both signs and some extreme probability curves. A coefficient prior is interpreted relative to the predictor scale. These are prior-predictive probability curves; simulated survivor counts would add binomial variation. Do not label this prior universally weak or ecologically justified.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="probability-differences" class="slide level2" data-visibility="uncounted">
-<h2>Probability differences</h2>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="" aria-label="1"></a>p_low <span class="ot">&lt;-</span> <span class="fu">plogis</span>(draws<span class="sc">$</span>alpha <span class="sc">-</span> draws<span class="sc">$</span>beta)</span>
-<span id="cb2-2"><a href="" aria-label="2"></a>p_high <span class="ot">&lt;-</span> <span class="fu">plogis</span>(draws<span class="sc">$</span>alpha <span class="sc">+</span> draws<span class="sc">$</span>beta)</span>
-<span id="cb2-3"><a href="" aria-label="3"></a><span class="fu">quantile</span>(p_high <span class="sc">-</span> p_low, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">5</span>, .<span class="dv">975</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Compute the difference for each paired draw. The comparison holds the two densities fixed.</p>
-</section>
-<section id="references" class="slide level2" data-visibility="uncounted">
+<section id="references" class="slide level2">
 <h2>References</h2>
 <ul>
 <li><a href="https://doi.org/10.1126/science.1190772">Comita et al.&nbsp;2010, Science</a></li>
@@ -1239,7 +957,7 @@ s_i^{\mathrm{rep},(m)}\sim\operatorname{Binomial}(n_i,p_i^{(m)}).</span></p>
 <li><a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html">Stan User’s Guide: predictive checks</a></li>
 </ul>
 
-</section></section>
+</section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <p><img src="../images/xtbg_logo.png" class="slide-logo"></p>

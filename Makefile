@@ -4,7 +4,7 @@ QUARTO ?= quarto
 RSCRIPT ?= Rscript
 PYTHON ?= python3
 
-.PHONY: help day1 day1-zip day2 day3 slides materials
+.PHONY: help day1 day1-zip day2 day3 slides materials site publish
 
 help:
 	@printf '%s\n' \
@@ -15,6 +15,8 @@ help:
 	  '  make day3   Build Day 3 slides, exercises and result sheet' \
 	  '  make slides Render all three slide decks' \
 	  '  make materials Build all materials and the participant ZIP' \
+	  '  make site   Build materials, ZIP and website in dist/site/' \
+	  '  make publish Build the website and push it to origin/gh-pages' \
 	  '  make help   Show this help'
 
 day1: day1/exercise-student.qmd
@@ -50,3 +52,9 @@ day%/exercise-student.qmd: day%/exercise.qmd R/classroom_materials.R R/generate_
 
 materials:
 	@cd "$(PROJECT_ROOT)" && $(RSCRIPT) R/build_classroom_materials.R
+
+site: materials
+	@cd "$(PROJECT_ROOT)" && $(PYTHON) scripts/publish_pages.py stage
+
+publish: site
+	@cd "$(PROJECT_ROOT)" && $(PYTHON) scripts/publish_pages.py publish

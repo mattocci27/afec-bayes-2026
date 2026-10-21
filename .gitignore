@@ -5,6 +5,7 @@
 !Dockerfile
 !Makefile
 .DS_Store
+__pycache__/
 
 *.key
 *.rds
