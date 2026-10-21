@@ -2,13 +2,15 @@
 PROJECT_ROOT := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 QUARTO ?= quarto
 RSCRIPT ?= Rscript
+PYTHON ?= python3
 
-.PHONY: help day1 day2 day3 slides materials
+.PHONY: help day1 day1-zip day2 day3 slides materials
 
 help:
 	@printf '%s\n' \
 	  'Targets:' \
 	  '  make day1   Build Day 1 slides, exercises and result sheet' \
+	  '  make day1-zip Build Day 1 materials and the Day 1-only participant ZIP' \
 	  '  make day2   Build Day 2 slides, exercises and result sheet' \
 	  '  make day3   Build Day 3 slides, exercises and result sheet' \
 	  '  make slides Render all three slide decks' \
@@ -21,6 +23,9 @@ day1: day1/exercise-student.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day1/exercise-student.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day1/results.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day1/instructor-notes.qmd
+
+day1-zip: day1
+	@cd "$(PROJECT_ROOT)" && $(PYTHON) scripts/build_day1_package.py
 
 day2: day2/exercise-student.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day2/slides.qmd

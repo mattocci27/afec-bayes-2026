@@ -1,0 +1,30 @@
+Day 1-only participant distribution
+
+Builder: python3 scripts/build_day1_package.py
+Output: dist/afec-day1-materials.zip (35.8 MB); entry: AFEC-Day1/START-HERE.html.
+Contains Day 1 slides/resources, participant HTML/QMD/R exercise, prepared-result
+HTML and an optional RStudio project. Days 2/3, fits and instructor-only files
+are excluded. No project R helpers, renv setup or toolchain are needed for Day 1.
+
+The existing slide HTML depends on CDN KaTeX. The distribution copy replaces
+these references with locally bundled KaTeX 0.16.11 (including fonts and licence,
+from the official npm package cached under dist/.cache). Source decks and the
+published website were not patched or published by this task.
+
+Validation:
+- make day1: rendered existing models/results only; no refit.
+- Builder checks current Day 1 HTML, solution-free source, local HTML/CSS resources
+  and links, and absence of remote display resources in those references.
+- Extracted ZIP into /private/tmp/AFEC Day1 relocation check/AFEC-Day1, outside the
+  source project and with spaces in the path. Resource/link checks passed.
+- Chrome file:// inspection: START-HERE links and slide images/math displayed.
+- Rscript --vanilla /private/tmp/afec-day1-relocation-check.R: cwd /private/tmp;
+  supplied exercise.R ran using installed instructor libraries, without project
+  activation or source-project data. Exact Beta(3,4) grid weights and plot passed.
+- Final ZIP contains the current participant handout and the required local math
+  assets; no later-day material or instructor-note files. git diff --check passed.
+
+Validation uses local macOS Chrome, R 4.6.1 and Python 3.12; it does not establish
+Windows/other-browser or classroom connectivity acceptance. Browser networking
+was not disconnected; offline readiness was checked through local resource
+resolution/CDN removal and rendering from the relocated file:// copy.

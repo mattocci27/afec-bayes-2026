@@ -26,6 +26,21 @@ Download and extract the participant ZIP for offline use. Open
 `dayN/slides.html`, `dayN/exercise-student.html` or `dayN/results.html` in a browser.
 The ZIP includes the prepared posterior draws; cloning this repository does not.
 
+For the first session, distribute a Day 1-only package while later materials are
+still being revised:
+
+```bash
+make day1-zip
+```
+
+This creates `dist/afec-day1-materials.zip`, with a `START-HERE.html` entry page,
+Day 1 slides and their resources, the participant exercise (HTML/QMD/R), and
+prepared results. Extract the complete ZIP anywhere and keep its folder structure.
+HTML viewing does not depend on R's working directory. Slide math assets are
+bundled for offline reading; building the package first downloads a pinned KaTeX
+release from npm into `dist/.cache/`. Day 1's exercise R code needs only tidyverse
+and reads no project files. Days 2–3 and instructor-only documents are excluded.
+
 **Setup:** [Readiness check](classroom/readiness.qmd) ·
 [R packages and optional local fitting](classroom/PACKAGES.md)
 
