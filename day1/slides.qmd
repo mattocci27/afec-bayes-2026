@@ -32,14 +32,14 @@ Outcomes: explain likelihood/prior/posterior in words; predict how data/prior ch
 alter a posterior.
 Assume English and no homework; do not assume R or GLM experience. The daytime
 R/statistics workshop starts on the same day. Figures are a complete route through
-the exercise; supplied code is optional. Confirm language and browser access.
+the exercise; supplied code is optional. Confirm language and access to R.
 0-8 setup/course question; 8-23 likelihood; 23-43 conditional probability/fip/Bayes;
 43-58 prior/posterior/coins; 58-70 ONE exercise (8 work + 4 debrief);
-70-80 short posterior-draw demonstration; 80-85 summary/Day 2 bridge;
-85-90 questions/buffer.
+After the exercise: summary, questions and buffer; advance to a complete
+Day 2 block only if the class is ready. Do not fill time with a Stan demonstration.
 Core: familiar examples and one figure-comparison exercise. Draw calculations,
 MLE differentiation, detailed estimators and MH/HMC are optional.
-If delayed, shorten Stan demonstration. Keep exercise debrief and questions.
+If delayed, shorten optional R comparisons. Keep exercise debrief and questions.
 -->
 
 ```{r setup, include=FALSE}
@@ -96,16 +96,15 @@ source(here::here("R/slides_setup.R"))
 
 ::: fragment
 ::: small
-- Each day: short lectures + one exercise in the browser-based R environment.
+- Each day: short lectures + one exercise using supplied R code or figures.
 - The goal is to understand Bayesian ideas in ecology and build a foundation for further learning.
 - Day 1: calculate a posterior directly. Days 2–3: use supplied posterior draws.
-  The instructor may demonstrate live sampling.
 :::
 :::
 
 ::: notes
 - 3 x 90 minutes
-- Nobody needs to install anything. Start individually; nearby discussion and help are optional.
+- Use supplied R code or figures. Start individually; nearby discussion and help are optional.
 :::
 
 ## {#where-we-are-going}
@@ -156,14 +155,14 @@ One year later, 2 are alive.
 ::: incremental
 - What is the survival probability $p$ of this species?
 - How sure are we?
-- Would we be equally sure with 40 survivors out of 100?
+- What if 40 out of 100 survived? Would we be more confident about $p$?
 :::
 
 ::: fragment
-One species, no predictor, one parameter.
-We start with this simple model of one survival probability.
-On Day 2, survival probability depends on conspecific density.
-On Day 3, survival rates vary among mother trees and species.
+We start with one survival probability, then extend this example to learn:
+
+- **Day 2 — regression:** how does survival change with conspecific density?
+- **Day 3 — hierarchical models:** how can we share information when estimating survival for different mother trees or species?
 :::
 :::
 :::
@@ -307,12 +306,12 @@ normal_density_plot
 ```
 :::
 ::: {.column width="50%"}
-Keep the observations and $\sigma=1$ fixed.
+The observations $x=\{-1.5,0,1.5\}$ and $\sigma=1$ are fixed.
 
 ::: incremental
-- Choose a mean $\mu$ and multiply the three densities.
-- Change $\mu$: the curve shifts and the product changes.
-- This product as a **function of $\mu$** is the **likelihood** $L(\mu)$.
+- Different values of $\mu$ give different probability densities at the observed values.
+- The product of these densities depends on $\mu$.
+- This product, viewed as a function of $\mu$, is the **likelihood** $L(\mu)$.
 :::
 :::
 :::
@@ -516,6 +515,7 @@ e.g.,
 
 - P(hangover) = 4%
 - P(baijiu) = 1.5%
+- P(hangover $\cap$ baijiu) = 1.275%.
 - P(hangover | baijiu) = 85%.
 :::
 
@@ -815,8 +815,7 @@ coin_prior_panel <- ggplot(
   scale_y_continuous(expand = expansion(mult = c(0, 0.06))) +
   labs(
     title = "Prior: Beta(51, 51)",
-    subtitle = "Same prior for A and B\np ~ Beta(51, 51)",
-    caption = "Strong prior centered at p = 0.5",
+    subtitle = "Strong prior belief: the coin is nearly fair",
     x = "Probability of heads (p)",
     y = "Density"
   ) +
@@ -887,7 +886,7 @@ wrap_ggplot_grob(coin_likelihood_grob) +
 - This deliberately strong prior illustrates its influence; it is not a default prior for ecological survival.
 :::
 
-## Bayesian updating: More data, less infulence from the prior
+## Bayesian updating: More data, less influence from the prior
 
 ```{=html}
 <style>
@@ -933,125 +932,35 @@ influence. These are deliberate teaching priors. Do not use them as defaults.
 No derivation is required. Explain the figure before discussing the numbers.
 :::
 
-## Exercise: calculate a seedling posterior {background-color="#f3e8f5"}
+## Exercise: More seedlings, less uncertainty? {background-color="#f3e8f5"}
 
 `day1/exercise-student.qmd`
 
-- Choose a small survey and a larger survey, both with survival proportion 0.4.
-- Predict the difference, then calculate a posterior for each survey.
-- Compare the plots and explain the uncertainty in survival probability.
+Compare two surveys with the same observed survival proportion:
 
-The prior stays flat. Changing the prior is an optional extension.
+- **Survey A:** 2 survivors out of 5 seedlings
+- **Survey B:** 20 survivors out of 50 seedlings
+
+1. **Predict:** Which posterior will be narrower?
+2. **Run:** Change only `y` and `N` in the supplied code.
+3. **Explain:** Why are the posteriors different if both proportions are 0.4?
+
+Keep the prior and grid unchanged.
 
 ::: notes
 58-70 minutes: 8 minutes of individual work and 4 minutes debrief.
 Participants may consult someone nearby; do not organise fixed pairs.
 The coin slides illustrated strong-prior influence. Here participants transfer
-that binomial structure to seedlings and design their own comparison, keeping
+that binomial structure to the assigned seedling surveys, keeping
 the observed proportion and prior fixed. Do not repeat the coin explanation or reveal
 the sample-size answer before their prediction.
-Checkpoint at 4 minutes: participants have chosen two valid surveys with proportion
-0.4 and predicted the width comparison. If R fails, use day1/results.html.
+Checkpoint at 4 minutes: participants have predicted the width comparison
+and changed the counts from 2/5 to 20/50. If R fails, use day1/results.html.
 Say: "Compare the horizontal widths, not the heights." Slide plots show density;
 the exercise plots probability per grid point. Keep this distinction oral.
 During the debrief, invite two brief explanations of the survey comparisons.
-Then connect the calculated posterior curve to the stored draws on the next slide.
-Skip the optional prior change if needed. This is the only required operation exercise.
-:::
-
-## Many values, one posterior distribution
-
-Back to 2 survivors out of 5, with the same Beta(1,1) prior.
-
-```{r seedling-draws, include=FALSE}
-fit <- course_fit("day1_seedling")
-draws <- fit$draws
-seedling_draw_mean <- mean(draws$p)
-seedling_draw_interval <- quantile(draws$p, c(0.025, 0.975))
-```
-
-::: columns
-::: {.column width="30%"}
-```{r seedling-values}
-tibble(p = round(head(draws$p, 4), 3)) |>
-  kable(format = "html") |>
-  kable_material(c("striped"), full_width = FALSE, font_size = 24)
-```
-
-... `r ndraws(draws)` values of $p$
-:::
-
-::: {.column width="70%"}
-```{r seedling-draw-histogram, fig.height=3.7, fig.width=8}
-ggplot(as_tibble(draws), aes(p)) +
-  geom_histogram(
-    aes(y = after_stat(density)),
-    bins = 40,
-    fill = col_post,
-    alpha = 0.5
-  ) +
-  stat_function(fun = dbeta, args = list(3, 4), linewidth = 1.2) +
-  labs(
-    x = "Survival probability p",
-    y = "Density",
-    subtitle = "Orange: Stan draws; black curve: exact posterior"
-  )
-```
-:::
-:::
-
-::: fragment
-Together, the values describe uncertainty about the survival probability.
-:::
-
-::: notes
-70-80 minutes: a short instructor demonstration following the exercise debrief.
-Say: “You calculated a posterior curve. Stan can represent the same distribution
-with many values of p; tomorrow we will use results saved in this form.”
-Use stored Stan results. First recall the exact Beta(3,4) posterior from the seedling example. Say:
-“Each number is a possible value of the unknown survival probability p.
-These are 4000 values of p, not observations of 4000 seedlings.”
-Point from the few values to the histogram and its match to the exact curve.
-Stan produces draws for this same model; we are loading results prepared earlier.
-Do not introduce chains, iteration bookkeeping, Stan syntax or MCMC mechanics.
-Before class, check stored R-hat, ESS, divergences, treedepth, E-BFMI and traces;
-the histogram's agreement alone does not establish reliable computation.
-:::
-
-## Summarise the values
-
-::: columns
-::: {.column width="50%"}
-### Posterior mean
-
-```{r, echo=TRUE, eval=FALSE}
-mean(draws$p)
-```
-
-**`r round(seedling_draw_mean, 2)`**
-:::
-
-::: {.column width="50%"}
-### 95% credible interval
-
-```{r, echo=TRUE, eval=FALSE}
-quantile(draws$p, c(0.025, 0.975))
-```
-
-**[`r paste(round(seedling_draw_interval, 2), collapse = ", ")`]**
-:::
-:::
-
-The mean summarises location; the interval summarises uncertainty about $p$.
-
-::: notes
-The object draws is assigned from fit$draws on the preceding slide; all displayed
-results are computed from that same object. Read the two summaries in words.
-The interval contains the middle 95% of the posterior draws and approximates the
-model-conditional credible interval for p. It is not an interval for future
-survival counts. Small differences from the exact Beta summaries are Monte Carlo error.
-Do not ask participants to run new inference or learn additional functions here.
-If time is short, show the histogram and state the summaries orally.
+Then recap how the data and prior determine the posterior and its uncertainty.
+This is the only required operation exercise.
 :::
 
 ## Summary of Day 1
@@ -1060,9 +969,8 @@ If time is short, show the histogram and state the summaries orally.
 - **Likelihood**: how probable are the data for given parameter values.
 - **Bayes' theorem** turns this around: [posterior]{.orange} $\propto$ [likelihood]{.teal} $\times$ [prior]{.purple}.
 - The posterior is a **distribution**.
-  We summarise it with a mean and an interval.
+  Its location describes plausible values; its width describes uncertainty.
 - The influence of a fixed prior depends on the information in the data.
-- Posterior draws let us calculate means and intervals.
 :::
 
 ::: fragment
@@ -1071,487 +979,12 @@ We will read a fitted survival curve and compare the model with observations.
 :::
 
 ::: notes
-80-85 minutes: recap the two Day 1 learning outcomes and connect to Day 2.
+After the exercise: recap the two Day 1 learning outcomes and connect to Day 2.
 The survey comparisons were already discussed during the exercise debrief;
-do not repeat the exercise here. Keep 85-90 minutes for questions and delay buffer.
+do not repeat the exercise here. Leave room for questions and buffer.
 :::
 
-# Appendix: optional material {visibility="uncounted"}
-
-## A Stan model = data + parameters + model {visibility="uncounted"}
-
-::: columns
-::: {.column width="50%"}
-```{r, results="asis"}
-show_stan("stan/binomial.stan", compact = TRUE)
-```
-:::
-
-::: {.column width="50%"}
-::: small
-- `data`: what we observed, and the settings of the prior
-  - $N = 5$, $y = 2$, $a = 1$, $b = 1$
-- `parameters`: what we want to learn
-  - $p$
-- `model`: [prior]{.purple} and [likelihood]{.teal}
-  - $p \sim \text{Beta}(a, b)$
-  - $y \sim \mathcal{B}(N, p)$
-
-::: fragment
-Stan returns **draws** from the [posterior]{.orange} of every parameter.
-:::
-
-::: fragment
-We pass the prior settings as data, so you can change the prior from R without touching the Stan file.
-:::
-:::
-:::
-:::
-
-
-## Extra columns in the Stan output {visibility="uncounted"}
-
-```{r, echo=TRUE, eval=FALSE}
-fit <- course_fit("day1_seedling")
-draws <- fit$draws
-draws
-```
-
-```{r seedling-extra-columns}
-as_tibble(draws) |>
-  select(.chain, .iteration, p) |>
-  mutate(p = round(p, 3)) |>
-  head(4) |>
-  kable(format = "html") |>
-  kable_material(c("striped"), full_width = FALSE, font_size = 24)
-```
-
-`.chain` and `.iteration` record where each draw came from.
-We use this information when checking the computation.
-
-::: notes
-Optional only. Chain and iteration identifiers are bookkeeping, not additional
-seedling observations or ecological parameters. Discuss their diagnostic use
-when needed; do not introduce this table in the Day 1 core demonstration.
-:::
-
-## Posterior probabilities from draws {visibility="uncounted"}
-
-What is the posterior probability that $p > 0.5$?
-
-```{r, echo=TRUE, eval=FALSE}
-mean(draws$p > 0.5)
-```
-
-**`r round(mean(draws$p > 0.5), 2)`** of the draws are above 0.5.
-
-::: notes
-Optional: this estimates a probability about the unknown parameter, conditional
-on the model and data. It is not the probability that the next seedling survives.
-The numerical result is computed from the same stored draws as the main slides.
-:::
-
-
-## What the MLE does not tell us {visibility="uncounted"}
-
-::: columns
-::: {.column width="55%"}
-```{r, fig.height=6, fig.width=8}
-tibble(p = seq(0, 1, length.out = 501)) |>
-  mutate(
-    `2 of 5` = dbinom(2, 5, p) / max(dbinom(2, 5, p)),
-    `40 of 100` = dbinom(40, 100, p) / max(dbinom(40, 100, p))
-  ) |>
-  pivot_longer(-p, names_to = "Data", values_to = "likelihood") |>
-  ggplot(aes(p, likelihood, linetype = Data)) +
-  geom_line(linewidth = 1.5, colour = col_like) +
-  geom_vline(xintercept = 0.4, linetype = 3) +
-  labs(x = "Survival probability p", y = "Relative likelihood") +
-  theme(legend.position = "top")
-```
-:::
-
-::: {.column width="45%"}
-::: incremental
-- Both data sets give the same MLE: $\hat{p} = 0.4$.
-- With 40 of 100, the likelihood curve is narrower.
-- A single number hides this uncertainty.
-- What we really want: **how plausible is each value of $p$, given the data?**
-  $$P(p \mid \text{data})$$
-:::
-:::
-:::
-
-::: notes
-- Each curve is divided by its own maximum, so both peaks are one. This makes their widths easier to compare without changing either MLE or the likelihood ratios within each data set.
-- Relative likelihood is not a posterior probability density for p; the curves are not normalised to integrate to one.
-- the likelihood is P(data | p), not P(p | data)
-- to turn it around we need Bayes' theorem
-:::
-
-## Forward problem: a positive PCR test {visibility="uncounted"}
-
-::: footer
-- $P(\text{Positive})$: 2%; $P(\text{Infected})$: 0.05%
-:::
-
-If a person is infected, what is the probability that the PCR test is positive?
-
-::: incremental
-- $P(\text{Positive} \mid \text{Infected}) = 95\%$
-- This is the **forward problem**: given infection status, predict the test result.
-:::
-
-::: notes
-- These are hypothetical teaching inputs, not current clinical performance estimates.
-- Sensitivity is the probability of a positive result among infected people.
-- For example, 95 of 100 infected samples may test positive.
-:::
-
-## Inverse problem: infection after a positive test {visibility="uncounted"}
-
-::: footer
-- $P(\text{Positive})$: 2%; $P(\text{Infected})$: 0.05%
-:::
-
-If the PCR test is positive, how likely is it that the person is infected?
-
-::: incremental
-- Predict before revealing the calculation.
-- $P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected})\,P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%$
-- This is the **inverse problem**: use the result to update what we believe about infection.
-:::
-
-::: notes
-- 0.95 * 0.0005 / 0.02 = 0.02375
-- The low prevalence matters: most people are not infected before testing.
-- The calculation uses the specified 2% positive rate; it is not derived from sensitivity and prevalence here.
-:::
-
-## Four things that are easy to mix up {visibility="uncounted"}
-
-::: small
-| | What it is | Seedlings (2 of 5, prior Beta(8, 2)) |
-|---|---|---|
-| **MLE** | the $p$ that maximises the [likelihood]{.teal} | `r round(2 / 5, 3)` |
-| **MAP** | the $p$ that maximises the [posterior]{.orange} (its peak) | `r round(9 / 13, 3)` |
-| **Posterior mean** | the average of the [posterior]{.orange} | `r round(10 / 15, 3)` |
-| **Posterior distribution** | every value of $p$ with its plausibility | Beta(10, 5) |
-:::
-
-::: incremental
-- MLE and MAP are single numbers.
-  They say nothing about uncertainty.
-- With a flat prior, MAP = MLE.
-  The posterior is still a distribution.
-- In this course we work with the **whole posterior** and summarise it with a mean (or median) and an interval.
-:::
-
-## Which prior? Simulate from it {visibility="uncounted"}
-
-```{r, fig.height=5.5, fig.width=15}
-set.seed(1)
-priors <- tribble(
-  ~name                            , ~a , ~b ,
-  "Flat: Beta(1, 1)"               ,  1 ,  1 ,
-  "Weakly informative: Beta(2, 2)" ,  2 ,  2 ,
-  "Informative: Beta(3, 7)"        ,  3 ,  7
-) |>
-  mutate(name = fct_inorder(name))
-
-dens <- priors |>
-  mutate(
-    d = map2(a, b, \(a, b) {
-      tibble(p = seq(0, 1, length.out = 201), density = dbeta(p, a, b))
-    })
-  ) |>
-  unnest(d)
-
-sims <- priors |>
-  mutate(
-    s = map2(a, b, \(a, b) tibble(y = rbinom(1e4, 5, rbeta(1e4, a, b))))
-  ) |>
-  unnest(s) |>
-  count(name, y) |>
-  group_by(name) |>
-  mutate(prop = n / sum(n))
-
-p1 <- ggplot(dens, aes(p, density)) +
-  geom_line(linewidth = 1.5, colour = col_prior) +
-  facet_wrap(~name) +
-  scale_x_continuous(breaks = c(0, 0.5, 1)) +
-  labs(x = "Survival probability p", y = "Prior density")
-
-p2 <- ggplot(sims, aes(y, prop)) +
-  geom_col(fill = col_prior, alpha = 0.7) +
-  facet_wrap(~name) +
-  labs(
-    x = "Survivors out of 5 seedlings, simulated from the prior",
-    y = "Proportion"
-  ) +
-  theme(strip.text = element_blank())
-
-p1 / p2
-```
-
-::: small
-::: incremental
-- **Prior predictive check**: draw $p$ from the prior, simulate data, and ask "could data like these happen?"
-- A prior is a statement about plausible *data*, so judge it on the scale of the data.
-- In ecology we mostly use **weakly informative** priors: they put less prior weight on implausible parameter scales.
-:::
-:::
-
-::: notes
-- informative prior here: earlier censuses suggest about 30% of seedlings survive
-- more on priors for regression coefficients on Day 2
-:::
-
-
-
-## Extension: deriving the binomial MLE {visibility="uncounted"}
-
-- 2 survivors out of 5 seedlings: What is the survival probability of seedlings?
-
-::: columns
-
-::: {.column width=40%}
-![](../images/seedling.png)
-:::
-
-::: {.column width=60%}
-::: incremental
-- $p$: survival probability; $1-p$: probability of dying
-
-- $L = {}_5C_2 p^2(1-p)^3$ (Binomial distribution)
-
-- $\mathrm{ln}\;L = \mathrm{ln}\;{}_5C_2 + 2\mathrm{ln}\;p + 3\mathrm{ln}(1-p)$
-
-- $\frac{d}{dp}\mathrm{ln}\;L = \frac{2}{p} - \frac{3}{1-p} = 0$
-
-- Solve: $p = \frac{2}{5}$
-
-:::
-:::
-:::
-
-## Extension: Normal density in R {visibility="uncounted"}
-
-::: columns
-
-::: {.column width=40%}
-
-```{r, fig.height=7}
-x <- seq(-5, 5, length.out = 100)
-y <- dnorm(x, mean = 0, sd = 1)
-tibble(x, y) |>
-  ggplot() +
-  xlab("x") +
-  ylab("Density") +
-  ggtitle("N(0, 1)") +
-  geom_line(aes(x, y)) +
-  theme(
-    axis.title = element_text(size = 32),
-    axis.text = element_text(size = 28)
-  )
-```
-
-::: small
-$f(x \mid \mu, \sigma) = \frac{1}{\sqrt{2\pi\sigma^2}}\mathrm{exp} \bigl[{-\frac{1}{2}\bigl\{\frac{x-\mu}{\sigma}}\bigr\}^2\bigr]$
-:::
-
-:::
-::: {.column width=60%}
-::: incremental
-- For continuous data, $f(\text{data}\mid\text{parameters})$ gives the **probability density** at the observed values.
-
-- e.g., when your model is $x_i \sim \mathcal{N}(\mu = 0, \sigma = 1)$ (normal distribution with mean 0 and standard deviation 1), what is the probability density at x = 1.96?
-:::
-
-::: fragment
-```{r, echo=TRUE}
-dnorm(1.96, mean = 0, sd = 1)
-```
-:::
-
-::: fragment
-- A statistical model always has this form: a distribution for the data (normal, binomial, Poisson, ...) with unknown parameters.
-:::
-
-:::
-
-:::
-
-::: notes
-- likelihood is all about probability density (mass) function (normal, log-normal, poisson, beta, gamma, binomial, negative-binomial...)
-- NOTE: throughout the course N(mu, sigma) is written with the standard deviation, as in Stan and in dnorm()
-:::
-
-
-## Likelihood of several observations {visibility="uncounted"}
-
-For independent observations $x=\{-1.5,\;0,\;1.5\}$, assume a Normal model with mean $\mu$ and standard deviation 1.
-The likelihood is the joint probability density, viewed as a function of $\mu$.
-
-::: small
-::: incremental
-- $L(\mu) = f(-1.5 \mid \mu, 1) \times f(0 \mid \mu, 1) \times f(1.5 \mid \mu, 1)$
-- $\mathrm{ln}\;L(\mu) = \mathrm{ln}\;f(-1.5 \mid \mu, 1) + \mathrm{ln}\;f(0 \mid \mu, 1) +  \mathrm{ln}\;f(1.5 \mid \mu, 1)$
-:::
-:::
-
-::: fragment
-
-```{r, fig.height=3.5}
-like_fun <- function(mu) {
-  dnorm(-1.5, mean = mu, sd = 1, log = TRUE) +
-    dnorm(0, mean = mu, sd = 1, log = TRUE) +
-    dnorm(1.5, mean = mu, sd = 1, log = TRUE)
-}
-
-x <- seq(-5, 5, length.out = 100)
-y <- like_fun(x)
-tibble(x, y) |>
-  ggplot() +
-  xlab("mu") +
-  ylab("ln L") +
-  geom_line(aes(x, y)) +
-  theme(
-    axis.title = element_text(size = 32),
-    axis.text = element_text(size = 28)
-  )
-```
-:::
-
-::: fragment
-The data are fixed.
-The likelihood is a function of the **parameter**.
-:::
-
-
----
-
-<img src="../images/bayes_re.png" width="100%" style="display: block; margin: auto;"/>
-
----
-
-
-## MCMC: a simplified Metropolis-Hastings (MH) algorithm {visibility="uncounted"}
-
-::: columns
-::: {.column width="40%"}
-
-![](../images/mh_trace.gif){height=290}
-
-![](../images/mh_post.gif){height=290}
-
-:::
-
-::: {.column width="60%"}
-
-::: incremental
-- Start with some values of *p* (e.g., 0.2 and 0.8).
-- Calculate the posterior of those values.
-- Repeat the following steps N times:
-  - Propose a new value of $p_{\text{new}}$ (e.g., $p \pm 0.01$)
-  - Calculate the posterior at $p_{\text{new}}$.
-  - If $\text{Post}(p_{\text{new}}) \geq \text{Post}(p_t), \text{ then } p_{t+1} = p_{\text{new}}$.
-  - Else, accept $p_{\text{new}}$ with probability $\frac{\text{Post}(p_{\text{new}})}{\text{Post}(p_t)}$.
-- After the first steps (grey: **warmup**), the chain visits each value of $p$ in proportion to its posterior probability.
-:::
-:::
-:::
-
-::: notes
-- example: coin B, posterior proportional to p^110 (1-p)^90
-- two chains from different starting points end up in the same place: this idea returns on Day 2 as R-hat
-:::
-
-
-## MCMC: Hamiltonian Monte Carlo (HMC) {visibility="uncounted"}
-
-::: columns
-
-::: {.column width=40%}
-![](../images/pot_eng.gif)
-
-![](../images/traj.gif)
-:::
-
-::: {.column width=60%}
-
-:::incremental
-
-- $H(\theta, r) = U(\theta) + r^2/2$ (Hamiltonian: potential energy + kinetic energy = constant)
-
-  - $U(\theta) = -\text{log}\; p(\theta \mid \text{data})$
-
-- Instead of sampling from $p(\theta \mid \text{data})$, HMC samples from a joint distribution over both $\theta$ and $r$.
-
-  - $p(\theta \mid \text{data}) \propto \int \text{exp}(-H(\theta, r))dr$
-
-- It's equivalent to sampling from $p(\theta \mid \text{data}) \propto \text{exp}(-U(\theta))$.
-
-- HMC explores very different $\theta$ along the same trajectory (i.e. leapfrog path), which is much more efficient than random sampling.
-
-:::
-:::
-:::
-
-## MCMC: Hamiltonian Monte Carlo (HMC) {visibility="uncounted"}
-
-::: columns
-
-::: {.column width=30%}
-![](../images/leapfrog.gif)
-
-![](../images/hmc.gif)
-
-:::
-
-::: {.column width=70%}
-
-:::incremental
-
-- Within each iteration, HMC simulates a trajectory using leapfrog steps.
-
-    -  No-U-Turn Sampler (NUTS) adapts trajectory length. `max_treedepth` limits it; Stan also has other sampler settings.
-
-- The Hamiltonian stays the same, but momentum $r$ is resampled each iteration.
-
-- Only the final parameter $\theta$ of each trajectory is kept as a posterior sample.
-
-:::
-:::
-:::
-
-::: footer
-The code behind these animations: `docs/hmc.qmd`, `R/hmc.R`
-:::
-
-## MCMC Methods: Comparison {visibility="uncounted"}
-
-| Feature                    | **Metropolis(-Hastings)**          | **Gibbs Sampling**                        | **Hamiltonian Monte Carlo (HMC)**        |
-|----------------------------|------------------------------------|-------------------------------------------|------------------------------------------|
-| How it works               | Try random moves, accept/reject    | Update one parameter at a time            | Simulate smooth movement using gradients |
-| Efficient in high dimensions? | ❌ Often slow                   | ✅ If math is simple                       | ✅ Very efficient                         |
-| Flexible?                  | ✅ Yes                             | Depends on available conditional updates                   | ✅ Yes                                    |
-| Typical software           | JAGS, custom R                     | JAGS, BUGS                                | Stan               |
-
-## Interfaces to Stan (for R users) {visibility="uncounted"}
-
-- Stan: The actual modeling and inference engine, written in C++.
-
-- CmdStan: Command line interface (you write Stan code and run it via terminal).
-
-- `rstan`, `cmdstanr`: R interface to Stan/Cmdstan (you write Stan code and run it within R).
-
-- `brms`, `rstanarm`: Higher-level R packages that generate and run Stan models for you (you write an R formula, without writing Stan code).
-
-- In this course, we use `cmdstanr` with models that are already written.
-  `brms` versions of the same models are optional material on Days 2 and 3.
-
-## References {visibility="uncounted"}
+## References
 
 - [Gelman, A. et al. Bayesian Data Analysis, Third Edition. (Chapman & Hall/CRC, 2013)](http://www.stat.columbia.edu/~gelman/book/)
 

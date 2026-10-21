@@ -54,7 +54,7 @@ narrate in full. Code execution and new fitting are optional throughout.
 
 | Day | Core in class | Optional reference |
 |---|---|---|
-| 1 | Likelihood, Bayes, prior/posterior, the seedling sample-size comparison and posterior summaries | Extra calculations, changing the prior, Stan code and sampler algorithms |
+| 1 | Likelihood, Bayes, prior/posterior, the seedling sample-size comparison and posterior interpretation | Extra calculations, changing the prior, Stan code and sampler algorithms |
 | 2 | Binomial regression, coefficient interpretation, sampling checks, survival curves and one existing PPC figure | New fitting, repeated tables, sampler details, predictive simulation code and further prediction examples |
 | 3 | Mother-tree pooling and model reading, its count check, and the three regression structures including the interaction | A complete second fitted-analysis walkthrough, new fitting, allometry and covariance implementation |
 
@@ -95,24 +95,21 @@ the [Day 1 instructor notes](../day1/instructor-notes.html).
 | Normal figures and the seedling likelihood: hold data fixed and vary the parameter | Describe differences between likelihood curves |
 | Conditional probability, all six fip figures and Bayes | Predict what changes when reasoning from outcomes to conditions |
 | Priors, posteriors and coin tosses: 3/5 versus 60/100, both with proportion 0.6 and the same strong prior | Identify which posterior moves closer to the data |
-| One activity: comparison, explanation and sharing | Choose small and large surveys with survival proportion 0.4; predict, run and explain their posterior widths; changing the prior is optional |
-| Show the same seedling posterior as a histogram of supplied draws, with a mean and 95% interval | Recognize draws as values of survival probability p; connect distribution location and width to the summaries |
+| One activity: comparison, explanation and sharing | Compare 2/5 and 20/50; predict, run and explain their posterior widths |
 | Day 1 recap and connection to Day 2 | Review the posterior and uncertainty; preview the density-dependence question |
 | Questions and buffer | Ask questions and reflect |
 
 Day 1 uses lightweight direct calculations; Days 2–3 can use supplied draws.
 The figures alone provide a route through the same questions on every day.
-If R is difficult on Day 1, compare 4/10 and 20/50 in the result sheet.
-Share a few participants' results immediately after the activity. Follow with
-the two short demonstrations of posterior draws and proceed directly to the
-recap. Do not add a demonstration title slide or a separate return-to-exercise
-debrief.
+If R is difficult on Day 1, compare 2/5 and 20/50 in the result sheet.
+Share a few participants' results immediately after the activity, then proceed
+directly to the recap. Posterior draws, their summaries and MCMC belong together
+on Day 2; the Day 1 slides end with the recap and references.
 
 The coin slides illustrate the influence of a strong prior. The activity holds
-a uniform prior fixed while participants read each update step and change the
-numbers. During the activity, check that participants have chosen
-small and large surveys, that both proportions are 0.4, and that they have
-predicted the widths. If plots do not appear, use `day1/results.html`.
+a uniform prior fixed while participants compare the assigned 2/5 and 20/50
+surveys. During the activity, check that participants have predicted the widths
+and changed only y and N for the second survey. If plots do not appear, use `day1/results.html`.
 Lecture figures show continuous densities; activity figures show probability
 at grid points. Briefly say, “Compare widths, not heights.” Before class, test
 copying the code to a new chunk and displaying both plots in a participant copy.
@@ -127,9 +124,8 @@ the MAP without requiring calculations. Beta(51,51) is deliberately strong and
 still influences the posterior after 100 observations. PCR proportions are
 hypothetical teaching values.
 
-**If running late:** shorten the draw demonstration and explain the mean and
-interval verbally. Preserve the activity explanation and questions. Keep only
-two demonstration slides in the main sequence. Stan code, chain/iteration
+**If running late:** shorten optional R comparisons. Preserve the activity
+explanation and questions. No Stan demonstration is required. Stan code, chain/iteration
 tables, posterior probability calculations, MLE differentiation, derivation of
 the Beta update, and MH/HMC are optional reference material.
 

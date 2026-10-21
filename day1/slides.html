@@ -31,7 +31,7 @@
     ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
       width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
@@ -150,12 +150,12 @@
     }
     .reveal .footnotes ol {
       counter-reset: ol;
-      list-style-type: none;
+      list-style-type: none; 
       margin-left: 0;
     }
     .reveal .footnotes ol li:before {
       counter-increment: ol;
-      content: counter(ol) ". ";
+      content: counter(ol) ". "; 
     }
     .reveal .footnotes ol li > p:first-child {
       display: inline-block;
@@ -197,23 +197,21 @@
     .reveal .slide > img.r-stretch.quarto-figure-center {
       display: block;
       margin-left: auto;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .reveal .slide > img.stretch.quarto-figure-left,
     .reveal .slide > img.r-stretch.quarto-figure-left  {
       display: block;
       margin-left: 0;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .reveal .slide > img.stretch.quarto-figure-right,
     .reveal .slide > img.r-stretch.quarto-figure-right  {
       display: block;
       margin-left: auto;
-      margin-right: 0;
+      margin-right: 0; 
     }
   </style>
-  <script src="slides_files/libs/kePrint-0.0.1/kePrint.js"></script>
-  <link href="slides_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 </head>
 <body class="quarto-light">
   <div class="reveal">
@@ -269,16 +267,16 @@ AFEC-X 2026 · 21 October
 <div class="fragment">
 <div class="small">
 <ul>
-<li>Each day: short lectures + one exercise in the browser-based R environment.</li>
+<li>Each day: short lectures + one exercise using supplied R code or figures.</li>
 <li>The goal is to understand Bayesian ideas in ecology and build a foundation for further learning.</li>
-<li>Day 1: calculate a posterior directly. Days 2–3: use supplied posterior draws. The instructor may demonstrate live sampling.</li>
+<li>Day 1: calculate a posterior directly. Days 2–3: use supplied posterior draws.</li>
 </ul>
 </div>
 </div>
 <aside class="notes">
 <ul>
 <li>3 x 90 minutes</li>
-<li>Nobody needs to install anything. Start individually; nearby discussion and help are optional.</li>
+<li>Use supplied R code or figures. Start individually; nearby discussion and help are optional.</li>
 </ul>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -338,10 +336,14 @@ AFEC-X 2026 · 21 October
 <ul>
 <li class="fragment">What is the survival probability <span class="math inline">p</span> of this species?</li>
 <li class="fragment">How sure are we?</li>
-<li class="fragment">Would we be equally sure with 40 survivors out of 100?</li>
+<li class="fragment">What if 40 out of 100 survived? Would we be more confident about <span class="math inline">p</span>?</li>
 </ul>
 <div class="fragment">
-<p>One species, no predictor, one parameter. We start with this simple model of one survival probability. On Day 2, survival probability depends on conspecific density. On Day 3, survival rates vary among mother trees and species.</p>
+<p>We start with one survival probability, then extend this example to learn:</p>
+<ul>
+<li><strong>Day 2 — regression:</strong> how does survival change with conspecific density?</li>
+<li><strong>Day 3 — hierarchical models:</strong> how can we share information when estimating survival for different mother trees or species?</li>
+</ul>
 </div>
 </div></div>
 </section>
@@ -436,11 +438,11 @@ AFEC-X 2026 · 21 October
 </div>
 </div>
 </div><div class="column" style="width:50%;">
-<p>Keep the observations and <span class="math inline">\sigma=1</span> fixed.</p>
+<p>The observations <span class="math inline">x=\{-1.5,0,1.5\}</span> and <span class="math inline">\sigma=1</span> are fixed.</p>
 <ul>
-<li class="fragment">Choose a mean <span class="math inline">\mu</span> and multiply the three densities.</li>
-<li class="fragment">Change <span class="math inline">\mu</span>: the curve shifts and the product changes.</li>
-<li class="fragment">This product as a <strong>function of <span class="math inline">\mu</span></strong> is the <strong>likelihood</strong> <span class="math inline">L(\mu)</span>.</li>
+<li class="fragment">Different values of <span class="math inline">\mu</span> give different probability densities at the observed values.</li>
+<li class="fragment">The product of these densities depends on <span class="math inline">\mu</span>.</li>
+<li class="fragment">This product, viewed as a function of <span class="math inline">\mu</span>, is the <strong>likelihood</strong> <span class="math inline">L(\mu)</span>.</li>
 </ul>
 </div></div>
 <div class="fragment">
@@ -640,6 +642,7 @@ P(A \mid B) = \frac{P(A \cap B)}{P(B)}
 <ul>
 <li class="fragment">P(hangover) = 4%</li>
 <li class="fragment">P(baijiu) = 1.5%</li>
+<li class="fragment">P(hangover <span class="math inline">\cap</span> baijiu) = 1.275%.</li>
 <li class="fragment">P(hangover | baijiu) = 85%.</li>
 </ul>
 </div></div>
@@ -890,8 +893,8 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
           display:block!important;
       }</style></aside>
 </section>
-<section id="bayesian-updating-more-data-less-infulence-from-the-prior" class="slide level2">
-<h2>Bayesian updating: More data, less infulence from the prior</h2>
+<section id="bayesian-updating-more-data-less-influence-from-the-prior" class="slide level2">
+<h2>Bayesian updating: More data, less influence from the prior</h2>
 <style>
 #bayesian-updating-two-amounts-of-coin-data .coin-interpretation {
   font-size: 0.7em;
@@ -920,107 +923,22 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
           display:block!important;
       }</style></aside>
 </section>
-<section id="exercise-calculate-a-seedling-posterior" class="slide level2" data-background-color="#f3e8f5">
-<h2>Exercise: calculate a seedling posterior</h2>
+<section id="exercise-more-seedlings-less-uncertainty" class="slide level2" data-background-color="#f3e8f5">
+<h2>Exercise: More seedlings, less uncertainty?</h2>
 <p><code>day1/exercise-student.qmd</code></p>
+<p>Compare two surveys with the same observed survival proportion:</p>
 <ul>
-<li>Choose a small survey and a larger survey, both with survival proportion 0.4.</li>
-<li>Predict the difference, then calculate a posterior for each survey.</li>
-<li>Compare the plots and explain the uncertainty in survival probability.</li>
+<li><strong>Survey A:</strong> 2 survivors out of 5 seedlings</li>
+<li><strong>Survey B:</strong> 20 survivors out of 50 seedlings</li>
 </ul>
-<p>The prior stays flat. Changing the prior is an optional extension.</p>
+<ol type="1">
+<li><strong>Predict:</strong> Which posterior will be narrower?</li>
+<li><strong>Run:</strong> Change only <code>y</code> and <code>N</code> in the supplied code.</li>
+<li><strong>Explain:</strong> Why are the posteriors different if both proportions are 0.4?</li>
+</ol>
+<p>Keep the prior and grid unchanged.</p>
 <aside class="notes">
-<p>58-70 minutes: 8 minutes of individual work and 4 minutes debrief. Participants may consult someone nearby; do not organise fixed pairs. The coin slides illustrated strong-prior influence. Here participants transfer that binomial structure to seedlings and design their own comparison, keeping the observed proportion and prior fixed. Do not repeat the coin explanation or reveal the sample-size answer before their prediction. Checkpoint at 4 minutes: participants have chosen two valid surveys with proportion 0.4 and predicted the width comparison. If R fails, use day1/results.html. Say: “Compare the horizontal widths, not the heights.” Slide plots show density; the exercise plots probability per grid point. Keep this distinction oral. During the debrief, invite two brief explanations of the survey comparisons. Then connect the calculated posterior curve to the stored draws on the next slide. Skip the optional prior change if needed. This is the only required operation exercise.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="many-values-one-posterior-distribution" class="slide level2">
-<h2>Many values, one posterior distribution</h2>
-<p>Back to 2 survivors out of 5, with the same Beta(1,1) prior.</p>
-<div class="columns">
-<div class="column" style="width:30%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<table class="lightable-material lightable-striped caption-top" style="font-size: 24px; font-family: &quot;Source Sans Pro&quot;, helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: right;" data-quarto-table-cell-role="th">p</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: right;">0.616</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">0.607</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">0.607</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">0.246</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p>… 4000 values of <span class="math inline">p</span></p>
-</div><div class="column" style="width:70%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/seedling-draw-histogram-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-<div class="fragment">
-<p>Together, the values describe uncertainty about the survival probability.</p>
-</div>
-<aside class="notes">
-<p>70-80 minutes: a short instructor demonstration following the exercise debrief. Say: “You calculated a posterior curve. Stan can represent the same distribution with many values of p; tomorrow we will use results saved in this form.” Use stored Stan results. First recall the exact Beta(3,4) posterior from the seedling example. Say: “Each number is a possible value of the unknown survival probability p. These are 4000 values of p, not observations of 4000 seedlings.” Point from the few values to the histogram and its match to the exact curve. Stan produces draws for this same model; we are loading results prepared earlier. Do not introduce chains, iteration bookkeeping, Stan syntax or MCMC mechanics. Before class, check stored R-hat, ESS, divergences, treedepth, E-BFMI and traces; the histogram’s agreement alone does not establish reliable computation.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="summarise-the-values" class="slide level2">
-<h2>Summarise the values</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
-<h3 id="posterior-mean">Posterior mean</h3>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="" aria-label="1"></a><span class="fu">mean</span>(draws<span class="sc">$</span>p)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p><strong>0.43</strong></p>
-</div><div class="column" style="width:50%;">
-<h3 id="credible-interval">95% credible interval</h3>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="" aria-label="1"></a><span class="fu">quantile</span>(draws<span class="sc">$</span>p, <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p><strong>[0.12, 0.76]</strong></p>
-</div></div>
-<p>The mean summarises location; the interval summarises uncertainty about <span class="math inline">p</span>.</p>
-<aside class="notes">
-<p>The object draws is assigned from fit$draws on the preceding slide; all displayed results are computed from that same object. Read the two summaries in words. The interval contains the middle 95% of the posterior draws and approximates the model-conditional credible interval for p.&nbsp;It is not an interval for future survival counts. Small differences from the exact Beta summaries are Monte Carlo error. Do not ask participants to run new inference or learn additional functions here. If time is short, show the histogram and state the summaries orally.</p>
+<p>58-70 minutes: 8 minutes of individual work and 4 minutes debrief. Participants may consult someone nearby; do not organise fixed pairs. The coin slides illustrated strong-prior influence. Here participants transfer that binomial structure to the assigned seedling surveys, keeping the observed proportion and prior fixed. Do not repeat the coin explanation or reveal the sample-size answer before their prediction. Checkpoint at 4 minutes: participants have predicted the width comparison and changed the counts from 2/5 to 20/50. If R fails, use day1/results.html. Say: “Compare the horizontal widths, not the heights.” Slide plots show density; the exercise plots probability per grid point. Keep this distinction oral. During the debrief, invite two brief explanations of the survey comparisons. Then recap how the data and prior determine the posterior and its uncertainty. This is the only required operation exercise.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -1038,122 +956,14 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
 <ul>
 <li class="fragment"><strong>Likelihood</strong>: how probable are the data for given parameter values.</li>
 <li class="fragment"><strong>Bayes’ theorem</strong> turns this around: <span class="orange">posterior</span> <span class="math inline">\propto</span> <span class="teal">likelihood</span> <span class="math inline">\times</span> <span class="purple">prior</span>.</li>
-<li class="fragment">The posterior is a <strong>distribution</strong>. We summarise it with a mean and an interval.</li>
+<li class="fragment">The posterior is a <strong>distribution</strong>. Its location describes plausible values; its width describes uncertainty.</li>
 <li class="fragment">The influence of a fixed prior depends on the information in the data.</li>
-<li class="fragment">Posterior draws let us calculate means and intervals.</li>
 </ul>
 <div class="fragment">
 <p><strong>Day 2</strong>: does survival probability change with conspecific density? We will read a fitted survival curve and compare the model with observations.</p>
 </div>
 <aside class="notes">
-<p>80-85 minutes: recap the two Day 1 learning outcomes and connect to Day 2. The survey comparisons were already discussed during the exercise debrief; do not repeat the exercise here. Keep 85-90 minutes for questions and delay buffer.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section></section>
-<section>
-<section id="appendix-optional-material" class="title-slide slide level1 center" data-visibility="uncounted">
-<h1>Appendix: optional material</h1>
-
-</section>
-<section id="a-stan-model-data-parameters-model" class="slide level2" data-visibility="uncounted">
-<h2>A Stan model = data + parameters + model</h2>
-<div class="columns">
-<div class="column" style="width:50%;">
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb7-1"><a href="" aria-label="1"></a><span class="kw">data</span> {</span>
-<span id="cb7-2"><a href="" aria-label="2"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
-<span id="cb7-3"><a href="" aria-label="3"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=N&gt; y;</span>
-<span id="cb7-4"><a href="" aria-label="4"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; a;</span>
-<span id="cb7-5"><a href="" aria-label="5"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; b;</span>
-<span id="cb7-6"><a href="" aria-label="6"></a>}</span>
-<span id="cb7-7"><a href="" aria-label="7"></a><span class="kw">parameters</span> {</span>
-<span id="cb7-8"><a href="" aria-label="8"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; p;</span>
-<span id="cb7-9"><a href="" aria-label="9"></a>}</span>
-<span id="cb7-10"><a href="" aria-label="10"></a><span class="kw">model</span> {</span>
-<span id="cb7-11"><a href="" aria-label="11"></a>  p ~ beta(a, b);</span>
-<span id="cb7-12"><a href="" aria-label="12"></a>  y ~ binomial(N, p);</span>
-<span id="cb7-13"><a href="" aria-label="13"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</div><div class="column" style="width:50%;">
-<div class="small">
-<ul>
-<li><code>data</code>: what we observed, and the settings of the prior
-<ul>
-<li><span class="math inline">N = 5</span>, <span class="math inline">y = 2</span>, <span class="math inline">a = 1</span>, <span class="math inline">b = 1</span></li>
-</ul></li>
-<li><code>parameters</code>: what we want to learn
-<ul>
-<li><span class="math inline">p</span></li>
-</ul></li>
-<li><code>model</code>: <span class="purple">prior</span> and <span class="teal">likelihood</span>
-<ul>
-<li><span class="math inline">p \sim \text{Beta}(a, b)</span></li>
-<li><span class="math inline">y \sim \mathcal{B}(N, p)</span></li>
-</ul></li>
-</ul>
-<div class="fragment">
-<p>Stan returns <strong>draws</strong> from the <span class="orange">posterior</span> of every parameter.</p>
-</div>
-<div class="fragment">
-<p>We pass the prior settings as data, so you can change the prior from R without touching the Stan file.</p>
-</div>
-</div>
-</div></div>
-</section>
-<section id="extra-columns-in-the-stan-output" class="slide level2" data-visibility="uncounted">
-<h2>Extra columns in the Stan output</h2>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="" aria-label="1"></a>fit <span class="ot">&lt;-</span> <span class="fu">course_fit</span>(<span class="st">"day1_seedling"</span>)</span>
-<span id="cb8-2"><a href="" aria-label="2"></a>draws <span class="ot">&lt;-</span> fit<span class="sc">$</span>draws</span>
-<span id="cb8-3"><a href="" aria-label="3"></a>draws</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<table class="lightable-material lightable-striped caption-top" style="font-size: 24px; font-family: &quot;Source Sans Pro&quot;, helvetica, sans-serif; width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th style="text-align: right;" data-quarto-table-cell-role="th">.chain</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">.iteration</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">p</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0.616</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">0.607</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">0.607</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0.246</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<p><code>.chain</code> and <code>.iteration</code> record where each draw came from. We use this information when checking the computation.</p>
-<aside class="notes">
-<p>Optional only. Chain and iteration identifiers are bookkeeping, not additional seedling observations or ecological parameters. Discuss their diagnostic use when needed; do not introduce this table in the Day 1 core demonstration.</p>
+<p>After the exercise: recap the two Day 1 learning outcomes and connect to Day 2. The survey comparisons were already discussed during the exercise debrief; do not repeat the exercise here. Leave room for questions and buffer.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -1166,433 +976,7 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
           display:block!important;
       }</style></aside>
 </section>
-<section id="posterior-probabilities-from-draws" class="slide level2" data-visibility="uncounted">
-<h2>Posterior probabilities from draws</h2>
-<p>What is the posterior probability that <span class="math inline">p &gt; 0.5</span>?</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="" aria-label="1"></a><span class="fu">mean</span>(draws<span class="sc">$</span>p <span class="sc">&gt;</span> <span class="fl">0.5</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p><strong>0.34</strong> of the draws are above 0.5.</p>
-<aside class="notes">
-<p>Optional: this estimates a probability about the unknown parameter, conditional on the model and data. It is not the probability that the next seedling survives. The numerical result is computed from the same stored draws as the main slides.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="what-the-mle-does-not-tell-us" class="slide level2" data-visibility="uncounted">
-<h2>What the MLE does not tell us</h2>
-<div class="columns">
-<div class="column" style="width:55%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-12-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:45%;">
-<ul>
-<li class="fragment">Both data sets give the same MLE: <span class="math inline">\hat{p} = 0.4</span>.</li>
-<li class="fragment">With 40 of 100, the likelihood curve is narrower.</li>
-<li class="fragment">A single number hides this uncertainty.</li>
-<li class="fragment">What we really want: <strong>how plausible is each value of <span class="math inline">p</span>, given the data?</strong> <span class="math display">P(p \mid \text{data})</span></li>
-</ul>
-</div></div>
-<aside class="notes">
-<ul>
-<li>Each curve is divided by its own maximum, so both peaks are one. This makes their widths easier to compare without changing either MLE or the likelihood ratios within each data set.</li>
-<li>Relative likelihood is not a posterior probability density for p; the curves are not normalised to integrate to one.</li>
-<li>the likelihood is P(data | p), not P(p | data)</li>
-<li>to turn it around we need Bayes’ theorem</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="forward-problem-a-positive-pcr-test" class="slide level2" data-visibility="uncounted">
-<h2>Forward problem: a positive PCR test</h2>
-<div class="footer">
-<ul>
-<li><span class="math inline">P(\text{Positive})</span>: 2%; <span class="math inline">P(\text{Infected})</span>: 0.05%</li>
-</ul>
-</div>
-<p>If a person is infected, what is the probability that the PCR test is positive?</p>
-<ul>
-<li class="fragment"><span class="math inline">P(\text{Positive} \mid \text{Infected}) = 95\%</span></li>
-<li class="fragment">This is the <strong>forward problem</strong>: given infection status, predict the test result.</li>
-</ul>
-<aside class="notes">
-<ul>
-<li>These are hypothetical teaching inputs, not current clinical performance estimates.</li>
-<li>Sensitivity is the probability of a positive result among infected people.</li>
-<li>For example, 95 of 100 infected samples may test positive.</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="inverse-problem-infection-after-a-positive-test" class="slide level2" data-visibility="uncounted">
-<h2>Inverse problem: infection after a positive test</h2>
-<div class="footer">
-<ul>
-<li><span class="math inline">P(\text{Positive})</span>: 2%; <span class="math inline">P(\text{Infected})</span>: 0.05%</li>
-</ul>
-</div>
-<p>If the PCR test is positive, how likely is it that the person is infected?</p>
-<ul>
-<li class="fragment">Predict before revealing the calculation.</li>
-<li class="fragment"><span class="math inline">P(\text{Infected} \mid \text{Positive}) = \frac{P(\text{Positive} \mid \text{Infected})\,P(\text{Infected})}{P(\text{Positive})} \approx 2.4\%</span></li>
-<li class="fragment">This is the <strong>inverse problem</strong>: use the result to update what we believe about infection.</li>
-</ul>
-<aside class="notes">
-<ul>
-<li>0.95 * 0.0005 / 0.02 = 0.02375</li>
-<li>The low prevalence matters: most people are not infected before testing.</li>
-<li>The calculation uses the specified 2% positive rate; it is not derived from sensitivity and prevalence here.</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="four-things-that-are-easy-to-mix-up" class="slide level2" data-visibility="uncounted">
-<h2>Four things that are easy to mix up</h2>
-<div class="small">
-<table class="caption-top">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th></th>
-<th>What it is</th>
-<th>Seedlings (2 of 5, prior Beta(8, 2))</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><strong>MLE</strong></td>
-<td>the <span class="math inline">p</span> that maximises the <span class="teal">likelihood</span></td>
-<td>0.4</td>
-</tr>
-<tr class="even">
-<td><strong>MAP</strong></td>
-<td>the <span class="math inline">p</span> that maximises the <span class="orange">posterior</span> (its peak)</td>
-<td>0.692</td>
-</tr>
-<tr class="odd">
-<td><strong>Posterior mean</strong></td>
-<td>the average of the <span class="orange">posterior</span></td>
-<td>0.667</td>
-</tr>
-<tr class="even">
-<td><strong>Posterior distribution</strong></td>
-<td>every value of <span class="math inline">p</span> with its plausibility</td>
-<td>Beta(10, 5)</td>
-</tr>
-</tbody>
-</table>
-</div>
-<ul>
-<li class="fragment">MLE and MAP are single numbers. They say nothing about uncertainty.</li>
-<li class="fragment">With a flat prior, MAP = MLE. The posterior is still a distribution.</li>
-<li class="fragment">In this course we work with the <strong>whole posterior</strong> and summarise it with a mean (or median) and an interval.</li>
-</ul>
-</section>
-<section id="which-prior-simulate-from-it" class="slide level2" data-visibility="uncounted">
-<h2>Which prior? Simulate from it</h2>
-
-<img data-src="slides_files/figure-revealjs/unnamed-chunk-13-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1440"><div class="small">
-<ul>
-<li class="fragment"><strong>Prior predictive check</strong>: draw <span class="math inline">p</span> from the prior, simulate data, and ask “could data like these happen?”</li>
-<li class="fragment">A prior is a statement about plausible <em>data</em>, so judge it on the scale of the data.</li>
-<li class="fragment">In ecology we mostly use <strong>weakly informative</strong> priors: they put less prior weight on implausible parameter scales.</li>
-</ul>
-</div>
-<aside class="notes">
-<ul>
-<li>informative prior here: earlier censuses suggest about 30% of seedlings survive</li>
-<li>more on priors for regression coefficients on Day 2</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="extension-deriving-the-binomial-mle" class="slide level2" data-visibility="uncounted">
-<h2>Extension: deriving the binomial MLE</h2>
-<ul>
-<li>2 survivors out of 5 seedlings: What is the survival probability of seedlings?</li>
-</ul>
-<div class="columns">
-<div class="column" style="width:40%;">
-<p><img data-src="../images/seedling.png"></p>
-</div><div class="column" style="width:60%;">
-<ul>
-<li class="fragment"><p><span class="math inline">p</span>: survival probability; <span class="math inline">1-p</span>: probability of dying</p></li>
-<li class="fragment"><p><span class="math inline">L = {}_5C_2 p^2(1-p)^3</span> (Binomial distribution)</p></li>
-<li class="fragment"><p><span class="math inline">\mathrm{ln}\;L = \mathrm{ln}\;{}_5C_2 + 2\mathrm{ln}\;p + 3\mathrm{ln}(1-p)</span></p></li>
-<li class="fragment"><p><span class="math inline">\frac{d}{dp}\mathrm{ln}\;L = \frac{2}{p} - \frac{3}{1-p} = 0</span></p></li>
-<li class="fragment"><p>Solve: <span class="math inline">p = \frac{2}{5}</span></p></li>
-</ul>
-</div></div>
-</section>
-<section id="extension-normal-density-in-r" class="slide level2" data-visibility="uncounted">
-<h2>Extension: Normal density in R</h2>
-<div class="columns">
-<div class="column" style="width:40%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-14-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="small">
-<p><span class="math inline">f(x \mid \mu, \sigma) = \frac{1}{\sqrt{2\pi\sigma^2}}\mathrm{exp} \bigl[{-\frac{1}{2}\bigl\{\frac{x-\mu}{\sigma}}\bigr\}^2\bigr]</span></p>
-</div>
-</div><div class="column" style="width:60%;">
-<ul>
-<li class="fragment"><p>For continuous data, <span class="math inline">f(\text{data}\mid\text{parameters})</span> gives the <strong>probability density</strong> at the observed values.</p></li>
-<li class="fragment"><p>e.g., when your model is <span class="math inline">x_i \sim \mathcal{N}(\mu = 0, \sigma = 1)</span> (normal distribution with mean 0 and standard deviation 1), what is the probability density at x = 1.96?</p></li>
-</ul>
-<div class="fragment">
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="" aria-label="1"></a><span class="fu">dnorm</span>(<span class="fl">1.96</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>  [1] 0.05844094</code></pre>
-</div>
-</div>
-</div>
-<div class="fragment">
-<ul>
-<li>A statistical model always has this form: a distribution for the data (normal, binomial, Poisson, …) with unknown parameters.</li>
-</ul>
-</div>
-</div></div>
-<aside class="notes">
-<ul>
-<li>likelihood is all about probability density (mass) function (normal, log-normal, poisson, beta, gamma, binomial, negative-binomial…)</li>
-<li>NOTE: throughout the course N(mu, sigma) is written with the standard deviation, as in Stan and in dnorm()</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="likelihood-of-several-observations" class="slide level2" data-visibility="uncounted">
-<h2>Likelihood of several observations</h2>
-<p>For independent observations <span class="math inline">x=\{-1.5,\;0,\;1.5\}</span>, assume a Normal model with mean <span class="math inline">\mu</span> and standard deviation 1. The likelihood is the joint probability density, viewed as a function of <span class="math inline">\mu</span>.</p>
-<div class="small">
-<ul>
-<li class="fragment"><span class="math inline">L(\mu) = f(-1.5 \mid \mu, 1) \times f(0 \mid \mu, 1) \times f(1.5 \mid \mu, 1)</span></li>
-<li class="fragment"><span class="math inline">\mathrm{ln}\;L(\mu) = \mathrm{ln}\;f(-1.5 \mid \mu, 1) + \mathrm{ln}\;f(0 \mid \mu, 1) +  \mathrm{ln}\;f(1.5 \mid \mu, 1)</span></li>
-</ul>
-</div>
-<div class="fragment">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/unnamed-chunk-16-1.png" class="quarto-figure quarto-figure-center" width="960"></p>
-</figure>
-</div>
-</div>
-</div>
-</div>
-<div class="fragment">
-<p>The data are fixed. The likelihood is a function of the <strong>parameter</strong>.</p>
-</div>
-</section>
-<section class="slide level2">
-
-
-<img src="../images/bayes_re.png" width="100%" style="display: block; margin: auto;" class="r-stretch"></section>
-<section id="mcmc-a-simplified-metropolis-hastings-mh-algorithm" class="slide level2" data-visibility="uncounted">
-<h2>MCMC: a simplified Metropolis-Hastings (MH) algorithm</h2>
-<div class="columns">
-<div class="column" style="width:40%;">
-<p><img data-src="../images/mh_trace.gif" height="290"></p>
-<p><img data-src="../images/mh_post.gif" height="290"></p>
-</div><div class="column" style="width:60%;">
-<ul>
-<li class="fragment">Start with some values of <em>p</em> (e.g., 0.2 and 0.8).</li>
-<li class="fragment">Calculate the posterior of those values.</li>
-<li class="fragment">Repeat the following steps N times:
-<ul>
-<li class="fragment">Propose a new value of <span class="math inline">p_{\text{new}}</span> (e.g., <span class="math inline">p \pm 0.01</span>)</li>
-<li class="fragment">Calculate the posterior at <span class="math inline">p_{\text{new}}</span>.</li>
-<li class="fragment">If <span class="math inline">\text{Post}(p_{\text{new}}) \geq \text{Post}(p_t), \text{ then } p_{t+1} = p_{\text{new}}</span>.</li>
-<li class="fragment">Else, accept <span class="math inline">p_{\text{new}}</span> with probability <span class="math inline">\frac{\text{Post}(p_{\text{new}})}{\text{Post}(p_t)}</span>.</li>
-</ul></li>
-<li class="fragment">After the first steps (grey: <strong>warmup</strong>), the chain visits each value of <span class="math inline">p</span> in proportion to its posterior probability.</li>
-</ul>
-</div></div>
-<aside class="notes">
-<ul>
-<li>example: coin B, posterior proportional to p^110 (1-p)^90</li>
-<li>two chains from different starting points end up in the same place: this idea returns on Day 2 as R-hat</li>
-</ul>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="mcmc-hamiltonian-monte-carlo-hmc" class="slide level2" data-visibility="uncounted">
-<h2>MCMC: Hamiltonian Monte Carlo (HMC)</h2>
-<div class="columns">
-<div class="column" style="width:40%;">
-<p><img data-src="../images/pot_eng.gif"></p>
-<p><img data-src="../images/traj.gif"></p>
-</div><div class="column" style="width:60%;">
-<ul>
-<li class="fragment"><p><span class="math inline">H(\theta, r) = U(\theta) + r^2/2</span> (Hamiltonian: potential energy + kinetic energy = constant)</p>
-<ul>
-<li class="fragment"><span class="math inline">U(\theta) = -\text{log}\; p(\theta \mid \text{data})</span></li>
-</ul></li>
-<li class="fragment"><p>Instead of sampling from <span class="math inline">p(\theta \mid \text{data})</span>, HMC samples from a joint distribution over both <span class="math inline">\theta</span> and <span class="math inline">r</span>.</p>
-<ul>
-<li class="fragment"><span class="math inline">p(\theta \mid \text{data}) \propto \int \text{exp}(-H(\theta, r))dr</span></li>
-</ul></li>
-<li class="fragment"><p>It’s equivalent to sampling from <span class="math inline">p(\theta \mid \text{data}) \propto \text{exp}(-U(\theta))</span>.</p></li>
-<li class="fragment"><p>HMC explores very different <span class="math inline">\theta</span> along the same trajectory (i.e.&nbsp;leapfrog path), which is much more efficient than random sampling.</p></li>
-</ul>
-</div></div>
-</section>
-<section id="mcmc-hamiltonian-monte-carlo-hmc-1" class="slide level2" data-visibility="uncounted">
-<h2>MCMC: Hamiltonian Monte Carlo (HMC)</h2>
-<div class="columns">
-<div class="column" style="width:30%;">
-<p><img data-src="../images/leapfrog.gif"></p>
-<p><img data-src="../images/hmc.gif"></p>
-</div><div class="column" style="width:70%;">
-<ul>
-<li class="fragment"><p>Within each iteration, HMC simulates a trajectory using leapfrog steps.</p>
-<ul>
-<li class="fragment">No-U-Turn Sampler (NUTS) adapts trajectory length. <code>max_treedepth</code> limits it; Stan also has other sampler settings.</li>
-</ul></li>
-<li class="fragment"><p>The Hamiltonian stays the same, but momentum <span class="math inline">r</span> is resampled each iteration.</p></li>
-<li class="fragment"><p>Only the final parameter <span class="math inline">\theta</span> of each trajectory is kept as a posterior sample.</p></li>
-</ul>
-</div></div>
-<div class="footer">
-<p>The code behind these animations: <code>docs/hmc.qmd</code>, <code>R/hmc.R</code></p>
-</div>
-</section>
-<section id="mcmc-methods-comparison" class="slide level2" data-visibility="uncounted">
-<h2>MCMC Methods: Comparison</h2>
-<table class="caption-top">
-<colgroup>
-<col style="width: 18%">
-<col style="width: 24%">
-<col style="width: 28%">
-<col style="width: 28%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Feature</th>
-<th><strong>Metropolis(-Hastings)</strong></th>
-<th><strong>Gibbs Sampling</strong></th>
-<th><strong>Hamiltonian Monte Carlo (HMC)</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>How it works</td>
-<td>Try random moves, accept/reject</td>
-<td>Update one parameter at a time</td>
-<td>Simulate smooth movement using gradients</td>
-</tr>
-<tr class="even">
-<td>Efficient in high dimensions?</td>
-<td>❌ Often slow</td>
-<td>✅ If math is simple</td>
-<td>✅ Very efficient</td>
-</tr>
-<tr class="odd">
-<td>Flexible?</td>
-<td>✅ Yes</td>
-<td>Depends on available conditional updates</td>
-<td>✅ Yes</td>
-</tr>
-<tr class="even">
-<td>Typical software</td>
-<td>JAGS, custom R</td>
-<td>JAGS, BUGS</td>
-<td>Stan</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="interfaces-to-stan-for-r-users" class="slide level2" data-visibility="uncounted">
-<h2>Interfaces to Stan (for R users)</h2>
-<ul>
-<li><p>Stan: The actual modeling and inference engine, written in C++.</p></li>
-<li><p>CmdStan: Command line interface (you write Stan code and run it via terminal).</p></li>
-<li><p><code>rstan</code>, <code>cmdstanr</code>: R interface to Stan/Cmdstan (you write Stan code and run it within R).</p></li>
-<li><p><code>brms</code>, <code>rstanarm</code>: Higher-level R packages that generate and run Stan models for you (you write an R formula, without writing Stan code).</p></li>
-<li><p>In this course, we use <code>cmdstanr</code> with models that are already written. <code>brms</code> versions of the same models are optional material on Days 2 and 3.</p></li>
-</ul>
-</section>
-<section id="references" class="slide level2" data-visibility="uncounted">
+<section id="references" class="slide level2">
 <h2>References</h2>
 <ul>
 <li><p><a href="http://www.stat.columbia.edu/~gelman/book/">Gelman, A. et al.&nbsp;Bayesian Data Analysis, Third Edition. (Chapman &amp; Hall/CRC, 2013)</a></p></li>
@@ -1619,7 +1003,7 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
   <script src="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
   <script src="slides_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="slides_files/libs/revealjs/plugin/quarto-support/support.js"></script>
-
+  
 
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
@@ -1641,7 +1025,7 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
 'smaller': false,
-
+ 
         // Display controls in the bottom right corner
         controls: true,
 
@@ -1803,7 +1187,7 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
         ]
       });
     </script>
-
+    
     <script>
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
@@ -1849,7 +1233,7 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
         });
         const isCodeAnnotation = (el) => {
           for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {
+            if (clz.startsWith('code-annotation-')) {                     
               return true;
             }
           }
@@ -1869,11 +1253,11 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
             button.setAttribute("data-bs-toggle", "tooltip");
             button.setAttribute("data-bs-placement", "left");
             button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button,
-              { trigger: "manual",
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
                 customClass: "code-copy-button-tooltip",
                 offset: [0, -8]});
-            tooltip.show();
+            tooltip.show();    
           }
           setTimeout(function() {
             if (tooltip) {
@@ -1952,7 +1336,7 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
           }
             config['offset'] = [0,0];
             config['maxWidth'] = 700;
-          window.tippy(el, config);
+          window.tippy(el, config); 
         }
         const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
         for (var i=0; i<noterefs.length; i++) {
@@ -2011,6 +1395,6 @@ Posterior <span class="math inline">\propto</span> Prior <span class="math inlin
       </script>
     <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
     <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
-
+    
 
 </body></html>

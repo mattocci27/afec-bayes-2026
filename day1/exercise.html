@@ -2210,9 +2210,9 @@ vertical-align: -.125em;
 <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
   <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">Table of contents</h2>
-
+   
   <ul class="collapse">
-  <li><a href="#core-exercise-more-seedlings-how-much-uncertainty" id="toc-core-exercise-more-seedlings-how-much-uncertainty" class="nav-link active" data-scroll-target="#core-exercise-more-seedlings-how-much-uncertainty">Core exercise: more seedlings, how much uncertainty?</a></li>
+  <li><a href="#core-exercise-more-seedlings-less-uncertainty" id="toc-core-exercise-more-seedlings-less-uncertainty" class="nav-link active" data-scroll-target="#core-exercise-more-seedlings-less-uncertainty">Core exercise: More seedlings, less uncertainty?</a></li>
   </ul>
 </nav>
 </div>
@@ -2233,17 +2233,17 @@ vertical-align: -.125em;
              <p>Masatoshi Katabuchi </p>
           </div>
   </div>
-
+    
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
       <p class="date">October 21, 2026</p>
     </div>
   </div>
-
-
+  
+    
   </div>
-
+  
 
 
 </header>
@@ -2253,10 +2253,19 @@ vertical-align: -.125em;
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_bw</span>(<span class="at">base_size =</span> <span class="dv">14</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<section id="core-exercise-more-seedlings-how-much-uncertainty" class="level1">
-<h1>Core exercise: more seedlings, how much uncertainty?</h1>
-<p><strong>Core:</strong> compare posterior uncertainty for two survey sizes using the supplied code or result figures. Changing the prior and fitting models are optional extensions.</p>
-<p>The code below is a starting example: 2 survivors out of 5 seedlings.</p>
+<section id="core-exercise-more-seedlings-less-uncertainty" class="level1">
+<h1>Core exercise: More seedlings, less uncertainty?</h1>
+<p>Compare two surveys with the same observed survival proportion:</p>
+<ul>
+<li>Survey A: 2 survivors out of 5 seedlings</li>
+<li>Survey B: 20 survivors out of 50 seedlings</li>
+</ul>
+<ol type="1">
+<li><strong>Predict:</strong> Which survey will have a narrower posterior distribution?</li>
+<li><strong>Run:</strong> Change only <code>y</code> and <code>N</code> in the code and compare the two posterior distributions.</li>
+<li><strong>Explain:</strong> Why are the posterior distributions different, even though the observed survival proportion is the same?</li>
+</ol>
+<p>The code starts with Survey A. Keep the prior and grid unchanged. If R is unavailable, compare the figures in <a href="results.html">the result sheet</a>.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="dv">2</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">5</span></span>
@@ -2284,12 +2293,6 @@ vertical-align: -.125em;
 </div>
 </div>
 </div>
-<ol type="1">
-<li>Choose a small survey and a larger survey, both with an observed survival proportion of 0.4. Write down the number surveyed (<code>N</code>) and the number surviving (<code>y</code>) for each.</li>
-<li>Before running the code, predict which survey will give a narrower posterior.</li>
-<li>If running R, use your counts in the code above. Copy the code into a new chunk for the second survey so that both plots remain visible. Keep the prior and grid unchanged. If reading the result sheet, use its prepared 4/10 and 20/50 surveys instead.</li>
-<li>Compare the two plots. Does the result agree with your prediction? Explain what the curve widths tell you about uncertainty in the survival probability.</li>
-</ol>
 <p><a href="instructor-notes.html">Instructor notes, solutions and demonstrations</a></p>
 </section>
 
@@ -2306,7 +2309,7 @@ vertical-align: -.125em;
     anchorJS.add('.anchored');
     const isCodeAnnotation = (el) => {
       for (const clz of el.classList) {
-        if (clz.startsWith('code-annotation-')) {
+        if (clz.startsWith('code-annotation-')) {                     
           return true;
         }
       }
@@ -2326,11 +2329,11 @@ vertical-align: -.125em;
         button.setAttribute("data-bs-toggle", "tooltip");
         button.setAttribute("data-bs-placement", "left");
         button.setAttribute("data-bs-title", "Copied!");
-        tooltip = new bootstrap.Tooltip(button,
-          { trigger: "manual",
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
             customClass: "code-copy-button-tooltip",
             offset: [0, -8]});
-        tooltip.show();
+        tooltip.show();    
       }
       setTimeout(function() {
         if (tooltip) {
@@ -2407,7 +2410,7 @@ vertical-align: -.125em;
       if (onUntriggerFn) {
         config.onUntrigger = onUntriggerFn;
       }
-      window.tippy(el, config);
+      window.tippy(el, config); 
     }
     const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
     for (var i=0; i<noterefs.length; i++) {
@@ -2482,7 +2485,7 @@ vertical-align: -.125em;
       tippyHover(xref, undefined, function(instance) {
         instance.disable();
         let url = xref.getAttribute('href');
-        let hash = undefined;
+        let hash = undefined; 
         if (url.startsWith('#')) {
           hash = url;
         } else {
@@ -2510,7 +2513,7 @@ vertical-align: -.125em;
               if (note !== null) {
                 const html = processXRef(id, note);
                 instance.setContent(html);
-              }
+              } 
             }).finally(() => {
               instance.enable();
               instance.show();
@@ -2534,7 +2537,7 @@ vertical-align: -.125em;
               }
               const html = processXRef(null, note);
               instance.setContent(html);
-            }
+            } 
           }).finally(() => {
             instance.enable();
             instance.show();
@@ -2574,7 +2577,7 @@ vertical-align: -.125em;
               height = bottom - top;
             }
             if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it
+              // cook up a div (if necessary) and position it 
               let div = window.document.getElementById("code-annotation-line-highlight");
               if (div === null) {
                 div = window.document.createElement("div");

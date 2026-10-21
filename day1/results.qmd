@@ -14,7 +14,7 @@ execute:
   cache: false
 ---
 
-Use this sheet with [the exercise](exercise-student.html). Predict before reading the results, then explain in words. These figures use exact updating or supplied fits, with no new Stan inference.
+Use this sheet with [the exercise](exercise-student.html). Predict before reading the results, then explain in words. These figures use direct grid calculations of the posterior; no model fitting is needed.
 
 ```{r setup, include=FALSE}
 library(tidyverse)
@@ -36,13 +36,12 @@ theme_set(theme_bw(base_size = 14))
 
 ## More seedlings, same observed proportion
 
-One possible choice is 4 survivors out of 10 seedlings and 20 out of 50.
-Your own survey counts may differ. Both plots use the same prior, grid and
+Survey A has 2 survivors out of 5 seedlings; Survey B has 20 out of 50. Both plots use the same prior, grid and
 horizontal axis. Predict the difference before viewing the second figure.
 
 ```{r comparisons, fig.height=3.4}
 p <- seq(0, 1, length.out = 101)
-for (N in c(10, 50)) {
+for (N in c(5, 50)) {
   y <- 0.4 * N
   prior <- dbeta(p, shape1 = 1, shape2 = 1)
   likelihood <- dbinom(x = y, size = N, prob = p)
@@ -63,42 +62,9 @@ for (N in c(10, 50)) {
 
 Both observed proportions are 0.4. Under this model and prior, the larger survey
 gives a narrower posterior: less uncertainty about the survival probability.
-The continuous posteriors approximated here are Beta(5,7) and Beta(21,31).
+The continuous posteriors approximated here are Beta(3,4) and Beta(21,31).
 Their means are close, but not identical.
 
-## Optional: a different prior with the same 2/5 data
-
-```{r prior-comparison, fig.height=3.4}
-y <- 2
-N <- 5
-prior <- dbeta(p, shape1 = 8, shape2 = 2)
-likelihood <- dbinom(x = y, size = N, prob = p)
-posterior <- prior * likelihood
-posterior <- posterior / sum(posterior)
-tibble(p = p, posterior = posterior) |>
-  ggplot(aes(x = p, y = posterior)) +
-  geom_line(linewidth = 1.2, colour = "#d95f02") +
-  coord_cartesian(xlim = c(0, 1)) +
-  labs(
-    x = "Survival probability p",
-    y = "Posterior probability per grid point",
-    title = "2 survivors out of 5 seedlings; prior Beta(8,2)"
-  )
-```
-
-Only the prior changes. The posterior shifts towards higher survival
-probabilities; a high-survival prior needs ecological justification.
-All these figures show probability per grid point, rather than continuous density.
-Vertical scales adjust automatically; compare horizontal widths.
-
-## Stan demonstration
-
-```{r stan-result}
-fit <- course_fit("day1_seedling")
-knitr::kable(course_diagnostics(fit), digits = 2)
-ggplot(as_tibble(fit$draws), aes(p)) +
-  geom_histogram(bins = 30, fill = "#d95f02") +
-  labs(x = "Survival probability", y = "Posterior draws")
-```
-
-This is the 2/5, Beta(1,1) posterior. Stored draws approximate a distribution.
+The larger survey provides more information about $p$, so its likelihood is more
+concentrated. With the same flat prior, its posterior is also narrower.
+Both figures show probability per grid point; compare horizontal widths.

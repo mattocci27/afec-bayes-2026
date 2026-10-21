@@ -356,6 +356,7 @@ ol li:before {
 
 
 /* Course slides: preserve the reference palette, with offline system fonts. */
+.reveal:not(:has(#title-slide.present)) .slide-logo { display: none; }
 .reveal { font-family: Lato, Arial, sans-serif; }
 .reveal h1, .reveal h2, .reveal h3 { font-family: "News Cycle", "Arial Narrow", Arial, sans-serif; }
 .reveal .title-box { margin: 2.5em auto 0; width: 86%; }

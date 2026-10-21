@@ -28,13 +28,13 @@ participant ZIP.
 
 # Core exercise: purpose and model
 
-Participants design a small and a larger survey with the same observed survival
-proportion (0.4), predict a sample-size effect and explain posterior uncertainty. This uses the same binomial
+Participants compare Survey A (2 survivors out of 5 seedlings) and Survey B
+(20 out of 50), predict a sample-size effect and explain posterior uncertainty. This uses the same binomial
 structure as the coin slides, now for seedling survival with a flat prior.
 The exercise assumes conditional independence and a common survival probability:
 $y \sim \operatorname{Binomial}(N,p)$, $p \sim \operatorname{Beta}(1,1)$.
 Hold that model, prior, grid and horizontal axis fixed in the comparison.
-The lecture supplies a comparison; participants now construct their own.
+Both observed proportions are 0.4; only the survey counts change.
 
 Assume participants can run supplied R code and edit two assignments; do not
 require function writing or a derivation of the Beta posterior. Allow about
@@ -45,12 +45,9 @@ If time is short, omit the optional prior comparison below.
 the likelihood with the counts fixed and p varying; multiplication and
 normalisation produce the grid posterior. The plotting lines only display it.
 
-Accept any two valid integer-count surveys with different N and y/N = 0.4.
-For example, 4/10 and 20/50 give Beta(5,7) and Beta(21,31) continuous posteriors;
-the larger survey gives the narrower posterior. These are examples, not assigned
-counts. Ask participants to check that their own two proportions are both 0.4.
-If stuck, suggest choosing two different multiples of 5 for N, then y = 0.4 N.
-N between 10 and 200 is convenient for the supplied 101-point grid.
+Survey A gives the continuous posterior Beta(3,4); Survey B gives Beta(21,31).
+Survey B has a narrower posterior because more observations make the likelihood
+more concentrated. The equal observed proportions do not imply equal information.
 
 Participants copy the calculation into a new code chunk for the second survey,
 changing only y and N. Keep both plots visible. If copying a labelled Quarto
@@ -69,7 +66,7 @@ Both exercise plots have the same horizontal axis and grid. Vertical scales adju
 clipping when counts change; compare horizontal width, not raw displayed height.
 The y-axis is probability per grid point, not continuous density. A much larger N
 may require a finer grid to resolve the posterior width; use the modest survey
-sizes above during class rather than making grid resolution another core task.
+sizes assigned during class rather than making grid resolution another core task.
 
 `dbeta()` gives the prior density at each candidate p, and `dbinom()` evaluates
 the probability of the observed count for each candidate. Multiplying these
@@ -77,7 +74,7 @@ values and normalising their sum produces a discrete grid approximation.
 The plotted heights are probabilities assigned to grid points, not continuous
 densities. Beta(1,1) gives equal prior weight across the grid.
 
-If browser R access fails, use the example 4/10 and 20/50 figures in `results.html`.
+If R is unavailable, use the 2/5 and 20/50 figures in `results.html`.
 Participants can still predict, compare and explain. Start individually; nearby
 help and discussion are optional. No fixed pairs or role changes are required,
 and no homework is required.
@@ -99,24 +96,11 @@ These priors are teaching contrasts, not general recommendations; a high-surviva
 prior needs evidence from a comparable habitat and census period.
 
 
-# Main demonstration: posterior draws and summaries
+# Optional reference: posterior draws and summaries
 
-Share a few participants' survey comparisons during the exercise debrief, then
-continue directly to the two demonstration slides. After the summaries, move to
-the Day 1 recap; do not return to the exercise for a separate reflection.
-These draws prepare participants to use the stored results on Day 2.
-
-Return to the starter 2/5 data and
-Beta(1,1) prior. Show a few values of p and the histogram of the stored Stan draws
-against the exact Beta(3,4) density. Explain that these are possible values of the
-unknown probability, not additional seedling observations.
-
-Then show only the mean and equal-tailed 95% credible interval. The slide code
-assigns `draws <- fit$draws` and computes both results from that same object.
-No new inference is required. Stan syntax, chain/iteration bookkeeping and
-posterior threshold probabilities are optional appendix material.
-Check the stored computation diagnostics before class; an attractive histogram
-is not sufficient validation.
+The Day 1 core ends with the exercise debrief and recap. Posterior draws and their summaries have been removed from the Day 1 slide deck.
+Introduce MCMC and posterior summaries together on Day 2.
+The Stan and brms material below is instructor reference, not a required demonstration.
 
 # Optional demonstration: Stan reads the same model
 
