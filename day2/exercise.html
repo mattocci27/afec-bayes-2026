@@ -9,7 +9,7 @@
 <meta name="author" content="Masatoshi Katabuchi">
 <meta name="dcterms.date" content="2026-10-22">
 
-<title>Day 2: Linear regression and MCMC</title>
+<title>Day 2: Logistic regression and MCMC</title>
 <style>
 
 span.smallcaps{font-variant: small-caps;}
@@ -2294,15 +2294,18 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#seedling-survival-regression" id="toc-seedling-survival-regression" class="nav-link active" data-scroll-target="#seedling-survival-regression">Seedling survival regression</a>
   <ul class="collapse">
-  <li><a href="#packages-and-data" id="toc-packages-and-data" class="nav-link" data-scroll-target="#packages-and-data">Packages and data</a></li>
-  <li><a href="#optional-fit-the-model-with-brms" id="toc-optional-fit-the-model-with-brms" class="nav-link" data-scroll-target="#optional-fit-the-model-with-brms">Optional: fit the model with brms</a></li>
-  <li><a href="#optional-fit-the-model-with-stan" id="toc-optional-fit-the-model-with-stan" class="nav-link" data-scroll-target="#optional-fit-the-model-with-stan">Optional: fit the model with Stan</a></li>
-  <li><a href="#data-and-posterior-draws" id="toc-data-and-posterior-draws" class="nav-link" data-scroll-target="#data-and-posterior-draws">Data and posterior draws</a></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
-  <li><a href="#sampling-diagnostics" id="toc-sampling-diagnostics" class="nav-link" data-scroll-target="#sampling-diagnostics">Sampling diagnostics</a></li>
-  <li><a href="#trace-plots" id="toc-trace-plots" class="nav-link" data-scroll-target="#trace-plots">Trace plots</a></li>
-  <li><a href="#survival-probabilities" id="toc-survival-probabilities" class="nav-link" data-scroll-target="#survival-probabilities">Survival probabilities</a></li>
-  <li><a href="#regression-plot" id="toc-regression-plot" class="nav-link" data-scroll-target="#regression-plot">Regression plot</a></li>
+  <li><a href="#model-and-data" id="toc-model-and-data" class="nav-link" data-scroll-target="#model-and-data">Model and data</a></li>
+  <li><a href="#prepared-result" id="toc-prepared-result" class="nav-link" data-scroll-target="#prepared-result">Load prepared posterior samples</a></li>
+  <li><a href="#posterior-summary-and-coefficient-interpretation" id="toc-posterior-summary-and-coefficient-interpretation" class="nav-link" data-scroll-target="#posterior-summary-and-coefficient-interpretation">Posterior summary and coefficient interpretation</a></li>
+  <li><a href="#mcmc-diagnostics-and-trace-plots" id="toc-mcmc-diagnostics-and-trace-plots" class="nav-link" data-scroll-target="#mcmc-diagnostics-and-trace-plots">MCMC diagnostics and trace plots</a></li>
+  <li><a href="#posterior-survival-probabilities" id="toc-posterior-survival-probabilities" class="nav-link" data-scroll-target="#posterior-survival-probabilities">Posterior survival probabilities</a></li>
+  <li><a href="#regression-plot-and-interpretation" id="toc-regression-plot-and-interpretation" class="nav-link" data-scroll-target="#regression-plot-and-interpretation">Regression plot and interpretation</a></li>
+  </ul></li>
+  <li><a href="#optional-appendix-fitting-models-with-brms-and-cmdstanr" id="toc-optional-appendix-fitting-models-with-brms-and-cmdstanr" class="nav-link" data-scroll-target="#optional-appendix-fitting-models-with-brms-and-cmdstanr">Optional appendix: Fitting models with brms and cmdstanr</a>
+  <ul class="collapse">
+  <li><a href="#fit-with-brms" id="toc-fit-with-brms" class="nav-link" data-scroll-target="#fit-with-brms">Fit with brms</a></li>
+  <li><a href="#fit-with-cmdstanr" id="toc-fit-with-cmdstanr" class="nav-link" data-scroll-target="#fit-with-cmdstanr">Fit with cmdstanr</a></li>
+  <li><a href="#analyse-a-newly-fitted-model" id="toc-analyse-a-newly-fitted-model" class="nav-link" data-scroll-target="#analyse-a-newly-fitted-model">Analyse a newly fitted model</a></li>
   </ul></li>
   <li><a href="#instructor-reference" id="toc-instructor-reference" class="nav-link" data-scroll-target="#instructor-reference">Instructor reference</a>
   <ul class="collapse">
@@ -2315,7 +2318,7 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Day 2: Linear regression and MCMC</h1>
+<h1 class="title">Day 2: Logistic regression and MCMC</h1>
 </div>
 
 
@@ -2346,19 +2349,24 @@ window.Quarto = {
 
 <section id="seedling-survival-regression" class="level1">
 <h1>Seedling survival regression</h1>
-<p>A binomial logistic regression relates seedling survival to scaled conspecific density in 60 simulated quadrats.</p>
+<section id="model-and-data" class="level2">
+<h2 class="anchored" data-anchor-id="model-and-data">Model and data</h2>
+<p>We model seedling survival for a <strong>single focal tree species</strong> across 60 simulated quadrats. A binomial logistic regression relates survival probability to scaled conspecific density:</p>
 <p><span class="math display">s_i\sim\operatorname{Binomial}(n_i,p_i),\qquad
 \operatorname{logit}(p_i)=\alpha+\beta x_i.</span></p>
 <ul>
-<li><code>n</code>: number of seedlings in a quadrat.</li>
-<li><code>suv</code>: number of survivors.</li>
-<li><code>cons</code>: scaled conspecific density.</li>
+<li><span class="math inline">i</span>: quadrat (<code>quadrat</code>).</li>
+<li><span class="math inline">n_i</span>: number of seedlings of the focal species in quadrat <span class="math inline">i</span> (<code>n</code>).</li>
+<li><span class="math inline">s_i</span>: number of those seedlings surviving the observation period (<code>suv</code>).</li>
+<li><span class="math inline">p_i</span>: survival probability for those seedlings.</li>
+<li><span class="math inline">x_i</span>: scaled conspecific density in quadrat <span class="math inline">i</span> (<code>cons</code>).</li>
 </ul>
-<p>The independent priors for <span class="math inline">\alpha</span> and <span class="math inline">\beta</span> are Normal with mean 0 and <strong>SD 2.5</strong>. The model can be fitted below or analysed using a prepared result.</p>
-<p><strong>Core:</strong> read the coefficient table, sampling checks and survival curve using the prepared result. Running the supplied analysis code is optional. For this route, skip both fitting sections and continue at <a href="#prepared-result">Prepared result</a>.</p>
-<p><strong>Optional:</strong> fit a new model with brms or Stan in a prepared environment.</p>
-<section id="packages-and-data" class="level2">
-<h2 class="anchored" data-anchor-id="packages-and-data">Packages and data</h2>
+<p>The simulation generates <code>cons</code> on a standard Normal scale; it does not specify whether density measures adults, seedlings or another conspecific group. We therefore interpret it as a simulated density index. The model assumes a common survival probability within each quadrat and conditionally independent seedling outcomes, with one shared density relationship across quadrats.</p>
+<p>The prepared result uses independent Normal priors with mean 0 and <strong>SD 2.5</strong> for <span class="math inline">\alpha</span> and <span class="math inline">\beta</span>.</p>
+<p><strong>Core:</strong> follow the coefficient summaries, sampling checks and survival curve using the prepared posterior samples. Running the analysis code is optional; no model compilation or new MCMC fitting is needed.</p>
+<p><strong>Optional appendix:</strong> fit a new model with brms or cmdstanr in a prepared environment after completing the walkthrough.</p>
+<section id="packages-and-data" class="level3">
+<h3 class="anchored" data-anchor-id="packages-and-data">Packages and data</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(posterior)</span>
@@ -2369,118 +2377,27 @@ window.Quarto = {
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>ndd <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">here</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;ndd.csv&quot;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="optional-fit-the-model-with-brms" class="level2">
-<h2 class="anchored" data-anchor-id="optional-fit-the-model-with-brms">Optional: fit the model with brms</h2>
-<p><code>brms</code> translates the regression formula into Stan. This fits the same binomial logit model and independent Normal(0, 2.5) coefficient priors used below.</p>
+</section>
+<section id="prepared-result" class="level2">
+<h2 class="anchored" data-anchor-id="prepared-result">Load prepared posterior samples</h2>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(brms)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>fit_brms <span class="ot">&lt;-</span> <span class="fu">brm</span>(</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bf</span>(suv <span class="sc">|</span> <span class="fu">trials</span>(n) <span class="sc">~</span> cons, <span class="at">center =</span> <span class="cn">FALSE</span>),</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> ndd,</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">&quot;logit&quot;</span>),</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior =</span> <span class="fu">set_prior</span>(<span class="st">&quot;normal(0, 2.5)&quot;</span>, <span class="at">class =</span> <span class="st">&quot;b&quot;</span>),</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">backend =</span> <span class="st">&quot;cmdstanr&quot;</span>,</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">42</span>,</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">cores =</span> <span class="dv">1</span>,</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">2000</span>,</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">500</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(<span class="st">&quot;fits&quot;</span>, <span class="st">&quot;day2_ndd.rds&quot;</span>))</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>coef_draws <span class="ot">&lt;-</span> <span class="fu">subset_draws</span>(fit<span class="sc">$</span>draws, <span class="at">variable =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>))</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>sampler_diagnostics <span class="ot">&lt;-</span> fit<span class="sc">$</span>diagnostics</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p><code>trials(n)</code> supplies the seedling count. <code>cons</code> predicts survival on the logit scale. The intercept is included automatically. <code>center=FALSE</code> keeps its prior at <code>cons = 0</code>, matching the Stan model. The coefficient names in brms are <code>b_Intercept</code> and <code>b_cons</code>.</p>
+<p>The prepared result uses the supplied, unchanged <code>ndd.csv</code>. Coefficient draws retain their chain and iteration identifiers; diagnostics are from the same fit. If the data or model are changed, new inference is required.</p>
 </section>
-<section id="optional-fit-the-model-with-stan" class="level2">
-<h2 class="anchored" data-anchor-id="optional-fit-the-model-with-stan">Optional: fit the model with Stan</h2>
-<p>The supplied file <code>stan/logit_reg.stan</code> contains:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;               <span class="co">// number of quadrats</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n;      <span class="co">// seedlings per quadrat</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; suv;    <span class="co">// survivors per quadrat</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] cons;               <span class="co">// conspecific density (scaled)</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> alpha;                   <span class="co">// intercept (logit scale)</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> beta;                    <span class="co">// slope (logit scale)</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="co">// likelihood: logit(p) = alpha + beta * cons</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  suv ~ binomial_logit(n, alpha + beta * cons);</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="co">// priors</span></span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  alpha ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  beta ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The R data list connects the CSV columns to Stan’s data block. <code>cmdstan_model()</code> compiles the model, and <code>$sample()</code> runs the chains.</p>
+<section id="posterior-summary-and-coefficient-interpretation" class="level2">
+<h2 class="anchored" data-anchor-id="posterior-summary-and-coefficient-interpretation">Posterior summary and coefficient interpretation</h2>
+<p><code>summarise_draws()</code> produces the coefficient table. The requested 2.5th and 97.5th percentiles give a <strong>95% credible interval</strong>, containing the central 95% of posterior probability for each coefficient, conditional on the data and model (including its priors).</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cmdstanr)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>stan_data <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">N =</span> <span class="fu">nrow</span>(ndd),</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="fu">as.integer</span>(ndd<span class="sc">$</span>n),</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">suv =</span> <span class="fu">as.integer</span>(ndd<span class="sc">$</span>suv),</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">cons =</span> ndd<span class="sc">$</span>cons</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>model_stan <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(<span class="fu">here</span>(<span class="st">&quot;stan&quot;</span>, <span class="st">&quot;logit_reg.stan&quot;</span>))</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>fit_stan <span class="ot">&lt;-</span> model_stan<span class="sc">$</span><span class="fu">sample</span>(</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> stan_data,</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">42</span>,</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">1</span>,</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">1000</span>,</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">1000</span>,</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">500</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Both fitting sections run new inference in a prepared environment. They are shown but not executed when this handout is rendered. Run either section to fit the model, or skip both and use the supplied result. Students do not need to install CmdStan, a C++ toolchain or Docker on their own computers.</p>
-</section>
-<section id="data-and-posterior-draws" class="level2">
-<h2 class="anchored" data-anchor-id="data-and-posterior-draws">Data and posterior draws</h2>
-<p>Run <strong>one</strong> of the following three chunks, then continue to Summary. Use brms or Stan after fitting that model; use the prepared result to skip fitting. Do not run all three: each replaces the result used below.</p>
-<section id="brms-result" class="level3">
-<h3 class="anchored" data-anchor-id="brms-result">brms result</h3>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>coef_draws <span class="ot">&lt;-</span> <span class="fu">as_draws_df</span>(fit_brms, <span class="at">variable =</span> <span class="fu">c</span>(<span class="st">&quot;b_Intercept&quot;</span>, <span class="st">&quot;b_cons&quot;</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename_variables</span>(<span class="at">alpha =</span> <span class="st">&quot;b_Intercept&quot;</span>, <span class="at">beta =</span> <span class="st">&quot;b_cons&quot;</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>sampler_diagnostics <span class="ot">&lt;-</span> brms<span class="sc">::</span><span class="fu">nuts_params</span>(fit_brms) <span class="sc">|&gt;</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Parameter <span class="sc">==</span> <span class="st">&quot;divergent__&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">num_divergent =</span> <span class="fu">sum</span>(Value), <span class="at">.by =</span> Chain) <span class="sc">|&gt;</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(num_divergent)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>The coefficients are renamed alpha and beta to match the equations. <code>nuts_params()</code> supplies the sampler diagnostics; here we count divergences per chain.</p>
-</section>
-<section id="stan-result" class="level3">
-<h3 class="anchored" data-anchor-id="stan-result">Stan result</h3>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>coef_draws <span class="ot">&lt;-</span> <span class="fu">as_draws_df</span>(fit_stan<span class="sc">$</span><span class="fu">draws</span>(<span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>)))</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>sampler_diagnostics <span class="ot">&lt;-</span> fit_stan<span class="sc">$</span><span class="fu">diagnostic_summary</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="prepared-result" class="level3">
-<h3 class="anchored" data-anchor-id="prepared-result">Prepared result</h3>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="fu">here</span>(<span class="st">&quot;fits&quot;</span>, <span class="st">&quot;day2_ndd.rds&quot;</span>))</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>coef_draws <span class="ot">&lt;-</span> <span class="fu">subset_draws</span>(fit<span class="sc">$</span>draws, <span class="at">variable =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>))</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>sampler_diagnostics <span class="ot">&lt;-</span> fit<span class="sc">$</span>diagnostics</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>The prepared result uses the supplied, unchanged <code>ndd.csv</code>. All three options retain chain and iteration identifiers. The diagnostics come from the same fit as the draws. New fits can differ slightly because of Monte Carlo variation.</p>
-</section>
-</section>
-<section id="summary" class="level2">
-<h2 class="anchored" data-anchor-id="summary">Summary</h2>
-<p><code>summarise_draws()</code> produces the coefficient table. The requested 2.5th and 97.5th percentiles give a <strong>95% credible interval</strong>.</p>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>coefficient_table <span class="ot">&lt;-</span> posterior<span class="sc">::</span><span class="fu">summarise_draws</span>(</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  coef_draws,</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean =</span> mean,</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">sd =</span> sd,</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  \(x) <span class="fu">quantile</span>(x, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>coefficient_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>coefficient_table <span class="ot">&lt;-</span> posterior<span class="sc">::</span><span class="fu">summarise_draws</span>(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  coef_draws,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean =</span> mean,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">sd =</span> sd,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  \(x) <span class="fu">quantile</span>(x, <span class="at">probs =</span> <span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.975</span>))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>coefficient_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; # A tibble: 2 × 5
 #&gt;   variable   mean     sd `2.5%` `97.5%`
@@ -2519,19 +2436,21 @@ window.Quarto = {
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\alpha</span> is log-odds at <code>cons = 0</code>. <span class="math inline">\beta</span> is the change in log-odds per one SD increase in density. Neither coefficient is itself a probability.</p>
+<p><span class="math inline">\alpha</span> is log-odds at <code>cons = 0</code>. <span class="math inline">\beta</span> is the change in log-odds per one-unit increase in the scaled density index (one SD on its generating scale). Neither coefficient is itself a probability; the change in survival probability depends on the starting density.</p>
 <p>In the prepared result, <code>beta</code> is negative and its credible interval excludes zero: higher density is associated with lower survival probability under this model. This is an association in simulated data, not evidence of a causal mechanism. Check the sampling before using the estimates.</p>
 </section>
-<section id="sampling-diagnostics" class="level2">
-<h2 class="anchored" data-anchor-id="sampling-diagnostics">Sampling diagnostics</h2>
+<section id="mcmc-diagnostics-and-trace-plots" class="level2">
+<h2 class="anchored" data-anchor-id="mcmc-diagnostics-and-trace-plots">MCMC diagnostics and trace plots</h2>
+<section id="numerical-diagnostics" class="level3">
+<h3 class="anchored" data-anchor-id="numerical-diagnostics">Numerical diagnostics</h3>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>sampling_table <span class="ot">&lt;-</span> posterior<span class="sc">::</span><span class="fu">summarise_draws</span>(</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  coef_draws,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">rhat =</span> posterior<span class="sc">::</span>rhat,</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">ess_bulk =</span> posterior<span class="sc">::</span>ess_bulk,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ess_tail =</span> posterior<span class="sc">::</span>ess_tail</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>sampling_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>sampling_table <span class="ot">&lt;-</span> posterior<span class="sc">::</span><span class="fu">summarise_draws</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  coef_draws,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">rhat =</span> posterior<span class="sc">::</span>rhat,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">ess_bulk =</span> posterior<span class="sc">::</span>ess_bulk,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">ess_tail =</span> posterior<span class="sc">::</span>ess_tail</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>sampling_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; # A tibble: 2 × 4
 #&gt;   variable  rhat ess_bulk ess_tail
@@ -2539,10 +2458,10 @@ window.Quarto = {
 #&gt; 1 alpha     1.00    1854.    2260.
 #&gt; 2 beta      1.00    2066.    2228.</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One row per chain, recorded when the model was fitted.</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>sampler_table <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(sampler_diagnostics) <span class="sc">|&gt;</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">chain =</span> <span class="fu">row_number</span>(), <span class="at">.before =</span> <span class="dv">1</span>)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>sampler_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One row per chain, recorded when the model was fitted.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>sampler_table <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(sampler_diagnostics) <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">chain =</span> <span class="fu">row_number</span>(), <span class="at">.before =</span> <span class="dv">1</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>sampler_table</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; # A tibble: 4 × 4
 #&gt;   chain num_divergent num_max_treedepth ebfmi
@@ -2559,12 +2478,12 @@ window.Quarto = {
 <li><strong><code>num_divergent</code>:</strong> divergent transitions after warmup, recorded for each chain. Investigate any nonzero count.</li>
 </ul>
 <p>Stan and prepared results also show <code>num_max_treedepth</code> and <code>ebfmi</code>, additional sampler checks that the instructor can explain.</p>
-<p>The prepared CNDD result has R-hat near 1, bulk/tail ESS above 400 and zero divergences. For a new fit, inspect the numbers produced by that fit. These are encouraging checks, not proof of convergence or sufficient precision for every use. The trace plots provide a complementary view.</p>
+<p>The prepared CNDD result has R-hat near 1, bulk/tail ESS above 400 and zero divergences. These are encouraging checks, not proof of convergence or sufficient precision for every use. The trace plots provide a complementary view.</p>
 </section>
-<section id="trace-plots" class="level2">
-<h2 class="anchored" data-anchor-id="trace-plots">Trace plots</h2>
+<section id="trace-plots" class="level3">
+<h3 class="anchored" data-anchor-id="trace-plots">Trace plots</h3>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>bayesplot<span class="sc">::</span><span class="fu">mcmc_trace</span>(coef_draws, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>bayesplot<span class="sc">::</span><span class="fu">mcmc_trace</span>(coef_draws, <span class="at">pars =</span> <span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -2574,41 +2493,42 @@ window.Quarto = {
 </div>
 </div>
 <p>The horizontal axis is saved sampling step, the vertical axis is a coefficient, and colours identify chains. These are post-warmup samples.</p>
-<p>The prepared result’s chains cover similar ranges without persistent separation or drift. Interpret a new fit using its own traces and numerical diagnostics. Overlap alone does not establish convergence; a single jump alone does not indicate failure.</p>
+<p>The prepared result’s chains cover similar ranges without persistent separation or drift. Overlap alone does not establish convergence; a single jump alone does not indicate failure.</p>
 </section>
-<section id="survival-probabilities" class="level2">
-<h2 class="anchored" data-anchor-id="survival-probabilities">Survival probabilities</h2>
+</section>
+<section id="posterior-survival-probabilities" class="level2">
+<h2 class="anchored" data-anchor-id="posterior-survival-probabilities">Posterior survival probabilities</h2>
 <p>Each row of <code>curve_draws</code> combines one saved coefficient pair with one density. <code>plogis(alpha + beta * cons)</code> converts log-odds into survival probability. We calculate probabilities for every paired draw before summarising them.</p>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>density_grid <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">cons =</span> <span class="fu">seq</span>(<span class="fu">min</span>(ndd<span class="sc">$</span>cons), <span class="fu">max</span>(ndd<span class="sc">$</span>cons), <span class="at">length.out =</span> <span class="dv">81</span>)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>curve_draws <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(coef_draws) <span class="sc">|&gt;</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(.draw, alpha, beta) <span class="sc">|&gt;</span></span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">crossing</span>(density_grid) <span class="sc">|&gt;</span></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">p =</span> <span class="fu">plogis</span>(alpha <span class="sc">+</span> beta <span class="sc">*</span> cons))</span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>curve_summary <span class="ot">&lt;-</span> curve_draws <span class="sc">|&gt;</span></span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cons) <span class="sc">|&gt;</span></span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">median =</span> <span class="fu">median</span>(p),</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower =</span> <span class="fu">quantile</span>(p, <span class="fl">0.025</span>),</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">upper =</span> <span class="fu">quantile</span>(p, <span class="fl">0.975</span>),</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>density_grid <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">cons =</span> <span class="fu">seq</span>(<span class="fu">min</span>(ndd<span class="sc">$</span>cons), <span class="fu">max</span>(ndd<span class="sc">$</span>cons), <span class="at">length.out =</span> <span class="dv">81</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>curve_draws <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(coef_draws) <span class="sc">|&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(.draw, alpha, beta) <span class="sc">|&gt;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">crossing</span>(density_grid) <span class="sc">|&gt;</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">p =</span> <span class="fu">plogis</span>(alpha <span class="sc">+</span> beta <span class="sc">*</span> cons))</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>curve_summary <span class="ot">&lt;-</span> curve_draws <span class="sc">|&gt;</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cons) <span class="sc">|&gt;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">median =</span> <span class="fu">median</span>(p),</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">lower =</span> <span class="fu">quantile</span>(p, <span class="fl">0.025</span>),</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">upper =</span> <span class="fu">quantile</span>(p, <span class="fl">0.975</span>),</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>At each density, <code>median</code>, <code>lower</code> and <code>upper</code> summarise the posterior distribution of survival probability. The alpha and beta from each draw stay together.</p>
+<p>At each density, <code>median</code>, <code>lower</code> and <code>upper</code> summarise the posterior distribution of survival probability. The alpha and beta from each draw stay together, preserving their joint posterior dependence. Transforming separately summarised coefficients would not, in general, give these posterior probability summaries.</p>
 </section>
-<section id="regression-plot" class="level2">
-<h2 class="anchored" data-anchor-id="regression-plot">Regression plot</h2>
+<section id="regression-plot-and-interpretation" class="level2">
+<h2 class="anchored" data-anchor-id="regression-plot-and-interpretation">Regression plot and interpretation</h2>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>regression_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(curve_summary, <span class="fu">aes</span>(<span class="at">x =</span> cons)) <span class="sc">+</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower, <span class="at">ymax =</span> upper), <span class="at">fill =</span> <span class="st">&quot;#d95f02&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> median), <span class="at">colour =</span> <span class="st">&quot;#d95f02&quot;</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> ndd, <span class="fu">aes</span>(<span class="at">y =</span> suv <span class="sc">/</span> n), <span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Conspecific density (scaled)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Survival probability&quot;</span>)</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>regression_plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>regression_plot <span class="ot">&lt;-</span> <span class="fu">ggplot</span>(curve_summary, <span class="fu">aes</span>(<span class="at">x =</span> cons)) <span class="sc">+</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower, <span class="at">ymax =</span> upper), <span class="at">fill =</span> <span class="st">&quot;#d95f02&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> median), <span class="at">colour =</span> <span class="st">&quot;#d95f02&quot;</span>, <span class="at">linewidth =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">data =</span> ndd, <span class="fu">aes</span>(<span class="at">y =</span> suv <span class="sc">/</span> n), <span class="at">alpha =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">limits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">&quot;Conspecific density (scaled)&quot;</span>, <span class="at">y =</span> <span class="st">&quot;Survival probability&quot;</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>regression_plot</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -2622,10 +2542,110 @@ window.Quarto = {
 <li><strong>Ribbon:</strong> 95% credible interval for survival probability at each density.</li>
 <li><strong>Points:</strong> observed survivor proportions, one per quadrat.</li>
 </ul>
-<p>For the prepared result, the fitted curve decreases with density, consistent with the negative coefficient. The ribbon describes uncertainty about probability; it need not contain every observed proportion. Observed proportions also vary because survival is binomial.</p>
+<p>For the prepared result, the fitted curve decreases with density, consistent with the negative coefficient. The ribbon describes uncertainty about probability; it need not contain every observed proportion. Observed proportions also vary because survival is binomial. These are <strong>pointwise</strong> credible intervals, not a simultaneous band for the whole curve. A posterior predictive interval for survivor counts or proportions would also include binomial sampling variability.</p>
 <p>The <code>alpha</code> argument in <code>geom_ribbon()</code> controls transparency; it is unrelated to the regression intercept <span class="math inline">\alpha</span>.</p>
 <p>Sampling diagnostics tell us about computation; they do not establish that the ecological model is appropriate.</p>
 <p><a href="results.html">The result sheet</a> provides the same outputs without the code.</p>
+</section>
+</section>
+<section id="optional-appendix-fitting-models-with-brms-and-cmdstanr" class="level1">
+<h1>Optional appendix: Fitting models with brms and cmdstanr</h1>
+<p>The examples below run <strong>new inference</strong> and require a prepared fitting environment. They are displayed but not executed during rendering. Students do not need to install CmdStan, a C++ toolchain or Docker on their own computers. The core walkthrough ends above; this appendix can be omitted during class.</p>
+<section id="fit-with-brms" class="level2">
+<h2 class="anchored" data-anchor-id="fit-with-brms">Fit with brms</h2>
+<p><code>brms</code> translates the regression formula into Stan. This fits a binomial logit model with Normal(0, 2.5) priors for the internally centered intercept and slope.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(brms)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>fit_brms <span class="ot">&lt;-</span> <span class="fu">brm</span>(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  suv <span class="sc">|</span> <span class="fu">trials</span>(n) <span class="sc">~</span> cons,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> ndd,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">&quot;logit&quot;</span>),</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">prior =</span> <span class="fu">c</span>(</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">2.5</span>), <span class="at">class =</span> <span class="st">&quot;Intercept&quot;</span>),</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">2.5</span>), <span class="at">class =</span> <span class="st">&quot;b&quot;</span>)</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">backend =</span> <span class="st">&quot;cmdstanr&quot;</span>,</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">42</span>,</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">cores =</span> <span class="dv">1</span>,</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter =</span> <span class="dv">2000</span>,</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">warmup =</span> <span class="dv">1000</span>,</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">500</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p><code>trials(n)</code> supplies the seedling count. <code>cons</code> predicts survival on the logit scale. The intercept is included automatically. The coefficient names in brms are <code>b_Intercept</code> and <code>b_cons</code>.</p>
+<p>brms applies its intercept prior at <code>mean(cons)</code>; the Stan model below applies its intercept prior at <code>cons = 0</code>. The likelihood is the same, but these prior specifications differ. See the <a href="https://paulbuerkner.com/brms/reference/set_prior.html">brms prior documentation</a>.</p>
+</section>
+<section id="fit-with-cmdstanr" class="level2">
+<h2 class="anchored" data-anchor-id="fit-with-cmdstanr">Fit with cmdstanr</h2>
+<p>The supplied file <code>stan/logit_reg.stan</code> contains:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;               <span class="co">// number of quadrats</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n;      <span class="co">// seedlings per quadrat</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; suv;    <span class="co">// survivors per quadrat</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[N] cons;               <span class="co">// conspecific density (scaled)</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> alpha;                   <span class="co">// intercept (logit scale)</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> beta;                    <span class="co">// slope (logit scale)</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="co">// likelihood: logit(p) = alpha + beta * cons</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  suv ~ binomial_logit(n, alpha + beta * cons);</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="co">// priors</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  alpha ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  beta ~ normal(<span class="dv">0</span>, <span class="fl">2.5</span>);</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The R data list connects the CSV columns to Stan’s data block. <code>cmdstan_model()</code> compiles the model, and <code>$sample()</code> runs the chains.</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cmdstanr)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>stan_data <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">N =</span> <span class="fu">nrow</span>(ndd),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> <span class="fu">as.integer</span>(ndd<span class="sc">$</span>n),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">suv =</span> <span class="fu">as.integer</span>(ndd<span class="sc">$</span>suv),</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">cons =</span> ndd<span class="sc">$</span>cons</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>model_stan <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(<span class="fu">here</span>(<span class="st">&quot;stan&quot;</span>, <span class="st">&quot;logit_reg.stan&quot;</span>))</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>fit_stan <span class="ot">&lt;-</span> model_stan<span class="sc">$</span><span class="fu">sample</span>(</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> stan_data,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">seed =</span> <span class="dv">42</span>,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">4</span>,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">1</span>,</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_warmup =</span> <span class="dv">1000</span>,</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">iter_sampling =</span> <span class="dv">1000</span>,</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">500</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="analyse-a-newly-fitted-model" class="level2">
+<h2 class="anchored" data-anchor-id="analyse-a-newly-fitted-model">Analyse a newly fitted model</h2>
+<p>After fitting <strong>one</strong> model, run its matching chunk below in place of the prepared-result loading chunk. Then rerun the core analysis from <a href="#posterior-summary-and-coefficient-interpretation">Posterior summary and coefficient interpretation</a> through the regression plot. Each chunk retains chain and iteration identifiers and uses diagnostics from the same fit as the coefficient draws. Do not reload the prepared result when analysing a new fit.</p>
+<section id="brms-result" class="level3">
+<h3 class="anchored" data-anchor-id="brms-result">brms result</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>coef_draws <span class="ot">&lt;-</span> <span class="fu">as_draws_df</span>(fit_brms, <span class="at">variable =</span> <span class="fu">c</span>(<span class="st">&quot;b_Intercept&quot;</span>, <span class="st">&quot;b_cons&quot;</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename_variables</span>(<span class="at">alpha =</span> <span class="st">&quot;b_Intercept&quot;</span>, <span class="at">beta =</span> <span class="st">&quot;b_cons&quot;</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>sampler_diagnostics <span class="ot">&lt;-</span> brms<span class="sc">::</span><span class="fu">nuts_params</span>(fit_brms) <span class="sc">|&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Parameter <span class="sc">==</span> <span class="st">&quot;divergent__&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">num_divergent =</span> <span class="fu">sum</span>(Value), <span class="at">.by =</span> Chain) <span class="sc">|&gt;</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(num_divergent)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>The coefficients are renamed alpha and beta to match the equations. <code>nuts_params()</code> supplies the sampler diagnostics; here we count divergences per chain.</p>
+</section>
+<section id="stan-result" class="level3">
+<h3 class="anchored" data-anchor-id="stan-result">Stan result</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>coef_draws <span class="ot">&lt;-</span> <span class="fu">as_draws_df</span>(fit_stan<span class="sc">$</span><span class="fu">draws</span>(<span class="fu">c</span>(<span class="st">&quot;alpha&quot;</span>, <span class="st">&quot;beta&quot;</span>)))</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>sampler_diagnostics <span class="ot">&lt;-</span> fit_stan<span class="sc">$</span><span class="fu">diagnostic_summary</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>New Stan fits can differ from the prepared result because of Monte Carlo variation; the brms fit also uses the different intercept prior described above. Interpret new fits using their own summaries, diagnostics and traces.</p>
+</section>
 </section>
 </section>
 <section id="instructor-reference" class="level1">
@@ -2636,8 +2656,9 @@ window.Quarto = {
 <p>Also check parameter-level diagnostics including <code>lp__</code>, treedepth, E-BFMI and Monte Carlo precision for the intended quantities. Do not copy the root file’s automatic good/bad classifications or its E-BFMI quality scale. Computation and ecological model appropriateness are different issues. The lecture includes one existing PPC figure; predictive simulation details remain optional reference.</p>
 <section id="choosing-the-fitting-route" class="level2">
 <h2 class="anchored" data-anchor-id="choosing-the-fitting-route">Choosing the fitting route</h2>
-<p>Use either live fitting section when the prepared environment and class pace permit. Run just one of the three result-loading chunks. Only the prepared result is executed when rendering the handout; live-result chunks have <code>eval=FALSE</code>. Do not use stored diagnostics to validate a new fit.</p>
-<p>The brms formula uses <code>bf(suv | trials(n) ~ cons, center=FALSE)</code> so both coefficient priors match <code>stan/logit_reg.stan</code>. Disabling internal centering keeps the intercept prior at cons=0; a plain <code>~ cons</code> would instead apply the intercept prior at the sample mean of cons. The brms result-loading chunk shows only divergence counts. Check treedepth, E-BFMI and other sampler details using the complete <code>nuts_params(fit_brms)</code> output when needed. In normal-prior R/Stan syntax, 2.5 is an SD. Rendering never compiles or samples the two fitting sections. No local student toolchain installation is required; validate any classroom live-fitting environment ahead of class. Compilation time and simultaneous server load are separate concerns.</p>
+<p>Use either live fitting section when the prepared environment and class pace permit. For a new fit, use its matching result-loading chunk in place of the prepared result, then rerun the core summaries and plots. Only the prepared result is executed when rendering the handout; live-result chunks have <code>eval=FALSE</code>. Do not use stored diagnostics to validate a new fit.</p>
+<p>The plain brms formula uses internal predictor centering. Its independent priors are on the centered intercept and slope. If <span class="math inline">m</span> is the sample mean of cons, that intercept is <span class="math inline">\alpha + \beta m</span>, whereas the Stan model places independent priors directly on <span class="math inline">\alpha</span> and <span class="math inline">\beta</span>. Here <span class="math inline">m</span> is approximately -0.191, not zero, so the joint priors differ. The returned <code>b_Intercept</code> is nevertheless on the original predictor scale (cons=0). Do not describe differences between these fitting routes as Monte Carlo variation alone or treat the prepared Stan result as a stored brms fit. The likelihood, data and downstream coefficient interpretations remain the same.</p>
+<p>The brms result-loading chunk shows only divergence counts. Check treedepth, E-BFMI and other sampler details using the complete <code>nuts_params(fit_brms)</code> output when needed. In normal-prior R/Stan syntax, 2.5 is an SD. Rendering never compiles or samples the two fitting sections. No local student toolchain installation is required; validate any classroom live-fitting environment ahead of class. Compilation time and simultaneous server load are separate concerns.</p>
 <p>References: <a href="https://paulbuerkner.com/brms/reference/brmsformula.html">brms formulas</a>, <a href="https://paulbuerkner.com/brms/reference/draws-brms.html">brms draws</a>, <a href="https://mc-stan.org/posterior/reference/draws_summary.html">posterior summaries</a> and <a href="https://mc-stan.org/learn-stan/diagnostics-warnings.html">Stan diagnostic guidance</a>.</p>
 </section>
 </section>

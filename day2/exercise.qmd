@@ -1,5 +1,5 @@
 ---
-title: "Day 2: Linear regression and MCMC"
+title: "Day 2: Logistic regression and MCMC"
 author: "Masatoshi Katabuchi"
 date: "2026-10-22"
 solutions: true
@@ -28,26 +28,38 @@ knitr::opts_chunk$set(
 
 # Seedling survival regression
 
-A binomial logistic regression relates seedling survival to scaled conspecific
-density in 60 simulated quadrats.
+## Model and data
+
+We model seedling survival for a **single focal tree species** across 60
+simulated quadrats. A binomial logistic regression relates survival probability
+to scaled conspecific density:
 
 $$s_i\sim\operatorname{Binomial}(n_i,p_i),\qquad
 \operatorname{logit}(p_i)=\alpha+\beta x_i.$$
 
-- `n`: number of seedlings in a quadrat.
-- `suv`: number of survivors.
-- `cons`: scaled conspecific density.
+- $i$: quadrat (`quadrat`).
+- $n_i$: number of seedlings of the focal species in quadrat $i$ (`n`).
+- $s_i$: number of those seedlings surviving the observation period (`suv`).
+- $p_i$: survival probability for those seedlings.
+- $x_i$: scaled conspecific density in quadrat $i$ (`cons`).
 
-The independent priors for $\alpha$ and $\beta$ are Normal with mean 0 and
-**SD 2.5**. The model can be fitted below or analysed using a prepared result.
+The simulation generates `cons` on a standard Normal scale; it does not specify
+whether density measures adults, seedlings or another conspecific group.
+We therefore interpret it as a simulated density index. The model assumes a
+common survival probability within each quadrat and conditionally independent
+seedling outcomes, with one shared density relationship across quadrats.
 
-**Core:** read the coefficient table, sampling checks and survival curve using
-the prepared result. Running the supplied analysis code is optional. For this
-route, skip both fitting sections and continue at [Prepared result](#prepared-result).
+The prepared result uses independent Normal priors with mean 0 and **SD 2.5**
+for $\alpha$ and $\beta$.
 
-**Optional:** fit a new model with brms or Stan in a prepared environment.
+**Core:** follow the coefficient summaries, sampling checks and survival curve
+using the prepared posterior samples. Running the analysis code is optional;
+no model compilation or new MCMC fitting is needed.
 
-## Packages and data
+**Optional appendix:** fit a new model with brms or cmdstanr in a prepared
+environment after completing the walkthrough.
+
+### Packages and data
 
 ```{r setup}
 library(tidyverse)
@@ -59,19 +71,183 @@ theme_set(theme_bw(base_size = 14))
 ndd <- read_csv(here("data", "ndd.csv"))
 ```
 
-## Optional: fit the model with brms
+## Load prepared posterior samples {#prepared-result}
 
-`brms` translates the regression formula into Stan. This fits the same binomial
-logit model and independent Normal(0, 2.5) coefficient priors used below.
+```{r draws-precomputed}
+fit <- readRDS(here("fits", "day2_ndd.rds"))
+coef_draws <- subset_draws(fit$draws, variable = c("alpha", "beta"))
+sampler_diagnostics <- fit$diagnostics
+```
+
+The prepared result uses the supplied, unchanged `ndd.csv`. Coefficient draws
+retain their chain and iteration identifiers; diagnostics are from the same fit.
+If the data or model are changed, new inference is required.
+
+## Posterior summary and coefficient interpretation
+
+`summarise_draws()` produces the coefficient table. The requested 2.5th and
+97.5th percentiles give a **95% credible interval**, containing the central
+95% of posterior probability for each coefficient, conditional on the data
+and model (including its priors).
+
+```{r coefficient-table}
+coefficient_table <- posterior::summarise_draws(
+  coef_draws,
+  mean = mean,
+  sd = sd,
+  \(x) quantile(x, probs = c(0.025, 0.975))
+)
+coefficient_table
+```
+
+| Column | Meaning |
+|---|---|
+| `variable` | `alpha`: intercept; `beta`: density coefficient. |
+| `mean` | Posterior mean of the coefficient. |
+| `sd` | Posterior standard deviation: uncertainty about the coefficient. |
+| `2.5%`, `97.5%` | Lower and upper ends of the 95% credible interval. |
+
+$\alpha$ is log-odds at `cons = 0`. $\beta$ is the change in log-odds per
+one-unit increase in the scaled density index (one SD on its generating scale).
+Neither coefficient is itself a probability; the change in survival probability
+depends on the starting density.
+
+In the prepared result, `beta` is negative and its credible interval excludes zero: higher density
+is associated with lower survival probability under this model. This is an
+association in simulated data, not evidence of a causal mechanism. Check the
+sampling before using the estimates.
+
+## MCMC diagnostics and trace plots
+
+### Numerical diagnostics
+
+```{r sampling-diagnostics}
+sampling_table <- posterior::summarise_draws(
+  coef_draws,
+  rhat = posterior::rhat,
+  ess_bulk = posterior::ess_bulk,
+  ess_tail = posterior::ess_tail
+)
+sampling_table
+
+# One row per chain, recorded when the model was fitted.
+sampler_table <- as_tibble(sampler_diagnostics) |>
+  mutate(chain = row_number(), .before = 1)
+sampler_table
+```
+
+- **`rhat`:** compares chains. Values near 1 are encouraging; values above 1.01
+  are a reason to investigate.
+- **`ess_bulk`, `ess_tail`:** effective sample sizes for central values and tails
+  of the posterior. They account for dependence among draws and are not seedling
+  sample sizes. For these four chains, values below about 400 warrant investigation.
+- **`num_divergent`:** divergent transitions after warmup, recorded for each chain.
+  Investigate any nonzero count.
+
+Stan and prepared results also show `num_max_treedepth` and `ebfmi`, additional
+sampler checks that the instructor can explain.
+
+The prepared CNDD result has R-hat near 1, bulk/tail ESS above 400 and zero
+divergences. These are encouraging checks, not proof of convergence or sufficient precision
+for every use. The trace plots provide a complementary view.
+
+### Trace plots
+
+```{r trace-plots}
+bayesplot::mcmc_trace(coef_draws, pars = c("alpha", "beta"))
+```
+
+The horizontal axis is saved sampling step, the vertical axis is a coefficient,
+and colours identify chains. These are post-warmup samples.
+
+The prepared result's chains cover similar ranges without persistent separation
+or drift. Overlap alone does not establish convergence; a single jump alone does not indicate failure.
+
+## Posterior survival probabilities
+
+Each row of `curve_draws` combines one saved coefficient pair with one density.
+`plogis(alpha + beta * cons)` converts log-odds into survival probability.
+We calculate probabilities for every paired draw before summarising them.
+
+```{r curve-probabilities}
+density_grid <- tibble(
+  cons = seq(min(ndd$cons), max(ndd$cons), length.out = 81)
+)
+curve_draws <- as_tibble(coef_draws) |>
+  select(.draw, alpha, beta) |>
+  crossing(density_grid) |>
+  mutate(p = plogis(alpha + beta * cons))
+
+curve_summary <- curve_draws |>
+  group_by(cons) |>
+  summarise(
+    median = median(p),
+    lower = quantile(p, 0.025),
+    upper = quantile(p, 0.975),
+    .groups = "drop"
+  )
+```
+
+At each density, `median`, `lower` and `upper` summarise the posterior distribution
+of survival probability. The alpha and beta from each draw stay together, preserving their joint
+posterior dependence. Transforming separately summarised coefficients would
+not, in general, give these posterior probability summaries.
+
+## Regression plot and interpretation
+
+```{r regression-plot}
+regression_plot <- ggplot(curve_summary, aes(x = cons)) +
+  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "#d95f02", alpha = 0.2) +
+  geom_line(aes(y = median), colour = "#d95f02", linewidth = 1) +
+  geom_point(data = ndd, aes(y = suv / n), alpha = 0.6) +
+  scale_y_continuous(limits = c(0, 1)) +
+  labs(x = "Conspecific density (scaled)", y = "Survival probability")
+regression_plot
+```
+
+- **Line:** posterior median of survival probability.
+- **Ribbon:** 95% credible interval for survival probability at each density.
+- **Points:** observed survivor proportions, one per quadrat.
+
+For the prepared result, the fitted curve decreases with density, consistent
+with the negative coefficient.
+The ribbon describes uncertainty about probability; it need not contain every
+observed proportion. Observed proportions also vary because survival is binomial.
+These are **pointwise** credible intervals, not a simultaneous band for the whole
+curve. A posterior predictive interval for survivor counts or proportions would
+also include binomial sampling variability.
+
+The `alpha` argument in `geom_ribbon()` controls transparency; it is unrelated
+to the regression intercept $\alpha$.
+
+Sampling diagnostics tell us about computation; they do not establish that the
+ecological model is appropriate.
+
+[The result sheet](results.html) provides the same outputs without the code.
+
+# Optional appendix: Fitting models with brms and cmdstanr
+
+The examples below run **new inference** and require a prepared fitting
+environment. They are displayed but not executed during rendering. Students do
+not need to install CmdStan, a C++ toolchain or Docker on their own computers.
+The core walkthrough ends above; this appendix can be omitted during class.
+
+## Fit with brms
+
+`brms` translates the regression formula into Stan. This fits a binomial logit
+model with Normal(0, 2.5) priors for the internally centered intercept and slope.
 
 ```{r fit-brms, eval=FALSE}
 library(brms)
 
 fit_brms <- brm(
-  bf(suv | trials(n) ~ cons, center = FALSE),
+  suv | trials(n) ~ cons,
   data = ndd,
   family = binomial(link = "logit"),
-  prior = set_prior("normal(0, 2.5)", class = "b"),
+  prior = c(
+    prior(normal(0, 2.5), class = "Intercept"),
+    prior(normal(0, 2.5), class = "b")
+  ),
   backend = "cmdstanr",
   seed = 42,
   chains = 4,
@@ -83,11 +259,14 @@ fit_brms <- brm(
 ```
 
 `trials(n)` supplies the seedling count. `cons` predicts survival on the logit
-scale. The intercept is included automatically. `center=FALSE` keeps its prior
-at `cons = 0`, matching the Stan model. The coefficient names in brms are
-`b_Intercept` and `b_cons`.
+scale. The intercept is included automatically. The coefficient names in brms
+are `b_Intercept` and `b_cons`.
 
-## Optional: fit the model with Stan
+brms applies its intercept prior at `mean(cons)`; the Stan model below applies
+its intercept prior at `cons = 0`. The likelihood is the same, but these prior
+specifications differ. See the [brms prior documentation](https://paulbuerkner.com/brms/reference/set_prior.html).
+
+## Fit with cmdstanr
 
 The supplied file `stan/logit_reg.stan` contains:
 
@@ -138,16 +317,14 @@ fit_stan <- model_stan$sample(
 )
 ```
 
-Both fitting sections run new inference in a prepared environment. They are
-shown but not executed when this handout is rendered. Run either section to fit
-the model, or skip both and use the supplied result. Students do not need to
-install CmdStan, a C++ toolchain or Docker on their own computers.
+## Analyse a newly fitted model
 
-## Data and posterior draws
-
-Run **one** of the following three chunks, then continue to Summary.
-Use brms or Stan after fitting that model; use the prepared result to skip fitting.
-Do not run all three: each replaces the result used below.
+After fitting **one** model, run its matching chunk below in place of the
+prepared-result loading chunk. Then rerun the core analysis from
+[Posterior summary and coefficient interpretation](#posterior-summary-and-coefficient-interpretation)
+through the regression plot. Each chunk retains chain and iteration identifiers
+and uses diagnostics from the same fit as the coefficient draws. Do not reload
+the prepared result when analysing a new fit.
 
 ### brms result
 
@@ -171,150 +348,10 @@ coef_draws <- as_draws_df(fit_stan$draws(c("alpha", "beta")))
 sampler_diagnostics <- fit_stan$diagnostic_summary()
 ```
 
-### Prepared result
 
-```{r draws-precomputed}
-fit <- readRDS(here("fits", "day2_ndd.rds"))
-coef_draws <- subset_draws(fit$draws, variable = c("alpha", "beta"))
-sampler_diagnostics <- fit$diagnostics
-```
-
-The prepared result uses the supplied, unchanged `ndd.csv`.
-All three options retain chain and iteration identifiers. The diagnostics come
-from the same fit as the draws. New fits can differ slightly because of Monte
-Carlo variation.
-
-## Summary
-
-`summarise_draws()` produces the coefficient table. The requested 2.5th and
-97.5th percentiles give a **95% credible interval**.
-
-```{r coefficient-table}
-coefficient_table <- posterior::summarise_draws(
-  coef_draws,
-  mean = mean,
-  sd = sd,
-  \(x) quantile(x, probs = c(0.025, 0.975))
-)
-coefficient_table
-```
-
-| Column | Meaning |
-|---|---|
-| `variable` | `alpha`: intercept; `beta`: density coefficient. |
-| `mean` | Posterior mean of the coefficient. |
-| `sd` | Posterior standard deviation: uncertainty about the coefficient. |
-| `2.5%`, `97.5%` | Lower and upper ends of the 95% credible interval. |
-
-$\alpha$ is log-odds at `cons = 0`. $\beta$ is the change in log-odds per
-one SD increase in density. Neither coefficient is itself a probability.
-
-In the prepared result, `beta` is negative and its credible interval excludes zero: higher density
-is associated with lower survival probability under this model. This is an
-association in simulated data, not evidence of a causal mechanism. Check the
-sampling before using the estimates.
-
-## Sampling diagnostics
-
-```{r sampling-diagnostics}
-sampling_table <- posterior::summarise_draws(
-  coef_draws,
-  rhat = posterior::rhat,
-  ess_bulk = posterior::ess_bulk,
-  ess_tail = posterior::ess_tail
-)
-sampling_table
-
-# One row per chain, recorded when the model was fitted.
-sampler_table <- as_tibble(sampler_diagnostics) |>
-  mutate(chain = row_number(), .before = 1)
-sampler_table
-```
-
-- **`rhat`:** compares chains. Values near 1 are encouraging; values above 1.01
-  are a reason to investigate.
-- **`ess_bulk`, `ess_tail`:** effective sample sizes for central values and tails
-  of the posterior. They account for dependence among draws and are not seedling
-  sample sizes. For these four chains, values below about 400 warrant investigation.
-- **`num_divergent`:** divergent transitions after warmup, recorded for each chain.
-  Investigate any nonzero count.
-
-Stan and prepared results also show `num_max_treedepth` and `ebfmi`, additional
-sampler checks that the instructor can explain.
-
-The prepared CNDD result has R-hat near 1, bulk/tail ESS above 400 and zero
-divergences. For a new fit, inspect the numbers produced by that fit. These are encouraging checks, not proof of convergence or sufficient
-precision for every use. The trace plots provide a complementary view.
-
-## Trace plots
-
-```{r trace-plots}
-bayesplot::mcmc_trace(coef_draws, pars = c("alpha", "beta"))
-```
-
-The horizontal axis is saved sampling step, the vertical axis is a coefficient,
-and colours identify chains. These are post-warmup samples.
-
-The prepared result's chains cover similar ranges without persistent separation
-or drift. Interpret a new fit using its own traces and numerical diagnostics. Overlap alone
-does not establish convergence; a single jump alone does not indicate failure.
-
-## Survival probabilities
-
-Each row of `curve_draws` combines one saved coefficient pair with one density.
-`plogis(alpha + beta * cons)` converts log-odds into survival probability.
-We calculate probabilities for every paired draw before summarising them.
-
-```{r curve-probabilities}
-density_grid <- tibble(
-  cons = seq(min(ndd$cons), max(ndd$cons), length.out = 81)
-)
-curve_draws <- as_tibble(coef_draws) |>
-  select(.draw, alpha, beta) |>
-  crossing(density_grid) |>
-  mutate(p = plogis(alpha + beta * cons))
-
-curve_summary <- curve_draws |>
-  group_by(cons) |>
-  summarise(
-    median = median(p),
-    lower = quantile(p, 0.025),
-    upper = quantile(p, 0.975),
-    .groups = "drop"
-  )
-```
-
-At each density, `median`, `lower` and `upper` summarise the posterior distribution
-of survival probability. The alpha and beta from each draw stay together.
-
-## Regression plot
-
-```{r regression-plot}
-regression_plot <- ggplot(curve_summary, aes(x = cons)) +
-  geom_ribbon(aes(ymin = lower, ymax = upper), fill = "#d95f02", alpha = 0.2) +
-  geom_line(aes(y = median), colour = "#d95f02", linewidth = 1) +
-  geom_point(data = ndd, aes(y = suv / n), alpha = 0.6) +
-  scale_y_continuous(limits = c(0, 1)) +
-  labs(x = "Conspecific density (scaled)", y = "Survival probability")
-regression_plot
-```
-
-- **Line:** posterior median of survival probability.
-- **Ribbon:** 95% credible interval for survival probability at each density.
-- **Points:** observed survivor proportions, one per quadrat.
-
-For the prepared result, the fitted curve decreases with density, consistent
-with the negative coefficient.
-The ribbon describes uncertainty about probability; it need not contain every
-observed proportion. Observed proportions also vary because survival is binomial.
-
-The `alpha` argument in `geom_ribbon()` controls transparency; it is unrelated
-to the regression intercept $\alpha$.
-
-Sampling diagnostics tell us about computation; they do not establish that the
-ecological model is appropriate.
-
-[The result sheet](results.html) provides the same outputs without the code.
+New Stan fits can differ from the prepared result because of Monte Carlo
+variation; the brms fit also uses the different intercept prior described above.
+Interpret new fits using their own summaries, diagnostics and traces.
 
 ::: {.content-visible when-meta="solutions"}
 # Instructor reference
@@ -345,14 +382,22 @@ existing PPC figure; predictive simulation details remain optional reference.
 ## Choosing the fitting route
 
 Use either live fitting section when the prepared environment and class pace
-permit. Run just one of the three result-loading chunks. Only the prepared
+permit. For a new fit, use its matching result-loading chunk in place of the prepared
+result, then rerun the core summaries and plots. Only the prepared
 result is executed when rendering the handout; live-result chunks have
 `eval=FALSE`. Do not use stored diagnostics to validate a new fit.
 
-The brms formula uses `bf(suv | trials(n) ~ cons, center=FALSE)` so both
-coefficient priors match `stan/logit_reg.stan`. Disabling internal centering
-keeps the intercept prior at cons=0; a plain `~ cons` would instead apply the
-intercept prior at the sample mean of cons. The brms result-loading chunk shows
+The plain brms formula uses internal predictor centering. Its independent priors
+are on the centered intercept and slope. If $m$ is the sample mean of cons,
+that intercept is $\alpha + \beta m$, whereas the Stan model places independent
+priors directly on $\alpha$ and $\beta$. Here $m$ is approximately -0.191, not
+zero, so the joint priors differ. The returned `b_Intercept` is nevertheless
+on the original predictor scale (cons=0). Do not describe differences between
+these fitting routes as Monte Carlo variation alone or treat the prepared
+Stan result as a stored brms fit. The likelihood, data and downstream
+coefficient interpretations remain the same.
+
+The brms result-loading chunk shows
 only divergence counts. Check treedepth, E-BFMI and other sampler details using
 the complete `nuts_params(fit_brms)` output when needed. In normal-prior R/Stan syntax, 2.5 is an SD. Rendering
 never compiles or samples the two fitting sections. No local student toolchain

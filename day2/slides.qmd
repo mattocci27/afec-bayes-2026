@@ -846,55 +846,89 @@ that must contain the observations. Participants will construct the same kind of
 curve from the paired draws using plogis(), quantile() and ggplot() in the exercise.
 :::
 
-## Stan: A modern language/software for Bayesian modeling
+## Stan: Software for Bayesian inference {#stan-a-modern-languagesoftware-for-bayesian-modeling}
 
 <style>
-#stan-a-modern-languagesoftware-for-bayesian-modeling pre code {
-  font-size: 0.8em;
-  line-height: 1.2;
+#stan-a-modern-languagesoftware-for-bayesian-modeling .stan-intro-main {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 64px;
+  align-items: center;
+  margin-top: 36px;
+  color: #222;
+  font-family: Arial, Helvetica, sans-serif;
+}
+#stan-a-modern-languagesoftware-for-bayesian-modeling .stan-intro-logo img {
+  display: block;
+  width: 320px;
+  height: auto;
+  margin: 0;
+}
+#stan-a-modern-languagesoftware-for-bayesian-modeling .stan-intro-text {
+  font-size: 36px;
+  line-height: 1.45;
+}
+#stan-a-modern-languagesoftware-for-bayesian-modeling .stan-intro-text p {
+  margin: 0;
+}
+#stan-a-modern-languagesoftware-for-bayesian-modeling .stan-intro-text p + p {
+  margin-top: 30px;
+}
+#stan-a-modern-languagesoftware-for-bayesian-modeling .stan-intro-flow {
+  display: grid;
+  grid-template-columns: 1fr 70px 1fr 70px 1fr;
+  gap: 20px;
+  align-items: center;
+  margin: 64px 20px 0;
+  color: #222;
+  font: 30px/1.3 Arial, Helvetica, sans-serif;
+  text-align: center;
+}
+#stan-a-modern-languagesoftware-for-bayesian-modeling .stan-flow-engine {
+  color: #28799e;
+}
+#stan-a-modern-languagesoftware-for-bayesian-modeling .stan-flow-arrow {
+  position: relative;
+  height: 1px;
+  background: #6c7c84;
+}
+#stan-a-modern-languagesoftware-for-bayesian-modeling .stan-flow-arrow::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-top: 1px solid #6c7c84;
+  border-right: 1px solid #6c7c84;
+  transform: rotate(45deg);
 }
 </style>
 
-::: columns
+```{=html}
+<div class="stan-intro-main">
+  <div class="stan-intro-logo">
+    <img src="../images/stan_logo.png" alt="Stan logo" width="320" height="320">
+  </div>
+  <div class="stan-intro-text">
+    <p>Stan is a probabilistic programming language and an engine for <strong>Bayesian inference</strong>.</p>
+    <p>Stan uses <strong>MCMC</strong> (primarily NUTS, a variant of HMC) to draw samples from posterior distributions.</p>
+  </div>
+</div>
 
-::: {.column width=35%}
-
-<img src="../images/stan_logo.png" width=180 alt="Stan Logo"/>
-
-
-```{stan, output.var="bernoulli", file=here::here("stan/bernoulli.stan"), eval=FALSE, echo=TRUE}
+<div class="stan-intro-flow" role="img" aria-label="Statistical model goes to Stan, which uses MCMC to produce posterior samples.">
+  <span>Statistical model</span>
+  <span class="stan-flow-arrow" aria-hidden="true"></span>
+  <span class="stan-flow-engine">Stan (MCMC)</span>
+  <span class="stan-flow-arrow" aria-hidden="true"></span>
+  <span>Posterior samples</span>
+</div>
 ```
 
-
-:::
-
-::: {.column width=65%}
-
-::: incremental
-
-- 🧑🏻‍💻 **Bayesian Modeling**
-
-  - Stan uses the No-U-Turn sampler (NUTS), a variant of Hamiltonian Monte Carlo (HMC), which is efficient for complex models with many parameters.
-
-- ⚙️ **Flexible and Scalable**
-
-  - You can use Stan for many types of models, from simple regressions to multi-level models including time-series, spatial, SEM, and more.
-
-- 💻 **Multiplatform**
-
-  - Stan works with R, Python, Julia, and more.
-  It also has tools for checking models and making visualizations.
-
-:::
-:::
-:::
-
 ::: notes
-Brief introduction (about 1 minute); no compilation or live sampling.
-The small Stan example records each seedling as a 0/1 outcome, with a common
-survival probability theta. Summing those independent Bernoulli outcomes gives
-the binomial count model from Day 1. Today's regression extends the survival
-probability to depend on density. Do not walk through every code line here.
+30–60 seconds. Connect the MCMC idea just introduced to the software that uses it.
+Read the two statements, then follow the flow from a statistical model through
+Stan to posterior samples. NUTS and HMC are names only here; no algorithm details.
 :::
 
 ## {#stan-from-r background-image="../images/cmdstanr_brms.png" background-size="contain" background-color="white"}
