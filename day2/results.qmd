@@ -48,22 +48,14 @@ knitr::opts_chunk$set(
 )
 ```
 
-## 1. Coefficient table
+## 1. Trace plots
 
-```{r coefficient-table}
-coefficient_table <- posterior::summarise_draws(
-  coef_draws,
-  mean = mean,
-  sd = sd,
-  \(x) quantile(x, probs = c(0.025, 0.975))
-)
-knitr::kable(coefficient_table, digits = 3)
+```{r trace-plots}
+bayesplot::mcmc_trace(coef_draws, pars = c("alpha", "beta"))
 ```
 
-`mean` is the posterior mean; `sd` is posterior uncertainty; `2.5%` and
-`97.5%` bound the 95% credible interval. Alpha and beta are on the logit scale.
-The beta row is negative and its interval excludes zero: survival decreases
-with density under this model.
+Colours identify chains. They cover similar ranges without persistent drift or
+separation. Next, check the numerical diagnostics.
 
 ## 2. Sampling diagnostics
 
@@ -82,18 +74,29 @@ sampler_table <- as_tibble(sampler_diagnostics) |>
 knitr::kable(sampler_table, digits = 3)
 ```
 
-R-hat near 1, sufficient bulk/tail ESS and no divergences are encouraging.
-Read them together with the traces. ESS is not the seedling sample size; zero
-divergences alone does not establish reliable sampling or an adequate model.
+R-hat measures agreement across chains; values near 1 are encouraging.
+ESS describes effective information in the draws: bulk ESS for the main part
+of the posterior, tail ESS for its tails. It is not the seedling sample size.
+Divergences signal potential sampling problems; investigate any nonzero count.
+Read these together with the traces before interpreting coefficients. Successful
+sampling does not establish ecological model adequacy.
 
-## 3. Trace plots
+## 3. Coefficient table
 
-```{r trace-plots}
-bayesplot::mcmc_trace(coef_draws, pars = c("alpha", "beta"))
+```{r coefficient-table}
+coefficient_table <- posterior::summarise_draws(
+  coef_draws,
+  mean = mean,
+  sd = sd,
+  \(x) quantile(x, probs = c(0.025, 0.975))
+)
+knitr::kable(coefficient_table, digits = 3)
 ```
 
-Colours identify chains. They cover similar ranges without persistent drift or
-separation, supporting the encouraging numerical diagnostics.
+`mean` is the posterior mean; `sd` is posterior uncertainty; `2.5%` and
+`97.5%` bound the 95% credible interval. Alpha and beta are on the logit scale.
+The beta row is negative and its interval excludes zero: survival decreases
+with density under this model.
 
 ## 4. Survival regression
 

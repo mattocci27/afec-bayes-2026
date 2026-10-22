@@ -30,34 +30,22 @@ knitr::opts_chunk$set(
 
 ## Model and data
 
-We model seedling survival for a **single focal tree species** across 60
-simulated quadrats. A binomial logistic regression relates survival probability
-to scaled conspecific density:
+We model seedling survival for a single tree species across 60 simulated quadrats using binomial logistic regression:
 
-$$s_i\sim\operatorname{Binomial}(n_i,p_i),\qquad
-\operatorname{logit}(p_i)=\alpha+\beta x_i.$$
+$$
+s_i \sim \operatorname{Binomial}(n_i,p_i), \qquad
+\operatorname{logit}(p_i)=\alpha+\beta x_i.
+$$
 
-- $i$: quadrat (`quadrat`).
-- $n_i$: number of seedlings of the focal species in quadrat $i$ (`n`).
-- $s_i$: number of those seedlings surviving the observation period (`suv`).
-- $p_i$: survival probability for those seedlings.
-- $x_i$: scaled conspecific density in quadrat $i$ (`cons`).
+- $i$: quadrat (`quadrat`)
+- $n_i$: number of seedlings (`n`)
+- $s_i$: number of surviving seedlings (`suv`)
+- $p_i$: survival probability
+- $x_i$: scaled conspecific density (`cons`)
 
-The simulation generates `cons` on a standard Normal scale; it does not specify
-whether density measures adults, seedlings or another conspecific group.
-We therefore interpret it as a simulated density index. The model assumes a
-common survival probability within each quadrat and conditionally independent
-seedling outcomes, with one shared density relationship across quadrats.
+We assign independent $\operatorname{Normal}(0, 2.5)$ priors to $\alpha$ and $\beta$.
 
-The prepared result uses independent Normal priors with mean 0 and **SD 2.5**
-for $\alpha$ and $\beta$.
-
-**Core:** follow the coefficient summaries, sampling checks and survival curve
-using the prepared posterior samples. Running the analysis code is optional;
-no model compilation or new MCMC fitting is needed.
-
-**Optional appendix:** fit a new model with brms or cmdstanr in a prepared
-environment after completing the walkthrough.
+We use prepared posterior samples to examine MCMC diagnostics, estimate model parameters, and visualize the relationship between density and survival.
 
 ### Packages and data
 
@@ -82,6 +70,45 @@ sampler_diagnostics <- fit$diagnostics
 The prepared result uses the supplied, unchanged `ndd.csv`. Coefficient draws
 retain their chain and iteration identifiers; diagnostics are from the same fit.
 If the data or model are changed, new inference is required.
+
+## Trace plots
+
+First inspect how the chains explore the posterior.
+
+```{r trace-plots}
+bayesplot::mcmc_trace(coef_draws, pars = c("alpha", "beta"))
+```
+
+The horizontal axis is saved sampling step, the vertical axis is a coefficient,
+and colours identify chains. These are post-warmup samples.
+
+The prepared result's chains cover similar ranges without persistent separation
+or drift. Overlap alone does not establish convergence; a single jump alone does not indicate failure.
+
+Next, use numerical diagnostics to check sampling quality alongside these traces.
+
+## Numerical diagnostics
+
+```{r sampling-diagnostics}
+sampling_table <- posterior::summarise_draws(
+  coef_draws,
+  rhat = posterior::rhat,
+  ess_bulk = posterior::ess_bulk,
+  ess_tail = posterior::ess_tail
+)
+sampling_table
+
+# One row per chain, recorded when the model was fitted.
+sampler_table <- as_tibble(sampler_diagnostics) |>
+  mutate(chain = row_number(), .before = 1)
+sampler_table
+```
+
+- **`rhat`:** Agreement across chains. Values should be close to 1 (ideally below 1.01).
+- **`ess_bulk`, `ess_tail`:** Effective sample sizes for the main part and tails of the posterior. Larger values are better; 400 is a useful minimum guideline here.
+- **`num_divergent`:** Number of divergent transitions, where the sampler fails to accurately follow a trajectory. Ideally zero.
+
+The prepared fit has R-hat near 1, ESS above 400, and no divergences, suggesting satisfactory sampling. However, good MCMC diagnostics do not guarantee that the ecological model is appropriate.
 
 ## Posterior summary and coefficient interpretation
 
@@ -114,70 +141,56 @@ depends on the starting density.
 
 In the prepared result, `beta` is negative and its credible interval excludes zero: higher density
 is associated with lower survival probability under this model. This is an
-association in simulated data, not evidence of a causal mechanism. Check the
-sampling before using the estimates.
-
-## MCMC diagnostics and trace plots
-
-### Numerical diagnostics
-
-```{r sampling-diagnostics}
-sampling_table <- posterior::summarise_draws(
-  coef_draws,
-  rhat = posterior::rhat,
-  ess_bulk = posterior::ess_bulk,
-  ess_tail = posterior::ess_tail
-)
-sampling_table
-
-# One row per chain, recorded when the model was fitted.
-sampler_table <- as_tibble(sampler_diagnostics) |>
-  mutate(chain = row_number(), .before = 1)
-sampler_table
-```
-
-- **`rhat`:** compares chains. Values near 1 are encouraging; values above 1.01
-  are a reason to investigate.
-- **`ess_bulk`, `ess_tail`:** effective sample sizes for central values and tails
-  of the posterior. They account for dependence among draws and are not seedling
-  sample sizes. For these four chains, values below about 400 warrant investigation.
-- **`num_divergent`:** divergent transitions after warmup, recorded for each chain.
-  Investigate any nonzero count.
-
-Stan and prepared results also show `num_max_treedepth` and `ebfmi`, additional
-sampler checks that the instructor can explain.
-
-The prepared CNDD result has R-hat near 1, bulk/tail ESS above 400 and zero
-divergences. These are encouraging checks, not proof of convergence or sufficient precision
-for every use. The trace plots provide a complementary view.
-
-### Trace plots
-
-```{r trace-plots}
-bayesplot::mcmc_trace(coef_draws, pars = c("alpha", "beta"))
-```
-
-The horizontal axis is saved sampling step, the vertical axis is a coefficient,
-and colours identify chains. These are post-warmup samples.
-
-The prepared result's chains cover similar ranges without persistent separation
-or drift. Overlap alone does not establish convergence; a single jump alone does not indicate failure.
+association in simulated data, not evidence of a causal mechanism.
 
 ## Posterior survival probabilities
 
-Each row of `curve_draws` combines one saved coefficient pair with one density.
-`plogis(alpha + beta * cons)` converts log-odds into survival probability.
-We calculate probabilities for every paired draw before summarising them.
+**Posterior coefficient draws → Posterior survival curves → Median and 95% credible interval**
+
+`density_grid` contains 81 equally spaced values spanning the observed range of
+conspecific density. These are prediction points, not additional observations;
+they let us draw smooth survival probability curves.
+
+For each paired draw of $\alpha$ and $\beta$, `plogis(alpha + beta * cons)`
+gives survival probabilities across this grid.
 
 ```{r curve-probabilities}
 density_grid <- tibble(
   cons = seq(min(ndd$cons), max(ndd$cons), length.out = 81)
 )
+
 curve_draws <- as_tibble(coef_draws) |>
   select(.draw, alpha, beta) |>
   crossing(density_grid) |>
   mutate(p = plogis(alpha + beta * cons))
+```
 
+```{r posterior-curves}
+set.seed(42)
+selected_draws <- curve_draws |>
+  distinct(.draw) |>
+  slice_sample(n = 50)
+
+posterior_curves_plot <- curve_draws |>
+  semi_join(selected_draws, by = ".draw") |>
+  ggplot(aes(x = cons, y = p, group = .draw)) +
+  geom_line(colour = "grey40", alpha = 0.15, linewidth = 0.4) +
+  scale_y_continuous(limits = c(0, 1)) +
+  labs(x = "Conspecific density (scaled)", y = "Survival probability")
+posterior_curves_plot
+```
+
+Each line represents one possible survival curve based on a posterior draw of
+the intercept and slope. The variation among curves illustrates uncertainty in
+the estimated relationship.
+
+Using **all posterior draws**, we now summarize survival probabilities at each
+density value:
+
+- **Median:** the central estimate of survival probability.
+- **2.5th and 97.5th percentiles:** the pointwise 95% credible interval.
+
+```{r curve-summary}
 curve_summary <- curve_draws |>
   group_by(cons) |>
   summarise(
@@ -188,10 +201,10 @@ curve_summary <- curve_draws |>
   )
 ```
 
-At each density, `median`, `lower` and `upper` summarise the posterior distribution
-of survival probability. The alpha and beta from each draw stay together, preserving their joint
-posterior dependence. Transforming separately summarised coefficients would
-not, in general, give these posterior probability summaries.
+The next plot shows these medians and credible intervals alongside the observed
+survival proportions.
+
+**Important:** We keep $\alpha$ and $\beta$ paired within each posterior draw to preserve their joint uncertainty. The credible interval represents uncertainty in the estimated survival probability, not variation among individual seedlings.
 
 ## Regression plot and interpretation
 
@@ -321,8 +334,8 @@ fit_stan <- model_stan$sample(
 
 After fitting **one** model, run its matching chunk below in place of the
 prepared-result loading chunk. Then rerun the core analysis from
-[Posterior summary and coefficient interpretation](#posterior-summary-and-coefficient-interpretation)
-through the regression plot. Each chunk retains chain and iteration identifiers
+[Trace plots](#trace-plots) through the regression plot. Each chunk retains
+chain and iteration identifiers
 and uses diagnostics from the same fit as the coefficient draws. Do not reload
 the prepared result when analysing a new fit.
 
@@ -356,10 +369,12 @@ Interpret new fits using their own summaries, diagnostics and traces.
 ::: {.content-visible when-meta="solutions"}
 # Instructor reference
 
-Follow the code and outputs in order: summary, diagnostics, traces, probability
-calculation and plotting. This is a guided walkthrough, not a worksheet with
+Follow the code and outputs in order: traces, numerical diagnostics, coefficient
+summary, probability calculation and plotting. This is a guided walkthrough,
+not a worksheet with
 separate questions, written answers or timed tasks. Explain the coefficient
-rows and table columns directly, then connect beta's sign to the curve.
+rows and table columns after checking sampling, then connect beta's sign and
+uncertainty to the curve.
 
 The coefficient mean is not MLE or MAP, and posterior SD is not Monte Carlo
 standard error. The plot uses a posterior median; neither summary needs to
@@ -373,7 +388,10 @@ the corresponding coefficient table. `summary(fit)` would describe the list.
 The prepared result corresponds to the supplied CSV and Stan model. If either
 is changed, fit the changed model rather than reusing the prepared result.
 
-Also check parameter-level diagnostics including `lp__`, treedepth, E-BFMI and
+Retain the complete sampler diagnostic output for validation.
+`num_max_treedepth` counts transitions reaching the tree-depth limit; reaching
+it can reduce sampling efficiency. `ebfmi` (E-BFMI) checks exploration of the
+energy distribution; low values warrant investigation. Also check `lp__` and
 Monte Carlo precision for the intended quantities. Do not copy the root file's
 automatic good/bad classifications or its E-BFMI quality scale. Computation and
 ecological model appropriateness are different issues. The lecture includes one

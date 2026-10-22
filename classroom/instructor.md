@@ -136,7 +136,7 @@ the Beta update, and MH/HMC are optional reference material.
 | From Day 1 to CNDD: “What happens to survival at higher density?” | Predict the direction of the relationship |
 | The same binomial model, logit and probability curves, and prior scale | Identify observations, unknown coefficients, priors and likelihood |
 | Approximate the posterior by simulation; healthy and failed traces; from paired draws to curves and a ribbon | Explain how one coefficient pair produces one curve |
-| Explain R code in the style of the root exercise.qmd | Follow code and output: coefficient table, diagnostics, traces and regression plot |
+| Explain R code in the style of the root exercise.qmd | Follow code and output: traces, numerical diagnostics, coefficient table, survival probabilities and regression plot |
 | Briefly show the existing density-pattern PPC figure | Compare observed proportions with replicated data; no additional exercise |
 | Questions about the walkthrough and buffer for different working speeds | Revisit code and interpretation as needed |
 | Brief preview of tomorrow, questions and buffer | If core understanding is secure and a full block fits, advance the mother-tree introduction using the rule above; no additional worksheet |
@@ -151,12 +151,11 @@ result file is a list of draws and diagnostics, not an object on which to call
 CmdStan's `$summary()` or brms's `summary()` directly. The instructor should
 understand this distinction; students need not memorize the object formats.
 
-Explain the coefficient table in this order: rows (alpha and beta), mean, SD,
-interval. The mean is a posterior mean, not an MLE or MAP. SD describes posterior
+After inspecting traces and numerical diagnostics, explain the coefficient table
+in this order: rows (alpha and beta), mean, SD, interval. The mean is a posterior mean, not an MLE or MAP. SD describes posterior
 uncertainty, not Monte Carlo error. Beta is a coefficient on the logit scale,
-not a probability or a percentage reduction. Interpret its sign provisionally,
-then check diagnostics and traces before using the estimates. Connect that sign
-to the direction of the final regression curve.
+not a probability or a percentage reduction. Connect its sign and credible
+interval to the direction and uncertainty of the final regression curve.
 
 Use `mcmc_trace()` to inspect four chains for overlap, persistent separation and
 drift. Read R-hat, ESS and divergence counts together. For four chains,
@@ -177,11 +176,11 @@ using all draws. Distinguish these from the conceptual species-coloured curves.
 
 New inference and Stan editing are optional. If an R problem cannot be resolved
 within two minutes, continue with the same tables, diagnostics and plots in
-`day2/results.html`. Both fitting sections, brms and Stan, appear before Data
-and posterior draws in the student handout. Demonstrate either fit if the
+`day2/results.html`. Both fitting sections, brms and Stan, are in the optional
+appendix after the core walkthrough in the student handout. Demonstrate either fit if the
 prepared environment and class pace permit. Run only one of the brms, Stan or
-prepared-result loading chunks; all later tables, diagnostics, traces and plots
-then use that result. Do not use stored diagnostics to assess a new fit.
+prepared-result loading chunks; the core traces, diagnostics, coefficient table
+and plots then use that result. Do not use stored diagnostics to assess a new fit.
 Fitting chunks have `eval=FALSE`, so rendering the HTML does not run inference.
 Do not require students to install CmdStan, a C++ toolchain or Docker.
 
@@ -201,7 +200,7 @@ in working speed first; advance a complete mother-tree block only when the
 conditions above are met.
 
 **If running late:** shorten the species preview and details of MCMC mechanics.
-Preserve reading the coefficient table, diagnostics, traces, regression plot and
+Preserve reading traces, diagnostics, the coefficient table, regression plot and
 the single PPC figure.
 
 ## Day 3: Hierarchical models

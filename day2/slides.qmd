@@ -28,8 +28,8 @@ execute:
 
 <!--
 DAY 2 SESSION PLAN: 90 minutes. Agreed CNDD example.
-Outcomes: read regression estimates and credible intervals; check sampling with
-numerical diagnostics and traces; draw and interpret the survival curve.
+Outcomes: inspect traces and numerical diagnostics before interpreting regression
+estimates and credible intervals; draw and interpret the survival curve.
 Sampling diagnostics alone do not establish ecological model appropriateness.
 Core: binomial regression, sampling checks, paired draws and survival curves,
 the guided R walkthrough, and one existing PPC figure.
@@ -949,18 +949,18 @@ walkthrough. No participant installation or new inference is required.
 
 We follow the R code and its outputs:
 
-1. Coefficient summaries and credible intervals.
-2. Sampling diagnostics.
-3. Trace plots.
+1. Trace plots.
+2. Numerical diagnostics.
+3. Coefficient summaries and credible intervals.
 4. Survival probabilities and a regression plot.
 
 Offline outputs: `day2/results.html`.
 
 ::: notes
 Guide the class through the handout, showing code and output together. Follow
-the root exercise.qmd style: explain the table columns and actual results,
-then the diagnostics, traces and graph. No timed student tasks, separate
-questions, written responses or debrief cycle. Running code alongside the
+the root exercise.qmd style: inspect traces, read numerical diagnostics, then
+explain coefficient estimates and credible intervals before the survival graph.
+No timed student tasks, separate questions, written responses or debrief cycle. Running code alongside the
 instructor is optional; the rendered copy and result sheet contain the outputs.
 Keep read_csv(), readRDS(), summarise_draws(), mcmc_trace(), plogis(), quantile()
 and ggplot() visible rather than hiding analysis in course-specific helpers.
