@@ -62,7 +62,7 @@ A/B/Cは資料に基づく授業設計上の仮説で、理解度の実測では
 - `day3-2/exercise.qmd` / `.html`：教員ソース・解釈。学生QMD/HTMLは生成物。
 - `day3-2/instructor-notes.qmd` / `.html`：既習範囲の対応表、時間、実演、
   誤解への対応、省略基準。`coverage-assessment.md`：作成前の内部評価。
-- `day3-2/project/`：AFEC-R-foundations.Rproj、data/seedlings.csv、
+- `day3-2/project/`：AFEC-R-basics.Rproj、data/seedlings.csv、
   R/inspect_seedlings.R、README.md（データ辞書）、report.qmd / .html。
 - `scripts/build_day3_2.py`：既存student_source()で解釈部分を除去、演習の4つの
   本編チャンクからRスクリプトを生成、5文書を描画し明示allowlistでZIP化。
@@ -72,7 +72,7 @@ A/B/Cは資料に基づく授業設計上の仮説で、理解度の実測では
 - ルートMakefileに `make day3-2`、READMEに追加セッションへの案内を追加。
 
 配布物は **dist/afec-day3-2-materials.zip**（約3 MB）。中は
-AFEC-R-foundations/配下の8ファイルで、Rproj、README、CSV、Rスクリプト、
+AFEC-R-basics/配下の8ファイルで、Rproj、README、CSV、Rスクリプト、
 レポートQMD/HTML、スライドHTML、学生用exercise.html。
 教員解釈・教員ノート・内部評価・ローカルworkspaceは除外する。
 HTMLはリソース埋込み。演習QMDの描画用root.dirはリポジトリ内project/を指すため、

@@ -29,7 +29,7 @@ knitr::opts_chunk$set(comment = "#>", fig.align = "center")
 seedlings <- read.csv("project/data/seedlings.csv")
 ```
 
-## {#title-slide}
+##  {#title-slide background="../images/priors.png" background-size="50%" background-position="50% 20%"}
 
 ::: title-box
 <h2>Day 3-2</h2>
@@ -45,26 +45,23 @@ Students have seen these commands before; connect them to files and objects.
 Timing, answers and prior-coverage mapping are in instructor-notes.qmd.
 :::
 
-## Saved files and live objects
+## From SSD storage to R memory
 
-::: {.computing-flow}
-**Disk**: `data/seedlings.csv` + `R/inspect_seedlings.R`
+**SSD:** `data/seedlings.csv`
 
-↓ Run the script; read the file
+```{.r}
+seedlings <- read.csv("data/seedlings.csv")
+```
 
-**R memory**: `seedlings` data frame → `diameter` vector
+**R memory (RAM):** `seedlings` — the table read from the CSV.
 
-↓ Execute the plotting command
-
-**Output**: a plot; a saved report when explicitly rendered
-:::
-
-The same name can refer to very different things: a file, an object or a column.
+The CSV stays unchanged on the SSD.
 
 ::: notes
-0–3 minutes, including title. Ask which of these survives closing R without
-saving a workspace. Files that were saved remain; objects must be recreated.
-The default plot is displayed, not automatically saved to disk.
+0–3 minutes, including title. Trace SSD file -> read.csv -> data frame in RAM.
+The assignment retains the returned data frame under the name seedlings.
+After restarting R with workspace restore disabled, run the import again.
+In browser RStudio, storage and R memory are on the server: upload the file first.
 :::
 
 ## A project folder and its files
@@ -72,8 +69,8 @@ The default plot is displayed, not automatically saved to disk.
 ::: columns
 ::: {.column width="54%"}
 ```text
-AFEC-R-foundations/
-├── AFEC-R-foundations.Rproj
+day3-2/project/
+├── AFEC-R-basics.Rproj
 ├── data/
 │   └── seedlings.csv
 ├── R/
@@ -84,93 +81,69 @@ AFEC-R-foundations/
 :::
 ::: {.column width="46%"}
 
-| Extension | Purpose |
+| File ending | What it contains |
 |---|---|
 | `.Rproj` | RStudio Project settings |
-| `.csv` | Tabular data as text |
-| `.R` | Saved R instructions |
-| `.qmd` | Prose and executable code |
-| `.html` | A document viewed in a browser |
+| `.csv` | A table saved as text |
+| `.R` | R code |
+| `.qmd` | A document with text and R code |
+| `.html` | A page to open in a browser |
 
 :::
 :::
 
-Files can live in different subfolders within one project.
+
 
 ::: notes
-3–6 minutes. Show the extracted folder and reveal extensions in the file manager
+3–6 minutes. Show day3-2/project/ in the repository. The separate participant ZIP
+names this folder AFEC-R-basics/ when extracted; its contents are the same.
+Reveal extensions in the file manager
 if hidden. Folder names are conventions, not special R syntax. Changing a file
 extension alone does not convert its contents. Keep data unchanged and save
 instructions separately. Quarto uses Markdown for the prose; no syntax lesson.
 :::
 
-## Paths need a starting point
+## Absolute and relative paths
 
-**Working directory:** the folder R uses to resolve relative file paths.
+| Path | Example | R's working directory |
+|---|---|---|
+| Absolute · Windows | `C:/work/data/seedlings.csv` | Anywhere |
+| Absolute · macOS | `/Users/alex/data/seedlings.csv` | Anywhere |
+| Absolute · Linux | `/home/alex/data/seedlings.csv` | Anywhere |
+| Relative · All three | `data/seedlings.csv` | Project folder here |
 
-| Path | Starting point |
-|---|---|
-| `data/seedlings.csv` | Current working directory |
-| `C:/research/AFEC-R-foundations/data/seedlings.csv` | Drive root (Windows example) |
-| `/home/research/AFEC-R-foundations/data/seedlings.csv` | Filesystem root (Linux example) |
-
-```{.r}
-getwd()
-file.exists("data/seedlings.csv")
-```
-
-If the whole project moves, which path can stay the same?
+**For sharing:** open the Project and use relative paths.
 
 ::: notes
-6–10 minutes. Absolute paths are illustrative, not commands or participant
-requirements. macOS absolute paths also start with /. Use / inside quoted R
-paths on all classroom systems. In browser RStudio, paths refer to the server's
-filesystem; uploading/extracting makes files available there. Relative paths
-remain valid when the whole folder moves and R starts at the new project root.
-The file.exists result is FALSE if the starting point or file name is wrong.
+6–12 minutes. Absolute examples are illustrative, not paths to copy.
+Absolute paths give the full location from the drive/filesystem root and work
+from any working directory if that file exists. Relative paths start from R's
+current working directory; the next slide sets it by opening the Project.
+Personal absolute paths usually need editing on another computer.
+macOS absolute paths also start with /. Use forward slashes in quoted R paths.
+Relative paths still need a known starting point; introduce the Project next.
+Show how the absolute path changes when the project moves, while data/seedlings.csv stays the same.
+In browser RStudio, paths refer to the server's filesystem.
 :::
 
-## RStudio: instructions, execution and results
+## Open the Project, then use relative paths
 
-| Source editor | Environment |
-|---|---|
-| Edit and save `R/inspect_seedlings.R` | Inspect objects created in this R session |
-| **Console** | **Files / Plots** |
-| Execute commands; read output and errors | Browse saved files / view plots |
-
-R runs code in the Console when you send it from Source with **Run**.
-
-The Files pane can browse a folder without changing R's working directory.
-
-::: notes
-10–14 minutes. The table is a schematic of the common pane layout, not a
-screenshot; actual layouts differ. Point to these panes in the live IDE.
-Brief checks in the Console are useful. Save the analysis instructions in a
-script so their order can be inspected and rerun. Console history can persist,
-but it is not a substitute for an intentional analysis script.
-:::
-
-## Opening a Project establishes context
-
-Open `AFEC-R-foundations.Rproj`, then open `R/inspect_seedlings.R`.
+Open `day3-2/project/AFEC-R-basics.Rproj`,
+then `R/inspect_seedlings.R`.
 
 ```{.r}
-getwd()
-file.exists("data/seedlings.csv")
+seedlings <- read.csv("data/seedlings.csv")
 ```
 
-- Opening the Project sets the initial working directory to its folder.
-- The relative path then works even though the script is inside `R/`.
-- Reopen the Project and check `getwd()` if a file cannot be found.
-
-A Project organizes the work; the script recreates its objects.
+R looks for `data/` inside the **Project folder**, even when the code is in `R/`.
 
 ::: notes
-14–19 minutes. Demonstrate on the prepared Project, not in the parent repository.
-Confirm Project name and actual getwd output. No setwd or machine-specific
-paths in the script. The working directory can later be changed explicitly;
-a Project is not a permanent lock on it. Merely opening a script does not change
-it. Do not teach Project creation menus: provide the functioning Project.
+12–19 minutes. Briefly demonstrate opening the prepared Project and script.
+Use Project-relative paths without getwd()/setwd() commands in the lesson.
+Avoid setwd() with a personal absolute path: another computer may lack that path.
+Relative paths alone do not guarantee reproducibility: preserve the starting
+context and folder structure. Opening a script alone does not set that context.
+If input is missing, reopen the correct Project and check folder names.
 Source: https://docs.posit.co/ide/user/ide/guide/code/projects.html
 :::
 
@@ -183,14 +156,14 @@ diameter
 
 | Action | What changes? |
 |---|---|
-| Save the script | Instructions on disk |
-| Run the assignment | An object named `diameter` in memory |
-| Run `diameter` | Its values appear in the Console |
+| Save the script | Code saved on the computer |
+| Run `diameter <- ...` | Values stored in R as `diameter` |
+| Run `diameter` | Values shown in the Console |
 
-After a fresh R session, saved instructions must run again to recreate objects.
+After restarting R, run the script again.
 
 ::: notes
-19–22 minutes. Predict which pane changes after Save vs Run; show the difference.
+19–22 minutes. Show what changes after Save and after Run, following the code together.
 Do not repeat the Harry/Potter arithmetic drills. If time permits restart R and
 rerun the two lines; otherwise describe this and do one restart in the practical.
 The supplied Project disables workspace restore/save. A Project alone does not
@@ -206,44 +179,44 @@ seedlings <- read.csv("data/seedlings.csv")
 
 | Part | Meaning |
 |---|---|
-| `"data/seedlings.csv"` | A path to a saved input file |
-| `read.csv(...)` | Read the file and return a data frame |
-| `seedlings <-` | Assign that result to an object named `seedlings` |
+| `"data/seedlings.csv"` | Input file |
+| `read.csv(...)` | Read the CSV as a table |
+| `seedlings <-` | Store it as `seedlings` |
 
-R uses the in-memory object for subsequent inspection and plotting.
-Editing that object does not automatically rewrite the CSV.
+
 
 ::: notes
-22–25 minutes. Distinguish the quotes from the unquoted object name and case.
+22–25 minutes. The in-memory object supports inspection and plotting; editing
+it does not rewrite the CSV. Distinguish the quotes from the unquoted object name and case.
 Explain right side evaluated before assignment. Reading again refreshes the
 object from disk; running a later plotting line does not automatically reread a
 changed CSV. CSV is one supported format, not the only format R can read.
 Source: R read.table/read.csv documentation.
 :::
 
-## Data type and data structure
+## Values and tables
 
 ::: columns
 ::: {.column width="48%"}
-### Type of values
+### Values
 
-- **Numeric:** `2.1`, `3.4` mm.
-- **Character:** `"Species_A"`.
-- **Logical:** `TRUE`, `FALSE`.
+- **Numeric (numbers):** `2.1`, `3.4`.
+- **Character (text):** `"Species_A"`.
+- **Logical (true/false):** `TRUE`, `FALSE`.
 
-`NA` marks a missing value in a column.
+`NA`: missing value.
 :::
 ::: {.column width="52%"}
-### Organization of values
+### How values are stored
 
-- **Vector:** a sequence of values.
-- **Data frame:** a table of columns.
+- **Vector:** values of the same type in order.
+- **Data frame:** a table.
 
-The columns here are vectors of equal length. Each column has its own type.
+All columns have the same number of rows.
 :::
 :::
 
-A numeric column and a data frame describe different aspects of the data.
+
 
 ::: notes
 25–29 minutes. Restrict vector here to ordinary atomic vectors, each with one
@@ -254,14 +227,13 @@ In R numeric usually means double here. If asked, 30 is numeric/double whereas
 NA is an indicator, not a separate ordinary measurement type.
 :::
 
-## Observations, columns and their types
+## Rows and columns
 
 ```{r preview}
 head(seedlings, 3)
 ```
 
-One row follows **one tagged seedling** over one observation interval.
-Columns describe its ID, species, initial stem diameter and later survival.
+**One row = one seedling**, measured and checked later for survival.
 
 ```{r structure}
 str(seedlings)
@@ -284,13 +256,13 @@ class(diameter)
 length(diameter)
 ```
 
-`seedlings$diameter_mm` selects a **column**, with one entry per seedling.
+`$diameter_mm`: the diameter column, one value per seedling.
 
 ```{r mixed-vector}
 class(c(2.1, "unmeasured"))
 ```
 
-Mixing a number and text in this vector makes both entries character values.
+Numbers mixed with text → all values become text.
 
 ::: notes
 33–37 minutes. class identifies an object's class, not a complete specification
@@ -308,11 +280,11 @@ is.na(diameter)
 seedlings$survived
 ```
 
-- Missing diameter: no recorded measurement, not a diameter of zero.
-- `survived = FALSE`: observed dead at the later census.
-- `survived = NA`: survival status was not recorded.
+- Diameter `NA`: unmeasured, not zero.
+- Survival `FALSE`: observed dead.
+- Survival `NA`: unknown.
 
-`is.na()` identifies missing entries; it returns a logical vector.
+`is.na()`: `TRUE` for missing entries.
 
 ::: notes
 37–41 minutes. Missing diameter is record 4; missing survival is record 5.
@@ -322,75 +294,69 @@ substitute 0 or FALSE for unknown values or introduce imputation here.
 Source: https://stat.ethz.ch/R-manual/R-devel/library/base/html/NA.html
 :::
 
-## Inspection before interpretation
+## Looking at the data
 
-| Command | What to inspect |
+| Code | What it shows |
 |---|---|
-| `class(seedlings)` | The class of the whole object |
-| `str(seedlings)` | Structure, column classes/types and example entries |
-| `head(seedlings)` | First six records by default |
-| `dim(seedlings)` | Rows, then columns |
+| `class(seedlings)` | What kind of object it is |
+| `str(seedlings)` | Column types and a few values |
+| `head(seedlings)` | First six rows |
+| `dim(seedlings)` | Number of rows, then columns |
 
-Which command would reveal a diameter column imported as text?
 
-A preview of six rows does not remove the remaining rows from the object.
 
 ::: notes
-41–45 minutes. str reveals the column type; class of the whole table alone does
-not. A numeric-looking printed value is not enough evidence. Ask for a reason,
-not recall of syntax. Scientific interpretation also needs the data dictionary
+41–45 minutes. head previews rows without removing the remaining observations.
+str reveals the column type; class of the whole table alone does
+not. Read the output together: a numeric-looking printed value alone does not
+establish its type. Scientific interpretation also needs the data dictionary
 and units. Do not reteach names, levels, summary and tail as a second catalogue.
 :::
 
-## Guided practical: files, objects and a plot
+## Reading the script: files, objects and a plot
 
-Open `exercise.html` and the prepared script `R/inspect_seedlings.R`.
+`exercise.html` + `R/inspect_seedlings.R`
 
-1. Locate the Project, data file and script; verify the working directory.
-2. Run the import and inspect the table and a column.
-3. Interpret missing observations; run the supplied histogram.
+**CSV → data frame → column → missing values → histogram**
 
-Explain where the input lives, what R holds in memory, and what each row means.
-
-All code is supplied. The rendered handout provides the same outputs if R is unavailable.
+Follow the supplied code and outputs together.
 
 ::: notes
-45–58 minutes: allow 3 location, 4 import/inspection, 3 columns/NA and 3 plot.
-Reserve 58–60 for the recap/questions. Students work in pairs if needed; no new
-code required. If a setup problem lasts two minutes, switch to supplied outputs
+45–55 minutes: allow 2 location, 3 import/inspection, 2 columns/NA and 3 plot.
+Reserve 55–58 for Quarto and 58–60 for the recap/questions. Walk through the script and outputs
+together; participants may follow along in R. No independent task or new code. If a setup problem lasts two minutes, switch to supplied outputs
 and return to the folder diagram. The histogram uses seven measured diameters.
 :::
 
-## Optional: a Quarto document {visibility="uncounted"}
+## Make a report with Quarto
 
-`report.qmd`: Markdown prose + R code → **Render** → `report.html`
+`report.qmd`: text + R code → **Render** → `report.html`
 
-- The QMD records how to generate the report.
-- The HTML displays its text, code and plot in a browser.
-- The prepared report reads its own CSV; Console objects are unnecessary.
+The code in the QMD reads the CSV. The HTML shows the report.
 
-Use the prepared HTML if Quarto is unavailable. No installation is needed today.
+Open `report.qmd` → click **Render** → open `report.html`.
 
 ::: notes
-Only if the practical finishes early: replace up to two minutes of spare
-practical/demo time. Never extend the hour. The report QMD is at the participant
-Project root, so its default document-directory execution finds data/. This is
-different from running an R/ script interactively with the project-root working
-directory. No execution-directory settings or Markdown syntax lesson for students.
+55–58 minutes. This is required: read the text and R code in report.qmd
+alongside the class, click Render and show the resulting HTML. Use the prepared
+RStudio environment with Quarto and knitr available; no classroom installation.
+The report reads its own CSV, independently of Console objects. Its QMD is at
+the participant Project root, so the default document-directory execution finds
+data/. If rendering fails, show the prepared HTML and explain the same steps;
+record the environment problem for follow-up. Do not omit the Quarto explanation.
 Source: https://quarto.org/docs/projects/code-execution.html
 :::
 
 ## Recreating the analysis
 
-Keep the input CSV, saved script and data dictionary in the Project folder.
+Keep **data + R code + notes explaining the columns** together.
 
-A fresh session can recreate the objects by running the script from the top.
+Open the Project → run the script from the top.
 
-For research handoff, also record the software environment and preserve backups.
-A Project supplies context; it does not do those jobs automatically.
+Save the R and package versions; keep backup copies.
 
 ::: notes
-58–60 minutes, including questions. Ask a participant to trace CSV -> data frame
--> diameter vector -> plot using actual filenames and objects. Do not add another
+58–60 minutes, including questions. Trace CSV -> data frame -> diameter vector
+-> plot together, using the filenames and objects just shown. Do not add another
 exercise. No statistical inference or model explanation in this session.
 :::

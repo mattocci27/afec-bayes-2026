@@ -4,14 +4,14 @@ archive <- normalizePath("dist/afec-day3-2-materials.zip", mustWork = TRUE)
 validation_dir <- tempfile("afec computing check ")
 dir.create(validation_dir)
 unzip(archive, exdir = validation_dir)
-project <- file.path(validation_dir, "AFEC-R-foundations")
+project <- file.path(validation_dir, "AFEC-R-basics")
 original_dir <- getwd()
 setwd(project)
 png(file.path(validation_dir, "exercise-plot.png"), width = 840, height = 480)
 script_time <- system.time(source("R/inspect_seedlings.R", echo = TRUE))
 dev.off()
 stopifnot(
-  file.exists("AFEC-R-foundations.Rproj"),
+  file.exists("AFEC-R-basics.Rproj"),
   identical(class(seedlings), "data.frame"),
   identical(dim(seedlings), c(8L, 4L)),
   identical(class(seedlings$species), "character"),

@@ -2185,10 +2185,11 @@ vertical-align: -.125em;
   <ul class="collapse">
   <li><a href="#before-class" id="toc-before-class" class="nav-link" data-scroll-target="#before-class">Before class</a></li>
   <li><a href="#files-panes-and-projects" id="toc-files-panes-and-projects" class="nav-link" data-scroll-target="#files-panes-and-projects">Files, panes and Projects</a></li>
+  <li><a href="#optional-here-example-and-path-comparison" id="toc-optional-here-example-and-path-comparison" class="nav-link" data-scroll-target="#optional-here-example-and-path-comparison">Optional here example and path comparison</a></li>
   <li><a href="#table-column-and-missingness" id="toc-table-column-and-missingness" class="nav-link" data-scroll-target="#table-column-and-missingness">Table, column and missingness</a></li>
   <li><a href="#practical-answers-and-expectations" id="toc-practical-answers-and-expectations" class="nav-link" data-scroll-target="#practical-answers-and-expectations">Practical answers and expectations</a></li>
   </ul></li>
-  <li><a href="#optional-quarto-demonstration" id="toc-optional-quarto-demonstration" class="nav-link" data-scroll-target="#optional-quarto-demonstration">Optional Quarto demonstration</a></li>
+  <li><a href="#required-quarto-report-walkthrough" id="toc-required-quarto-report-walkthrough" class="nav-link" data-scroll-target="#required-quarto-report-walkthrough">Required Quarto report walkthrough</a></li>
   <li><a href="#deliberate-exclusions" id="toc-deliberate-exclusions" class="nav-link" data-scroll-target="#deliberate-exclusions">Deliberate exclusions</a></li>
   <li><a href="#technical-references" id="toc-technical-references" class="nav-link" data-scroll-target="#technical-references">Technical references</a></li>
   </ul>
@@ -2218,7 +2219,7 @@ vertical-align: -.125em;
 <section id="purpose-and-assumptions" class="level1">
 <h1>Purpose and assumptions</h1>
 <p>This 60-minute session follows a separate 30-minute lecture. It consolidates research computing foundations; do not add statistical-model explanations. The previous 90-minute Day 3 materials remain reference, not an additional 90-minute obligation. The instructor must select the separate lecture’s content. Approximately 30 graduate students have received Ninya Quibod’s introductory R instruction. Documented exposure does not establish mastery.</p>
-<p>Assume participants can access a prepared RStudio session (browser or already installed Desktop). Confirm this before class; do not spend the hour installing software. The core practical uses only base R. Quarto and knitr are authoring requirements and prerequisites for the optional demonstration, not for students to run the supplied script. English materials match the existing AFEC course.</p>
+<p>Assume participants can access a prepared RStudio session (browser or already installed Desktop). Confirm this before class; do not spend the hour installing software. The supplied R script uses only base R. The required report walkthrough also needs Quarto and knitr in the prepared RStudio environment. Confirm these before class; participants should not install them during class. English materials match the existing AFEC course.</p>
 </section>
 <section id="evidence-from-previous-teaching" class="level1">
 <h1>Evidence from previous teaching</h1>
@@ -2270,11 +2271,11 @@ vertical-align: -.125em;
 <tr class="odd">
 <td>C: essential and not found</td>
 <td>Project workflow, a worked absolute/relative comparison, class(), file extensions, Markdown/Quarto, fresh-session workflow</td>
-<td>Introduce a prepared Project and class(); explain QMD/HTML only briefly and make rendering optional.</td>
+<td>Introduce a prepared Project and class(); read QMD text and R code together, render it and show the HTML.</td>
 </tr>
 </tbody>
 </table>
-<p>A/B/C are planning judgments, not labels for students. Use the short oral predictions on slides 4, 7 and 13 to adjust emphasis. If answers already include the mechanism, shorten the example and retain time for the integrated practical. If unclear, demonstrate the concrete action and ask participants to explain its consequence. No lengthy written quiz is needed.</p>
+<p>A/B/C are planning judgments, not labels for students. Read the code and outputs together, explaining each step as it appears. Participants may run the supplied lines alongside the instructor. Do not add prediction questions, pair discussion or independent tasks. Use questions from participants to adjust the pace.</p>
 <section id="precision-when-reinforcing-previous-explanations" class="level2">
 <h2 class="anchored" data-anchor-id="precision-when-reinforcing-previous-explanations">Precision when reinforcing previous explanations</h2>
 <p>Clarify these points without turning the class into a correction of another instructor. Files need not be in a single flat folder. R can read formats other than CSV. Console history may persist, but a saved script is the deliberate record. head()/tail() default to six rows, <code>$</code> selects a column and levels() reports factor levels. read_excel() is in readxl, not dplyr. Whole-number values need not use R’s integer storage (<code>30</code> versus <code>30L</code>). Most of these details are for answering questions, not additional slides.</p>
@@ -2297,47 +2298,56 @@ vertical-align: -.125em;
 </thead>
 <tbody>
 <tr class="odd">
-<td>0–10</td>
-<td>1–4: saved files, folder tree, extensions and paths</td>
+<td>0–6</td>
+<td>1–3: SSD to RAM, folder tree and extensions</td>
 <td>File vs object; relative paths need a starting point.</td>
 </tr>
 <tr class="even">
-<td>10–25</td>
-<td>5–8: RStudio panes, prepared Project, Save/Run, CSV import</td>
+<td>6–25</td>
+<td>4–7: absolute/relative paths, prepared Project, Save/Run, CSV import</td>
 <td>Live IDE demonstration; connect Source -&gt; Console -&gt; Environment.</td>
 </tr>
 <tr class="odd">
 <td>25–45</td>
-<td>9–13: types/structures, actual table, columns, NA, inspection</td>
+<td>8–12: types/structures, actual table, columns, NA, inspection</td>
 <td>Read real output; one seedling per row; type and structure differ.</td>
 </tr>
 <tr class="even">
-<td>45–58</td>
-<td>14: integrated practical</td>
-<td>3 min location, 4 import, 3 column/NA, 3 histogram.</td>
+<td>45–55</td>
+<td>13: script walkthrough</td>
+<td>2 min location, 3 import, 2 column/NA, 3 histogram.</td>
 </tr>
 <tr class="odd">
+<td>55–58</td>
+<td>14: Quarto report</td>
+<td>Read the QMD, click Render, open the HTML.</td>
+</tr>
+<tr class="even">
 <td>58–60</td>
-<td>16: recap and questions</td>
+<td>15: recap and questions</td>
 <td>Trace the whole route; retain buffer.</td>
 </tr>
 </tbody>
 </table>
-<p>Slide 15 is optional and uncounted. Render the prepared report only if time remains; it replaces up to two minutes of spare practical/demo time. It never adds time. With setup delays, omit it and the live restart/coercion demonstration; keep the folder/working-directory distinction and the practical. Use the rendered handout when an R problem persists beyond two minutes.</p>
-<p>These are teaching allocations, not measured learner completion times. The script is short and supplied in full, but a fresh participant rehearsal is needed to establish actual 15-minute completion.</p>
+<p>Quarto is required. Keep its three-minute slot even if setup is delayed; shorten the live restart or coercion example instead. The here example is optional and appears only in the handout. If an R problem persists beyond two minutes, follow the saved outputs together. If Render fails, use the saved report HTML while explaining the QMD-to-HTML steps; record the problem for follow-up.</p>
+<p>These are teaching allocations, not measured learner completion times. The script is short and supplied in full, but a fresh participant rehearsal is needed to establish the pace of the 15-minute walkthrough.</p>
 </section>
 <section id="demonstration-instructions" class="level1">
 <h1>Demonstration instructions</h1>
 <section id="before-class" class="level2">
 <h2 class="anchored" data-anchor-id="before-class">Before class</h2>
 <p>Build with <code>make day3-2</code>; distribute only <code>dist/afec-day3-2-materials.zip</code>. The ZIP contains the participant Project and self-contained slides/exercise/ report HTML, not this note, its answers or the planning assessment. The original all-days ZIP and website do not automatically include this extra session.</p>
-<p>Extract a fresh copy of the participant ZIP, preferably to a folder with a space in its name. Open its <code>.Rproj</code> in the intended RStudio environment. Confirm its Project name, <code>getwd()</code> and <code>file.exists(&quot;data/seedlings.csv&quot;)</code>. Keep workspace restore/save disabled; the supplied Project already requests this. Test opening the script, running selected lines, seeing the histogram and reading local HTML. Browser RStudio paths refer to the server, so demonstrate upload/extract/open if that is how students will receive the folder. Desktop and browser menus can vary. Check actual access for all participants separately from local validation.</p>
+<p>Extract a fresh copy of the participant ZIP, preferably to a folder with a space in its name. Open its <code>.Rproj</code> in the intended RStudio environment. Confirm its Project name and <code>file.exists(&quot;data/seedlings.csv&quot;)</code>. Keep workspace restore/save disabled; the supplied Project already requests this. Test opening the script, running selected lines, seeing the histogram and reading local HTML. Browser RStudio paths refer to the server, so demonstrate upload/extract/open if that is how students will receive the folder. Desktop and browser menus can vary. Check actual access for all participants separately from local validation.</p>
 </section>
 <section id="files-panes-and-projects" class="level2">
 <h2 class="anchored" data-anchor-id="files-panes-and-projects">Files, panes and Projects</h2>
-<p>Show the Project root and its data/ and R/ subfolders in Files. Browse to data/ and run <code>getwd()</code> to demonstrate that Files browsing does not automatically change R’s working directory. Reopen the Project if the starting state is wrong; do not patch code with an instructor-specific absolute path.</p>
+<p>Show the Project root and its data/ and R/ subfolders. Explain absolute paths from a drive/filesystem root, then relative paths from R’s starting folder. Opening the supplied Project establishes that folder; the script uses relative paths. Do not teach getwd()/setwd() commands or personal absolute paths. If input is missing, reopen the correct Project and check the folder structure.</p>
 <p>Open the supplied script. Run its location section first, then the import. Show the new object in Environment. Point to its Source line and the resulting Console output. Save a harmless comment change to show saving does not execute code. Use an isolated example <code>diameter &lt;- c(2.1, 3.4, 4.7)</code> for a live Save/Run comparison, then run the supplied script’s import and column section to replace that object with the real column.</p>
-<p>If useful and time permits, restart R once and show that opening a script has not recreated <code>seedlings</code>. Rerun from the top. Do not quit a participant’s unrelated session or use rm(list=ls()). Projects establish an initial working directory; setwd() could change it later, so getwd() checks the actual state.</p>
+<p>If useful and time permits, restart R once and show that opening a script has not recreated <code>seedlings</code>. Rerun from the top. Do not quit a participant’s unrelated session or use rm(list=ls()). Preserve the Project starting context and folder structure so the relative paths resolve consistently.</p>
+</section>
+<section id="optional-here-example-and-path-comparison" class="level2">
+<h2 class="anchored" data-anchor-id="optional-here-example-and-path-comparison">Optional here example and path comparison</h2>
+<p>Use the walkthrough’s three-minute location allocation to explain the path comparison too: personal absolute paths change with the parent location; internal relative paths survive moving the whole Project. No manual working-directory change is required. If demonstrating here, use its i_am declaration at the top of the supplied script in a fresh participant Project session. Confirm its generated path ends in data/seedlings.csv and the two imports are identical. Do not add the optional here code to the core script or require participant installation. here returns an absolute path constructed from a portable specification; this differs from hard-coding a personal path.</p>
 </section>
 <section id="table-column-and-missingness" class="level2">
 <h2 class="anchored" data-anchor-id="table-column-and-missingness">Table, column and missingness</h2>
@@ -2350,10 +2360,10 @@ vertical-align: -.125em;
 <p>See the instructor version of <a href="exercise.html#instructor-interpretation">the exercise</a>. Participants receive <code>exercise.html</code> renamed from the solution-free build. Expected results: data.frame, 8 x 4; character ID/species, numeric diameter, logical survival; diameter length 8; histogram counts 0, 3, 3, 1. The wrong starting folder R/ resolves data/seedlings.csv to R/data/seedlings.csv. Moving the whole Project preserves its internal relative path. Editing an R object does not rewrite the CSV; outputs need a deliberate export/render step.</p>
 </section>
 </section>
-<section id="optional-quarto-demonstration" class="level1">
-<h1>Optional Quarto demonstration</h1>
+<section id="required-quarto-report-walkthrough" class="level1">
+<h1>Required Quarto report walkthrough</h1>
 <p>Open <code>report.qmd</code> at the participant Project root; point to prose and the import chunk, then Render. Default knitr execution starts from the QMD’s directory, which here is also the participant Project root. It imports its own data; it must not rely on objects created interactively. The outer exercise/slides use course authoring paths; students do not need to know that machinery.</p>
-<p>Markdown supplies the document’s plain-text structure; Quarto executes code and renders the HTML. Do not teach YAML, chunk options or Markdown syntax. If the runtime lacks Quarto/knitr, open the prepared <code>report.html</code> instead.</p>
+<p>Markdown supplies the document’s plain-text structure; Quarto executes code and renders the HTML. Do not teach YAML, chunk options or Markdown syntax. If the runtime unexpectedly lacks Quarto/knitr, show the prepared <code>report.html</code>, explain the rendering steps and record the environment issue for follow-up.</p>
 </section>
 <section id="deliberate-exclusions" class="level1">
 <h1>Deliberate exclusions</h1>
@@ -2362,13 +2372,15 @@ vertical-align: -.125em;
 <section id="technical-references" class="level1">
 <h1>Technical references</h1>
 <ul>
-<li><a href="https://docs.posit.co/ide/user/ide/guide/code/projects.html">Posit: RStudio Projects</a></li>
-<li><a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html">R: data input</a></li>
-<li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/data.frame.html">R: data frames</a></li>
-<li><a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/str.html">R: str</a></li>
-<li><a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/head.html">R: head</a></li>
-<li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/NA.html">R: missing values</a></li>
-<li><a href="https://quarto.org/docs/projects/code-execution.html">Quarto: managing execution</a></li>
+<li><p><a href="https://docs.posit.co/ide/user/ide/guide/code/projects.html">Posit: RStudio Projects</a></p></li>
+<li><p><a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html">R: data input</a></p></li>
+<li><p><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/data.frame.html">R: data frames</a></p></li>
+<li><p><a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/str.html">R: str</a></p></li>
+<li><p><a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/head.html">R: head</a></p></li>
+<li><p><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/NA.html">R: missing values</a></p></li>
+<li><p><a href="https://quarto.org/docs/projects/code-execution.html">Quarto: managing execution</a></p></li>
+<li><p><a href="https://here.r-lib.org/reference/here.html">here: project paths</a></p></li>
+<li><p><a href="https://here.r-lib.org/reference/i_am.html">here: declaring script location</a></p></li>
 </ul>
 </section>
 

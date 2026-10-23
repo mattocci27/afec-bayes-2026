@@ -20,40 +20,77 @@ knitr::opts_chunk$set(comment = "#>", fig.width = 7, fig.height = 4)
 knitr::opts_knit$set(root.dir = normalizePath("project", mustWork = TRUE))
 ```
 
-# Guided practical: a file becomes an R object
+# Reading a file and working with R objects
 
-**Purpose:** connect the project folder, an input file, a script and the objects
-R creates. The supplied code does the work; concentrate on what each step means.
+We read the CSV using the supplied R code, then look at the table in R memory,
+then to a column and a histogram. The code and its output are shown together.
 
-Use the separate **AFEC-R-foundations** participant ZIP. Extract it completely,
-then open `AFEC-R-foundations.Rproj` in RStudio. In a browser RStudio session,
+Use the separate **AFEC-R-basics** participant ZIP. Extract it completely,
+then open `AFEC-R-basics.Rproj` in RStudio. In a browser RStudio session,
 upload and extract the ZIP first, then open that Project. Keep the whole folder.
-No packages need installing. Work with a neighbour if needed.
+The main script uses base R; no additional packages are needed.
 
 If R is unavailable, use the displayed outputs below and the prepared
-`report.html` to follow the same interpretation of files and objects.
+`report.html` to follow the same steps.
 
-## 1. Locate the input and script
+## 1. Find the data file and R code
 
 In Files, find `data/seedlings.csv` and `R/inspect_seedlings.R`.
 Open the script in Source; run its numbered sections from the top with Run or
 Ctrl+Enter (Cmd+Enter on macOS). Saving the script alone does not run it.
 
 ```{r location, eval=FALSE}
-getwd()
 file.exists("data/seedlings.csv")
 ```
 
-`getwd()` should show the extracted **AFEC-R-foundations** folder, with a prefix
-that depends on your computer/server. The second command should return `TRUE`.
-The script is in `R/`; this path starts from the working directory.
+Opening the Project tells R which folder to start from. The result should be
+`TRUE`: R found `seedlings.csv` in the Project's `data/` folder. Keep the folders
+and files together when moving or sharing the Project.
 
-**Interpret:** if the working directory were `R/`, where would R look for
-`data/seedlings.csv`? Explain why opening the Project is useful here.
+If the starting folder were `R/`, this relative path would point to
+`R/data/seedlings.csv`. Opening the Project gives the intended starting folder.
 If the file check returns `FALSE`, reopen the Project and check the extracted
 folder structure and spelling before changing the code.
 
-## 2. Import and inspect
+### Moving the project to another computer
+
+Compare these two ways to read the same input. The first path is an example only;
+do not copy it as a command.
+
+```{.r}
+# A personal absolute path (example only)
+seedlings <- read.csv("C:/Users/Alex/research/project/data/seedlings.csv")
+
+# A relative path, after opening the supplied Project
+seedlings <- read.csv("data/seedlings.csv")
+```
+
+When a colleague extracts the project into another folder, the personal absolute
+path usually needs changing. The relative path stays `data/seedlings.csv`,
+provided the `data/` folder and CSV stay in the same place within the Project.
+
+### Optional: the same input with `here`
+
+This extra example uses the `here` package. If it is already installed, open
+the Project in a new R session and run this code in `R/inspect_seedlings.R`.
+You can skip this section; the main code does not need `here`.
+
+```{r here-path, eval=FALSE}
+here::i_am("R/inspect_seedlings.R")
+here::here("data", "seedlings.csv")
+seedlings_here <- read.csv(here::here("data", "seedlings.csv"))
+identical(seedlings_here, read.csv("data/seedlings.csv"))
+```
+
+Expect a full absolute path ending in `data/seedlings.csv`, then `TRUE`:
+both lines read the same table. `i_am()` tells `here` where this R file is
+inside the Project. `here()` then makes a full path from the Project folder
+to the CSV. `read.csv()` reads the file.
+
+The full path can differ on another computer. The code
+`"data", "seedlings.csv"` stays the same. The main code continues below.
+
+## 2. Read the CSV and look at the table
 
 ```{r import-data}
 seedlings <- read.csv("data/seedlings.csv")
@@ -64,19 +101,20 @@ dim(seedlings)
 ```
 
 These are fictional teaching data, separate from the statistical sessions.
-One row is one tagged seedling followed over one observation interval.
-`diameter_mm` is its initial stem diameter; `survived` records survival to the
-later census. `Species_A` and `Species_B` are fictional species labels.
+Each row is one seedling. `diameter_mm` is its stem diameter at the start,
+in mm. `survived` tells us whether it was still alive when checked later. `Species_A` and `Species_B` are fictional species labels.
 
-`class()` identifies an object's class, `str()` shows its structure and column
-classes/types, and `head()` previews six rows by default. `dim()` reports rows,
-then columns. The preview does not change or shorten the stored data frame.
+`class()` shows what kind of object we have. `str()` shows the column types
+and some values. `head()` shows the first six rows. `dim()` gives the number
+of rows, then columns. Looking at the first six rows does not remove other rows.
 
-**Interpret:** distinguish the file `"data/seedlings.csv"` from the object
-`seedlings`. Identify what the 8 rows and 4 columns represent. Use the output
-to explain why one data frame can contain both measurements and species labels.
+`"data/seedlings.csv"` names the saved file; `seedlings` names the
+table in R memory. This table has 8 rows and 4 columns. Each row follows one
+seedling; each column holds its ID, species, diameter or survival status.
+Columns can have different types, so measurements and species labels can share
+one data frame.
 
-## 3. Inspect a column and missing observations
+## 3. Look at a column and missing values
 
 ```{r inspect-column}
 diameter <- seedlings$diameter_mm
@@ -87,14 +125,14 @@ class(seedlings$species)
 class(seedlings$survived)
 ```
 
-`$diameter_mm` selects a column: a numeric vector with one entry per seedling.
-The assignment creates `diameter` in memory. It does not edit the input file.
-`NA` denotes an unrecorded value; `is.na()` returns a logical vector identifying
-which entries are missing.
+`$diameter_mm` takes the diameter column from the table. Its values are stored
+in R as `diameter`. The CSV stays unchanged.
+`NA` means a value is missing. `is.na()` shows `TRUE` for each missing value.
 
-**Interpret:** compare the structures of `seedlings` and `diameter`. Explain why
-the missing diameter is not zero, and why an unknown survival observation cannot
-be recorded as `FALSE` (a known death).
+`seedlings` is a data frame; `diameter` is one numeric vector of length 8.
+Its fourth entry is `NA`: no measurement was recorded, rather than a diameter
+of zero. In the survival column, `NA` means unknown and `FALSE` means observed
+dead. These record different information.
 
 ## 4. Read a supplied plot
 
@@ -110,30 +148,37 @@ hist(
 )
 ```
 
-The code sends the numeric diameter column to a plotting function. Read the
-units and the number of measured seedlings represented by the bars. Check
-that number against the missing-value output rather than assuming every row
-contributed a measurement. The histogram excludes missing diameters.
+`hist()` draws a histogram of the diameter values. The
+horizontal axis shows stem diameter in mm, and the vertical axis counts
+seedlings. The bars show seven measurements. The missing diameter is left out.
 
-**Connect the steps:** identify the saved files another researcher needs to
-recreate this plot after opening the Project in a fresh R session.
+We can make this plot again by keeping the CSV and R code in the same
+Project folders, then running the code in a new R session.
 
-## Optional: a prepared report
+## 5. Make a report with Quarto
 
-If time and the prepared environment permit, open `report.qmd` and click Render.
-It reads its own input and creates `report.html`. Compare the source with the
-HTML; no Markdown syntax practice is required. Otherwise read the prepared HTML.
+`report.qmd` is a document with text and R code. Open it in RStudio and click
+**Render** to create `report.html`. The code reads the CSV and makes the plot.
+Open the HTML to see the text, code and plot together.
+
+We follow these steps together. If Render fails, follow the instructor using
+the saved HTML.
 
 ::: {.content-visible when-meta="solutions"}
 # Instructor interpretation
 
-Allow 15 minutes including the recap: 3 for locating the Project/script, 4 for
-import/inspection, 3 for columns/NA, 3 for the plot and 2 for questions. The
-optional render replaces spare time; do not extend the session for it.
+Allow 15 minutes including the recap: 2 for locating the Project/script, 3 for
+import/inspection, 2 for columns/NA, 3 for the plot, 3 for Quarto and 2 for questions.
+Quarto is required; here remains optional. Do not extend the session.
 
 - The wrong working directory `R/` would make the relative path refer to
   `R/data/seedlings.csv`, which does not exist. Opening this Project establishes
   the intended initial working directory; opening a script does not do that.
+- The personal absolute path needs editing when the parent location changes.
+  The relative path works unchanged after opening the relocated Project, provided
+  data/seedlings.csv remains in the same place within it. The optional here
+  comparison returns TRUE; its generated absolute path is machine-dependent,
+  but the script does not hard-code that location.
 - The imported object is a data.frame with 8 rows and 4 columns. A row follows
   one seedling, not one species. The two species share this table.
 - IDs and species are character vectors, diameter is numeric, survival logical.

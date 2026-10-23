@@ -31,7 +31,7 @@ These are planning hypotheses. Reassign emphasis after the short oral checks.
 | B | p. 21 mentions NA, missing values and duplicates without a worked missing-data example | Show measured diameter missing vs zero, unknown survival vs FALSE; inspect is.na(). No imputation or statistical missing-data lesson. |
 | B | p. 22 and script list names(), summary(), levels(), dim(), str(), head(), tail(), plus column extraction | Read actual outputs, especially rows vs columns and each column's type. Use class(), str(), head() together. Do not repeat the full catalogue. |
 | C | No explicit RStudio Project workflow, worked absolute/relative comparison, file-extension map or restart-and-rerun workflow found | Introduce a prepared .Rproj with separate data/ and R/ folders; opening it establishes the initial working directory. Show how a relative path survives relocation of the whole folder. |
-| C | No class() example, Markdown or Quarto explanation found | Add class() to compare the table and a column. Explain .qmd -> .html only as an optional prepared demonstration. |
+| C | No class() example, Markdown or Quarto explanation found | Add class() to compare the table and a column. Include a required .qmd -> .html walkthrough: read text and R code, click Render, then open the report. |
 
 ## Accuracy points to clarify without criticizing previous instruction
 
@@ -48,16 +48,16 @@ These are planning hypotheses. Reassign emphasis after the short oral checks.
 
 ## Planned session and limits
 
-10 min files/paths, 15 min RStudio/Projects/objects, 20 min types/structures/
+6 min files, 19 min paths/Projects/objects, 20 min types/structures/
 inspection/missing values, 15 min one integrated practical (including recap and
-questions). Optional Quarto rendering replaces spare demonstration time; it
-never extends the 60-minute slot. This follows the separate 30-minute lecture;
+questions and a required three-minute Quarto report walkthrough). Quarto
+is included within the 60-minute slot. This follows the separate 30-minute lecture;
 there is no statistical-model or inference lesson in Day 3-2.
 
 Use eight explicitly fictional seedling records with species labels, initial
 stem diameter in mm and later survival status. The unit is one tagged seedling
 followed over one interval, not a species or quadrat. One diameter and one
 survival observation are missing. Provide the project, all code and an expected
-output route. Base R only for the practical; Quarto/knitr only for authoring or
-optional rendering. No loops, custom functions, complex indexing, installation,
+output route. The R script uses base R; the required report walkthrough also
+needs Quarto and knitr ready in the class environment. No loops, custom functions, complex indexing, installation,
 matrices, factor internals, list manipulation or general programming tutorial.

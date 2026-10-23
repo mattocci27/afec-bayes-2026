@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Seedling diameter: a reproducible description</title>
+<title>Seedling diameter</title>
 <style>
 
 span.smallcaps{font-variant: small-caps;}
@@ -2210,7 +2210,7 @@ vertical-align: -.125em;
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Seedling diameter: a reproducible description</h1>
+<h1 class="title">Seedling diameter</h1>
 </div>
 
 
@@ -2227,7 +2227,7 @@ vertical-align: -.125em;
 </header>
 
 
-<p>These eight fictional seedling records demonstrate how a document connects research data, code and output. Each row is one tagged seedling followed over one observation interval. Diameter is the initial stem diameter in millimetres.</p>
+<p>These are made-up data for eight seedlings. Each row is one seedling. Diameter is the stem diameter in mm at the start. This document reads the CSV and makes a plot.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>seedlings <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/seedlings.csv&quot;</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(seedlings)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -2260,7 +2260,7 @@ vertical-align: -.125em;
 </div>
 </div>
 </div>
-<p>The CSV stays unchanged when we render this document. The HTML is an output; the QMD records how to recreate it.</p>
+<p>Clicking Render leaves the CSV unchanged. The HTML shows the report. The QMD contains the text and R code needed to make it again.</p>
 
 </main>
 <!-- /main column -->

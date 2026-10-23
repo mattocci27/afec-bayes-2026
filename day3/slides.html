@@ -258,17 +258,15 @@ Masatoshi Katabuchi @ XTBG, CAS
           display:block!important;
       }</style></aside>
 </section>
-<section id="todays-progression" class="slide level2">
-<h2>Today’s progression</h2>
+<section id="todays-roadmap" class="slide level2">
+<h2>Today’s roadmap</h2>
 <ol type="1">
-<li><strong>Survival probabilities:</strong> estimate differences among eight mother trees. We start without a density effect.</li>
-<li><strong>Regression relationships:</strong> extend the same idea to differences in intercepts and slopes among species.</li>
+<li><strong>Survival probabilities among mother trees</strong><br>
+How can information from other trees improve our estimates?</li>
+<li><strong>Species-specific regression relationships</strong><br>
+How can the same idea be applied to intercepts and slopes?</li>
 </ol>
-<p>A <strong>hierarchical model</strong> uses data from all groups to estimate each group’s parameters.</p>
-<div class="small">
-<p><strong>Core:</strong> mother-tree pooling and the three regression structures.<br>
-<strong>Optional reference:</strong> a full second analysis, new fitting and allometry.</p>
-</div>
+<p><strong>Key idea:</strong> Hierarchical models allow groups to share information.</p>
 <aside class="notes">
 <p>First use the mother-tree binomial model with no density predictor to focus on information sharing. Later extend the hierarchy to regression coefficients. This is a progression in model structure, not a claim that the first model falls outside the regression framework. Mother-tree data are different from Day 2’s quadrats. Species CNDD is a conceptual illustration; the allometry example uses its own simulated data and saved hierarchical regression fit.</p>
 <style type="text/css">
@@ -282,16 +280,6 @@ Masatoshi Katabuchi @ XTBG, CAS
           overflow: hidden!important;
           display:block!important;
       }</style></aside>
-</section>
-<section id="todays-objectives" class="slide level2">
-<h2>Today’s objectives</h2>
-<p><strong>Understanding Bayesian hierarchical models</strong></p>
-<ul>
-<li>Explain how data from other groups can help estimate each group’s survival.</li>
-<li>Identify the likelihood, shared prior and survival probabilities in supplied code.</li>
-<li>Compare survival estimates and their uncertainty with and without information sharing.</li>
-<li>Explain how the same idea extends to species-specific regression relationships.</li>
-</ul>
 </section>
 <section id="eight-mother-trees-one-overall-survival-rate" class="slide level2">
 <h2>Eight mother trees: one overall survival rate?</h2>
@@ -777,6 +765,11 @@ p_j\text{ drawn from the posterior}</span></p>
 <p><span class="math display">\operatorname{logit}(p_j)=\alpha_j</span></p>
 <p><strong>Now: intercept + density effect</strong></p>
 <p><span class="math display">\operatorname{logit}(p_{ij})=\alpha_j+{\color{#d95f02}{\beta_j x_{ij}}}</span></p>
+<p><strong>Shared priors across species</strong></p>
+<p><span class="math display">\begin{aligned}
+\alpha_j&amp;\sim\mathcal{N}(\mu_\alpha,\sigma_\alpha)\\
+\beta_j&amp;\sim\mathcal{N}(\mu_\beta,\sigma_\beta)
+\end{aligned}</span></p>
 </div><div class="column" style="width:55%;">
 <div class="cell" data-layout-align="center">
 <div class="cell-output-display">
@@ -788,14 +781,14 @@ p_j\text{ drawn from the posterior}</span></p>
 </div>
 </div>
 </div></div>
-<p><strong>We can share information about these coefficients, too.</strong></p>
+<p><strong>Shared priors let species share information: this is a hierarchical model.</strong></p>
 <div class="footer">
-<p>Conceptual simulation inspired by <a href="https://doi.org/10.1126/science.1190772">Comita et al.&nbsp;2010</a> and <a href="https://doi.org/10.1002/ecy.4382">Song &amp; Katabuchi et al.&nbsp;2024</a>.</p>
+<p>Conceptual simulation. References: <a href="https://doi.org/10.1126/science.1190772">Comita et al.&nbsp;2010</a> and <a href="https://doi.org/10.1002/ecy.4382">Song &amp; Katabuchi et al.&nbsp;2024</a>.</p>
 </div>
 <aside class="notes">
 <p>Model progression and selected code. The main transition is from a model without a density predictor to a regression that includes density, not from mother trees to species. Strictly, the earlier model is already an intercept-only logistic regression.</p>
 <p>So far, each group had one survival probability. We did not include a predictor that could explain variation in survival within a group. Now bring back Day 2’s question: how does survival change with conspecific density? Adding density gives each group a curve, with an intercept and a density coefficient. The orange term is the addition to the model. i indexes observations within group j, and x_ij is scaled conspecific density. Both models retain a binomial observation model (or Bernoulli for individual seedlings).</p>
-<p>The information-sharing idea still applies: group regression coefficients can be connected through shared distributions. Their hyperparameters also need priors in a full model. The curves alone do not demonstrate fitted pooling.</p>
+<p>The information-sharing idea still applies: group regression coefficients can be connected through shared distributions. Their hyperparameters also need priors in a full model. The curves alone do not demonstrate fitted pooling. Point from the species curves to alpha_j and beta_j, then to their shared priors. As in the mother-tree model, the shared means and SDs are unknown and estimated jointly with the group coefficients. Normal’s second argument is SD. The displayed priors describe marginal variation across species; they do not require independent intercepts and slopes. A joint multivariate Normal can have these marginals while allowing correlation, as noted on the varying-slope slide. This is the same prior-to-hierarchy connection as main.qmd slide 37, now with the binomial/logit model used here rather than a new Normal response model.</p>
 <p>For this application the groups are species rather than mother trees. Each coloured curve represents a species. This is the seeded conceptual example from main.qmd, not fitted species effects for Day 2’s data or a numerical reproduction of either paper. It uses a different simulated data set, and does not add density to the eight mother-tree data.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
@@ -843,8 +836,12 @@ p_j\text{ drawn from the posterior}</span></p>
 <span id="cb4-4"><a href="" aria-label="4"></a>  n[i], alpha[group[i]] + beta[group[i]] * x[i]</span>
 <span id="cb4-5"><a href="" aria-label="5"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Both coefficients vary by species and have shared group distributions.</p>
+<div class="small">
+<p><strong>Note:</strong> The group priors for <span class="math inline">\alpha</span> and <span class="math inline">\beta</span> are independent here for simplicity.<br>
+Intercepts and slopes can be correlated; use a <strong>multivariate normal distribution</strong> to model them together.</p>
+</div>
 <aside class="notes">
-<p>Selected conceptual model lines, with declarations, loops and hyperpriors omitted. For this first explanation, the intercept and slope distributions are conditionally independent given their hyperparameters. Correlated group effects are an optional extension; do not claim this excerpt is identical to vslope.stan, which uses a multivariate, non-centered parameterization with correlations. Ask: what changed from beta to beta[group[i]], and where is information shared? No participant implementation is required. This is the model idea in original exercise.qmd section 6; Cholesky/LKJ derivations are outside the core session.</p>
+<p>Selected conceptual model lines, with declarations, loops and hyperpriors omitted. For this first explanation, the intercept and slope distributions are conditionally independent given their hyperparameters. The visible note explains that a multivariate Normal group prior can allow correlations between intercepts and slopes across species. This is distinct from posterior dependence induced by the likelihood, which can occur even with independent group priors. Do not claim this excerpt is identical to vslope.stan, which uses a multivariate, non-centered parameterization with correlations. Ask: what changed from beta to beta[group[i]], and where is information shared? No participant implementation is required. This is the model idea in original exercise.qmd section 6; Cholesky/LKJ derivations are outside the core session.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -919,13 +916,26 @@ p_j\text{ drawn from the posterior}</span></p>
           display:block!important;
       }</style></aside>
 </section>
-<section id="three-days-of-bayesian-thinking" class="slide level2">
-<h2>Three days of Bayesian thinking</h2>
+<section id="summary" class="slide level2">
+<h2>Summary</h2>
 <ul>
-<li>A posterior expresses uncertainty conditional on data and assumptions.</li>
-<li>Predictions put that uncertainty on the scale of an ecological question.</li>
-<li>Hierarchical priors share information while allowing groups to differ.</li>
-<li>Computation, model-generated data and ecological context all inform interpretation.</li>
+<li><p><em>Why Bayesian estimation is useful</em>.</p></li>
+<li><p><em>Why multilevel models are important</em>.</p></li>
+</ul>
+<ul>
+<li class="fragment"><strong>Bayesian workflow = Likelihood + Prior → Posterior</strong>
+<ul>
+<li class="fragment">One clear pipeline for fitting, checking, and predicting.</li>
+</ul></li>
+<li class="fragment"><strong>Priors = ecological knowledge</strong>
+<ul>
+<li class="fragment">Weakly informative priors stabilize small data sets.</li>
+<li class="fragment">Hierarchical priors share information across species, time, sites, etc.</li>
+</ul></li>
+<li class="fragment"><strong>Multilevel models are the default in ecology</strong>
+<ul>
+<li class="fragment">Ecology is hierarchical (individual → population → community); Bayesian tools handle this naturally.</li>
+</ul></li>
 </ul>
 </section>
 <section>
@@ -933,80 +943,36 @@ p_j\text{ drawn from the posterior}</span></p>
 <h1>Optional reference</h1>
 
 </section>
-<section id="priors-can-also-express-spatial-similarity" class="slide level2" data-visibility="uncounted">
-<h2>Priors can also express spatial similarity</h2>
-<div class="columns">
-<div class="column" style="width:35%;">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="../images/spatial.png" style="width:100.0%"></p>
-<figcaption>A focal grid cell and its neighbouring cells</figcaption>
-</figure>
+<section id="priors-and-ecology-multilevel-structure-for-spatial-autocorrelation" class="slide level2" data-visibility="uncounted">
+<h2>Priors and ecology: multilevel structure for spatial autocorrelation</h2>
+<div class="footer">
+<p>Each observation <em>i</em> is associated with a grid cell (<span class="math inline">m,n</span>), so <span class="math inline">\tilde{r}i = r_{m,n}</span>.</p>
 </div>
-</div><div class="column" style="width:65%;">
-<p>Nearby quadrats may share unmeasured habitat conditions.</p>
+<div class="columns">
+<div class="column" style="width:30%;">
+<p><img data-src="../images/spatial.png"></p>
+</div><div class="column" style="width:70%;">
 <ul>
-<li>A spatial effect represents residual differences among locations.</li>
-<li>A joint prior can express stronger similarity between effects at nearby locations.</li>
-<li>The strength and spatial scale of that similarity also need assumptions and priors.</li>
+<li>When the data <span class="math inline">y_i</span> is similar to the surrounding samples (e.g., temporal / spatial autocorrelation):</li>
 </ul>
-<p>Group priors express commonality among trees; spatial priors can express commonality related to location.</p>
-</div></div>
-<div class="small">
-<p>Research extension only; no spatial model is fitted in this course.</p>
+<ul>
+<li class="fragment">Likelihood: <span class="math inline">y_i \sim \mathcal{N}(\mu + \tilde{r_i}, \sigma)</span></li>
+<li class="fragment">Prior (spatial effect): <span class="math inline">\tilde{r_i} = r_{m, n} \sim \mathcal{N}(\phi_{m,n}, \tau)</span></li>
+<li class="fragment"><span class="math inline">\phi_{m,n}</span> = average of 8 neighbors around <span class="math inline">r_{m,n}</span></li>
+</ul>
+<div class="fragment">
+<p><span class="math display">
+\begin{align*}
+\phi_{m,n} = \frac{1}{8} (&amp;
+r_{m-1,n-1} + r_{m-1,n} + r_{m-1,n+1} + \\
+&amp; r_{m,n-1} + r_{m,n+1} + \\
+&amp; r_{m+1,n-1} + r_{m+1,n} + r_{m+1,n+1})
+\end{align*}
+</span></p>
 </div>
-<aside class="notes">
-<p>Optional connection to main.qmd’s spatial-prior example; omit when time is short. The image illustrates neighbourhoods, not observed spatial effects. A spatial prior is an assumption about latent effects, not a claim that neighbouring observations must be equal. Habitat predictors may account for some structure; the residual spatial effect addresses remaining dependence under the model. Unlike the conditionally independent mother-tree effects, a spatial joint prior can encode dependence that varies with distance. A Gaussian process is one example; no covariance formula or implementation is required here. Do not restore the old eight-neighbour conditional equation as a complete model: boundary rules, a coherent joint distribution and any constraints must be defined. Source: Stan User’s Guide, Gaussian Processes.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="allometry-and-wood-density" class="slide level2" data-visibility="uncounted">
-<h2>Allometry and wood density</h2>
-<div class="columns">
-<div class="column" style="width:52%;">
-<div class="cell" data-layout-align="center">
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="slides_files/figure-revealjs/allometry-curves-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-</div><div class="column" style="width:48%;">
-<p><strong>Individual level:</strong> DBH predicts height.</p>
-<p><strong>Species level:</strong> wood density may predict the allometric exponent.</p>
-<p><span class="math display">h=a\,\mathrm{DBH}^{b}</span></p>
 </div></div>
 <aside class="notes">
-<p>Optional second research connection. The data are simulated. Explain the power-law shape visually, without a new transformation or coefficient exercise. Inspiration follows main.qmd’s research example; its unpublished citation status has not been independently established.</p>
-<style type="text/css">
-        span.MJX_Assistive_MathML {
-          position:absolute!important;
-          clip: rect(1px, 1px, 1px, 1px);
-          padding: 1px 0 0 0!important;
-          border: 0!important;
-          height: 1px!important;
-          width: 1px!important;
-          overflow: hidden!important;
-          display:block!important;
-      }</style></aside>
-</section>
-<section id="the-same-structure-with-a-different-response" class="slide level2" data-visibility="uncounted">
-<h2>The same structure with a different response</h2>
-
-<img data-src="slides_files/figure-revealjs/wood-density-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>The response changes to log height. Species still share information through a group model.</p>
-<aside class="notes">
-<p>The figure uses day3_vslope, fitted to the existing simulated allometry data. Points summarise species exponents and the line summarises their expected value at each wood density, with 95% intervals. It is not evidence from a real forest. Skip these two slides if delayed. Detailed transformation and implementation are optional.</p>
+<p>Optional reference; omit when time is short. This is the original main.qmd slide, with only its image path adjusted for day3/. No spatial model is fitted. The eight-neighbour mean illustrates an interior cell on a regular grid. The notation tilde r refers to the effect for the cell containing observation i; it is not an additional independent effect for each observation. A complete spatial model also needs boundary rules, a coherent joint prior and appropriate constraints (for example, to separate an intrinsic spatial effect from the intercept). The slide is a conceptual conditional-prior illustration, not a complete specification to implement as independent Normal draws.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;

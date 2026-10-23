@@ -69,18 +69,14 @@ We first leave out the density predictor and use a separate data set to make the
 idea of information sharing easier to see. We return to species CNDD later.
 :::
 
-## Today's progression
+## Today's roadmap
 
-1. **Survival probabilities:** estimate differences among eight mother trees.
-   We start without a density effect.
-2. **Regression relationships:** extend the same idea to differences in intercepts and slopes among species.
+1. **Survival probabilities among mother trees**  
+   How can information from other trees improve our estimates?
+2. **Species-specific regression relationships**  
+   How can the same idea be applied to intercepts and slopes?
 
-A **hierarchical model** uses data from all groups to estimate each group's parameters.
-
-::: small
-**Core:** mother-tree pooling and the three regression structures.\
-**Optional reference:** a full second analysis, new fitting and allometry.
-:::
+**Key idea:** Hierarchical models allow groups to share information.
 
 ::: notes
 First use the mother-tree binomial model with no density predictor to focus on
@@ -90,15 +86,6 @@ outside the regression framework. Mother-tree data are different from Day 2's
 quadrats. Species CNDD is a conceptual illustration; the allometry example uses
 its own simulated data and saved hierarchical regression fit.
 :::
-
-## Today's objectives
-
-**Understanding Bayesian hierarchical models**
-
-- Explain how data from other groups can help estimate each group's survival.
-- Identify the likelihood, shared prior and survival probabilities in supplied code.
-- Compare survival estimates and their uncertainty with and without information sharing.
-- Explain how the same idea extends to species-specific regression relationships.
 
 ## Eight mother trees: one overall survival rate?
 
@@ -496,6 +483,13 @@ $$\operatorname{logit}(p_j)=\alpha_j$$
 
 $$\operatorname{logit}(p_{ij})=\alpha_j+{\color{#d95f02}{\beta_j x_{ij}}}$$
 
+**Shared priors across species**
+
+$$\begin{aligned}
+\alpha_j&\sim\mathcal{N}(\mu_\alpha,\sigma_\alpha)\\
+\beta_j&\sim\mathcal{N}(\mu_\beta,\sigma_\beta)
+\end{aligned}$$
+
 :::
 ::: {.column width="55%"}
 
@@ -506,10 +500,10 @@ plot_cndd_species()
 :::
 :::
 
-**We can share information about these coefficients, too.**
+**Shared priors let species share information: this is a hierarchical model.**
 
 ::: footer
-Conceptual simulation inspired by [Comita et al. 2010](https://doi.org/10.1126/science.1190772)
+Conceptual simulation. References: [Comita et al. 2010](https://doi.org/10.1126/science.1190772)
 and [Song & Katabuchi et al. 2024](https://doi.org/10.1002/ecy.4382).
 :::
 
@@ -529,6 +523,14 @@ observation model (or Bernoulli for individual seedlings).
 The information-sharing idea still applies: group regression coefficients can
 be connected through shared distributions. Their hyperparameters also need
 priors in a full model. The curves alone do not demonstrate fitted pooling.
+Point from the species curves to alpha_j and beta_j, then to their shared
+priors. As in the mother-tree model, the shared means and SDs are unknown and
+estimated jointly with the group coefficients. Normal's second argument is SD.
+The displayed priors describe marginal variation across species; they do not
+require independent intercepts and slopes. A joint multivariate Normal can have
+these marginals while allowing correlation, as noted on the varying-slope slide.
+This is the same prior-to-hierarchy connection as main.qmd slide 37, now with
+the binomial/logit model used here rather than a new Normal response model.
 
 For this application the groups are species rather than mother trees. Each
 coloured curve represents a species. This is the seeded conceptual example
@@ -584,11 +586,19 @@ suv[i] ~ binomial_logit(
 
 Both coefficients vary by species and have shared group distributions.
 
+::: small
+**Note:** The group priors for $\alpha$ and $\beta$ are independent here for simplicity.\
+Intercepts and slopes can be correlated; use a **multivariate normal distribution** to model them together.
+:::
+
 ::: notes
 Selected conceptual model lines, with declarations, loops and hyperpriors
 omitted. For this first explanation, the intercept and slope distributions are
-conditionally independent given their hyperparameters. Correlated group effects
-are an optional extension; do not claim this excerpt is identical to vslope.stan,
+conditionally independent given their hyperparameters. The visible note explains
+that a multivariate Normal group prior can allow correlations between intercepts
+and slopes across species. This is distinct from posterior dependence induced
+by the likelihood, which can occur even with independent group priors.
+Do not claim this excerpt is identical to vslope.stan,
 which uses a multivariate, non-centered parameterization with correlations.
 Ask: what changed from beta to beta[group[i]], and where is information shared?
 No participant implementation is required. This is the model idea in original
@@ -648,94 +658,72 @@ A hierarchical model is not automatically appropriate because a grouping label
 exists. Discuss shared habitat, census interval and missing predictors.
 :::
 
-## Three days of Bayesian thinking
+## Summary
 
-- A posterior expresses uncertainty conditional on data and assumptions.
-- Predictions put that uncertainty on the scale of an ecological question.
-- Hierarchical priors share information while allowing groups to differ.
-- Computation, model-generated data and ecological context all inform interpretation.
+- *Why Bayesian estimation is useful*.
+
+- *Why multilevel models are important*.
+
+::: incremental
+
+- **Bayesian workflow = Likelihood + Prior → Posterior**
+  - One clear pipeline for fitting, checking, and predicting.
+
+- **Priors = ecological knowledge**
+  - Weakly informative priors stabilize small data sets.
+  - Hierarchical priors share information across species, time, sites, etc.
+
+- **Multilevel models are the default in ecology**
+  - Ecology is hierarchical (individual → population → community); Bayesian tools handle this naturally.
+
+:::
 
 # Optional reference {visibility="uncounted"}
 
-## Priors can also express spatial similarity {visibility="uncounted"}
+## Priors and ecology: multilevel structure for spatial autocorrelation {visibility="uncounted"}
+
+::: footer
+Each observation *i* is associated with a grid cell ($m,n$), so $\tilde{r}i = r_{m,n}$.
+:::
 
 ::: columns
-::: {.column width="35%"}
-![A focal grid cell and its neighbouring cells](../images/spatial.png){width=100%}
-:::
-::: {.column width="65%"}
-
-Nearby quadrats may share unmeasured habitat conditions.
-
-- A spatial effect represents residual differences among locations.
-- A joint prior can express stronger similarity between effects at nearby locations.
-- The strength and spatial scale of that similarity also need assumptions and priors.
-
-Group priors express commonality among trees; spatial priors can express
-commonality related to location.
-:::
+::: {.column width="30%"}
+![](../images/spatial.png)
 :::
 
-::: small
-Research extension only; no spatial model is fitted in this course.
+::: {.column width="70%"}
+
+- When the data $y_i$ is similar to the surrounding samples (e.g., temporal / spatial autocorrelation):
+
+::: incremental
+  - Likelihood: $y_i \sim \mathcal{N}(\mu + \tilde{r_i}, \sigma)$
+  - Prior (spatial effect): $\tilde{r_i} = r_{m, n} \sim \mathcal{N}(\phi_{m,n}, \tau)$
+  - $\phi_{m,n}$ = average of 8 neighbors around  $r_{m,n}$
 :::
 
-::: notes
-Optional connection to main.qmd's spatial-prior example; omit when time is short.
-The image illustrates neighbourhoods, not observed spatial effects. A spatial
-prior is an assumption about latent effects, not a claim that neighbouring
-observations must be equal. Habitat predictors may account for some structure;
-the residual spatial effect addresses remaining dependence under the model.
-Unlike the conditionally independent mother-tree effects, a spatial joint prior
-can encode dependence that varies with distance. A Gaussian process is one
-example; no covariance formula or implementation is required here.
-Do not restore the old eight-neighbour conditional equation as a complete model:
-boundary rules, a coherent joint distribution and any constraints must be defined.
-Source: Stan User's Guide, Gaussian Processes.
+::: fragment
+$$
+\begin{align*}
+\phi_{m,n} = \frac{1}{8} (&
+r_{m-1,n-1} + r_{m-1,n} + r_{m-1,n+1} + \\
+& r_{m,n-1} + r_{m,n+1} + \\
+& r_{m+1,n-1} + r_{m+1,n} + r_{m+1,n+1})
+\end{align*}
+$$
 :::
-
-## Allometry and wood density {visibility="uncounted"}
-
-::: columns
-::: {.column width="52%"}
-```{r allometry-curves, fig.width=8, fig.height=4.6}
-allo <- make_allometry_data()
-ggplot(allo, aes(dbh, h, colour = sp)) +
-  geom_point(alpha = .6) +
-  labs(x = "DBH (cm)", y = "Height (m)") +
-  guides(colour = "none")
-```
-:::
-::: {.column width="48%"}
-
-**Individual level:** DBH predicts height.
-
-**Species level:** wood density may predict the allometric exponent.
-
-$$h=a\,\mathrm{DBH}^{b}$$
 :::
 :::
 
 ::: notes
-Optional second research connection.
-The data are simulated. Explain the power-law shape visually, without a new
-transformation or coefficient exercise. Inspiration follows main.qmd's research
-example; its unpublished citation status has not been independently established.
-:::
-
-## The same structure with a different response {visibility="uncounted"}
-
-```{r wood-density, fig.width=11, fig.height=4.5}
-plot_wood_density()
-```
-
-The response changes to log height. Species still share information through a group model.
-
-::: notes
-The figure uses day3_vslope, fitted to the existing simulated allometry data.
-Points summarise species exponents and the line summarises their expected value
-at each wood density, with 95% intervals. It is not evidence from a real forest.
-Skip these two slides if delayed. Detailed transformation and implementation are optional.
+Optional reference; omit when time is short. This is the original main.qmd
+slide, with only its image path adjusted for day3/. No spatial model is fitted.
+The eight-neighbour mean illustrates an interior cell on a regular grid. The
+notation tilde r refers to the effect for the cell containing observation i;
+it is not an additional independent effect for each observation. A complete
+spatial model also needs boundary rules, a coherent joint prior and appropriate
+constraints (for example, to separate an intrinsic spatial effect from the
+intercept). The slide is a conceptual conditional-prior illustration, not a
+complete specification to implement as independent Normal draws.
 :::
 
 ## Alternative priors for group variation {visibility="uncounted"}

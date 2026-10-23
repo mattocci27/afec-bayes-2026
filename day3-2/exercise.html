@@ -2212,13 +2212,13 @@ vertical-align: -.125em;
     <h2 id="toc-title">Table of contents</h2>
    
   <ul class="collapse">
-  <li><a href="#guided-practical-a-file-becomes-an-r-object" id="toc-guided-practical-a-file-becomes-an-r-object" class="nav-link active" data-scroll-target="#guided-practical-a-file-becomes-an-r-object">Guided practical: a file becomes an R object</a>
+  <li><a href="#reading-a-file-and-working-with-r-objects" id="toc-reading-a-file-and-working-with-r-objects" class="nav-link active" data-scroll-target="#reading-a-file-and-working-with-r-objects">Reading a file and working with R objects</a>
   <ul class="collapse">
-  <li><a href="#locate-the-input-and-script" id="toc-locate-the-input-and-script" class="nav-link" data-scroll-target="#locate-the-input-and-script">1. Locate the input and script</a></li>
-  <li><a href="#import-and-inspect" id="toc-import-and-inspect" class="nav-link" data-scroll-target="#import-and-inspect">2. Import and inspect</a></li>
-  <li><a href="#inspect-a-column-and-missing-observations" id="toc-inspect-a-column-and-missing-observations" class="nav-link" data-scroll-target="#inspect-a-column-and-missing-observations">3. Inspect a column and missing observations</a></li>
+  <li><a href="#find-the-data-file-and-r-code" id="toc-find-the-data-file-and-r-code" class="nav-link" data-scroll-target="#find-the-data-file-and-r-code">1. Find the data file and R code</a></li>
+  <li><a href="#read-the-csv-and-look-at-the-table" id="toc-read-the-csv-and-look-at-the-table" class="nav-link" data-scroll-target="#read-the-csv-and-look-at-the-table">2. Read the CSV and look at the table</a></li>
+  <li><a href="#look-at-a-column-and-missing-values" id="toc-look-at-a-column-and-missing-values" class="nav-link" data-scroll-target="#look-at-a-column-and-missing-values">3. Look at a column and missing values</a></li>
   <li><a href="#read-a-supplied-plot" id="toc-read-a-supplied-plot" class="nav-link" data-scroll-target="#read-a-supplied-plot">4. Read a supplied plot</a></li>
-  <li><a href="#optional-a-prepared-report" id="toc-optional-a-prepared-report" class="nav-link" data-scroll-target="#optional-a-prepared-report">Optional: a prepared report</a></li>
+  <li><a href="#make-a-report-with-quarto" id="toc-make-a-report-with-quarto" class="nav-link" data-scroll-target="#make-a-report-with-quarto">5. Make a report with Quarto</a></li>
   </ul></li>
   <li><a href="#instructor-interpretation" id="toc-instructor-interpretation" class="nav-link" data-scroll-target="#instructor-interpretation">Instructor interpretation</a></li>
   </ul>
@@ -2257,30 +2257,51 @@ vertical-align: -.125em;
 </header>
 
 
-<section id="guided-practical-a-file-becomes-an-r-object" class="level1">
-<h1>Guided practical: a file becomes an R object</h1>
-<p><strong>Purpose:</strong> connect the project folder, an input file, a script and the objects R creates. The supplied code does the work; concentrate on what each step means.</p>
-<p>Use the separate <strong>AFEC-R-foundations</strong> participant ZIP. Extract it completely, then open <code>AFEC-R-foundations.Rproj</code> in RStudio. In a browser RStudio session, upload and extract the ZIP first, then open that Project. Keep the whole folder. No packages need installing. Work with a neighbour if needed.</p>
-<p>If R is unavailable, use the displayed outputs below and the prepared <code>report.html</code> to follow the same interpretation of files and objects.</p>
-<section id="locate-the-input-and-script" class="level2">
-<h2 class="anchored" data-anchor-id="locate-the-input-and-script">1. Locate the input and script</h2>
+<section id="reading-a-file-and-working-with-r-objects" class="level1">
+<h1>Reading a file and working with R objects</h1>
+<p>We read the CSV using the supplied R code, then look at the table in R memory, then to a column and a histogram. The code and its output are shown together.</p>
+<p>Use the separate <strong>AFEC-R-basics</strong> participant ZIP. Extract it completely, then open <code>AFEC-R-basics.Rproj</code> in RStudio. In a browser RStudio session, upload and extract the ZIP first, then open that Project. Keep the whole folder. The main script uses base R; no additional packages are needed.</p>
+<p>If R is unavailable, use the displayed outputs below and the prepared <code>report.html</code> to follow the same steps.</p>
+<section id="find-the-data-file-and-r-code" class="level2">
+<h2 class="anchored" data-anchor-id="find-the-data-file-and-r-code">1. Find the data file and R code</h2>
 <p>In Files, find <code>data/seedlings.csv</code> and <code>R/inspect_seedlings.R</code>. Open the script in Source; run its numbered sections from the top with Run or Ctrl+Enter (Cmd+Enter on macOS). Saving the script alone does not run it.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getwd</span>()</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">file.exists</span>(<span class="st">&quot;data/seedlings.csv&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">file.exists</span>(<span class="st">&quot;data/seedlings.csv&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p><code>getwd()</code> should show the extracted <strong>AFEC-R-foundations</strong> folder, with a prefix that depends on your computer/server. The second command should return <code>TRUE</code>. The script is in <code>R/</code>; this path starts from the working directory.</p>
-<p><strong>Interpret:</strong> if the working directory were <code>R/</code>, where would R look for <code>data/seedlings.csv</code>? Explain why opening the Project is useful here. If the file check returns <code>FALSE</code>, reopen the Project and check the extracted folder structure and spelling before changing the code.</p>
+<p>Opening the Project tells R which folder to start from. The result should be <code>TRUE</code>: R found <code>seedlings.csv</code> in the Project’s <code>data/</code> folder. Keep the folders and files together when moving or sharing the Project.</p>
+<p>If the starting folder were <code>R/</code>, this relative path would point to <code>R/data/seedlings.csv</code>. Opening the Project gives the intended starting folder. If the file check returns <code>FALSE</code>, reopen the Project and check the extracted folder structure and spelling before changing the code.</p>
+<section id="moving-the-project-to-another-computer" class="level3">
+<h3 class="anchored" data-anchor-id="moving-the-project-to-another-computer">Moving the project to another computer</h3>
+<p>Compare these two ways to read the same input. The first path is an example only; do not copy it as a command.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># A personal absolute path (example only)</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>seedlings <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;C:/Users/Alex/research/project/data/seedlings.csv&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># A relative path, after opening the supplied Project</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>seedlings <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/seedlings.csv&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>When a colleague extracts the project into another folder, the personal absolute path usually needs changing. The relative path stays <code>data/seedlings.csv</code>, provided the <code>data/</code> folder and CSV stay in the same place within the Project.</p>
 </section>
-<section id="import-and-inspect" class="level2">
-<h2 class="anchored" data-anchor-id="import-and-inspect">2. Import and inspect</h2>
+<section id="optional-the-same-input-with-here" class="level3">
+<h3 class="anchored" data-anchor-id="optional-the-same-input-with-here">Optional: the same input with <code>here</code></h3>
+<p>This extra example uses the <code>here</code> package. If it is already installed, open the Project in a new R session and run this code in <code>R/inspect_seedlings.R</code>. You can skip this section; the main code does not need <code>here</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>seedlings <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/seedlings.csv&quot;</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(seedlings)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>here<span class="sc">::</span><span class="fu">i_am</span>(<span class="st">&quot;R/inspect_seedlings.R&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;seedlings.csv&quot;</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>seedlings_here <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;seedlings.csv&quot;</span>))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(seedlings_here, <span class="fu">read.csv</span>(<span class="st">&quot;data/seedlings.csv&quot;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Expect a full absolute path ending in <code>data/seedlings.csv</code>, then <code>TRUE</code>: both lines read the same table. <code>i_am()</code> tells <code>here</code> where this R file is inside the Project. <code>here()</code> then makes a full path from the Project folder to the CSV. <code>read.csv()</code> reads the file.</p>
+<p>The full path can differ on another computer. The code <code>&quot;data&quot;, &quot;seedlings.csv&quot;</code> stays the same. The main code continues below.</p>
+</section>
+</section>
+<section id="read-the-csv-and-look-at-the-table" class="level2">
+<h2 class="anchored" data-anchor-id="read-the-csv-and-look-at-the-table">2. Read the CSV and look at the table</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>seedlings <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/seedlings.csv&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(seedlings)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] &quot;data.frame&quot;</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(seedlings)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(seedlings)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; &#39;data.frame&#39;:    8 obs. of  4 variables:
 #&gt;  $ seedling_id: chr  &quot;s01&quot; &quot;s02&quot; &quot;s03&quot; &quot;s04&quot; ...
@@ -2288,7 +2309,7 @@ vertical-align: -.125em;
 #&gt;  $ diameter_mm: num  2.1 3.4 4.7 NA 5.2 3.8 6.1 4.2
 #&gt;  $ survived   : logi  TRUE FALSE TRUE TRUE NA FALSE ...</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(seedlings)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(seedlings)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;   seedling_id   species diameter_mm survived
 #&gt; 1         s01 Species_A         2.1     TRUE
@@ -2298,55 +2319,55 @@ vertical-align: -.125em;
 #&gt; 5         s05 Species_A         5.2       NA
 #&gt; 6         s06 Species_B         3.8    FALSE</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(seedlings)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dim</span>(seedlings)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 8 4</code></pre>
 </div>
 </div>
-<p>These are fictional teaching data, separate from the statistical sessions. One row is one tagged seedling followed over one observation interval. <code>diameter_mm</code> is its initial stem diameter; <code>survived</code> records survival to the later census. <code>Species_A</code> and <code>Species_B</code> are fictional species labels.</p>
-<p><code>class()</code> identifies an object’s class, <code>str()</code> shows its structure and column classes/types, and <code>head()</code> previews six rows by default. <code>dim()</code> reports rows, then columns. The preview does not change or shorten the stored data frame.</p>
-<p><strong>Interpret:</strong> distinguish the file <code>&quot;data/seedlings.csv&quot;</code> from the object <code>seedlings</code>. Identify what the 8 rows and 4 columns represent. Use the output to explain why one data frame can contain both measurements and species labels.</p>
+<p>These are fictional teaching data, separate from the statistical sessions. Each row is one seedling. <code>diameter_mm</code> is its stem diameter at the start, in mm. <code>survived</code> tells us whether it was still alive when checked later. <code>Species_A</code> and <code>Species_B</code> are fictional species labels.</p>
+<p><code>class()</code> shows what kind of object we have. <code>str()</code> shows the column types and some values. <code>head()</code> shows the first six rows. <code>dim()</code> gives the number of rows, then columns. Looking at the first six rows does not remove other rows.</p>
+<p><code>&quot;data/seedlings.csv&quot;</code> names the saved file; <code>seedlings</code> names the table in R memory. This table has 8 rows and 4 columns. Each row follows one seedling; each column holds its ID, species, diameter or survival status. Columns can have different types, so measurements and species labels can share one data frame.</p>
 </section>
-<section id="inspect-a-column-and-missing-observations" class="level2">
-<h2 class="anchored" data-anchor-id="inspect-a-column-and-missing-observations">3. Inspect a column and missing observations</h2>
+<section id="look-at-a-column-and-missing-values" class="level2">
+<h2 class="anchored" data-anchor-id="look-at-a-column-and-missing-values">3. Look at a column and missing values</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>diameter <span class="ot">&lt;-</span> seedlings<span class="sc">$</span>diameter_mm</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(diameter)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>diameter <span class="ot">&lt;-</span> seedlings<span class="sc">$</span>diameter_mm</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(diameter)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] &quot;numeric&quot;</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(diameter)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(diameter)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] 8</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.na</span>(diameter)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">is.na</span>(diameter)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] FALSE FALSE FALSE  TRUE FALSE FALSE FALSE FALSE</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(seedlings<span class="sc">$</span>species)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(seedlings<span class="sc">$</span>species)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] &quot;character&quot;</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(seedlings<span class="sc">$</span>survived)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(seedlings<span class="sc">$</span>survived)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] &quot;logical&quot;</code></pre>
 </div>
 </div>
-<p><code>$diameter_mm</code> selects a column: a numeric vector with one entry per seedling. The assignment creates <code>diameter</code> in memory. It does not edit the input file. <code>NA</code> denotes an unrecorded value; <code>is.na()</code> returns a logical vector identifying which entries are missing.</p>
-<p><strong>Interpret:</strong> compare the structures of <code>seedlings</code> and <code>diameter</code>. Explain why the missing diameter is not zero, and why an unknown survival observation cannot be recorded as <code>FALSE</code> (a known death).</p>
+<p><code>$diameter_mm</code> takes the diameter column from the table. Its values are stored in R as <code>diameter</code>. The CSV stays unchanged. <code>NA</code> means a value is missing. <code>is.na()</code> shows <code>TRUE</code> for each missing value.</p>
+<p><code>seedlings</code> is a data frame; <code>diameter</code> is one numeric vector of length 8. Its fourth entry is <code>NA</code>: no measurement was recorded, rather than a diameter of zero. In the survival column, <code>NA</code> means unknown and <code>FALSE</code> means observed dead. These record different information.</p>
 </section>
 <section id="read-a-supplied-plot" class="level2">
 <h2 class="anchored" data-anchor-id="read-a-supplied-plot">4. Read a supplied plot</h2>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  seedlings<span class="sc">$</span>diameter_mm,</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">8</span>),</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Initial seedling stem diameter&quot;</span>,</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;Stem diameter (mm)&quot;</span>,</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">&quot;Number of seedlings&quot;</span>,</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="st">&quot;#1b9e77&quot;</span>,</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> <span class="st">&quot;white&quot;</span></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  seedlings<span class="sc">$</span>diameter_mm,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">6</span>, <span class="dv">8</span>),</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">main =</span> <span class="st">&quot;Initial seedling stem diameter&quot;</span>,</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlab =</span> <span class="st">&quot;Stem diameter (mm)&quot;</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">ylab =</span> <span class="st">&quot;Number of seedlings&quot;</span>,</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">col =</span> <span class="st">&quot;#1b9e77&quot;</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">border =</span> <span class="st">&quot;white&quot;</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -2355,19 +2376,21 @@ vertical-align: -.125em;
 </div>
 </div>
 </div>
-<p>The code sends the numeric diameter column to a plotting function. Read the units and the number of measured seedlings represented by the bars. Check that number against the missing-value output rather than assuming every row contributed a measurement. The histogram excludes missing diameters.</p>
-<p><strong>Connect the steps:</strong> identify the saved files another researcher needs to recreate this plot after opening the Project in a fresh R session.</p>
+<p><code>hist()</code> draws a histogram of the diameter values. The horizontal axis shows stem diameter in mm, and the vertical axis counts seedlings. The bars show seven measurements. The missing diameter is left out.</p>
+<p>We can make this plot again by keeping the CSV and R code in the same Project folders, then running the code in a new R session.</p>
 </section>
-<section id="optional-a-prepared-report" class="level2">
-<h2 class="anchored" data-anchor-id="optional-a-prepared-report">Optional: a prepared report</h2>
-<p>If time and the prepared environment permit, open <code>report.qmd</code> and click Render. It reads its own input and creates <code>report.html</code>. Compare the source with the HTML; no Markdown syntax practice is required. Otherwise read the prepared HTML.</p>
+<section id="make-a-report-with-quarto" class="level2">
+<h2 class="anchored" data-anchor-id="make-a-report-with-quarto">5. Make a report with Quarto</h2>
+<p><code>report.qmd</code> is a document with text and R code. Open it in RStudio and click <strong>Render</strong> to create <code>report.html</code>. The code reads the CSV and makes the plot. Open the HTML to see the text, code and plot together.</p>
+<p>We follow these steps together. If Render fails, follow the instructor using the saved HTML.</p>
 </section>
 </section>
 <section id="instructor-interpretation" class="level1">
 <h1>Instructor interpretation</h1>
-<p>Allow 15 minutes including the recap: 3 for locating the Project/script, 4 for import/inspection, 3 for columns/NA, 3 for the plot and 2 for questions. The optional render replaces spare time; do not extend the session for it.</p>
+<p>Allow 15 minutes including the recap: 2 for locating the Project/script, 3 for import/inspection, 2 for columns/NA, 3 for the plot, 3 for Quarto and 2 for questions. Quarto is required; here remains optional. Do not extend the session.</p>
 <ul>
 <li>The wrong working directory <code>R/</code> would make the relative path refer to <code>R/data/seedlings.csv</code>, which does not exist. Opening this Project establishes the intended initial working directory; opening a script does not do that.</li>
+<li>The personal absolute path needs editing when the parent location changes. The relative path works unchanged after opening the relocated Project, provided data/seedlings.csv remains in the same place within it. The optional here comparison returns TRUE; its generated absolute path is machine-dependent, but the script does not hard-code that location.</li>
 <li>The imported object is a data.frame with 8 rows and 4 columns. A row follows one seedling, not one species. The two species share this table.</li>
 <li>IDs and species are character vectors, diameter is numeric, survival logical. str() abbreviates these as chr, num and logi. head() displays six rows without reducing nrow; dim() returns 8 4. A data frame is a list of equal-length columns here, but no list indexing needs to be taught.</li>
 <li>diameter is a numeric vector of length 8. Its fourth entry is NA. Missing survival is in the fifth record; FALSE in records 2 and 6 means observed death.</li>

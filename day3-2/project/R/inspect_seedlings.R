@@ -6,7 +6,6 @@
 # Generated from day3-2/exercise.qmd; edit that source to revise.
 
 # 1. location
-getwd()
 file.exists("data/seedlings.csv")
 
 # 2. import-data

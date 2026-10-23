@@ -1,7 +1,7 @@
-# AFEC R foundations: participant project
+# AFEC R basics: participant project
 
 1. Extract the complete ZIP before opening files. Keep the folder structure.
-2. Open `AFEC-R-foundations.Rproj` in RStudio. In a browser RStudio session,
+2. Open `AFEC-R-basics.Rproj` in RStudio. In a browser RStudio session,
    upload/extract the ZIP, then open the Project from the Files pane.
 3. Open `exercise.html` for the guided instructions (in the ZIP), or use the
    course handout. Open `R/inspect_seedlings.R` in RStudio's Source editor.
@@ -34,12 +34,13 @@ survival observation. Unknown survival is not a recorded death. The CSV has
 The histogram uses seven measured diameters; its vertical axis counts seedlings.
 The script prints to the Console and draws to Plots; it does not overwrite data.
 
-## Optional report
+## Make a report with Quarto
 
-`report.qmd` contains Markdown prose and runnable R code; `report.html` is its
-prepared output. Read the HTML without R or Quarto. If RStudio already has
-Quarto and knitr, open `report.qmd` and click Render. The document imports its
-own data from its own directory; it does not depend on Console objects.
+`report.qmd` is a document with text and R code. We read it together in class,
+click **Render** in RStudio, then open `report.html` to see the report.
+The code reads the CSV itself; it does not need objects from the Console.
+The class RStudio environment needs Quarto and knitr ready before class.
+If Render fails, follow the instructor with the saved HTML.
 
 For this project, keep R's workspace restore/save disabled (already set in the
 .Rproj). Save scripts, inputs, documentation and any deliberately exported

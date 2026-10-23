@@ -18,9 +18,9 @@ R instruction. Documented exposure does not establish mastery.
 
 Assume participants can access a prepared RStudio session (browser or already
 installed Desktop). Confirm this before class; do not spend the hour installing
-software. The core practical uses only base R. Quarto and knitr are authoring
-requirements and prerequisites for the optional demonstration, not for students
-to run the supplied script. English materials match the existing AFEC course.
+software. The supplied R script uses only base R. The required report
+walkthrough also needs Quarto and knitr in the prepared RStudio environment.
+Confirm these before class; participants should not install them during class. English materials match the existing AFEC course.
 
 # Evidence from previous teaching
 
@@ -37,13 +37,12 @@ responses are present, so completion and mastery remain unknown.
 | B: likely conceptual ambiguity | p. 19 getwd/setwd and advice to put files in the same location; script absolute Windows paths | Use separate data/ and R/ folders; resolve one relative path from the Project. Folder browsing, opening a script and changing the working directory are distinct actions. |
 | B: likely conceptual ambiguity | pp. 16–18 lists of types and structures, Harry Potter examples | Connect numeric/character/logical to column vectors and the whole table. One coercion example reveals why appearance alone is insufficient. |
 | B: likely conceptual ambiguity | pp. 20–24 import, NA, inspection and factor conversion; script DIVER.csv -> diver and new respiration_log column | Explain file vs object, rows vs columns, one observation's meaning and missing vs observed values. Interpret outputs instead of repeating a function catalogue. |
-| C: essential and not found | Project workflow, a worked absolute/relative comparison, class(), file extensions, Markdown/Quarto, fresh-session workflow | Introduce a prepared Project and class(); explain QMD/HTML only briefly and make rendering optional. |
+| C: essential and not found | Project workflow, a worked absolute/relative comparison, class(), file extensions, Markdown/Quarto, fresh-session workflow | Introduce a prepared Project and class(); read QMD text and R code together, render it and show the HTML. |
 
-A/B/C are planning judgments, not labels for students. Use the short oral
-predictions on slides 4, 7 and 13 to adjust emphasis. If answers already include
-the mechanism, shorten the example and retain time for the integrated practical.
-If unclear, demonstrate the concrete action and ask participants to explain its
-consequence. No lengthy written quiz is needed.
+A/B/C are planning judgments, not labels for students. Read the code and outputs
+together, explaining each step as it appears. Participants may run the supplied
+lines alongside the instructor. Do not add prediction questions, pair discussion
+or independent tasks. Use questions from participants to adjust the pace.
 
 ## Precision when reinforcing previous explanations
 
@@ -59,21 +58,22 @@ for answering questions, not additional slides.
 
 | Minutes | Slides / activity | Emphasis |
 |---|---|---|
-| 0–10 | 1–4: saved files, folder tree, extensions and paths | File vs object; relative paths need a starting point. |
-| 10–25 | 5–8: RStudio panes, prepared Project, Save/Run, CSV import | Live IDE demonstration; connect Source -> Console -> Environment. |
-| 25–45 | 9–13: types/structures, actual table, columns, NA, inspection | Read real output; one seedling per row; type and structure differ. |
-| 45–58 | 14: integrated practical | 3 min location, 4 import, 3 column/NA, 3 histogram. |
-| 58–60 | 16: recap and questions | Trace the whole route; retain buffer. |
+| 0–6 | 1–3: SSD to RAM, folder tree and extensions | File vs object; relative paths need a starting point. |
+| 6–25 | 4–7: absolute/relative paths, prepared Project, Save/Run, CSV import | Live IDE demonstration; connect Source -> Console -> Environment. |
+| 25–45 | 8–12: types/structures, actual table, columns, NA, inspection | Read real output; one seedling per row; type and structure differ. |
+| 45–55 | 13: script walkthrough | 2 min location, 3 import, 2 column/NA, 3 histogram. |
+| 55–58 | 14: Quarto report | Read the QMD, click Render, open the HTML. |
+| 58–60 | 15: recap and questions | Trace the whole route; retain buffer. |
 
-Slide 15 is optional and uncounted. Render the prepared report only if time
-remains; it replaces up to two minutes of spare practical/demo time. It never
-adds time. With setup delays, omit it and the live restart/coercion demonstration;
-keep the folder/working-directory distinction and the practical. Use the
-rendered handout when an R problem persists beyond two minutes.
+Quarto is required. Keep its three-minute slot even if setup is delayed; shorten
+the live restart or coercion example instead. The here example is optional and
+appears only in the handout. If an R problem persists beyond two minutes, follow
+the saved outputs together. If Render fails, use the saved report HTML while
+explaining the QMD-to-HTML steps; record the problem for follow-up.
 
 These are teaching allocations, not measured learner completion times. The
 script is short and supplied in full, but a fresh participant rehearsal is
-needed to establish actual 15-minute completion.
+needed to establish the pace of the 15-minute walkthrough.
 
 # Demonstration instructions
 
@@ -86,7 +86,7 @@ all-days ZIP and website do not automatically include this extra session.
 
 Extract a fresh copy of the participant ZIP, preferably to a folder with a space
 in its name. Open its `.Rproj` in the intended RStudio environment. Confirm its
-Project name, `getwd()` and `file.exists("data/seedlings.csv")`. Keep workspace
+Project name and `file.exists("data/seedlings.csv")`. Keep workspace
 restore/save disabled; the supplied Project already requests this. Test opening
 the script, running selected lines, seeing the histogram and reading local HTML.
 Browser RStudio paths refer to the server, so demonstrate upload/extract/open if
@@ -95,10 +95,11 @@ Check actual access for all participants separately from local validation.
 
 ## Files, panes and Projects
 
-Show the Project root and its data/ and R/ subfolders in Files. Browse to data/
-and run `getwd()` to demonstrate that Files browsing does not automatically
-change R's working directory. Reopen the Project if the starting state is wrong;
-do not patch code with an instructor-specific absolute path.
+Show the Project root and its data/ and R/ subfolders. Explain absolute paths
+from a drive/filesystem root, then relative paths from R's starting folder.
+Opening the supplied Project establishes that folder; the script uses relative
+paths. Do not teach getwd()/setwd() commands or personal absolute paths.
+If input is missing, reopen the correct Project and check the folder structure.
 
 Open the supplied script. Run its location section first, then the import.
 Show the new object in Environment. Point to its Source line and the resulting
@@ -109,8 +110,20 @@ that object with the real column.
 
 If useful and time permits, restart R once and show that opening a script has
 not recreated `seedlings`. Rerun from the top. Do not quit a participant's unrelated
-session or use rm(list=ls()). Projects establish an initial working directory;
-setwd() could change it later, so getwd() checks the actual state.
+session or use rm(list=ls()). Preserve the Project starting context and folder
+structure so the relative paths resolve consistently.
+
+## Optional here example and path comparison
+
+Use the walkthrough's three-minute location allocation to explain the path
+comparison too: personal absolute paths change with the
+parent location; internal relative paths survive moving the whole Project.
+No manual working-directory change is required. If demonstrating here, use
+its i_am declaration at the top of the supplied script in a fresh participant
+Project session. Confirm its generated path ends in data/seedlings.csv and the
+two imports are identical. Do not add the optional here code to the core script
+or require participant installation. here returns an absolute path constructed
+from a portable specification; this differs from hard-coding a personal path.
 
 ## Table, column and missingness
 
@@ -142,7 +155,7 @@ The wrong starting folder R/ resolves data/seedlings.csv to R/data/seedlings.csv
 Moving the whole Project preserves its internal relative path. Editing an R
 object does not rewrite the CSV; outputs need a deliberate export/render step.
 
-# Optional Quarto demonstration
+# Required Quarto report walkthrough
 
 Open `report.qmd` at the participant Project root; point to prose and the import
 chunk, then Render. Default knitr execution starts from the QMD's directory,
@@ -152,7 +165,8 @@ course authoring paths; students do not need to know that machinery.
 
 Markdown supplies the document's plain-text structure; Quarto executes code and
 renders the HTML. Do not teach YAML, chunk options or Markdown syntax. If the
-runtime lacks Quarto/knitr, open the prepared `report.html` instead.
+runtime unexpectedly lacks Quarto/knitr, show the prepared `report.html`,
+explain the rendering steps and record the environment issue for follow-up.
 
 # Deliberate exclusions
 
@@ -172,3 +186,6 @@ lesson. A Project does not pin packages or guarantee reproducibility by itself.
 - [R: head](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/head.html)
 - [R: missing values](https://stat.ethz.ch/R-manual/R-devel/library/base/html/NA.html)
 - [Quarto: managing execution](https://quarto.org/docs/projects/code-execution.html)
+
+- [here: project paths](https://here.r-lib.org/reference/here.html)
+- [here: declaring script location](https://here.r-lib.org/reference/i_am.html)

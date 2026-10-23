@@ -855,23 +855,32 @@ width: 300px;
 </style>
   <style type="text/css">
 .reveal .slide pre { font-size: 0.65em; }
-.reveal .slide div.sourceCode, .reveal .slide pre.sourceCode {
-background-color: #181818;
-color: #eaeaea;
-}
 .reveal .slide div.sourceCode pre code { font-size: 1em; line-height: 1.35; }
-.reveal .slide .sourceCode code, .reveal .slide .sourceCode code span { color: #eaeaea; }
-.reveal .slide .sourceCode code span.fu { color: #c397d8; }
-.reveal .slide .sourceCode code span.st { color: #b9ca4a; }
-.reveal .slide .sourceCode code span.dv,
-.reveal .slide .sourceCode code span.fl,
-.reveal .slide .sourceCode code span.bn { color: #7aa6da; }
-.reveal .slide .sourceCode code span.co { color: #b0b0b0; }
 .reveal .slide .cell-output-stdout pre code { font-size: 1em; line-height: 1.35; }
 .reveal .slide table { font-size: 0.78em; }
 .reveal .slide table td, .reveal .slide table th { padding: 0.25em 0.4em; }
 .reveal .slide .computing-flow { line-height: 1.35; margin: 0.7em 0; }
 .reveal .slide .computing-flow p { margin: 0.3em 0; }
+.reveal .slide div.sourceCode,
+.reveal .slide pre.sourceCode,
+.reveal .slide div.sourceCode pre code {
+background-color: #263238;
+color: #eeffff;
+}
+.reveal .slide .sourceCode code span { color: #eeffff; }
+.reveal .slide .sourceCode code span.kw,
+.reveal .slide .sourceCode code span.cf { color: #c792ea; }
+.reveal .slide .sourceCode code span.fu { color: #82aaff; }
+.reveal .slide .sourceCode code span.st,
+.reveal .slide .sourceCode code span.ch,
+.reveal .slide .sourceCode code span.ss { color: #c3e88d; }
+.reveal .slide .sourceCode code span.dv,
+.reveal .slide .sourceCode code span.fl,
+.reveal .slide .sourceCode code span.bn { color: #f78c6c; }
+.reveal .slide .sourceCode code span.op,
+.reveal .slide .sourceCode code span.sc { color: #89ddff; }
+.reveal .slide .sourceCode code span.cn { color: #ffcb6b; }
+.reveal .slide .sourceCode code span.co { color: #90a4ae; }
 </style>
   <style type="text/css">.reveal
 div.sourceCode
@@ -1372,7 +1381,7 @@ margin-right: 0; }
     <div class="slides">
 
 
-<section id="title-slide" class="slide level2 center">
+<section id="title-slide" class="slide level2 center" data-background="../images/priors.png" data-background-size="50%" data-background-position="50% 20%">
 <h2></h2>
 <div class="title-box">
 <h2>
@@ -1402,18 +1411,14 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="saved-files-and-live-objects" class="slide level2">
-<h2>Saved files and live objects</h2>
-<div class="computing-flow">
-<p><strong>Disk</strong>: <code>data/seedlings.csv</code> + <code>R/inspect_seedlings.R</code></p>
-<p>↓ Run the script; read the file</p>
-<p><strong>R memory</strong>: <code>seedlings</code> data frame → <code>diameter</code> vector</p>
-<p>↓ Execute the plotting command</p>
-<p><strong>Output</strong>: a plot; a saved report when explicitly rendered</p>
-</div>
-<p>The same name can refer to very different things: a file, an object or a column.</p>
+<section id="from-ssd-storage-to-r-memory" class="slide level2">
+<h2>From SSD storage to R memory</h2>
+<p><strong>SSD:</strong> <code>data/seedlings.csv</code></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href aria-label="1"></a>seedlings <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/seedlings.csv&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>R memory (RAM):</strong> <code>seedlings</code> — the table read from the CSV.</p>
+<p>The CSV stays unchanged on the SSD.</p>
 <aside class="notes">
-<p>0–3 minutes, including title. Ask which of these survives closing R without saving a workspace. Files that were saved remain; objects must be recreated. The default plot is displayed, not automatically saved to disk.</p>
+<p>0–3 minutes, including title. Trace SSD file -&gt; read.csv -&gt; data frame in RAM. The assignment retains the returned data frame under the name seedlings. After restarting R with workspace restore disabled, run the import again. In browser RStudio, storage and R memory are on the server: upload the file first.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1430,20 +1435,20 @@ display:block!important;
 <h2>A project folder and its files</h2>
 <div class="columns">
 <div class="column" style="width:54%;">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb1-1"><a href aria-label="1"></a>AFEC-R-foundations/</span>
-<span id="cb1-2"><a href aria-label="2"></a>├── AFEC-R-foundations.Rproj</span>
-<span id="cb1-3"><a href aria-label="3"></a>├── data/</span>
-<span id="cb1-4"><a href aria-label="4"></a>│   └── seedlings.csv</span>
-<span id="cb1-5"><a href aria-label="5"></a>├── R/</span>
-<span id="cb1-6"><a href aria-label="6"></a>│   └── inspect_seedlings.R</span>
-<span id="cb1-7"><a href aria-label="7"></a>├── report.qmd</span>
-<span id="cb1-8"><a href aria-label="8"></a>└── report.html</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource text number-lines code-with-copy"><code class="sourceCode"><span id="cb2-1"><a href aria-label="1"></a>day3-2/project/</span>
+<span id="cb2-2"><a href aria-label="2"></a>├── AFEC-R-basics.Rproj</span>
+<span id="cb2-3"><a href aria-label="3"></a>├── data/</span>
+<span id="cb2-4"><a href aria-label="4"></a>│   └── seedlings.csv</span>
+<span id="cb2-5"><a href aria-label="5"></a>├── R/</span>
+<span id="cb2-6"><a href aria-label="6"></a>│   └── inspect_seedlings.R</span>
+<span id="cb2-7"><a href aria-label="7"></a>├── report.qmd</span>
+<span id="cb2-8"><a href aria-label="8"></a>└── report.html</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div><div class="column" style="width:46%;">
 <table class="caption-top">
 <thead>
 <tr class="header">
-<th>Extension</th>
-<th>Purpose</th>
+<th>File ending</th>
+<th>What it contains</th>
 </tr>
 </thead>
 <tbody>
@@ -1453,26 +1458,25 @@ display:block!important;
 </tr>
 <tr class="even">
 <td><code>.csv</code></td>
-<td>Tabular data as text</td>
+<td>A table saved as text</td>
 </tr>
 <tr class="odd">
 <td><code>.R</code></td>
-<td>Saved R instructions</td>
+<td>R code</td>
 </tr>
 <tr class="even">
 <td><code>.qmd</code></td>
-<td>Prose and executable code</td>
+<td>A document with text and R code</td>
 </tr>
 <tr class="odd">
 <td><code>.html</code></td>
-<td>A document viewed in a browser</td>
+<td>A page to open in a browser</td>
 </tr>
 </tbody>
 </table>
 </div></div>
-<p>Files can live in different subfolders within one project.</p>
 <aside class="notes">
-<p>3–6 minutes. Show the extracted folder and reveal extensions in the file manager if hidden. Folder names are conventions, not special R syntax. Changing a file extension alone does not convert its contents. Keep data unchanged and save instructions separately. Quarto uses Markdown for the prose; no syntax lesson.</p>
+<p>3–6 minutes. Show day3-2/project/ in the repository. The separate participant ZIP names this folder AFEC-R-basics/ when extracted; its contents are the same. Reveal extensions in the file manager if hidden. Folder names are conventions, not special R syntax. Changing a file extension alone does not convert its contents. Keep data unchanged and save instructions separately. Quarto uses Markdown for the prose; no syntax lesson.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1485,40 +1489,42 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="paths-need-a-starting-point" class="slide level2">
-<h2>Paths need a starting point</h2>
-<p><strong>Working directory:</strong> the folder R uses to resolve relative file paths.</p>
+<section id="absolute-and-relative-paths" class="slide level2">
+<h2>Absolute and relative paths</h2>
 <table class="caption-top">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Path</th>
-<th>Starting point</th>
+<th>Example</th>
+<th>R’s working directory</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td>Absolute · Windows</td>
+<td><code>C:/work/data/seedlings.csv</code></td>
+<td>Anywhere</td>
+</tr>
+<tr class="even">
+<td>Absolute · macOS</td>
+<td><code>/Users/alex/data/seedlings.csv</code></td>
+<td>Anywhere</td>
+</tr>
+<tr class="odd">
+<td>Absolute · Linux</td>
+<td><code>/home/alex/data/seedlings.csv</code></td>
+<td>Anywhere</td>
+</tr>
+<tr class="even">
+<td>Relative · All three</td>
 <td><code>data/seedlings.csv</code></td>
-<td>Current working directory</td>
-</tr>
-<tr class="even">
-<td><code>C:/research/AFEC-R-foundations/data/seedlings.csv</code></td>
-<td>Drive root (Windows example)</td>
-</tr>
-<tr class="odd">
-<td><code>/home/research/AFEC-R-foundations/data/seedlings.csv</code></td>
-<td>Filesystem root (Linux example)</td>
+<td>Project folder here</td>
 </tr>
 </tbody>
 </table>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href aria-label="1"></a><span class="fu">getwd</span>()</span>
-<span id="cb2-2"><a href aria-label="2"></a><span class="fu">file.exists</span>(<span class="st">&quot;data/seedlings.csv&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>If the whole project moves, which path can stay the same?</p>
+<p><strong>For sharing:</strong> open the Project and use relative paths.</p>
 <aside class="notes">
-<p>6–10 minutes. Absolute paths are illustrative, not commands or participant requirements. macOS absolute paths also start with /. Use / inside quoted R paths on all classroom systems. In browser RStudio, paths refer to the server’s filesystem; uploading/extracting makes files available there. Relative paths remain valid when the whole folder moves and R starts at the new project root. The file.exists result is FALSE if the starting point or file name is wrong.</p>
+<p>6–12 minutes. Absolute examples are illustrative, not paths to copy. Absolute paths give the full location from the drive/filesystem root and work from any working directory if that file exists. Relative paths start from R’s current working directory; the next slide sets it by opening the Project. Personal absolute paths usually need editing on another computer. macOS absolute paths also start with /. Use forward slashes in quoted R paths. Relative paths still need a known starting point; introduce the Project next. Show how the absolute path changes when the project moves, while data/seedlings.csv stays the same. In browser RStudio, paths refer to the server’s filesystem.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1531,63 +1537,13 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="rstudio-instructions-execution-and-results" class="slide level2">
-<h2>RStudio: instructions, execution and results</h2>
-<table class="caption-top">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Source editor</th>
-<th>Environment</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Edit and save <code>R/inspect_seedlings.R</code></td>
-<td>Inspect objects created in this R session</td>
-</tr>
-<tr class="even">
-<td><strong>Console</strong></td>
-<td><strong>Files / Plots</strong></td>
-</tr>
-<tr class="odd">
-<td>Execute commands; read output and errors</td>
-<td>Browse saved files / view plots</td>
-</tr>
-</tbody>
-</table>
-<p>R runs code in the Console when you send it from Source with <strong>Run</strong>.</p>
-<p>The Files pane can browse a folder without changing R’s working directory.</p>
+<section id="open-the-project-then-use-relative-paths" class="slide level2">
+<h2>Open the Project, then use relative paths</h2>
+<p>Open <code>day3-2/project/AFEC-R-basics.Rproj</code>, then <code>R/inspect_seedlings.R</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href aria-label="1"></a>seedlings <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">&quot;data/seedlings.csv&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>R looks for <code>data/</code> inside the <strong>Project folder</strong>, even when the code is in <code>R/</code>.</p>
 <aside class="notes">
-<p>10–14 minutes. The table is a schematic of the common pane layout, not a screenshot; actual layouts differ. Point to these panes in the live IDE. Brief checks in the Console are useful. Save the analysis instructions in a script so their order can be inspected and rerun. Console history can persist, but it is not a substitute for an intentional analysis script.</p>
-<style type="text/css">
-span.MJX_Assistive_MathML {
-position:absolute!important;
-clip: rect(1px, 1px, 1px, 1px);
-padding: 1px 0 0 0!important;
-border: 0!important;
-height: 1px!important;
-width: 1px!important;
-overflow: hidden!important;
-display:block!important;
-}</style></aside>
-</section>
-<section id="opening-a-project-establishes-context" class="slide level2">
-<h2>Opening a Project establishes context</h2>
-<p>Open <code>AFEC-R-foundations.Rproj</code>, then open <code>R/inspect_seedlings.R</code>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href aria-label="1"></a><span class="fu">getwd</span>()</span>
-<span id="cb3-2"><a href aria-label="2"></a><span class="fu">file.exists</span>(<span class="st">&quot;data/seedlings.csv&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li>Opening the Project sets the initial working directory to its folder.</li>
-<li>The relative path then works even though the script is inside <code>R/</code>.</li>
-<li>Reopen the Project and check <code>getwd()</code> if a file cannot be found.</li>
-</ul>
-<p>A Project organizes the work; the script recreates its objects.</p>
-<aside class="notes">
-<p>14–19 minutes. Demonstrate on the prepared Project, not in the parent repository. Confirm Project name and actual getwd output. No setwd or machine-specific paths in the script. The working directory can later be changed explicitly; a Project is not a permanent lock on it. Merely opening a script does not change it. Do not teach Project creation menus: provide the functioning Project. Source: https://docs.posit.co/ide/user/ide/guide/code/projects.html</p>
+<p>12–19 minutes. Briefly demonstrate opening the prepared Project and script. Use Project-relative paths without getwd()/setwd() commands in the lesson. Avoid setwd() with a personal absolute path: another computer may lack that path. Relative paths alone do not guarantee reproducibility: preserve the starting context and folder structure. Opening a script alone does not set that context. If input is missing, reopen the correct Project and check folder names. Source: https://docs.posit.co/ide/user/ide/guide/code/projects.html</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1614,21 +1570,21 @@ display:block!important;
 <tbody>
 <tr class="odd">
 <td>Save the script</td>
-<td>Instructions on disk</td>
+<td>Code saved on the computer</td>
 </tr>
 <tr class="even">
-<td>Run the assignment</td>
-<td>An object named <code>diameter</code> in memory</td>
+<td>Run <code>diameter &lt;- ...</code></td>
+<td>Values stored in R as <code>diameter</code></td>
 </tr>
 <tr class="odd">
 <td>Run <code>diameter</code></td>
-<td>Its values appear in the Console</td>
+<td>Values shown in the Console</td>
 </tr>
 </tbody>
 </table>
-<p>After a fresh R session, saved instructions must run again to recreate objects.</p>
+<p>After restarting R, run the script again.</p>
 <aside class="notes">
-<p>19–22 minutes. Predict which pane changes after Save vs Run; show the difference. Do not repeat the Harry/Potter arithmetic drills. If time permits restart R and rerun the two lines; otherwise describe this and do one restart in the practical. The supplied Project disables workspace restore/save. A Project alone does not save data objects or guarantee reproducibility. Saving a script also does not save its most recent printed results.</p>
+<p>19–22 minutes. Show what changes after Save and after Run, following the code together. Do not repeat the Harry/Potter arithmetic drills. If time permits restart R and rerun the two lines; otherwise describe this and do one restart in the practical. The supplied Project disables workspace restore/save. A Project alone does not save data objects or guarantee reproducibility. Saving a script also does not save its most recent printed results.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1654,21 +1610,20 @@ display:block!important;
 <tbody>
 <tr class="odd">
 <td><code>&quot;data/seedlings.csv&quot;</code></td>
-<td>A path to a saved input file</td>
+<td>Input file</td>
 </tr>
 <tr class="even">
 <td><code>read.csv(...)</code></td>
-<td>Read the file and return a data frame</td>
+<td>Read the CSV as a table</td>
 </tr>
 <tr class="odd">
 <td><code>seedlings &lt;-</code></td>
-<td>Assign that result to an object named <code>seedlings</code></td>
+<td>Store it as <code>seedlings</code></td>
 </tr>
 </tbody>
 </table>
-<p>R uses the in-memory object for subsequent inspection and plotting. Editing that object does not automatically rewrite the CSV.</p>
 <aside class="notes">
-<p>22–25 minutes. Distinguish the quotes from the unquoted object name and case. Explain right side evaluated before assignment. Reading again refreshes the object from disk; running a later plotting line does not automatically reread a changed CSV. CSV is one supported format, not the only format R can read. Source: R read.table/read.csv documentation.</p>
+<p>22–25 minutes. The in-memory object supports inspection and plotting; editing it does not rewrite the CSV. Distinguish the quotes from the unquoted object name and case. Explain right side evaluated before assignment. Reading again refreshes the object from disk; running a later plotting line does not automatically reread a changed CSV. CSV is one supported format, not the only format R can read. Source: R read.table/read.csv documentation.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1681,26 +1636,25 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="data-type-and-data-structure" class="slide level2">
-<h2>Data type and data structure</h2>
+<section id="values-and-tables" class="slide level2">
+<h2>Values and tables</h2>
 <div class="columns">
 <div class="column" style="width:48%;">
-<h3 id="type-of-values">Type of values</h3>
+<h3 id="values">Values</h3>
 <ul>
-<li><strong>Numeric:</strong> <code>2.1</code>, <code>3.4</code> mm.</li>
-<li><strong>Character:</strong> <code>&quot;Species_A&quot;</code>.</li>
-<li><strong>Logical:</strong> <code>TRUE</code>, <code>FALSE</code>.</li>
+<li><strong>Numeric (numbers):</strong> <code>2.1</code>, <code>3.4</code>.</li>
+<li><strong>Character (text):</strong> <code>&quot;Species_A&quot;</code>.</li>
+<li><strong>Logical (true/false):</strong> <code>TRUE</code>, <code>FALSE</code>.</li>
 </ul>
-<p><code>NA</code> marks a missing value in a column.</p>
+<p><code>NA</code>: missing value.</p>
 </div><div class="column" style="width:52%;">
-<h3 id="organization-of-values">Organization of values</h3>
+<h3 id="how-values-are-stored">How values are stored</h3>
 <ul>
-<li><strong>Vector:</strong> a sequence of values.</li>
-<li><strong>Data frame:</strong> a table of columns.</li>
+<li><strong>Vector:</strong> values of the same type in order.</li>
+<li><strong>Data frame:</strong> a table.</li>
 </ul>
-<p>The columns here are vectors of equal length. Each column has its own type.</p>
+<p>All columns have the same number of rows.</p>
 </div></div>
-<p>A numeric column and a data frame describe different aspects of the data.</p>
 <aside class="notes">
 <p>25–29 minutes. Restrict vector here to ordinary atomic vectors, each with one underlying type. A general list can mix object types; a data frame is a list of columns with equal row counts. This one sentence is enough; no list exercise. In R numeric usually means double here. If asked, 30 is numeric/double whereas 30L is integer; storage type does not determine a variable’s scientific role. NA is an indicator, not a separate ordinary measurement type.</p>
 <style type="text/css">
@@ -1715,8 +1669,8 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="observations-columns-and-their-types" class="slide level2">
-<h2>Observations, columns and their types</h2>
+<section id="rows-and-columns" class="slide level2">
+<h2>Rows and columns</h2>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href aria-label="1"></a><span class="fu">head</span>(seedlings, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1726,7 +1680,7 @@ display:block!important;
 #&gt; 3         s03 Species_A         4.7     TRUE</code></pre>
 </div>
 </div>
-<p>One row follows <strong>one tagged seedling</strong> over one observation interval. Columns describe its ID, species, initial stem diameter and later survival.</p>
+<p><strong>One row = one seedling</strong>, measured and checked later for survival.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href aria-label="1"></a><span class="fu">str</span>(seedlings)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -1768,14 +1722,14 @@ display:block!important;
 <pre><code>#&gt; [1] 8</code></pre>
 </div>
 </div>
-<p><code>seedlings$diameter_mm</code> selects a <strong>column</strong>, with one entry per seedling.</p>
+<p><code>$diameter_mm</code>: the diameter column, one value per seedling.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href aria-label="1"></a><span class="fu">class</span>(<span class="fu">c</span>(<span class="fl">2.1</span>, <span class="st">&quot;unmeasured&quot;</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt; [1] &quot;character&quot;</code></pre>
 </div>
 </div>
-<p>Mixing a number and text in this vector makes both entries character values.</p>
+<p>Numbers mixed with text → all values become text.</p>
 <aside class="notes">
 <p>33–37 minutes. class identifies an object’s class, not a complete specification of its internal storage; no typeof detour. Show that “unmeasured” in an otherwise numeric CSV column may change its imported class too. Keep numeric measurement and missingness separate. This is one demonstration of coercion, not a type conversion tutorial. The assignment copies values semantically; it creates no live link that writes back to the data frame or input file.</p>
 <style type="text/css">
@@ -1803,11 +1757,11 @@ display:block!important;
 </div>
 </div>
 <ul>
-<li>Missing diameter: no recorded measurement, not a diameter of zero.</li>
-<li><code>survived = FALSE</code>: observed dead at the later census.</li>
-<li><code>survived = NA</code>: survival status was not recorded.</li>
+<li>Diameter <code>NA</code>: unmeasured, not zero.</li>
+<li>Survival <code>FALSE</code>: observed dead.</li>
+<li>Survival <code>NA</code>: unknown.</li>
 </ul>
-<p><code>is.na()</code> identifies missing entries; it returns a logical vector.</p>
+<p><code>is.na()</code>: <code>TRUE</code> for missing entries.</p>
 <aside class="notes">
 <p>37–41 minutes. Missing diameter is record 4; missing survival is record 5. The input token NA becomes a missing marker with this import function. The text “NA” in an R character vector is distinct from R’s missing marker. Do not substitute 0 or FALSE for unknown values or introduce imputation here. Source: https://stat.ethz.ch/R-manual/R-devel/library/base/html/NA.html</p>
 <style type="text/css">
@@ -1822,42 +1776,36 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="inspection-before-interpretation" class="slide level2">
-<h2>Inspection before interpretation</h2>
+<section id="looking-at-the-data" class="slide level2">
+<h2>Looking at the data</h2>
 <table class="caption-top">
-<colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
-</colgroup>
 <thead>
 <tr class="header">
-<th>Command</th>
-<th>What to inspect</th>
+<th>Code</th>
+<th>What it shows</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td><code>class(seedlings)</code></td>
-<td>The class of the whole object</td>
+<td>What kind of object it is</td>
 </tr>
 <tr class="even">
 <td><code>str(seedlings)</code></td>
-<td>Structure, column classes/types and example entries</td>
+<td>Column types and a few values</td>
 </tr>
 <tr class="odd">
 <td><code>head(seedlings)</code></td>
-<td>First six records by default</td>
+<td>First six rows</td>
 </tr>
 <tr class="even">
 <td><code>dim(seedlings)</code></td>
-<td>Rows, then columns</td>
+<td>Number of rows, then columns</td>
 </tr>
 </tbody>
 </table>
-<p>Which command would reveal a diameter column imported as text?</p>
-<p>A preview of six rows does not remove the remaining rows from the object.</p>
 <aside class="notes">
-<p>41–45 minutes. str reveals the column type; class of the whole table alone does not. A numeric-looking printed value is not enough evidence. Ask for a reason, not recall of syntax. Scientific interpretation also needs the data dictionary and units. Do not reteach names, levels, summary and tail as a second catalogue.</p>
+<p>41–45 minutes. head previews rows without removing the remaining observations. str reveals the column type; class of the whole table alone does not. Read the output together: a numeric-looking printed value alone does not establish its type. Scientific interpretation also needs the data dictionary and units. Do not reteach names, levels, summary and tail as a second catalogue.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1870,18 +1818,13 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="guided-practical-files-objects-and-a-plot" class="slide level2">
-<h2>Guided practical: files, objects and a plot</h2>
-<p>Open <code>exercise.html</code> and the prepared script <code>R/inspect_seedlings.R</code>.</p>
-<ol type="1">
-<li>Locate the Project, data file and script; verify the working directory.</li>
-<li>Run the import and inspect the table and a column.</li>
-<li>Interpret missing observations; run the supplied histogram.</li>
-</ol>
-<p>Explain where the input lives, what R holds in memory, and what each row means.</p>
-<p>All code is supplied. The rendered handout provides the same outputs if R is unavailable.</p>
+<section id="reading-the-script-files-objects-and-a-plot" class="slide level2">
+<h2>Reading the script: files, objects and a plot</h2>
+<p><code>exercise.html</code> + <code>R/inspect_seedlings.R</code></p>
+<p><strong>CSV → data frame → column → missing values → histogram</strong></p>
+<p>Follow the supplied code and outputs together.</p>
 <aside class="notes">
-<p>45–58 minutes: allow 3 location, 4 import/inspection, 3 columns/NA and 3 plot. Reserve 58–60 for the recap/questions. Students work in pairs if needed; no new code required. If a setup problem lasts two minutes, switch to supplied outputs and return to the folder diagram. The histogram uses seven measured diameters.</p>
+<p>45–55 minutes: allow 2 location, 3 import/inspection, 2 columns/NA and 3 plot. Reserve 55–58 for Quarto and 58–60 for the recap/questions. Walk through the script and outputs together; participants may follow along in R. No independent task or new code. If a setup problem lasts two minutes, switch to supplied outputs and return to the folder diagram. The histogram uses seven measured diameters.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1894,17 +1837,13 @@ overflow: hidden!important;
 display:block!important;
 }</style></aside>
 </section>
-<section id="optional-a-quarto-document" class="slide level2" data-visibility="uncounted">
-<h2>Optional: a Quarto document</h2>
-<p><code>report.qmd</code>: Markdown prose + R code → <strong>Render</strong> → <code>report.html</code></p>
-<ul>
-<li>The QMD records how to generate the report.</li>
-<li>The HTML displays its text, code and plot in a browser.</li>
-<li>The prepared report reads its own CSV; Console objects are unnecessary.</li>
-</ul>
-<p>Use the prepared HTML if Quarto is unavailable. No installation is needed today.</p>
+<section id="make-a-report-with-quarto" class="slide level2">
+<h2>Make a report with Quarto</h2>
+<p><code>report.qmd</code>: text + R code → <strong>Render</strong> → <code>report.html</code></p>
+<p>The code in the QMD reads the CSV. The HTML shows the report.</p>
+<p>Open <code>report.qmd</code> → click <strong>Render</strong> → open <code>report.html</code>.</p>
 <aside class="notes">
-<p>Only if the practical finishes early: replace up to two minutes of spare practical/demo time. Never extend the hour. The report QMD is at the participant Project root, so its default document-directory execution finds data/. This is different from running an R/ script interactively with the project-root working directory. No execution-directory settings or Markdown syntax lesson for students. Source: https://quarto.org/docs/projects/code-execution.html</p>
+<p>55–58 minutes. This is required: read the text and R code in report.qmd alongside the class, click Render and show the resulting HTML. Use the prepared RStudio environment with Quarto and knitr available; no classroom installation. The report reads its own CSV, independently of Console objects. Its QMD is at the participant Project root, so the default document-directory execution finds data/. If rendering fails, show the prepared HTML and explain the same steps; record the environment problem for follow-up. Do not omit the Quarto explanation. Source: https://quarto.org/docs/projects/code-execution.html</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;
@@ -1919,11 +1858,11 @@ display:block!important;
 </section>
 <section id="recreating-the-analysis" class="slide level2">
 <h2>Recreating the analysis</h2>
-<p>Keep the input CSV, saved script and data dictionary in the Project folder.</p>
-<p>A fresh session can recreate the objects by running the script from the top.</p>
-<p>For research handoff, also record the software environment and preserve backups. A Project supplies context; it does not do those jobs automatically.</p>
+<p>Keep <strong>data + R code + notes explaining the columns</strong> together.</p>
+<p>Open the Project → run the script from the top.</p>
+<p>Save the R and package versions; keep backup copies.</p>
 <aside class="notes">
-<p>58–60 minutes, including questions. Ask a participant to trace CSV -&gt; data frame -&gt; diameter vector -&gt; plot using actual filenames and objects. Do not add another exercise. No statistical inference or model explanation in this session.</p>
+<p>58–60 minutes, including questions. Trace CSV -&gt; data frame -&gt; diameter vector -&gt; plot together, using the filenames and objects just shown. Do not add another exercise. No statistical inference or model explanation in this session.</p>
 <style type="text/css">
 span.MJX_Assistive_MathML {
 position:absolute!important;

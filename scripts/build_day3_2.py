@@ -49,7 +49,7 @@ def build(package_only=False):
     # RStudio state out of the participant archive.
     files = {
         name: SESSION / "project" / name for name in [
-            "AFEC-R-foundations.Rproj", "README.md", "data/seedlings.csv",
+            "AFEC-R-basics.Rproj", "README.md", "data/seedlings.csv",
             "R/inspect_seedlings.R", "report.qmd", "report.html"
         ]
     }
@@ -77,7 +77,7 @@ def build(package_only=False):
     # Reuse the existing offline-resource/link check on the exact package tree.
     from build_day1_package import check_links
     with tempfile.TemporaryDirectory(prefix="afec-day3-2-package-") as directory:
-        stage = Path(directory) / "AFEC-R-foundations"
+        stage = Path(directory) / "AFEC-R-basics"
         for name, path in files.items():
             target = stage / name
             target.parent.mkdir(parents=True, exist_ok=True)
