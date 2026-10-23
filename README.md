@@ -18,6 +18,12 @@ uncertainty and build a foundation for further learning.
 | Day 2 | Regression, MCMC, survival predictions and model checking | [day2/](day2/) |
 | Day 3 | Hierarchical models and partial pooling | [day3/](day3/) |
 
+The supplementary [Day 3-2: Introduction to R and Research Computing](day3-2/README.md)
+is a separate 60-minute session after a 30-minute lecture. It reinforces files,
+Projects and R data objects using the previous `nina/` instruction as context.
+`make day3-2` builds its materials and `dist/afec-day3-2-materials.zip` separately
+from the statistical-course ZIP.
+
 Core and optional content are labelled. Each day uses an ecological example and
 one core exercise. Read the supplied figures or run the supplied R code;
 independent R or Stan programming is not required.

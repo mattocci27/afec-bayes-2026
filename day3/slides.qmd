@@ -245,22 +245,43 @@ does not update the probability for tree B. Small data can give wide intervals.
 ## Information sharing through a prior
 
 ::: columns
-::: {.column width="68%"}
+::: {.column width="55%"}
 ![](../images/multilevel.png){width=100% style="height: auto;"}
 :::
-::: {.column width="32%"}
+::: {.column width="45%"}
 
+**Likelihood**
 $$s_j\sim\operatorname{Binomial}(n_j,p_j)$$
-$$\operatorname{logit}(p_j)\sim\mathcal{N}(\mu,\sigma)$$
 
-Each mother tree can differ. Their shared distribution describes the commonality.
+**Shared prior for tree effects**
+$$\operatorname{logit}(p_j)\mid\mu,\sigma\sim\mathcal{N}(\mu,\sigma)$$
+
+**Hyperpriors**
+$$\begin{aligned}
+\mu&\sim\mathcal{N}(0,5)\\
+\sigma&\sim\operatorname{HalfNormal}(0,1)
+\end{aligned}$$
 :::
 :::
+
+**Day 2:** prior scales were specified. **Today:** the shared centre and
+between-tree SD are unknown too; we estimate them with priors.
 
 ::: notes
-A hierarchical prior connects group parameters.
-The model estimates mu and sigma from all eight trees, with hyperpriors.
-The Normal second argument is SD, on the logit scale.
+Allow about one minute for the bridge from Day 2, within the existing pooling
+explanation. Day 2 used specified Normal(0,2.5) priors for regression coefficients.
+Here the shared Normal distribution describes how biologically comparable tree
+effects vary; its centre and SD are unknown. Hyperpriors describe uncertainty
+about those shared parameters. Their numerical scales are specified, just as
+the coefficient-prior scales were on Day 2.
+All eight trees inform mu and sigma, connecting their posterior tree estimates.
+The model estimates tree effects and shared parameters jointly; it does not
+estimate a prior in a separate step and reuse the data as independent evidence.
+The conditional tree effects are independent given mu and sigma in this model.
+The Normal second argument is SD, on the logit scale. These hyperpriors match
+stan/logistic.stan and the saved fit; do not substitute main.qmd's half-Cauchy.
+The next slide interprets sigma on the probability scale. Shorten repeated code
+explanation if needed; do not add a new activity or a prior-fitting demonstration.
 :::
 
 ## How much can mother trees differ?
@@ -636,6 +657,43 @@ exists. Discuss shared habitat, census interval and missing predictors.
 
 # Optional reference {visibility="uncounted"}
 
+## Priors can also express spatial similarity {visibility="uncounted"}
+
+::: columns
+::: {.column width="35%"}
+![A focal grid cell and its neighbouring cells](../images/spatial.png){width=100%}
+:::
+::: {.column width="65%"}
+
+Nearby quadrats may share unmeasured habitat conditions.
+
+- A spatial effect represents residual differences among locations.
+- A joint prior can express stronger similarity between effects at nearby locations.
+- The strength and spatial scale of that similarity also need assumptions and priors.
+
+Group priors express commonality among trees; spatial priors can express
+commonality related to location.
+:::
+:::
+
+::: small
+Research extension only; no spatial model is fitted in this course.
+:::
+
+::: notes
+Optional connection to main.qmd's spatial-prior example; omit when time is short.
+The image illustrates neighbourhoods, not observed spatial effects. A spatial
+prior is an assumption about latent effects, not a claim that neighbouring
+observations must be equal. Habitat predictors may account for some structure;
+the residual spatial effect addresses remaining dependence under the model.
+Unlike the conditionally independent mother-tree effects, a spatial joint prior
+can encode dependence that varies with distance. A Gaussian process is one
+example; no covariance formula or implementation is required here.
+Do not restore the old eight-neighbour conditional equation as a complete model:
+boundary rules, a coherent joint distribution and any constraints must be defined.
+Source: Stan User's Guide, Gaussian Processes.
+:::
+
 ## Allometry and wood density {visibility="uncounted"}
 
 ::: columns
@@ -736,3 +794,4 @@ survivor count would also require a seedling count and binomial sampling.
 - [Song & Katabuchi et al. 2024, Ecology](https://doi.org/10.1002/ecy.4382)
 - [Stan User's Guide: hierarchical logistic regression](https://mc-stan.org/docs/stan-users-guide/regression.html#hierarchical-logistic-regression)
 - [Stan User's Guide: predictive checks](https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html)
+- [Stan User's Guide: Gaussian processes](https://mc-stan.org/docs/stan-users-guide/gaussian-processes.html)

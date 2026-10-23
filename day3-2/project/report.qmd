@@ -1,0 +1,37 @@
+---
+title: "Seedling diameter: a reproducible description"
+format:
+  html:
+    theme: coderpro
+    embed-resources: true
+execute:
+  echo: true
+  cache: false
+---
+
+These eight fictional seedling records demonstrate how a document connects
+research data, code and output. Each row is one tagged seedling followed over
+one observation interval. Diameter is the initial stem diameter in millimetres.
+
+```{r import}
+seedlings <- read.csv("data/seedlings.csv")
+head(seedlings)
+```
+
+One diameter measurement is missing. This histogram counts only the seven
+recorded measurements; missing diameter is not a diameter of zero.
+
+```{r diameter-plot, fig.width=7, fig.height=4}
+hist(
+  seedlings$diameter_mm,
+  breaks = c(0, 2, 4, 6, 8),
+  main = "Initial seedling stem diameter",
+  xlab = "Stem diameter (mm)",
+  ylab = "Number of seedlings",
+  col = "#1b9e77",
+  border = "white"
+)
+```
+
+The CSV stays unchanged when we render this document. The HTML is an output;
+the QMD records how to recreate it.

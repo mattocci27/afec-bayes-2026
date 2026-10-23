@@ -1,0 +1,156 @@
+---
+title: "Day 3-2: Introduction to R and Research Computing"
+author: "Masatoshi Katabuchi"
+date: "2026-10-23"
+solutions: true
+format:
+  html:
+    theme: coderpro
+    toc: true
+    toc-depth: 2
+    number-sections: false
+    embed-resources: true
+execute:
+  cache: false
+  error: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(comment = "#>", fig.width = 7, fig.height = 4)
+knitr::opts_knit$set(root.dir = normalizePath("project", mustWork = TRUE))
+```
+
+# Guided practical: a file becomes an R object
+
+**Purpose:** connect the project folder, an input file, a script and the objects
+R creates. The supplied code does the work; concentrate on what each step means.
+
+Use the separate **AFEC-R-foundations** participant ZIP. Extract it completely,
+then open `AFEC-R-foundations.Rproj` in RStudio. In a browser RStudio session,
+upload and extract the ZIP first, then open that Project. Keep the whole folder.
+No packages need installing. Work with a neighbour if needed.
+
+If R is unavailable, use the displayed outputs below and the prepared
+`report.html` to follow the same interpretation of files and objects.
+
+## 1. Locate the input and script
+
+In Files, find `data/seedlings.csv` and `R/inspect_seedlings.R`.
+Open the script in Source; run its numbered sections from the top with Run or
+Ctrl+Enter (Cmd+Enter on macOS). Saving the script alone does not run it.
+
+```{r location, eval=FALSE}
+getwd()
+file.exists("data/seedlings.csv")
+```
+
+`getwd()` should show the extracted **AFEC-R-foundations** folder, with a prefix
+that depends on your computer/server. The second command should return `TRUE`.
+The script is in `R/`; this path starts from the working directory.
+
+**Interpret:** if the working directory were `R/`, where would R look for
+`data/seedlings.csv`? Explain why opening the Project is useful here.
+If the file check returns `FALSE`, reopen the Project and check the extracted
+folder structure and spelling before changing the code.
+
+## 2. Import and inspect
+
+```{r import-data}
+seedlings <- read.csv("data/seedlings.csv")
+class(seedlings)
+str(seedlings)
+head(seedlings)
+dim(seedlings)
+```
+
+These are fictional teaching data, separate from the statistical sessions.
+One row is one tagged seedling followed over one observation interval.
+`diameter_mm` is its initial stem diameter; `survived` records survival to the
+later census. `Species_A` and `Species_B` are fictional species labels.
+
+`class()` identifies an object's class, `str()` shows its structure and column
+classes/types, and `head()` previews six rows by default. `dim()` reports rows,
+then columns. The preview does not change or shorten the stored data frame.
+
+**Interpret:** distinguish the file `"data/seedlings.csv"` from the object
+`seedlings`. Identify what the 8 rows and 4 columns represent. Use the output
+to explain why one data frame can contain both measurements and species labels.
+
+## 3. Inspect a column and missing observations
+
+```{r inspect-column}
+diameter <- seedlings$diameter_mm
+class(diameter)
+length(diameter)
+is.na(diameter)
+class(seedlings$species)
+class(seedlings$survived)
+```
+
+`$diameter_mm` selects a column: a numeric vector with one entry per seedling.
+The assignment creates `diameter` in memory. It does not edit the input file.
+`NA` denotes an unrecorded value; `is.na()` returns a logical vector identifying
+which entries are missing.
+
+**Interpret:** compare the structures of `seedlings` and `diameter`. Explain why
+the missing diameter is not zero, and why an unknown survival observation cannot
+be recorded as `FALSE` (a known death).
+
+## 4. Read a supplied plot
+
+```{r diameter-plot}
+hist(
+  seedlings$diameter_mm,
+  breaks = c(0, 2, 4, 6, 8),
+  main = "Initial seedling stem diameter",
+  xlab = "Stem diameter (mm)",
+  ylab = "Number of seedlings",
+  col = "#1b9e77",
+  border = "white"
+)
+```
+
+The code sends the numeric diameter column to a plotting function. Read the
+units and the number of measured seedlings represented by the bars. Check
+that number against the missing-value output rather than assuming every row
+contributed a measurement. The histogram excludes missing diameters.
+
+**Connect the steps:** identify the saved files another researcher needs to
+recreate this plot after opening the Project in a fresh R session.
+
+## Optional: a prepared report
+
+If time and the prepared environment permit, open `report.qmd` and click Render.
+It reads its own input and creates `report.html`. Compare the source with the
+HTML; no Markdown syntax practice is required. Otherwise read the prepared HTML.
+
+::: {.content-visible when-meta="solutions"}
+# Instructor interpretation
+
+Allow 15 minutes including the recap: 3 for locating the Project/script, 4 for
+import/inspection, 3 for columns/NA, 3 for the plot and 2 for questions. The
+optional render replaces spare time; do not extend the session for it.
+
+- The wrong working directory `R/` would make the relative path refer to
+  `R/data/seedlings.csv`, which does not exist. Opening this Project establishes
+  the intended initial working directory; opening a script does not do that.
+- The imported object is a data.frame with 8 rows and 4 columns. A row follows
+  one seedling, not one species. The two species share this table.
+- IDs and species are character vectors, diameter is numeric, survival logical.
+  str() abbreviates these as chr, num and logi. head() displays six rows without
+  reducing nrow; dim() returns 8 4. A data frame is a list of equal-length
+  columns here, but no list indexing needs to be taught.
+- diameter is a numeric vector of length 8. Its fourth entry is NA. Missing
+  survival is in the fifth record; FALSE in records 2 and 6 means observed death.
+- The histogram has counts 0, 3, 3, 1 over intervals [0,2], (2,4], (4,6], (6,8].
+  Seven measured seedlings contribute. Default hist() uses right-closed bins
+  with the lowest endpoint included; no need to teach interval syntax.
+- Share the input CSV, analysis script, Project and data dictionary. The report
+  source reproduces its own HTML. Keep the folder structure. Live Environment
+  objects alone do not document the analysis. A Project does not pin software
+  versions; record sessionInfo() for research handoff if needed.
+
+The script is generated from the four labelled exercise chunks, so its analysis
+matches the handout. Student source generation removes this whole Div.
+See [Instructor notes](instructor-notes.html) for prior-coverage mapping and demos.
+:::

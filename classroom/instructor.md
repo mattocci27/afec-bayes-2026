@@ -208,6 +208,14 @@ the single PPC figure.
 Explain the mother-tree counts, complete pooling, separate estimation and the
 shared prior. Keep the three-model and Tree A truth comparisons in the lecture,
 then open the handout. Do not ask for predictions of results already displayed.
+At "Information sharing through a prior", spend about one minute connecting
+Day 2's specified coefficient-prior scales to today's unknown shared centre and
+between-tree SD. The tree-effect distribution is a conditional hierarchical
+prior; mu and sigma also have priors and are estimated jointly with the tree
+effects. This is part of the existing pooling explanation, not an extra activity.
+The optional spatial-similarity slide restores the broader ecological connection
+from main.qmd; omit it when time is short. Preserve the 90-minute limit by
+shortening repeated code explanation, not the regression connection or questions.
 All comparison summaries use seed 42; use the generated tables rather than
 hard-coded observed proportions. The truth plot uses axes 0.2–0.5, with Tree G
 outside that window and still available in the full result table.

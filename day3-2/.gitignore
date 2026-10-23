@@ -1,0 +1,3 @@
+# The repository excludes course data exports; this small teaching input is source.
+!project/data/
+!project/data/seedlings.csv

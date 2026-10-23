@@ -1,0 +1,174 @@
+---
+title: "Day 3-2: Instructor notes"
+format:
+  html:
+    theme: coderpro
+    toc: true
+    embed-resources: true
+---
+
+# Purpose and assumptions
+
+This 60-minute session follows a separate 30-minute lecture. It consolidates
+research computing foundations; do not add statistical-model explanations.
+The previous 90-minute Day 3 materials remain reference, not an additional
+90-minute obligation. The instructor must select the separate lecture's content.
+Approximately 30 graduate students have received Ninya Quibod's introductory
+R instruction. Documented exposure does not establish mastery.
+
+Assume participants can access a prepared RStudio session (browser or already
+installed Desktop). Confirm this before class; do not spend the hour installing
+software. The core practical uses only base R. Quarto and knitr are authoring
+requirements and prerequisites for the optional demonstration, not for students
+to run the supplied script. English materials match the existing AFEC course.
+
+# Evidence from previous teaching
+
+The [planning assessment](coverage-assessment.md) records the source review made
+before authoring. All 30 PDF pages, corresponding PPTX text/notes and the complete
+R script in `nina/` were inspected. No previous exercise datasets or student
+responses are present, so completion and mastery remain unknown.
+
+| Category | Previous coverage | Decision and reason |
+|---|---|---|
+| A: exposure suggests familiarity | pp. 8–13 arithmetic, assignment, naming/case; script comments, c(), sum(), mean(), help | Briefly reuse assignment and case in an import; omit calculator drills and memorization. Check rather than assume fluency. |
+| A: exposure suggests familiarity | pp. 25–26 installations/plots; script hist(), boxplot(), ggplot() on diver respiration vs experience | Supply one familiar histogram; no package or plot-construction lesson. |
+| B: likely conceptual ambiguity | pp. 14–15 Console vs Source and reopen exercises | Separate saved instructions, execution and live objects. Console checks are legitimate; scripts preserve the intended sequence. |
+| B: likely conceptual ambiguity | p. 19 getwd/setwd and advice to put files in the same location; script absolute Windows paths | Use separate data/ and R/ folders; resolve one relative path from the Project. Folder browsing, opening a script and changing the working directory are distinct actions. |
+| B: likely conceptual ambiguity | pp. 16–18 lists of types and structures, Harry Potter examples | Connect numeric/character/logical to column vectors and the whole table. One coercion example reveals why appearance alone is insufficient. |
+| B: likely conceptual ambiguity | pp. 20–24 import, NA, inspection and factor conversion; script DIVER.csv -> diver and new respiration_log column | Explain file vs object, rows vs columns, one observation's meaning and missing vs observed values. Interpret outputs instead of repeating a function catalogue. |
+| C: essential and not found | Project workflow, a worked absolute/relative comparison, class(), file extensions, Markdown/Quarto, fresh-session workflow | Introduce a prepared Project and class(); explain QMD/HTML only briefly and make rendering optional. |
+
+A/B/C are planning judgments, not labels for students. Use the short oral
+predictions on slides 4, 7 and 13 to adjust emphasis. If answers already include
+the mechanism, shorten the example and retain time for the integrated practical.
+If unclear, demonstrate the concrete action and ask participants to explain its
+consequence. No lengthy written quiz is needed.
+
+## Precision when reinforcing previous explanations
+
+Clarify these points without turning the class into a correction of another
+instructor. Files need not be in a single flat folder. R can read formats other
+than CSV. Console history may persist, but a saved script is the deliberate
+record. head()/tail() default to six rows, `$` selects a column and levels()
+reports factor levels. read_excel() is in readxl, not dplyr. Whole-number values
+need not use R's integer storage (`30` versus `30L`). Most of these details are
+for answering questions, not additional slides.
+
+# Timing: 60 minutes including questions
+
+| Minutes | Slides / activity | Emphasis |
+|---|---|---|
+| 0–10 | 1–4: saved files, folder tree, extensions and paths | File vs object; relative paths need a starting point. |
+| 10–25 | 5–8: RStudio panes, prepared Project, Save/Run, CSV import | Live IDE demonstration; connect Source -> Console -> Environment. |
+| 25–45 | 9–13: types/structures, actual table, columns, NA, inspection | Read real output; one seedling per row; type and structure differ. |
+| 45–58 | 14: integrated practical | 3 min location, 4 import, 3 column/NA, 3 histogram. |
+| 58–60 | 16: recap and questions | Trace the whole route; retain buffer. |
+
+Slide 15 is optional and uncounted. Render the prepared report only if time
+remains; it replaces up to two minutes of spare practical/demo time. It never
+adds time. With setup delays, omit it and the live restart/coercion demonstration;
+keep the folder/working-directory distinction and the practical. Use the
+rendered handout when an R problem persists beyond two minutes.
+
+These are teaching allocations, not measured learner completion times. The
+script is short and supplied in full, but a fresh participant rehearsal is
+needed to establish actual 15-minute completion.
+
+# Demonstration instructions
+
+## Before class
+
+Build with `make day3-2`; distribute only `dist/afec-day3-2-materials.zip`.
+The ZIP contains the participant Project and self-contained slides/exercise/
+report HTML, not this note, its answers or the planning assessment. The original
+all-days ZIP and website do not automatically include this extra session.
+
+Extract a fresh copy of the participant ZIP, preferably to a folder with a space
+in its name. Open its `.Rproj` in the intended RStudio environment. Confirm its
+Project name, `getwd()` and `file.exists("data/seedlings.csv")`. Keep workspace
+restore/save disabled; the supplied Project already requests this. Test opening
+the script, running selected lines, seeing the histogram and reading local HTML.
+Browser RStudio paths refer to the server, so demonstrate upload/extract/open if
+that is how students will receive the folder. Desktop and browser menus can vary.
+Check actual access for all participants separately from local validation.
+
+## Files, panes and Projects
+
+Show the Project root and its data/ and R/ subfolders in Files. Browse to data/
+and run `getwd()` to demonstrate that Files browsing does not automatically
+change R's working directory. Reopen the Project if the starting state is wrong;
+do not patch code with an instructor-specific absolute path.
+
+Open the supplied script. Run its location section first, then the import.
+Show the new object in Environment. Point to its Source line and the resulting
+Console output. Save a harmless comment change to show saving does not execute
+code. Use an isolated example `diameter <- c(2.1, 3.4, 4.7)` for a live Save/Run
+comparison, then run the supplied script's import and column section to replace
+that object with the real column.
+
+If useful and time permits, restart R once and show that opening a script has
+not recreated `seedlings`. Rerun from the top. Do not quit a participant's unrelated
+session or use rm(list=ls()). Projects establish an initial working directory;
+setwd() could change it later, so getwd() checks the actual state.
+
+## Table, column and missingness
+
+Use the eight fictional seedling records. Species labels are placeholders, not
+real taxa. One row follows one seedling over one interval. Stem diameter is in
+mm, not adult DBH. A data frame's ordinary columns have different types but
+matching lengths. Mention its list structure in one sentence only; no list
+indexing exercise. class() identifies class; str() gives the wider picture.
+
+Show `class(c(2.1, "unmeasured"))` once: numeric-looking text cannot be used as a
+measurement without appropriate interpretation. A numeric column can contain
+NA. Do not teach conversion workflows or silently replace a missing observation.
+The survival column is logical because the CSV uses TRUE/FALSE/NA and read.csv
+recognizes these values. Other import functions/values can produce different
+types: inspect rather than assume.
+
+The fourth diameter is missing, and the fifth survival status is unknown.
+The histogram omits one missing diameter and shows seven measurements. Unknown
+survival is not a known death. Do not add imputation, hypothesis testing or a
+statistical-model exercise.
+
+## Practical answers and expectations
+
+See the instructor version of [the exercise](exercise.html#instructor-interpretation).
+Participants receive `exercise.html` renamed from the solution-free build.
+Expected results: data.frame, 8 x 4; character ID/species, numeric diameter,
+logical survival; diameter length 8; histogram counts 0, 3, 3, 1.
+The wrong starting folder R/ resolves data/seedlings.csv to R/data/seedlings.csv.
+Moving the whole Project preserves its internal relative path. Editing an R
+object does not rewrite the CSV; outputs need a deliberate export/render step.
+
+# Optional Quarto demonstration
+
+Open `report.qmd` at the participant Project root; point to prose and the import
+chunk, then Render. Default knitr execution starts from the QMD's directory,
+which here is also the participant Project root. It imports its own data; it
+must not rely on objects created interactively. The outer exercise/slides use
+course authoring paths; students do not need to know that machinery.
+
+Markdown supplies the document's plain-text structure; Quarto executes code and
+renders the HTML. Do not teach YAML, chunk options or Markdown syntax. If the
+runtime lacks Quarto/knitr, open the prepared `report.html` instead.
+
+# Deliberate exclusions
+
+No statistical inference, model fitting, package installation/updating, loops,
+custom functions, matrix operations, factor internals, complex indexing, list
+manipulation, Git, shell commands or general R syntax course. Reproducibility
+here means preserving inputs and instructions and rerunning in a known context;
+software versions and backups deserve one closing reminder, not a new tooling
+lesson. A Project does not pin packages or guarantee reproducibility by itself.
+
+# Technical references
+
+- [Posit: RStudio Projects](https://docs.posit.co/ide/user/ide/guide/code/projects.html)
+- [R: data input](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/read.table.html)
+- [R: data frames](https://stat.ethz.ch/R-manual/R-devel/library/base/html/data.frame.html)
+- [R: str](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/str.html)
+- [R: head](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/head.html)
+- [R: missing values](https://stat.ethz.ch/R-manual/R-devel/library/base/html/NA.html)
+- [Quarto: managing execution](https://quarto.org/docs/projects/code-execution.html)

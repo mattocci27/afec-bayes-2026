@@ -4,7 +4,7 @@ QUARTO ?= quarto
 RSCRIPT ?= Rscript
 PYTHON ?= python3
 
-.PHONY: help day1 day1-zip day2 day3 slides materials site publish
+.PHONY: help day1 day1-zip day2 day3 day3-2 slides materials site publish
 
 help:
 	@printf '%s\n' \
@@ -13,6 +13,7 @@ help:
 	  '  make day1-zip Build Day 1 materials and the Day 1-only participant ZIP' \
 	  '  make day2   Build Day 2 slides, exercises and result sheet' \
 	  '  make day3   Build Day 3 slides, exercises and result sheet' \
+	  '  make day3-2 Build the 60-minute R foundations session and participant ZIP' \
 	  '  make slides Render all three slide decks' \
 	  '  make materials Build all materials and the participant ZIP' \
 	  '  make site   Build materials, ZIP and website in dist/site/' \
@@ -40,6 +41,9 @@ day3: day3/exercise-student.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day3/exercise.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day3/exercise-student.qmd
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day3/results.qmd
+
+day3-2:
+	@cd "$(PROJECT_ROOT)" && $(PYTHON) scripts/build_day3_2.py
 
 slides:
 	@cd "$(PROJECT_ROOT)" && $(QUARTO) render day1/slides.qmd

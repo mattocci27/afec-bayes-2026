@@ -31,7 +31,7 @@
     ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
       width: 0.8em;
-      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
@@ -150,12 +150,12 @@
     }
     .reveal .footnotes ol {
       counter-reset: ol;
-      list-style-type: none;
+      list-style-type: none; 
       margin-left: 0;
     }
     .reveal .footnotes ol li:before {
       counter-increment: ol;
-      content: counter(ol) ". ";
+      content: counter(ol) ". "; 
     }
     .reveal .footnotes ol li > p:first-child {
       display: inline-block;
@@ -197,19 +197,19 @@
     .reveal .slide > img.r-stretch.quarto-figure-center {
       display: block;
       margin-left: auto;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .reveal .slide > img.stretch.quarto-figure-left,
     .reveal .slide > img.r-stretch.quarto-figure-left  {
       display: block;
       margin-left: 0;
-      margin-right: auto;
+      margin-right: auto; 
     }
     .reveal .slide > img.stretch.quarto-figure-right,
     .reveal .slide > img.r-stretch.quarto-figure-right  {
       display: block;
       margin-left: auto;
-      margin-right: 0;
+      margin-right: 0; 
     }
   </style>
   <script src="slides_files/libs/kePrint-0.0.1/kePrint.js"></script>
@@ -534,14 +534,19 @@ Masatoshi Katabuchi @ XTBG, CAS
 <section id="information-sharing-through-a-prior" class="slide level2">
 <h2>Information sharing through a prior</h2>
 <div class="columns">
-<div class="column" style="width:68%;">
+<div class="column" style="width:55%;">
 <p><img data-src="../images/multilevel.png" style="height: auto;;width:100.0%"></p>
-</div><div class="column" style="width:32%;">
-<p><span class="math display">s_j\sim\operatorname{Binomial}(n_j,p_j)</span> <span class="math display">\operatorname{logit}(p_j)\sim\mathcal{N}(\mu,\sigma)</span></p>
-<p>Each mother tree can differ. Their shared distribution describes the commonality.</p>
+</div><div class="column" style="width:45%;">
+<p><strong>Likelihood</strong> <span class="math display">s_j\sim\operatorname{Binomial}(n_j,p_j)</span></p>
+<p><strong>Shared prior for tree effects</strong> <span class="math display">\operatorname{logit}(p_j)\mid\mu,\sigma\sim\mathcal{N}(\mu,\sigma)</span></p>
+<p><strong>Hyperpriors</strong> <span class="math display">\begin{aligned}
+\mu&amp;\sim\mathcal{N}(0,5)\\
+\sigma&amp;\sim\operatorname{HalfNormal}(0,1)
+\end{aligned}</span></p>
 </div></div>
+<p><strong>Day 2:</strong> prior scales were specified. <strong>Today:</strong> the shared centre and between-tree SD are unknown too; we estimate them with priors.</p>
 <aside class="notes">
-<p>A hierarchical prior connects group parameters. The model estimates mu and sigma from all eight trees, with hyperpriors. The Normal second argument is SD, on the logit scale.</p>
+<p>Allow about one minute for the bridge from Day 2, within the existing pooling explanation. Day 2 used specified Normal(0,2.5) priors for regression coefficients. Here the shared Normal distribution describes how biologically comparable tree effects vary; its centre and SD are unknown. Hyperpriors describe uncertainty about those shared parameters. Their numerical scales are specified, just as the coefficient-prior scales were on Day 2. All eight trees inform mu and sigma, connecting their posterior tree estimates. The model estimates tree effects and shared parameters jointly; it does not estimate a prior in a separate step and reuse the data as independent evidence. The conditional tree effects are independent given mu and sigma in this model. The Normal second argument is SD, on the logit scale. These hyperpriors match stan/logistic.stan and the saved fit; do not substitute main.qmd’s half-Cauchy. The next slide interprets sigma on the probability scale. Shorten repeated code explanation if needed; do not add a new activity or a prior-fitting demonstration.</p>
 <style type="text/css">
         span.MJX_Assistive_MathML {
           position:absolute!important;
@@ -928,6 +933,42 @@ p_j\text{ drawn from the posterior}</span></p>
 <h1>Optional reference</h1>
 
 </section>
+<section id="priors-can-also-express-spatial-similarity" class="slide level2" data-visibility="uncounted">
+<h2>Priors can also express spatial similarity</h2>
+<div class="columns">
+<div class="column" style="width:35%;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="../images/spatial.png" style="width:100.0%"></p>
+<figcaption>A focal grid cell and its neighbouring cells</figcaption>
+</figure>
+</div>
+</div><div class="column" style="width:65%;">
+<p>Nearby quadrats may share unmeasured habitat conditions.</p>
+<ul>
+<li>A spatial effect represents residual differences among locations.</li>
+<li>A joint prior can express stronger similarity between effects at nearby locations.</li>
+<li>The strength and spatial scale of that similarity also need assumptions and priors.</li>
+</ul>
+<p>Group priors express commonality among trees; spatial priors can express commonality related to location.</p>
+</div></div>
+<div class="small">
+<p>Research extension only; no spatial model is fitted in this course.</p>
+</div>
+<aside class="notes">
+<p>Optional connection to main.qmd’s spatial-prior example; omit when time is short. The image illustrates neighbourhoods, not observed spatial effects. A spatial prior is an assumption about latent effects, not a claim that neighbouring observations must be equal. Habitat predictors may account for some structure; the residual spatial effect addresses remaining dependence under the model. Unlike the conditionally independent mother-tree effects, a spatial joint prior can encode dependence that varies with distance. A Gaussian process is one example; no covariance formula or implementation is required here. Do not restore the old eight-neighbour conditional equation as a complete model: boundary rules, a coherent joint distribution and any constraints must be defined. Source: Stan User’s Guide, Gaussian Processes.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
 <section id="allometry-and-wood-density" class="slide level2" data-visibility="uncounted">
 <h2>Allometry and wood density</h2>
 <div class="columns">
@@ -1037,6 +1078,7 @@ p_j\text{ drawn from the posterior}</span></p>
 <li><a href="https://doi.org/10.1002/ecy.4382">Song &amp; Katabuchi et al.&nbsp;2024, Ecology</a></li>
 <li><a href="https://mc-stan.org/docs/stan-users-guide/regression.html#hierarchical-logistic-regression">Stan User’s Guide: hierarchical logistic regression</a></li>
 <li><a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html">Stan User’s Guide: predictive checks</a></li>
+<li><a href="https://mc-stan.org/docs/stan-users-guide/gaussian-processes.html">Stan User’s Guide: Gaussian processes</a></li>
 </ul>
 
 </section></section>
@@ -1057,7 +1099,7 @@ p_j\text{ drawn from the posterior}</span></p>
   <script src="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
   <script src="slides_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
   <script src="slides_files/libs/revealjs/plugin/quarto-support/support.js"></script>
-
+  
 
   <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
   <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
@@ -1079,7 +1121,7 @@ p_j\text{ drawn from the posterior}</span></p>
 'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
 'chalkboard': {"buttons":true},
 'smaller': false,
-
+ 
         // Display controls in the bottom right corner
         controls: true,
 
@@ -1241,7 +1283,7 @@ p_j\text{ drawn from the posterior}</span></p>
         ]
       });
     </script>
-
+    
     <script>
       // htmlwidgets need to know to resize themselves when slides are shown/hidden.
       // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
@@ -1287,7 +1329,7 @@ p_j\text{ drawn from the posterior}</span></p>
         });
         const isCodeAnnotation = (el) => {
           for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {
+            if (clz.startsWith('code-annotation-')) {                     
               return true;
             }
           }
@@ -1307,11 +1349,11 @@ p_j\text{ drawn from the posterior}</span></p>
             button.setAttribute("data-bs-toggle", "tooltip");
             button.setAttribute("data-bs-placement", "left");
             button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button,
-              { trigger: "manual",
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
                 customClass: "code-copy-button-tooltip",
                 offset: [0, -8]});
-            tooltip.show();
+            tooltip.show();    
           }
           setTimeout(function() {
             if (tooltip) {
@@ -1390,7 +1432,7 @@ p_j\text{ drawn from the posterior}</span></p>
           }
             config['offset'] = [0,0];
             config['maxWidth'] = 700;
-          window.tippy(el, config);
+          window.tippy(el, config); 
         }
         const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
         for (var i=0; i<noterefs.length; i++) {
@@ -1452,6 +1494,6 @@ p_j\text{ drawn from the posterior}</span></p>
     <style>
     .reveal .mother-story > p { height: 2.6em; line-height: 1.3; }
     </style>
-
+    
 
 </body></html>

@@ -1,0 +1,19 @@
+/* The shared AFEC theme and palette remain in course.scss/course.css. */
+.reveal .slide pre { font-size: 0.65em; }
+.reveal .slide div.sourceCode, .reveal .slide pre.sourceCode {
+  background-color: #181818;
+  color: #eaeaea;
+}
+.reveal .slide div.sourceCode pre code { font-size: 1em; line-height: 1.35; }
+.reveal .slide .sourceCode code, .reveal .slide .sourceCode code span { color: #eaeaea; }
+.reveal .slide .sourceCode code span.fu { color: #c397d8; }
+.reveal .slide .sourceCode code span.st { color: #b9ca4a; }
+.reveal .slide .sourceCode code span.dv,
+.reveal .slide .sourceCode code span.fl,
+.reveal .slide .sourceCode code span.bn { color: #7aa6da; }
+.reveal .slide .sourceCode code span.co { color: #b0b0b0; }
+.reveal .slide .cell-output-stdout pre code { font-size: 1em; line-height: 1.35; }
+.reveal .slide table { font-size: 0.78em; }
+.reveal .slide table td, .reveal .slide table th { padding: 0.25em 0.4em; }
+.reveal .slide .computing-flow { line-height: 1.35; margin: 0.7em 0; }
+.reveal .slide .computing-flow p { margin: 0.3em 0; }

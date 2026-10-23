@@ -1,0 +1,9 @@
+seedling_id,species,diameter_mm,survived
+s01,Species_A,2.1,TRUE
+s02,Species_B,3.4,FALSE
+s03,Species_A,4.7,TRUE
+s04,Species_B,NA,TRUE
+s05,Species_A,5.2,NA
+s06,Species_B,3.8,FALSE
+s07,Species_A,6.1,TRUE
+s08,Species_B,4.2,TRUE
