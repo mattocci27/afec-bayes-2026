@@ -59,6 +59,41 @@ theme_set(theme_bw(base_size = 14))
 ndd <- read_csv(here("data", "ndd.csv"))
 ```
 
+## Fitting the model with Stan
+
+The model in `stan/logit_reg.stan` combines priors and likelihood:
+
+```{.stan}
+model {
+  alpha ~ normal(0, 2.5);
+  beta ~ normal(0, 2.5);
+  suv ~ binomial_logit(n, alpha + beta * cons);
+}
+```
+
+The first two statements specify the priors; the third specifies the likelihood.
+Stan uses MCMC to sample from the posterior distribution.
+
+The following code illustrates how cmdstanr runs the model; it is shown here
+without execution.
+
+```{r stan-fitting-preview, eval=FALSE}
+model_stan <- cmdstanr::cmdstan_model(
+  here("stan", "logit_reg.stan")
+)
+
+fit_stan <- model_stan$sample(
+  data = stan_data,
+  chains = 4
+)
+```
+
+`cmdstan_model()` compiles the Stan model; `$sample()` runs four MCMC chains.
+`stan_data` contains the data passed to Stan and is constructed in the
+[optional appendix](#fit-with-cmdstanr).
+
+For this lesson, we use previously saved posterior samples instead of fitting the model again.
+
 ## Load prepared posterior samples {#prepared-result}
 
 ```{r draws-precomputed}
@@ -368,6 +403,11 @@ Interpret new fits using their own summaries, diagnostics and traces.
 
 ::: {.content-visible when-meta="solutions"}
 # Instructor reference
+
+Spend at most 2–3 minutes on [Fitting the model with Stan](#fitting-the-model-with-stan):
+connect priors and likelihood to MCMC draws, then load the prepared samples.
+The preview is illustrative (`eval=FALSE`); do not compile or fit during this
+walkthrough. The complete data list and fitting examples remain in the appendix.
 
 Follow the code and outputs in order: traces, numerical diagnostics, coefficient
 summary, probability calculation and plotting. This is a guided walkthrough,

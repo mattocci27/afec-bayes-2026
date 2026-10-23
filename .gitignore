@@ -27,3 +27,4 @@ classroom/readiness.html
 data/
 dist/
 _site/
+.Rproj.user
