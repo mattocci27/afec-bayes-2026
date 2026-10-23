@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="slides_files/libs/clipboard/clipboard.min.js"></script>
+<script src="slides_files/libs/quarto-html/tabby.min.js"></script>
+<script src="slides_files/libs/quarto-html/popper.min.js"></script>
+<script src="slides_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="slides_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="slides_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="slides_files/libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.10.19">
+
+  <meta name="author" content="Masatoshi Katabuchi">
+  <title>Bayesian statistics for ecology: Day 3 — Hierarchical models</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/reveal.css">
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="slides_files/libs/revealjs/dist/theme/quarto-c23c6b66d12f3bc450971ca9a3a2df29.css">
+  <link rel="stylesheet" href="../assets/course.css">
+  <script>window.backupDefine = window.define; window.define = undefined;</script><script src="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.js"></script>
+  <script>document.addEventListener("DOMContentLoaded", function () {
+ var mathElements = document.getElementsByClassName("math");
+ var macros = [];
+ for (var i = 0; i < mathElements.length; i++) {
+  var texText = mathElements[i].firstChild;
+  if (mathElements[i].tagName == "SPAN") {
+   katex.render(texText.data, mathElements[i], {
+    displayMode: mathElements[i].classList.contains('display'),
+    throwOnError: false,
+    macros: macros,
+    fleqn: false
+   });
+}}});
+  </script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css">
+  <link href="slides_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="slides_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="slides_files/libs/revealjs/plugin/reveal-chalkboard/font-awesome/css/all.css" rel="stylesheet">
+  <link href="slides_files/libs/revealjs/plugin/reveal-chalkboard/style.css" rel="stylesheet">
+  <link href="slides_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none;
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". ";
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto;
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0;
+    }
+  </style>
+  <script src="slides_files/libs/kePrint-0.0.1/kePrint.js"></script>
+  <link href="slides_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+
+<section id="title-slide" class="slide level2 center" data-background="../images/priors.png" data-background-size="50%" data-background-position="50% 20%">
+<h2></h2>
+<div class="title-box">
+<h2>
+Bayesian statistics for ecology
+</h2>
+<h3>
+Day 3: Hierarchical models
+</h3>
+<p>
+AFEC-X 2026 · 23 October
+</p>
+<h3>
+Masatoshi Katabuchi @ XTBG, CAS
+</h3>
+</div>
+</section>
+<section id="survival-density-and-group-differences" class="slide level2">
+<h2>Survival, density and group differences</h2>
+<ul>
+<li>Day 1: uncertainty about a survival probability.</li>
+<li>Day 2: survival probability changes with conspecific density.</li>
+<li>Today: estimate each group using its own data and data from other groups.</li>
+</ul>
+<aside class="notes">
+<p>We first leave out the density predictor and use a separate data set to make the idea of information sharing easier to see. We return to species CNDD later.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="todays-progression" class="slide level2">
+<h2>Today’s progression</h2>
+<ol type="1">
+<li><strong>Survival probabilities:</strong> estimate differences among eight mother trees. We start without a density effect.</li>
+<li><strong>Regression relationships:</strong> extend the same idea to differences in intercepts and slopes among species.</li>
+</ol>
+<p>A <strong>hierarchical model</strong> uses data from all groups to estimate each group’s parameters.</p>
+<div class="small">
+<p><strong>Core:</strong> mother-tree pooling and the three regression structures.<br>
+<strong>Optional reference:</strong> a full second analysis, new fitting and allometry.</p>
+</div>
+<aside class="notes">
+<p>First use the mother-tree binomial model with no density predictor to focus on information sharing. Later extend the hierarchy to regression coefficients. This is a progression in model structure, not a claim that the first model falls outside the regression framework. Mother-tree data are different from Day 2’s quadrats. Species CNDD is a conceptual illustration; the allometry example uses its own simulated data and saved hierarchical regression fit.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="todays-objectives" class="slide level2">
+<h2>Today’s objectives</h2>
+<p><strong>Understanding Bayesian hierarchical models</strong></p>
+<ul>
+<li>Explain how data from other groups can help estimate each group’s survival.</li>
+<li>Identify the likelihood, shared prior and survival probabilities in supplied code.</li>
+<li>Compare survival estimates and their uncertainty with and without information sharing.</li>
+<li>Explain how the same idea extends to species-specific regression relationships.</li>
+</ul>
+</section>
+<section id="eight-mother-trees-one-overall-survival-rate" class="slide level2">
+<h2>Eight mother trees: one overall survival rate?</h2>
+<div class="columns">
+<div class="column" style="width:42%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="table caption-top" style="font-size: 27px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Tree</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Seedlings</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Survivors</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">A</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">B</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">18</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">D</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">19</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">E</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">F</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">12</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">H</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">12</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:58%;">
+<p>We followed seedlings under eight mother trees of one species.</p>
+<p>What if we combine all seedlings into one group?</p>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="" aria-label="1"></a><span class="fu">sum</span>(trees<span class="sc">$</span>suv) <span class="sc">/</span> <span class="fu">sum</span>(trees<span class="sc">$</span>n)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] 0.2973978</code></pre>
+</div>
+</div>
+<p>One overall observed survival proportion: <strong>0.297</strong>.</p>
+</div></div>
+<aside class="notes">
+<p>Start with the concrete calculation from main.qmd, using newly simulated mother-tree data (seed 42), different from Day 2’s quadrats. The result is a pooled observed proportion, also the common-probability binomial MLE; it is not a posterior mean. Ask what differences among trees this one number hides. Do not introduce the hypothetical 0/2 and 2/2 cases here.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="eight-mother-trees-estimate-each-tree-separately" class="slide level2">
+<h2>Eight mother trees: estimate each tree separately?</h2>
+<div class="columns">
+<div class="column" style="width:48%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="table caption-top" style="font-size: 25px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Tree</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Seedlings</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Survivors</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">A</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.40</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">B</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">0.46</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.25</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">D</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">0.38</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">E</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.19</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">F</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0.32</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">H</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0.24</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div><div class="column" style="width:52%;">
+<p>For each mother tree:</p>
+<p>Survival proportion = survivors / seedlings.</p>
+<p>The proportions range from <strong>0.05</strong> to <strong>0.46</strong>.</p>
+<p>Do these differences reflect real tree differences, sampling variation, or both?</p>
+</div></div>
+<aside class="notes">
+<p>Calculate the proportions before naming the models. They are separate binomial MLEs, not the separate posterior means shown after the exercise. Different observed proportions alone do not establish different underlying probabilities.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="one-common-probability-or-different-probabilities" class="slide level2">
+<h2>One common probability, or different probabilities?</h2>
+
+<img data-src="slides_files/figure-revealjs/observed-trees-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>Can data from other trees help us estimate each tree’s survival probability?</p>
+<aside class="notes">
+<p>Each point is one mother tree; point size is its seedling count. The dashed line is the pooled observed proportion, not a fitted regression line. Neither all differences being real nor all trees being identical follows from this plot. Use this question to motivate the two extreme models and their hierarchical alternative. Show fitted comparisons and generating probabilities later in the lecture, before the model-reading activity.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="complete-pooling" class="slide level2">
+<h2>Complete pooling</h2>
+<div class="columns">
+<div class="column" style="width:68%;">
+<p><img data-src="../images/pool.png" style="height: auto;;width:100.0%"></p>
+</div><div class="column" style="width:32%;">
+<p><span class="math display">s_j\sim\operatorname{Binomial}(n_j,p)</span></p>
+<p>Every mother tree shares the same <span class="math inline">p</span>.</p>
+<p>What ecological difference does this assumption leave out?</p>
+</div></div>
+<aside class="notes">
+<p>j indexes mother trees. Our comparison uses p ~ Beta(1,1), the flat Day 1 prior. An uncertainty interval for a common p does not represent between-tree variation.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="separate-estimation" class="slide level2">
+<h2>Separate estimation</h2>
+<div class="columns">
+<div class="column" style="width:68%;">
+<p><img data-src="../images/separate.png" style="height: auto;;width:100.0%"></p>
+</div><div class="column" style="width:32%;">
+<p><span class="math display">s_j\sim\operatorname{Binomial}(n_j,p_j)</span></p>
+<p>Each mother tree has its own independent <span class="math inline">p_j</span>.</p>
+<p>How much can a tree with few seedlings tell us on its own?</p>
+</div></div>
+<aside class="notes">
+<p>Our comparison uses independent Beta(1,1) priors. What we learn about tree A does not update the probability for tree B. Small data can give wide intervals.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="information-sharing-through-a-prior" class="slide level2">
+<h2>Information sharing through a prior</h2>
+<div class="columns">
+<div class="column" style="width:68%;">
+<p><img data-src="../images/multilevel.png" style="height: auto;;width:100.0%"></p>
+</div><div class="column" style="width:32%;">
+<p><span class="math display">s_j\sim\operatorname{Binomial}(n_j,p_j)</span> <span class="math display">\operatorname{logit}(p_j)\sim\mathcal{N}(\mu,\sigma)</span></p>
+<p>Each mother tree can differ. Their shared distribution describes the commonality.</p>
+</div></div>
+<aside class="notes">
+<p>A hierarchical prior connects group parameters. The model estimates mu and sigma from all eight trees, with hyperpriors. The Normal second argument is SD, on the logit scale.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="how-much-can-mother-trees-differ" class="slide level2">
+<h2>How much can mother trees differ?</h2>
+<div class="columns">
+<div class="column" style="width:65%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/group-variation-1.png" class="quarto-figure quarto-figure-center" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:35%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/group-sd-prior-1.png" class="quarto-figure quarto-figure-center" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><span class="math inline">\sigma</span> describes differences among trees. We estimate <span class="math inline">\sigma</span> from the data, with a prior.</p>
+</div></div>
+<aside class="notes">
+<p>Read both figures together: the three dashed lines in the prior plot mark sigma = 0.1, 1 and 3, the values used for the three panels on the left. The prior is a distribution over sigma, not a fourth mother-tree curve or a posterior. A sigma value and a prior distribution for sigma are different things. The model estimates sigma with a half-Normal(0,1) prior; it is not fixed at 1.</p>
+<p>The left panels are hypothetical illustrations, not fitted mother-tree posteriors. Fix the group logit centre at mu=0 and use the same eight standard Normal quantiles. Only sigma changes. Each coloured curve has illustrative within-tree logit SD 0.2; this extra width is a visual aid, not another level in the fitted model. Use the Jacobian 1/[p(1-p)] to convert logit densities to the probability scale, then scale each curve to peak 1. Relative density areas cannot be compared. Probability-scale modes need not equal plogis of the group logit centres. Greater inferred group variation generally permits less sharing for comparable data; these panels do not themselves show fitted shrinkage. The actual model estimates mu with Normal(0,5) prior; mu=0 is fixed only here. Keep alternative priors in the optional reference. Do not replace the saved model’s half-Normal prior with main.qmd’s older half-Cauchy prior.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="what-information-does-each-tree-provide" class="slide level2">
+<h2>What information does each tree provide?</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<table class="table caption-top" style="font-size: 25px; margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">tree</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">n</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">suv</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">proportion</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">A</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.40</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">B</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">0.46</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">C</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.25</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">D</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">0.38</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">E</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0.19</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">F</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0.32</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">G</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.05</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">H</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0.24</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Read the seedling counts and survival proportions together.</p>
+<aside class="notes">
+<p>Lecture comparison, before the model/code walkthrough. Ask which trees have little information and which observed proportions are extreme. Use these observations to interpret the next two figures together. This is a brief lecture prompt, not the participant activity.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="three-ways-of-estimating-survival" class="slide level2 mother-story">
+<h2>Three ways of estimating survival</h2>
+
+<img data-src="slides_files/figure-revealjs/fitted-trees-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Points: posterior means. Intervals: 95% credible.<br> Rows ordered by Separate estimates; n = seedlings.</p>
+<aside class="notes">
+<p>Complete and separate models use Beta(1,1) probability priors, whereas partial pooling uses the Normal logit group prior with estimated centre and SD. State this difference. It is an illustrative model comparison, not an isolation of pooling under identical marginal priors. All code and priors are in the handout. The grey line and ribbon show the single complete-pooling posterior, shared by all trees. Only separate and partial estimates are repeated by tree. The grey line is a comparison reference, not the exact target of hierarchical shrinkage. Rows are ordered by the separate posterior means, with the largest at the top. n is the seedling count. Separate and Partial pooling are vertically dodged within each tree so their 95% intervals can be compared. Separate is always an open purple circle; Partial pooling is always a filled orange circle. The next slide retains those encodings and reveals the generating probabilities on a 1:1 scatterplot. The separate model is the no-pooling model from earlier.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="in-a-simulation-we-can-check-against-the-truth" class="slide level2 mother-story">
+<h2>Does sharing information improve the estimates?</h2>
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/tree-truth-comparison-1.png" class="quarto-figure quarto-figure-center" width="588" height="470"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Tree A: 0.41 → 0.34; true probability = 0.30.</strong><br> Arrows: Separate → Partial pooling. Dashed diagonal: estimate = truth.</p>
+<aside class="notes">
+<p>Read x as the generating probability and y as the posterior mean. The square panel has identical axis scales; its dashed 1:1 line represents agreement with the truth. Vertical connections show the direction and amount of movement from Separate to Partial pooling. The connections are drawn behind the points. Each tree’s true probability is explicitly joined by tree ID, not by row order. F has true p=0.25 and D has true p=0.36. Several trees share the same true probability, so some trajectories overlap. Both axes are restricted to 0.2–0.5; Tree G estimates fall below this window.</p>
+<p>Follow labelled Tree A: n=15, separate posterior mean 0.41, partial-pooling mean 0.34 and generating probability 0.30. Movement depends on n, extremity and the inferred group distribution. Separate points remain posterior means under independent Beta(1,1) priors, not observed proportions or MLEs. Do not claim that sharing information always improves every estimate or that one simulated data set establishes general performance. In real data, truth is unknown. Use this comparison as a visual illustration, not an exact error calculation. Read these results before the activity. If short of time, focus on Tree A and the point that information sharing does not guarantee improvement.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="read-the-model-behind-these-results" class="slide level2" data-background-color="#f3e8f5">
+<h2>Read the model behind these results</h2>
+<p><code>day3/exercise-student.qmd</code></p>
+<ul>
+<li>Connect the observed counts to Stan’s data.</li>
+<li>Find the likelihood and the shared distribution of intercepts.</li>
+<li>Connect posterior intercepts to survival probabilities.</li>
+<li>Explain the information-sharing assumption in one sentence.</li>
+</ul>
+<p>Read supplied code; running the R chunks is optional.</p>
+<aside class="notes">
+<p>The lecture has already shown the comparison and truth figures. Use the handout to connect those results to the full model and analysis code. The handout shows compilation/sampling as well as a saved-result route; participants can read either without running a new fit. Then read diagnostics and explain the replicated-count check before returning to regression.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="can-the-model-reproduce-the-observed-counts" class="slide level2">
+<h2>Can the model reproduce the observed counts?</h2>
+<p><span class="math display">\widetilde{s}_j\sim\operatorname{Binomial}(n_j,p_j),\qquad
+p_j\text{ drawn from the posterior}</span></p>
+
+<img data-src="slides_files/figure-revealjs/mother-check-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1152"><p>Keep each tree’s seedling count fixed.<br> Orange intervals describe replicated <strong>counts</strong>, not uncertainty in a probability.</p>
+<aside class="notes">
+<p>This is the mother-tree intercept-only model from the handout, before adding a density predictor. For each posterior draw, generate binomial survivor counts using the observed n_j and sampled p_j. Open circles are observed survivor counts; orange points/intervals show replicated-count medians and 95% predictive intervals. Read the generation and plotting code in the handout alongside this figure. It checks compatibility with observations, not MCMC convergence. Numerical sampling diagnostics and traces are covered separately in the same handout. Inspect which trees look poorly reproduced, while recognizing that agreement in this in-sample check does not establish adequacy of every model assumption.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="from-an-intercept-only-model-to-regression" class="slide level2">
+<h2>From an intercept-only model to regression</h2>
+<div class="columns">
+<div class="column" style="width:45%;">
+<p><strong>So far: intercept only</strong></p>
+<p><span class="math display">\operatorname{logit}(p_j)=\alpha_j</span></p>
+<p><strong>Now: intercept + density effect</strong></p>
+<p><span class="math display">\operatorname{logit}(p_{ij})=\alpha_j+{\color{#d95f02}{\beta_j x_{ij}}}</span></p>
+</div><div class="column" style="width:55%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/species-cndd-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</div></div>
+<p><strong>We can share information about these coefficients, too.</strong></p>
+<div class="footer">
+<p>Conceptual simulation inspired by <a href="https://doi.org/10.1126/science.1190772">Comita et al.&nbsp;2010</a> and <a href="https://doi.org/10.1002/ecy.4382">Song &amp; Katabuchi et al.&nbsp;2024</a>.</p>
+</div>
+<aside class="notes">
+<p>Model progression and selected code. The main transition is from a model without a density predictor to a regression that includes density, not from mother trees to species. Strictly, the earlier model is already an intercept-only logistic regression.</p>
+<p>So far, each group had one survival probability. We did not include a predictor that could explain variation in survival within a group. Now bring back Day 2’s question: how does survival change with conspecific density? Adding density gives each group a curve, with an intercept and a density coefficient. The orange term is the addition to the model. i indexes observations within group j, and x_ij is scaled conspecific density. Both models retain a binomial observation model (or Bernoulli for individual seedlings).</p>
+<p>The information-sharing idea still applies: group regression coefficients can be connected through shared distributions. Their hyperparameters also need priors in a full model. The curves alone do not demonstrate fitted pooling.</p>
+<p>For this application the groups are species rather than mother trees. Each coloured curve represents a species. This is the seeded conceptual example from main.qmd, not fitted species effects for Day 2’s data or a numerical reproduction of either paper. It uses a different simulated data set, and does not add density to the eight mother-tree data.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="first-varying-intercepts-a-common-slope" class="slide level2">
+<h2>First: varying intercepts, a common slope</h2>
+<p>Species can differ in baseline survival while sharing a density coefficient.</p>
+<p><span class="math display">\operatorname{logit}(p_{ij})=\alpha_j+\beta x_{ij}</span></p>
+<p>Selected model lines:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb3-1"><a href="" aria-label="1"></a>alpha ~ normal(mu_alpha, sigma_alpha);</span>
+<span id="cb3-2"><a href="" aria-label="2"></a>suv[i] ~ binomial_logit(</span>
+<span id="cb3-3"><a href="" aria-label="3"></a>  n[i], alpha[group[i]] + beta * x[i]</span>
+<span id="cb3-4"><a href="" aria-label="4"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The index on <code>alpha</code> changes the intercept used for each observation. <code>beta</code> is shared by all species.</p>
+<aside class="notes">
+<p>A conceptual CNDD extension, not executable code for the saved mother-tree fit. Declarations, loops and the remaining priors are omitted from these selected lines. group[i] maps observation i to species j, x is scaled density, n is the seedling count and suv is the survivor count. The likelihood is still binomial. The Normal group prior is shown in centered form so the model structure is easy to read; an equivalent non-centered representation can also be used. These curves need not be parallel on the probability scale. The shared slope is a common change in log-odds per unit density. Do not introduce a new fit. This is the idea in section 4 of the original exercise.qmd, adapted from Normal log-height regression to binomial survival regression.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="then-varying-intercepts-and-slopes" class="slide level2">
+<h2>Then: varying intercepts and slopes</h2>
+<p>Species may also differ in their response to density.</p>
+<p><span class="math display">\operatorname{logit}(p_{ij})=\alpha_j+\beta_j x_{ij}</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb4-1"><a href="" aria-label="1"></a>alpha ~ normal(mu_alpha, sigma_alpha);</span>
+<span id="cb4-2"><a href="" aria-label="2"></a>beta ~ normal(mu_beta, sigma_beta);</span>
+<span id="cb4-3"><a href="" aria-label="3"></a>suv[i] ~ binomial_logit(</span>
+<span id="cb4-4"><a href="" aria-label="4"></a>  n[i], alpha[group[i]] + beta[group[i]] * x[i]</span>
+<span id="cb4-5"><a href="" aria-label="5"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Both coefficients vary by species and have shared group distributions.</p>
+<aside class="notes">
+<p>Selected conceptual model lines, with declarations, loops and hyperpriors omitted. For this first explanation, the intercept and slope distributions are conditionally independent given their hyperparameters. Correlated group effects are an optional extension; do not claim this excerpt is identical to vslope.stan, which uses a multivariate, non-centered parameterization with correlations. Ask: what changed from beta to beta[group[i]], and where is information shared? No participant implementation is required. This is the model idea in original exercise.qmd section 6; Cholesky/LKJ derivations are outside the core session.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="can-abundance-explain-slope-differences" class="slide level2">
+<h2>Can abundance explain slope differences?</h2>
+<p>The expected density coefficient can depend on species abundance <span class="math inline">a_j</span>.</p>
+<p><span class="math display">\beta_j\sim\mathcal{N}(\gamma_0+\gamma_1 a_j,\tau_\beta)</span></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb5-1"><a href="" aria-label="1"></a>beta[j] ~ normal(</span>
+<span id="cb5-2"><a href="" aria-label="2"></a>  gamma0 + gamma1 * abundance[j], tau_beta</span>
+<span id="cb5-3"><a href="" aria-label="3"></a>);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Density varies among observations. Abundance describes the species. The group model still allows unexplained differences among species.</p>
+<aside class="notes">
+<p>i indexes seedlings and j species here. The response is Bernoulli per seedling, or binomial when counts share the same predictors. a_j is scaled species abundance. The group SD tau_beta and all coefficients require priors in a full analysis. This extends the varying-slope model: a group-level predictor explains its expected slope, while tau_beta describes remaining between-species variation. This is the model idea in original exercise.qmd section 7. The code is a conceptual excerpt, not a new fitted research model or implementation exercise.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="a-species-level-relationship" class="slide level2">
+<h2>A species-level relationship</h2>
+
+<img data-src="slides_files/figure-revealjs/species-abundance-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>What would this relationship imply about species differences?</p>
+<aside class="notes">
+<p>Simulated coefficients, with the generating line shown. Higher coefficients here mean less negative slopes. A logit coefficient is not a fixed probability difference, which also depends on baseline survival and the densities compared. The model asks about an association. It alone does not establish the cause of rarity.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="ecological-reasons-to-share-information" class="slide level2">
+<h2>Ecological reasons to share information</h2>
+<p>Which trees or species should share information in a hierarchical model?</p>
+<ul>
+<li>Groups should be biologically comparable.</li>
+<li>Species traits can explain systematic differences among groups.</li>
+<li>Partial pooling depends on assumptions about how groups vary.</li>
+</ul>
+<aside class="notes">
+<p>A hierarchical model is not automatically appropriate because a grouping label exists. Discuss shared habitat, census interval and missing predictors.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="three-days-of-bayesian-thinking" class="slide level2">
+<h2>Three days of Bayesian thinking</h2>
+<ul>
+<li>A posterior expresses uncertainty conditional on data and assumptions.</li>
+<li>Predictions put that uncertainty on the scale of an ecological question.</li>
+<li>Hierarchical priors share information while allowing groups to differ.</li>
+<li>Computation, model-generated data and ecological context all inform interpretation.</li>
+</ul>
+</section>
+<section>
+<section id="optional-reference" class="title-slide slide level1 center" data-visibility="uncounted">
+<h1>Optional reference</h1>
+
+</section>
+<section id="allometry-and-wood-density" class="slide level2" data-visibility="uncounted">
+<h2>Allometry and wood density</h2>
+<div class="columns">
+<div class="column" style="width:52%;">
+<div class="cell" data-layout-align="center">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="slides_files/figure-revealjs/allometry-curves-1.png" class="quarto-figure quarto-figure-center" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</div><div class="column" style="width:48%;">
+<p><strong>Individual level:</strong> DBH predicts height.</p>
+<p><strong>Species level:</strong> wood density may predict the allometric exponent.</p>
+<p><span class="math display">h=a\,\mathrm{DBH}^{b}</span></p>
+</div></div>
+<aside class="notes">
+<p>Optional second research connection. The data are simulated. Explain the power-law shape visually, without a new transformation or coefficient exercise. Inspiration follows main.qmd’s research example; its unpublished citation status has not been independently established.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-same-structure-with-a-different-response" class="slide level2" data-visibility="uncounted">
+<h2>The same structure with a different response</h2>
+
+<img data-src="slides_files/figure-revealjs/wood-density-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1056"><p>The response changes to log height. Species still share information through a group model.</p>
+<aside class="notes">
+<p>The figure uses day3_vslope, fitted to the existing simulated allometry data. Points summarise species exponents and the line summarises their expected value at each wood density, with 95% intervals. It is not evidence from a real forest. Skip these two slides if delayed. Detailed transformation and implementation are optional.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="alternative-priors-for-group-variation" class="slide level2" data-visibility="uncounted">
+<h2>Alternative priors for group variation</h2>
+
+<img data-src="slides_files/figure-revealjs/group-sd-priors-1.png" class="quarto-figure quarto-figure-center r-stretch" width="1248"><p>The fitted model uses Half-Normal(0,1). The others are optional comparisons.</p>
+<aside class="notes">
+<p>This changes the prior distribution for sigma, rather than fixing sigma at a particular value. All curves share the same axes and are normalized by twice the symmetric density for sigma &gt;= 0. Wider and heavier-tailed priors have mass beyond the displayed range. No refit was performed for these comparison curves. Skip this slide in the core explanation.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="the-completed-model-and-its-assumptions" class="slide level2" data-visibility="uncounted">
+<h2>The completed model and its assumptions</h2>
+<p>Selected lines from <code>stan/logistic.stan</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource stan number-lines code-with-copy"><code class="sourceCode stan"><span id="cb6-1"><a href="" aria-label="1"></a>mu ~ normal(<span class="dv">0</span>, <span class="dv">5</span>);</span>
+<span id="cb6-2"><a href="" aria-label="2"></a>sigma ~ std_normal();  <span class="co">// sigma is constrained to be positive</span></span>
+<span id="cb6-3"><a href="" aria-label="3"></a>z_tilde ~ std_normal();</span>
+<span id="cb6-4"><a href="" aria-label="4"></a>z = mu + sigma * z_tilde;</span>
+<span id="cb6-5"><a href="" aria-label="5"></a><span class="co">// For every mother tree i:</span></span>
+<span id="cb6-6"><a href="" aria-label="6"></a>suv[i] ~ binomial_logit(N[i], z[ii[i]]);</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Data: seedlings and survivors. Unknowns: tree effects, group centre and group SD.</p>
+<aside class="notes">
+<p>These lines come from stan/logistic.stan, shown together for reading. z is a transformed parameter and sigma has lower bound zero. Read the complete file in the handout. No independent coding or non-centred parameterisation lesson. Priors: mu Normal(0,5), sigma half-Normal(0,1). z_tilde is standard Normal.</p>
+<style type="text/css">
+        span.MJX_Assistive_MathML {
+          position:absolute!important;
+          clip: rect(1px, 1px, 1px, 1px);
+          padding: 1px 0 0 0!important;
+          border: 0!important;
+          height: 1px!important;
+          width: 1px!important;
+          overflow: hidden!important;
+          display:block!important;
+      }</style></aside>
+</section>
+<section id="a-new-mother-tree" class="slide level2" data-visibility="uncounted">
+<h2>A new mother tree</h2>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="" aria-label="1"></a><span class="fu">set.seed</span>(<span class="dv">20261026</span>)</span>
+<span id="cb7-2"><a href="" aria-label="2"></a>draws <span class="ot">&lt;-</span> fit<span class="sc">$</span>draws</span>
+<span id="cb7-3"><a href="" aria-label="3"></a>p_new <span class="ot">&lt;-</span> <span class="fu">plogis</span>(<span class="fu">rnorm</span>(<span class="fu">nrow</span>(draws), draws<span class="sc">$</span>mu, draws<span class="sc">$</span>sigma))</span>
+<span id="cb7-4"><a href="" aria-label="4"></a><span class="fu">quantile</span>(p_new, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">5</span>, .<span class="dv">975</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>This predicts a new tree’s probability, including group variation. A future survivor count would also require a seedling count and binomial sampling.</p>
+</section>
+<section id="references" class="slide level2" data-visibility="uncounted">
+<h2>References</h2>
+<ul>
+<li><a href="https://doi.org/10.1126/science.1190772">Comita et al.&nbsp;2010, Science</a></li>
+<li><a href="https://doi.org/10.1002/ecy.4382">Song &amp; Katabuchi et al.&nbsp;2024, Ecology</a></li>
+<li><a href="https://mc-stan.org/docs/stan-users-guide/regression.html#hierarchical-logistic-regression">Stan User’s Guide: hierarchical logistic regression</a></li>
+<li><a href="https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html">Stan User’s Guide: predictive checks</a></li>
+</ul>
+
+</section></section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<p><img src="../images/xtbg_logo.png" class="slide-logo"></p>
+<div class="footer footer-default">
+
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="slides_files/libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="slides_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="slides_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="slides_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="slides_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="slides_files/libs/revealjs/plugin/reveal-chalkboard/plugin.js"></script>
+  <script src="slides_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+
+
+  <script src="slides_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="slides_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="slides_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': false,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleChalkboard(event)\"><kbd>b</kbd> Toggle Chalkboard</a></li>\n<li class=\"slide-tool-item\" data-item=\"6\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleNotesCanvas(event)\"><kbd>c</kbd> Toggle Notes Canvas</a></li>\n<li class=\"slide-tool-item\" data-item=\"7\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.downloadDrawings(event)\"><kbd>d</kbd> Download Drawings</a></li>\n<li class=\"slide-tool-item\" data-item=\"8\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'chalkboard': {"buttons":true},
+'smaller': false,
+
+        // Display controls in the bottom right corner
+        controls: true,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1440,
+
+        height: 810,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        maxScale: 1,
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, RevealChalkboard, QuartoSupport,
+
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button,
+              { trigger: "manual",
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config);
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    <link rel="stylesheet" href="../assets/fontawesome-free-6.1.1-web/css/all.min.css">
+    <script src="../assets/fontawesome-free-6.1.1-web/js/all.min.js"></script>
+    <style>
+    .reveal .mother-story > p { height: 2.6em; line-height: 1.3; }
+    </style>
+
+
+</body></html>
